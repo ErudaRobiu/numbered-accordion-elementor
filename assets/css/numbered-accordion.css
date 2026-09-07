@@ -1,0 +1,242 @@
+/**
+ * Numbered Accordion for Elementor
+ *
+ * All colours and motion values come in as custom properties written by the
+ * Elementor style controls, so this file never needs editing to re-skin.
+ */
+
+.nacc {
+	--nacc-divider: #e3e7ea;
+	--nacc-divider-active: #2f7a4e;
+	--nacc-divider-width: 1px;
+
+	--nacc-number: #7fa98c;
+	--nacc-number-hover: #4e9670;
+	--nacc-number-active: #2f7a4e;
+
+	--nacc-eyebrow: #2f7a4e;
+
+	--nacc-title: #5b7186;
+	--nacc-title-hover: #33536f;
+	--nacc-title-active: #22405c;
+
+	--nacc-desc: #3e5a70;
+
+	--nacc-duration: 450ms;
+	--nacc-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------------------------------------------------------------- rows --- */
+
+.nacc-item {
+	position: relative;
+	border-bottom: var(--nacc-divider-width) solid var(--nacc-divider);
+}
+
+.nacc--top-rule .nacc-item:first-child {
+	border-top: var(--nacc-divider-width) solid var(--nacc-divider);
+}
+
+/* The accent rule that sweeps in from the left under an open item. */
+.nacc-item::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: calc(var(--nacc-divider-width) * -1);
+	height: var(--nacc-divider-width);
+	background-color: var(--nacc-divider-active);
+	transform: scaleX(0);
+	transform-origin: left center;
+	transition: transform var(--nacc-duration) var(--nacc-ease);
+	pointer-events: none;
+}
+
+.nacc-item.is-open::after {
+	transform: scaleX(1);
+}
+
+.nacc-item__head {
+	margin: 0;
+	padding: 0;
+	font: inherit;
+	color: inherit;
+}
+
+/* ------------------------------------------------------------- trigger --- */
+
+.nacc-item__trigger {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+	width: 100%;
+	margin: 0;
+	padding: 26px 0;
+	background: none;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	font: inherit;
+	color: inherit;
+	text-align: left;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.nacc-item__trigger:focus-visible {
+	outline: 2px solid var(--nacc-divider-active);
+	outline-offset: 4px;
+}
+
+.nacc-item__label {
+	display: block;
+	min-width: 0;
+}
+
+/* -------------------------------------------------------------- pieces --- */
+
+.nacc-item__eyebrow {
+	display: block;
+	color: var(--nacc-eyebrow);
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 1.2px;
+	line-height: 1.2;
+	text-transform: uppercase;
+	padding-bottom: 10px;
+}
+
+.nacc-item__title {
+	display: block;
+	margin: 0;
+	color: var(--nacc-title);
+	font-size: 28px;
+	font-weight: 600;
+	line-height: 1.25;
+	transition: color var(--nacc-duration) var(--nacc-ease);
+}
+
+.nacc-item__trigger:hover .nacc-item__title {
+	color: var(--nacc-title-hover);
+}
+
+.nacc-item.is-open .nacc-item__title,
+.nacc-item.is-open .nacc-item__trigger:hover .nacc-item__title {
+	color: var(--nacc-title-active);
+}
+
+.nacc-item__number {
+	flex: 0 0 auto;
+	color: var(--nacc-number);
+	font-size: 30px;
+	font-weight: 700;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: "tnum" 1;
+	text-align: right;
+	transition:
+		color var(--nacc-duration) var(--nacc-ease),
+		transform var(--nacc-duration) var(--nacc-ease);
+}
+
+.nacc-item__trigger:hover .nacc-item__number {
+	color: var(--nacc-number-hover);
+	transform: translateY(-2px);
+}
+
+.nacc-item.is-open .nacc-item__number,
+.nacc-item.is-open .nacc-item__trigger:hover .nacc-item__number {
+	color: var(--nacc-number-active);
+	transform: none;
+}
+
+.nacc-item__body {
+	padding: 0 0 30px;
+}
+
+.nacc-item__desc {
+	margin: 0;
+	color: var(--nacc-desc);
+	font-size: 17px;
+	line-height: 1.7;
+	opacity: 0;
+	transform: translateY(10px);
+	transition:
+		opacity var(--nacc-duration) var(--nacc-ease),
+		transform var(--nacc-duration) var(--nacc-ease);
+}
+
+.nacc-item.is-open .nacc-item__desc {
+	opacity: 1;
+	transform: none;
+	transition-delay: 80ms;
+}
+
+/* ------------------------------------------------------------ collapse --- */
+
+/*
+ * Baseline, no-JS and legacy-browser behaviour: hard show/hide. The animated
+ * grid technique is layered on top only once JS has confirmed support, so an
+ * unsupported browser degrades to an accordion that still works.
+ */
+.nacc-collapse {
+	display: none;
+}
+
+.nacc-item.is-open .nacc-collapse {
+	display: block;
+}
+
+.nacc--anim .nacc-collapse {
+	display: grid;
+	grid-template-rows: 0fr;
+	transition: grid-template-rows var(--nacc-duration) var(--nacc-ease);
+}
+
+.nacc--anim .nacc-item.is-open .nacc-collapse {
+	grid-template-rows: 1fr;
+}
+
+.nacc-collapse__inner {
+	min-height: 0;
+	overflow: hidden;
+}
+
+/* ------------------------------------------------------------ responsive - */
+
+@media (max-width: 767px) {
+	.nacc-item__trigger {
+		gap: 16px;
+	}
+
+	.nacc-item__title {
+		font-size: 22px;
+	}
+
+	.nacc-item__number {
+		font-size: 22px;
+	}
+}
+
+/* --------------------------------------------------------- reduced motion - */
+
+@media (prefers-reduced-motion: reduce) {
+	.nacc-item::after,
+	.nacc-item__title,
+	.nacc-item__number,
+	.nacc-item__desc,
+	.nacc--anim .nacc-collapse {
+		transition-duration: 1ms !important;
+		transition-delay: 0ms !important;
+	}
+
+	.nacc-item__desc {
+		transform: none;
+	}
+
+	.nacc-item__trigger:hover .nacc-item__number {
+		transform: none;
+	}
+}
