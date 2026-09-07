@@ -3,7 +3,7 @@
  * Plugin Name:       Numbered Accordion for Elementor
  * Plugin URI:        https://erudarobiu.com/
  * Description:       A modern, lightly animated numbered accordion widget for Elementor. Works on both classic and V4 (Atomic) pages.
- * Version:           1.0.2
+ * Version:           1.0.3
  * Author:            Eruda Robiu
  * Author URI:        https://erudarobiu.com/
  * License:           GPL-2.0-or-later
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'NACC_VERSION', '1.0.2' );
+define( 'NACC_VERSION', '1.0.3' );
 define( 'NACC_FILE', __FILE__ );
 define( 'NACC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'NACC_URL', plugin_dir_url( __FILE__ ) );
