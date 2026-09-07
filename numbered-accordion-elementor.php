@@ -4,7 +4,7 @@
  * Plugin URI:        https://erudarobiu.com/
  * Description:       A modern, lightly animated numbered accordion widget for Elementor. Works on both classic and V4 (Atomic) pages.
  * Version:           1.0.1
- * Author:            Erud Robiu
+ * Author:            Eruda Robiu
  * Author URI:        https://erudarobiu.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
