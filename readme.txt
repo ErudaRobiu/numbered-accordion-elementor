@@ -48,6 +48,12 @@ Atomic pages and can be placed alongside atomic elements.
 
 == Changelog ==
 
+= 1.0.3 =
+* Fix: on themes that style <button> elements, the accordion trigger picked up
+  the theme's button fill (background colour, gradient, border or shadow), most
+  visibly on the focused/open row. The trigger reset is now high specificity and
+  covers the hover, focus, active and visited states.
+
 = 1.0.2 =
 * Correct the plugin author name.
 

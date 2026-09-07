@@ -73,10 +73,6 @@
 	width: 100%;
 	margin: 0;
 	padding: 26px 0;
-	background: none;
-	border: 0;
-	border-radius: 0;
-	box-shadow: none;
 	font: inherit;
 	color: inherit;
 	text-align: left;
@@ -85,9 +81,40 @@
 	appearance: none;
 }
 
-.nacc-item__trigger:focus-visible {
-	outline: 2px solid var(--nacc-divider-active);
-	outline-offset: 4px;
+/*
+ * This is a <button>, and themes style buttons hard -- background fills,
+ * gradients, borders, shadows -- usually including :hover, :focus and :active.
+ * A focused trigger picking up the theme's button fill is the most visible
+ * symptom. The selector below is deliberately high specificity (0,3,0) and
+ * uses !important on the properties themes actually fight over: among
+ * important declarations specificity is compared before source order, so this
+ * wins even if the theme also uses !important and loads after this file.
+ *
+ * Layout, colour and typography above are intentionally left un-important so
+ * Elementor's own style controls still work.
+ */
+.nacc .nacc-item .nacc-item__trigger,
+.nacc .nacc-item .nacc-item__trigger:hover,
+.nacc .nacc-item .nacc-item__trigger:focus,
+.nacc .nacc-item .nacc-item__trigger:active,
+.nacc .nacc-item .nacc-item__trigger:visited {
+	background: none !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+	text-decoration: none !important;
+	text-shadow: none !important;
+	filter: none !important;
+	transform: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* Keyboard focus must still be visible after that reset. */
+.nacc .nacc-item .nacc-item__trigger:focus-visible {
+	outline: 2px solid var(--nacc-divider-active) !important;
+	outline-offset: 4px !important;
 }
 
 .nacc-item__label {
