@@ -48,6 +48,9 @@ Atomic pages and can be placed alongside atomic elements.
 
 == Changelog ==
 
+= 1.0.2 =
+* Correct the plugin author name.
+
 = 1.0.1 =
 * Fix: the plugin refused to load with "could not find the Elementor widget API".
   Elementor's autoloader cannot resolve \Elementor\Widget_Base (it derives
