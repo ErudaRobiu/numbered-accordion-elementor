@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name:       Numbered Accordion for Elementor
+ * Plugin Name:       Eruda Toolkit
  * Plugin URI:        https://erudarobiu.com/
- * Description:       A modern, lightly animated numbered accordion widget for Elementor. Works on both classic and V4 (Atomic) pages.
- * Version:           1.0.3
+ * Description:       A small toolkit of site-building modules: a numbered accordion widget for Elementor, and a page duplicator.
+ * Version:           2.0.0
  * Author:            Eruda Robiu
  * Author URI:        https://erudarobiu.com/
  * License:           GPL-2.0-or-later
@@ -13,111 +13,105 @@
  * Requires at least: 6.0
  * Requires PHP:      7.4
  *
- * @package NumberedAccordion
+ * @package ErudaToolkit
+ */
+
+/*
+ * A note on names.
+ *
+ * The plugin is called Eruda Toolkit, but this file, and the directory holding
+ * it, are still called numbered-accordion-elementor. That is deliberate.
+ *
+ * WordPress identifies an installed plugin by its path, and the bundled
+ * plugin-update-checker keys its update channel on that same path. Renaming
+ * either would orphan every existing install: PUC cannot carry an install
+ * across a slug change, so each client site would need a manual
+ * install-the-new-then-remove-the-old, in that order, with the accordion
+ * missing from live pages in between.
+ *
+ * The rename is therefore display-only. Clients receive this as an ordinary
+ * update and the entry in their plugin list simply renames itself. The path may
+ * be tidied later, once no install remains on 1.0.x.
+ *
+ * The text domain stays 'numbered-accordion' for the same reason: existing
+ * translation files are keyed to it.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'NACC_VERSION', '1.0.3' );
-define( 'NACC_FILE', __FILE__ );
-define( 'NACC_PATH', plugin_dir_path( __FILE__ ) );
-define( 'NACC_URL', plugin_dir_url( __FILE__ ) );
+define( 'ERUDA_VERSION', '2.0.0' );
+define( 'ERUDA_FILE', __FILE__ );
+define( 'ERUDA_PATH', plugin_dir_path( __FILE__ ) );
+define( 'ERUDA_URL', plugin_dir_url( __FILE__ ) );
 
-define( 'NACC_MIN_ELEMENTOR', '3.5.0' );
-define( 'NACC_REPO', 'https://github.com/ErudaRobiu/numbered-accordion-elementor/' );
-define( 'NACC_MIN_PHP', '7.4' );
+define( 'ERUDA_MIN_PHP', '7.4' );
+define( 'ERUDA_MIN_ELEMENTOR', '3.5.0' );
+define( 'ERUDA_REPO', 'https://github.com/ErudaRobiu/numbered-accordion-elementor/' );
 
 /**
- * Boot the plugin only when every dependency is genuinely present.
+ * Boot the toolkit.
  *
- * Every failure path below returns quietly and shows an admin notice. Nothing
- * here can produce a fatal error on the front end, which is the whole point:
- * if Elementor is deactivated, downgraded or restructured, the site keeps
- * running and the widget simply stops appearing.
+ * Only the PHP version is checked here. Everything else is a per-module
+ * requirement: a site without Elementor still gets a working duplicator, and
+ * only the accordion module reports itself unavailable.
+ *
+ * This is also why the plugin deliberately does not declare a
+ * `Requires Plugins: elementor` header. Elementor is a module requirement, not
+ * a plugin requirement, and declaring it would stop the duplicator being
+ * installable on a site that has no use for Elementor.
  */
-function nacc_bootstrap() {
-	// 1. PHP version.
-	if ( version_compare( PHP_VERSION, NACC_MIN_PHP, '<' ) ) {
-		nacc_admin_notice(
+function eruda_bootstrap() {
+	if ( version_compare( PHP_VERSION, ERUDA_MIN_PHP, '<' ) ) {
+		add_action( 'admin_notices', 'eruda_php_version_notice' );
+		return;
+	}
+
+	require_once ERUDA_PATH . 'includes/interface-module.php';
+	require_once ERUDA_PATH . 'includes/class-toolkit.php';
+	require_once ERUDA_PATH . 'includes/class-settings.php';
+
+	\ErudaToolkit\Toolkit::instance()->boot();
+}
+add_action( 'plugins_loaded', 'eruda_bootstrap', 20 );
+
+/**
+ * Tell an administrator that PHP is too old.
+ *
+ * The message is built here rather than at plugins_loaded because translating
+ * anything before init makes WordPress 6.7 and later warn about loading a text
+ * domain too early.
+ */
+function eruda_php_version_notice() {
+	if ( ! current_user_can( 'activate_plugins' ) ) {
+		return;
+	}
+
+	printf(
+		'<div class="notice notice-warning is-dismissible"><p>%s</p></div>',
+		esc_html(
 			sprintf(
 				/* translators: 1: required PHP version, 2: current PHP version */
-				esc_html__( 'Numbered Accordion for Elementor requires PHP %1$s or greater. You are running %2$s.', 'numbered-accordion' ),
-				NACC_MIN_PHP,
+				__( 'Eruda Toolkit requires PHP %1$s or greater. You are running %2$s.', 'numbered-accordion' ),
+				ERUDA_MIN_PHP,
 				PHP_VERSION
 			)
-		);
-		return;
-	}
-
-	// 2. Elementor loaded at all.
-	if ( ! did_action( 'elementor/loaded' ) ) {
-		nacc_admin_notice(
-			esc_html__( 'Numbered Accordion for Elementor requires Elementor to be installed and activated.', 'numbered-accordion' )
-		);
-		return;
-	}
-
-	// 3. Elementor version.
-	if ( ! defined( 'ELEMENTOR_VERSION' ) || version_compare( ELEMENTOR_VERSION, NACC_MIN_ELEMENTOR, '<' ) ) {
-		nacc_admin_notice(
-			sprintf(
-				/* translators: %s: required Elementor version */
-				esc_html__( 'Numbered Accordion for Elementor requires Elementor %s or greater.', 'numbered-accordion' ),
-				NACC_MIN_ELEMENTOR
-			)
-		);
-		return;
-	}
-
-	/*
-	 * Note: do NOT test for \Elementor\Widget_Base here. Elementor's autoloader
-	 * cannot resolve it (its derived path is ELEMENTOR_PATH/widget-base.php,
-	 * while the file actually lives in includes/base/), so the class only comes
-	 * into existence when the widgets manager requires it -- which happens
-	 * immediately before the elementor/widgets/register hook fires. That check
-	 * belongs in the register callback, and lives in Plugin::register_widgets().
-	 */
-
-	require_once NACC_PATH . 'includes/class-plugin.php';
-
-	\NumberedAccordion\Plugin::instance();
-}
-add_action( 'plugins_loaded', 'nacc_bootstrap', 20 );
-
-/**
- * Queue a dismissible admin notice. Admin-side only, never front end.
- *
- * @param string $message Escaped message text.
- */
-function nacc_admin_notice( $message ) {
-	add_action(
-		'admin_notices',
-		function () use ( $message ) {
-			if ( ! current_user_can( 'activate_plugins' ) ) {
-				return;
-			}
-			printf(
-				'<div class="notice notice-warning is-dismissible"><p>%s</p></div>',
-				wp_kses_post( $message )
-			);
-		}
+		)
 	);
 }
 
 /**
  * Wire up the update channel.
  *
- * Runs independently of Elementor: a site should still be able to receive a fix
- * even if Elementor is deactivated at the time. Everything is guarded so a
- * missing or broken library degrades to "no update notices" rather than a
- * fatal error.
+ * Runs independently of every module, so a site can still receive a fix even
+ * when every module is switched off. Everything is guarded so a missing or
+ * broken library degrades to "no update notices" rather than a fatal error.
  */
 add_action(
 	'init',
 	function () {
-		$library = NACC_PATH . 'vendor/plugin-update-checker/plugin-update-checker.php';
+		$library = ERUDA_PATH . 'vendor/plugin-update-checker/plugin-update-checker.php';
 
 		if ( ! is_readable( $library ) ) {
 			return;
@@ -132,7 +126,9 @@ add_action(
 		}
 
 		try {
-			$checker = $factory::buildUpdateChecker( NACC_REPO, NACC_FILE, 'numbered-accordion-elementor' );
+			// The slug stays numbered-accordion-elementor: it must match the
+			// directory this plugin is installed in, not the product name.
+			$checker = $factory::buildUpdateChecker( ERUDA_REPO, ERUDA_FILE, 'numbered-accordion-elementor' );
 			$checker->setBranch( 'main' );
 
 			// Serve the zip attached to each release rather than GitHub's
@@ -145,7 +141,7 @@ add_action(
 		} catch ( \Throwable $e ) {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				error_log( 'Numbered Accordion: update checker failed - ' . $e->getMessage() );
+				error_log( 'Eruda Toolkit: update checker failed - ' . $e->getMessage() );
 			}
 		}
 	}
@@ -160,7 +156,7 @@ add_action(
 add_filter(
 	'auto_update_plugin',
 	function ( $update, $item ) {
-		if ( isset( $item->plugin ) && plugin_basename( NACC_FILE ) === $item->plugin ) {
+		if ( isset( $item->plugin ) && plugin_basename( ERUDA_FILE ) === $item->plugin ) {
 			return false;
 		}
 		return $update;
@@ -175,6 +171,6 @@ add_filter(
 add_action(
 	'init',
 	function () {
-		load_plugin_textdomain( 'numbered-accordion', false, dirname( plugin_basename( NACC_FILE ) ) . '/languages' );
+		load_plugin_textdomain( 'numbered-accordion', false, dirname( plugin_basename( ERUDA_FILE ) ) . '/languages' );
 	}
 );

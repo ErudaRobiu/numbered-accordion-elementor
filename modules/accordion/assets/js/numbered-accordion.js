@@ -34,7 +34,6 @@
 	 */
 	function setState( item, open ) {
 		var trigger = item.querySelector( '.nacc-item__trigger' );
-		var panel = item.querySelector( '.nacc-item__panel' );
 
 		item.classList.toggle( 'is-open', open );
 
@@ -42,8 +41,18 @@
 			trigger.setAttribute( 'aria-expanded', open ? 'true' : 'false' );
 		}
 
-		if ( panel && SUPPORTS_INERT ) {
-			panel.inert = ! open;
+		/*
+		 * Every collapsible region in the item, not just the panel. The eyebrow
+		 * sits inside the trigger button in its own .nacc-collapse, and a
+		 * closed one is clipped by overflow rather than hidden by display:none.
+		 * Clipped content stays in the accessibility tree, so without this a
+		 * screen reader reads a closed row's eyebrow as part of the button's
+		 * name: "Recover, Lepido Heat Recovery Unit".
+		 */
+		if ( SUPPORTS_INERT ) {
+			toArray( item.querySelectorAll( '.nacc-collapse' ) ).forEach( function ( region ) {
+				region.inert = ! open;
+			} );
 		}
 	}
 
@@ -58,8 +67,17 @@
 		var collapseAll = 'yes' === root.getAttribute( 'data-collapse-all' );
 		var isOpen = item.classList.contains( 'is-open' );
 
+		/*
+		 * "Allow closing every item" off means one row must stay open -- not
+		 * that an open row can never be closed. Refusing every close is right
+		 * in single-open mode, where the open row is always the last one, but
+		 * in multi-open mode it used to lock the accordion: open three rows and
+		 * none of them could be closed again. Bail only on the last one.
+		 */
 		if ( isOpen && ! collapseAll ) {
-			return;
+			if ( root.querySelectorAll( '.nacc-item.is-open' ).length < 2 ) {
+				return;
+			}
 		}
 
 		if ( ! isOpen && ! multiple ) {

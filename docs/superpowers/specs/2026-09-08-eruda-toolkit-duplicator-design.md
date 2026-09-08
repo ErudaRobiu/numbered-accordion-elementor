@@ -202,10 +202,23 @@ Pure logic is extracted so it can be tested without WordPress:
 - `Duplicator::copy_title()` — the title suffix
 - `Toolkit::is_enabled()` — missing key means enabled
 
-These are covered by a PHPUnit suite with stubbed WordPress functions. No
-`wp-env` or WordPress test suite: the harness cost is disproportionate for a
-two-module plugin, and the hook wiring it would cover is carried instead by a
-written manual QA checklist in `docs/QA.md`.
+These are covered by `tests/run.php`, which stubs the handful of WordPress
+functions they touch.
+
+The suite is a dependency-free script rather than PHPUnit, which is a departure
+from the plan. The machine has no Composer, and this repository has no Composer
+setup at all — it vendors its one library by hand. Adding `composer.json` and a
+3 MB `phpunit.phar` (excluded from the release zip, gitignored, re-fetched on
+every clean checkout) to run 48 assertions over four functions is not a good
+trade. `php tests/run.php` needs no install step, which is the property that
+decides whether a solo maintainer actually runs it.
+
+The suite was mutation-checked: dropping the `wp_slash()` call, removing
+`_elementor_css` from the denylist, and changing the copy's status to `publish`
+each turn it red.
+
+No `wp-env` or WordPress test suite. The hook wiring it would cover is carried
+instead by the manual QA checklist in `docs/QA.md`.
 
 ## Release
 

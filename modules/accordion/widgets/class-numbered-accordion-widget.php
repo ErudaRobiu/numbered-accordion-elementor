@@ -2,10 +2,10 @@
 /**
  * Numbered Accordion widget.
  *
- * @package NumberedAccordion
+ * @package ErudaToolkit
  */
 
-namespace NumberedAccordion\Widgets;
+namespace ErudaToolkit\Modules\Accordion\Widgets;
 
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Typography;
@@ -72,7 +72,7 @@ class Numbered_Accordion_Widget extends Widget_Base {
 	 * @return array
 	 */
 	public function get_style_depends() {
-		return array( \NumberedAccordion\Plugin::STYLE_HANDLE );
+		return array( \ErudaToolkit\Modules\Accordion\Accordion_Module::STYLE_HANDLE );
 	}
 
 	/**
@@ -81,7 +81,7 @@ class Numbered_Accordion_Widget extends Widget_Base {
 	 * @return array
 	 */
 	public function get_script_depends() {
-		return array( \NumberedAccordion\Plugin::SCRIPT_HANDLE );
+		return array( \ErudaToolkit\Modules\Accordion\Accordion_Module::SCRIPT_HANDLE );
 	}
 
 	/**
@@ -732,6 +732,14 @@ class Numbered_Accordion_Widget extends Widget_Base {
 			data-multiple="<?php echo esc_attr( $multiple ); ?>"
 			data-collapse-all="<?php echo esc_attr( $collapse_all ); ?>">
 			<?php
+			/*
+			 * Counts rendered rows, not repeater entries. Items with a blank
+			 * title are skipped, and numbering them by their position in the
+			 * repeater would leave gaps in the sequence (01, 03, 04) and pin
+			 * "keep one open" to a row that was never rendered.
+			 */
+			$position = 0;
+
 			foreach ( array_values( $items ) as $index => $item ) {
 				$title = isset( $item['item_title'] ) ? trim( $item['item_title'] ) : '';
 
@@ -741,9 +749,11 @@ class Numbered_Accordion_Widget extends Widget_Base {
 
 				$eyebrow = isset( $item['item_eyebrow'] ) ? trim( $item['item_eyebrow'] ) : '';
 				$desc    = isset( $item['item_desc'] ) ? trim( $item['item_desc'] ) : '';
-				$number  = $this->format_number( $index, $settings );
+				$number  = $this->format_number( $position, $settings );
 
-				$is_open = ( isset( $item['item_open'] ) && 'yes' === $item['item_open'] ) || ( $force_first_open && 0 === $index );
+				$is_open = ( isset( $item['item_open'] ) && 'yes' === $item['item_open'] ) || ( $force_first_open && 0 === $position );
+
+				++$position;
 
 				$uid          = $widget_id . '-' . ( isset( $item['_id'] ) ? $item['_id'] : (string) $index );
 				$trigger_id   = 'nacc-trigger-' . $uid;
