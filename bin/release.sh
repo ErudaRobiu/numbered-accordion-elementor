@@ -42,7 +42,18 @@ mv "${BUILD}/${SLUG}.zip" "./${SLUG}.zip"
 rm -rf "$BUILD"
 
 git add -A
-git commit -m "Release ${VERSION}"
+
+# The version may already have been bumped in the feature commit, which is how
+# 2.0.0 and 2.1.0 were done. The zip is gitignored, so in that case there is
+# genuinely nothing left to commit -- and `git commit` failing under `set -e`
+# used to kill the release here, after the bump and the build but before the
+# tag, the push and the GitHub release.
+if git diff --cached --quiet; then
+	echo "version already bumped in an earlier commit; tagging HEAD as it is"
+else
+	git commit -m "Release ${VERSION}"
+fi
+
 git tag "v${VERSION}"
 git push origin main --tags
 
