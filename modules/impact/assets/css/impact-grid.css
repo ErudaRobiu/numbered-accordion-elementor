@@ -148,10 +148,16 @@
 	margin: var(--eimp-icon-gap) 0;
 }
 
+/*
+ * The control sets the width, not a ceiling on it. max-width with width:auto
+ * can only ever shrink a replaced element below its intrinsic size, so above
+ * the width of the file WordPress served the control silently stopped doing
+ * anything. max-width now only stops a large icon overflowing a narrow card.
+ */
 .eimp-card__img {
 	display: block;
-	width: auto;
-	max-width: var(--eimp-icon-size);
+	width: var(--eimp-icon-size);
+	max-width: 100%;
 	height: auto;
 }
 

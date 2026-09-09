@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -92,6 +92,10 @@ error, and every duplicator hook is admin-side only.
 
 == Upgrade Notice ==
 
+= 2.1.1 =
+Fixes the Impact Grid icon width control, which stopped responding above the
+width of the uploaded file.
+
 = 2.1.0 =
 From 2.0.0, this adds an Impact Grid widget and changes nothing else. From
 1.0.x it is a large update: the plugin becomes Eruda Toolkit and gains a
@@ -105,6 +109,15 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.1.1 =
+* Fix: the Impact Grid's icon width control did nothing above a certain size.
+  It set a maximum width, which can only shrink an image below its natural
+  size, never enlarge it - so the slider stopped responding at the width of the
+  file WordPress had served. It now sets the width outright, and the control is
+  relabelled "Width" to match. Icons are also requested at full size so a
+  scaled-down file cannot cap the control, with an explicit sizes hint so the
+  browser still downloads an appropriately small one.
 
 = 2.1.0 =
 * New: "Impact Grid" module. Adds an Impact Grid widget to Elementor: a grid of

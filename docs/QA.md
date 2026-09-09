@@ -78,6 +78,9 @@ The parsing, the figure detection and the numbering are covered by
 - [ ] Dropping the widget in gives six cards with the shipped copy
 - [ ] Uploading an icon to a card shows it; a card with no icon closes up
       without leaving a gap
+- [ ] The icon Width slider tracks all the way to 320px, including well above
+      the uploaded file's own width, and stays sharp there
+- [ ] A wide icon in a narrow column is contained rather than overflowing
 - [ ] Cards 4-6 render ticks, and card 6 nests its two bullets under its one
       check item
 - [ ] Emptying a card's every field drops it, and the cards after it renumber

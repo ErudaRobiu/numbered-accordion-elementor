@@ -308,6 +308,31 @@ check( 'padded numbering stops padding past nine', '10', Impact_Content::format_
 check( 'numbering can start elsewhere', '7', Impact_Content::format_number( 0, 'plain', 7 ) );
 check( 'numbering can be switched off', '', Impact_Content::format_number( 0, 'none', 1 ) );
 
+
+/* --------------------------------------- Impact_Content::icon_sizes_attr --- */
+
+/*
+ * The icon is requested at its full size so the width control is never capped
+ * by the intrinsic width of a scaled-down file. That would leave the browser
+ * free to pull a 4000px original for a 150px slot, so the display width is
+ * handed over as an explicit sizes hint.
+ */
+check( 'a pixel width becomes a sizes hint', '150px', Impact_Content::icon_sizes_attr( array( 'size' => 150, 'unit' => 'px' ) ) );
+check( 'a numeric string works too', '220px', Impact_Content::icon_sizes_attr( array( 'size' => '220', 'unit' => 'px' ) ) );
+check( 'a fractional width is kept', '150.5px', Impact_Content::icon_sizes_attr( array( 'size' => 150.5, 'unit' => 'px' ) ) );
+
+// A percentage is of the card, whose width is not known here. Saying nothing
+// lets WordPress fall back to its own default rather than assert a wrong one.
+check( 'a percentage yields no hint', '', Impact_Content::icon_sizes_attr( array( 'size' => 60, 'unit' => '%' ) ) );
+check( 'a missing unit yields no hint', '', Impact_Content::icon_sizes_attr( array( 'size' => 150 ) ) );
+check( 'a missing size yields no hint', '', Impact_Content::icon_sizes_attr( array( 'unit' => 'px' ) ) );
+check( 'an empty size yields no hint', '', Impact_Content::icon_sizes_attr( array( 'size' => '', 'unit' => 'px' ) ) );
+check( 'a zero width yields no hint', '', Impact_Content::icon_sizes_attr( array( 'size' => 0, 'unit' => 'px' ) ) );
+check( 'a negative width yields no hint', '', Impact_Content::icon_sizes_attr( array( 'size' => -10, 'unit' => 'px' ) ) );
+check( 'a non-numeric size yields no hint', '', Impact_Content::icon_sizes_attr( array( 'size' => 'big', 'unit' => 'px' ) ) );
+check( 'an empty array yields no hint', '', Impact_Content::icon_sizes_attr( array() ) );
+check( 'a non-array yields no hint', '', Impact_Content::icon_sizes_attr( null ) );
+
 /* ------------------------------------------------------------- report --- */
 
 echo "\n";

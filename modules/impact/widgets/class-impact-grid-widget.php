@@ -701,7 +701,7 @@ class Impact_Grid_Widget extends Widget_Base {
 		$this->add_responsive_control(
 			'icon_size',
 			array(
-				'label'      => esc_html__( 'Maximum width', 'numbered-accordion' ),
+				'label'      => esc_html__( 'Width', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px', '%' ),
 				'range'      => array(
@@ -1094,9 +1094,10 @@ class Impact_Grid_Widget extends Widget_Base {
 	/**
 	 * Render a card's uploaded icon.
 	 *
-	 * @param array $card Repeater row.
+	 * @param array $card     Repeater row.
+	 * @param array $settings Widget settings, for the display-width hint.
 	 */
-	private function render_media( $card ) {
+	private function render_media( $card, $settings ) {
 		$image = isset( $card['card_image'] ) && is_array( $card['card_image'] ) ? $card['card_image'] : array();
 		$url   = isset( $image['url'] ) ? $image['url'] : '';
 		$id    = isset( $image['id'] ) ? (int) $image['id'] : 0;
@@ -1108,17 +1109,29 @@ class Impact_Grid_Widget extends Widget_Base {
 		<div class="eimp-card__media">
 			<?php
 			if ( $id > 0 ) {
+				/*
+				 * Full size, not a scaled one: a scaled file's intrinsic width
+				 * becomes a ceiling the icon width control cannot raise, and
+				 * the control then appears to stop working partway along its
+				 * range. srcset still hands the browser smaller candidates,
+				 * and the sizes hint below tells it which to take.
+				 */
+				$attr = array(
+					'class'   => 'eimp-card__img',
+					'loading' => 'lazy',
+				);
+
+				$sizes = Impact_Content::icon_sizes_attr(
+					isset( $settings['icon_size'] ) ? $settings['icon_size'] : null
+				);
+
+				if ( '' !== $sizes ) {
+					$attr['sizes'] = $sizes;
+				}
+
 				// Goes through the media library, so WordPress supplies both
 				// the alt text and a srcset.
-				echo wp_get_attachment_image(
-					$id,
-					'medium',
-					false,
-					array(
-						'class'   => 'eimp-card__img',
-						'loading' => 'lazy',
-					)
-				);
+				echo wp_get_attachment_image( $id, 'full', false, $attr );
 			} else {
 				?>
 				<img class="eimp-card__img" src="<?php echo esc_url( $url ); ?>" alt="" loading="lazy" />
@@ -1187,7 +1200,7 @@ class Impact_Grid_Widget extends Widget_Base {
 						</div>
 					<?php endif; ?>
 
-					<?php $this->render_media( $card ); ?>
+					<?php $this->render_media( $card, $settings ); ?>
 
 					<?php if ( 'stat' === $type ) : ?>
 						<?php

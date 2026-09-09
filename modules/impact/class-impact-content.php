@@ -120,6 +120,44 @@ final class Impact_Content {
 	}
 
 	/**
+	 * Build the sizes attribute for a card icon.
+	 *
+	 * Icons are requested at their full size, because asking WordPress for a
+	 * scaled-down one caps how large the width control can ever render them:
+	 * an intrinsic width the control cannot exceed is a control that silently
+	 * stops responding partway along its range.
+	 *
+	 * Full-size sources make srcset's default sizes hint wrong in the other
+	 * direction -- it would let the browser pull a 4000px original for a
+	 * 150px slot -- so the display width is stated here instead.
+	 *
+	 * A percentage width is of the card, whose width is not known at render
+	 * time. Rather than assert something wrong, say nothing and let WordPress
+	 * apply its own default.
+	 *
+	 * @param mixed $icon_size The icon_size control value.
+	 * @return string A sizes attribute value, or '' to leave it to WordPress.
+	 */
+	public static function icon_sizes_attr( $icon_size ) {
+		if ( ! is_array( $icon_size ) ) {
+			return '';
+		}
+
+		$unit = isset( $icon_size['unit'] ) ? $icon_size['unit'] : '';
+		$size = isset( $icon_size['size'] ) ? $icon_size['size'] : '';
+
+		if ( 'px' !== $unit || '' === $size || ! is_numeric( $size ) ) {
+			return '';
+		}
+
+		if ( (float) $size <= 0 ) {
+			return '';
+		}
+
+		return $size . 'px';
+	}
+
+	/**
 	 * Format a card's badge number.
 	 *
 	 * @param int    $position Zero-based position among rendered cards.

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-09 11:36+0100\n"
+"POT-Creation-Date: 2026-09-09 12:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -341,7 +341,6 @@ msgid "Space below"
 msgstr ""
 
 #: modules/accordion/widgets/class-numbered-accordion-widget.php:624
-#: modules/impact/widgets/class-impact-grid-widget.php:704
 msgid "Maximum width"
 msgstr ""
 
@@ -587,6 +586,10 @@ msgstr ""
 #: modules/impact/widgets/class-impact-grid-widget.php:794
 #: modules/impact/widgets/class-impact-grid-widget.php:907
 msgid "Leave empty to use each card's accent."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:704
+msgid "Width"
 msgstr ""
 
 #: modules/impact/widgets/class-impact-grid-widget.php:722

@@ -111,6 +111,13 @@ is left exactly as typed rather than counted to a value the widget guessed at.
 The count-up derives its thousands separators and decimal places from the string
 the editor typed, not from the visitor's locale.
 
+The icon width control sets `width`, not `max-width`. That is not a style
+preference: `max-width` on a replaced element with `width: auto` can only shrink
+it below its intrinsic size, so the control silently stopped responding above
+the width of the file WordPress served, and the icon is requested at full size
+for the same reason. `max-width: 100%` remains, but only to stop a large icon
+overflowing a narrow card.
+
 Elementor has no nested repeater, so a checklist card's nesting comes from its
 text: one item per line, and a line opening with a dash, asterisk or bullet
 nests under the item above it. `Impact_Content::parse_list()` owns that, and
