@@ -93,7 +93,11 @@ error, and every duplicator hook is admin-side only.
 == Upgrade Notice ==
 
 = 2.1.0 =
-Adds an Impact Grid widget. Nothing existing changes; no page needs re-saving.
+From 2.0.0, this adds an Impact Grid widget and changes nothing else. From
+1.0.x it is a large update: the plugin becomes Eruda Toolkit and gains a
+settings screen, a page duplicator and the Impact Grid widget. Either way it is
+an in-place update - the plugin folder is unchanged, existing accordions are
+untouched, and no page needs re-saving.
 
 = 2.0.0 =
 The plugin is now called Eruda Toolkit and has gained a page duplicator. This is
