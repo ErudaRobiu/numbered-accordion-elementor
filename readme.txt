@@ -3,15 +3,15 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.1.0
 License: GPLv2 or later
 
-A small toolkit of site-building modules: a numbered accordion widget for
-Elementor, and a page duplicator.
+A small toolkit of site-building modules: a numbered accordion and an impact
+grid widget for Elementor, and a page duplicator.
 
 == Description ==
 
-Two modules, each switchable from Settings > Eruda Toolkit. Modules are on by
+Three modules, each switchable from Settings > Eruda Toolkit. Modules are on by
 default.
 
 = Numbered Accordion =
@@ -36,6 +36,29 @@ along the bottom of the row.
 Requires Elementor 3.5 or greater. This is a classic (V3) Elementor widget. It
 renders correctly on Elementor V4 Atomic pages and can be placed alongside
 atomic elements.
+
+= Impact Grid =
+
+Adds a single widget, "Impact Grid", to the Elementor panel under the General
+category. A grid of numbered cards for presenting results: energy saved, tonnes
+avoided, whatever the figures are.
+
+Each card is one of two kinds. A figure card carries a large number, a unit, a
+rule, an optional second figure and a caption. A checklist card carries ticked
+points, each of which can have plain bullets nested under it.
+
+* Repeater-driven cards, each with its own icon, type and accent
+* Two accent colours set once, with every card choosing a side
+* Automatic numbering (1, 2 ... or 01, 02 ... or hidden), with a configurable
+  starting value
+* Figures count up from zero as their card scrolls into view, in the number
+  format they were typed in
+* Cards rise and fade in a stagger, ticks draw themselves, rules sweep open
+* Full Elementor style controls for typography, colours, spacing and motion
+* Honours prefers-reduced-motion: cards appear in place and figures print
+* Assets load only on pages where the widget is actually used
+
+Requires Elementor 3.5 or greater.
 
 = Duplicate Pages =
 
@@ -69,12 +92,22 @@ error, and every duplicator hook is admin-side only.
 
 == Upgrade Notice ==
 
+= 2.1.0 =
+Adds an Impact Grid widget. Nothing existing changes; no page needs re-saving.
+
 = 2.0.0 =
 The plugin is now called Eruda Toolkit and has gained a page duplicator. This is
 an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.1.0 =
+* New: "Impact Grid" module. Adds an Impact Grid widget to Elementor: a grid of
+  numbered figure and checklist cards that reveal in a stagger as they scroll
+  into view, with figures counting up from zero.
+* The module is on by default on upgrade, and adds nothing to a page until the
+  widget is placed. Existing accordions and duplicator behaviour are untouched.
 
 = 2.0.0 =
 * New: the plugin is now Eruda Toolkit, a modular plugin. The numbered accordion

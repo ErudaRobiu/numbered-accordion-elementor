@@ -20,13 +20,14 @@ The 2.0.0 rebrand is display-only, and this is the part most worth proving.
 
 ## Modules and settings
 
-- [ ] **Settings → Eruda Toolkit** lists both modules, both checked
+- [ ] **Settings → Eruda Toolkit** lists all three modules, all checked
 - [ ] Unchecking Duplicate Pages and saving removes the Duplicate row action
 - [ ] Unchecking Numbered Accordion and saving removes the widget from the
       Elementor panel
+- [ ] Unchecking Impact Grid and saving removes that widget from the panel too
 - [ ] With Elementor deactivated: the settings page still loads, the accordion
-      module shows "Elementor is not installed or not activated", and **the
-      duplicator still works**
+      and impact grid modules both show "Elementor is not installed or not
+      activated", and **the duplicator still works**
 - [ ] An Editor (not an Administrator) cannot see the settings page
 
 ## Duplicator
@@ -66,3 +67,52 @@ This is where a naive duplicator goes wrong, so test it deliberately.
       eyebrow
 - [ ] An item with a blank title: the remaining rows number 01, 02, 03 with no gap
 - [ ] A blank first item with "keep one open": the first *rendered* row opens
+
+## Impact Grid
+
+The parsing, the figure detection and the numbering are covered by
+`php tests/run.php`. Everything below is what it cannot reach.
+
+### Rendering
+
+- [ ] Dropping the widget in gives six cards with the shipped copy
+- [ ] Uploading an icon to a card shows it; a card with no icon closes up
+      without leaving a gap
+- [ ] Cards 4-6 render ticks, and card 6 nests its two bullets under its one
+      check item
+- [ ] Emptying a card's every field drops it, and the cards after it renumber
+      without leaving a gap in the sequence
+- [ ] Switching a card between Figure and Checklist shows the right controls
+- [ ] Setting Number format to Hidden removes the badges and hides the badge
+      style section
+- [ ] Columns responds at tablet and mobile breakpoints
+
+### Motion
+
+- [ ] Scrolling the grid into view reveals the cards left to right in a
+      stagger, not all at once
+- [ ] Figures count up from zero and land on exactly the typed string,
+      commas included
+- [ ] A figure typed as `30,400+`, `~5` or `45%` does not count, and shows
+      exactly as typed
+- [ ] Ticks draw their ring then their mark
+- [ ] Hovering a landed card lifts it immediately — no delay inherited from
+      the reveal stagger
+- [ ] A card far below the fold, reaching the viewport on its own, appears
+      without waiting out the earlier cards' delays
+- [ ] With Count-up duration set to 0, figures appear at their final value
+- [ ] With **System Settings → Accessibility → Reduce motion** on: every card
+      is visible immediately, nothing moves, and figures show their final
+      value
+- [ ] With JavaScript disabled: the whole grid is visible and readable, and
+      every figure shows its final value
+
+### Editor and assets
+
+- [ ] Editing a card in the Elementor editor re-renders it and the animation
+      re-runs
+- [ ] Two Impact Grids on one page both animate, and each counts its own
+      figures
+- [ ] The CSS and JS load only on pages carrying the widget
+- [ ] A screen reader reads each figure once, at its final value, and does not
+      read a mid-animation number

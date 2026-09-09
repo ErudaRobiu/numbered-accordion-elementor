@@ -46,3 +46,4 @@ function __( $text, $domain = 'default' ) { // phpcs:ignore
 
 require_once dirname( __DIR__ ) . '/includes/class-toolkit.php';
 require_once dirname( __DIR__ ) . '/modules/duplicator/class-duplicator.php';
+require_once dirname( __DIR__ ) . '/modules/impact/class-impact-content.php';

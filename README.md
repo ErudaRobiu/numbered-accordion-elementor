@@ -6,6 +6,7 @@ A small toolkit of site-building modules. Each one can be switched off from
 | Module | What it does | Needs |
 | --- | --- | --- |
 | Numbered Accordion | A numbered, lightly animated accordion widget for Elementor | Elementor 3.5+ |
+| Impact Grid | A grid of numbered figure and checklist cards that animate into view | Elementor 3.5+ |
 | Duplicate Pages | A Duplicate row action and bulk action on Pages and Posts | Nothing beyond core |
 
 ![Widget](docs/preview.png)
@@ -23,14 +24,15 @@ installing an update is always a manual click.
 
 - WordPress 6.0+
 - PHP 7.4+
-- Elementor 3.5+, for the accordion module only
+- Elementor 3.5+, for the accordion and impact grid modules only
 
 ## Layout
 
 ```
 numbered-accordion-elementor.php   bootstrap, update channel
 includes/                          module registry and settings screen
-modules/accordion/                 the Elementor widget and its assets
+modules/accordion/                 the accordion widget and its assets
+modules/impact/                    the impact grid widget and its assets
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -64,8 +66,8 @@ The text domain stays `numbered-accordion` for the same reason.
 Live client pages carry these inside saved Elementor JSON. Change one and
 existing pages render empty:
 
-- the widget name `nacc-numbered-accordion`
-- every `.nacc*` CSS class
+- the widget names `nacc-numbered-accordion` and `eimp-impact-grid`
+- every `.nacc*` and `.eimp*` CSS class
 - every Elementor control ID
 
 PHP namespaces, class names and asset handles are runtime-only and safe to rename.
@@ -83,6 +85,37 @@ autoloader cannot resolve it (it derives `ELEMENTOR_PATH/widget-base.php`, while
 the file lives at `includes/base/widget-base.php`), so the class does not exist
 until the widgets manager requires it immediately before the
 `elementor/widgets/register` hook fires.
+
+### The impact grid
+
+Two decisions here are worth keeping.
+
+**Reveals are CSS animations, not transitions.** Each card's delay comes from a
+`--eimp-i` custom property, and the animation uses `animation-fill-mode:
+backwards` so it holds its opening frame during that delay and then hands the
+element back to its declared style. A transition with a `transition-delay` would
+have done the same reveal, but the delay would then also apply to the hover
+lift, which would stall by up to half a second on the last card. Animations do
+not have that problem.
+
+**`--eimp-i` is rewritten per batch.** The markup ships an index matching each
+card's position in the grid, which is the right cascade when the whole grid
+arrives at once. `IntersectionObserver` rewrites it for each batch of cards that
+crosses the threshold together, so a card scrolling in alone later does not sit
+waiting out five other cards' worth of delay before appearing.
+
+Whether a figure counts up is decided once, in PHP, by
+`Impact_Content::is_countable()`, and handed to the browser as a data attribute.
+Anything that is not a plain number — a range, a trailing plus, a percentage —
+is left exactly as typed rather than counted to a value the widget guessed at.
+The count-up derives its thousands separators and decimal places from the string
+the editor typed, not from the visitor's locale.
+
+Elementor has no nested repeater, so a checklist card's nesting comes from its
+text: one item per line, and a line opening with a dash, asterisk or bullet
+nests under the item above it. `Impact_Content::parse_list()` owns that, and
+promotes an orphan sub-bullet to a top-level item rather than dropping it — a
+list that lost text would look like a bug in the widget.
 
 ### The duplicator
 
@@ -109,7 +142,8 @@ php tests/run.php
 
 No install step and no Composer: the suite stubs the handful of WordPress
 functions the pure logic touches. It covers the meta denylist, the slashing
-round trip, the insert payload and the module-enabled default. Everything it
+round trip, the insert payload, the module-enabled default, and the impact
+grid's list parsing, figure detection and numbering. Everything it
 cannot reach — hook wiring, capability checks, the Elementor round trip — is in
 [`docs/QA.md`](docs/QA.md).
 

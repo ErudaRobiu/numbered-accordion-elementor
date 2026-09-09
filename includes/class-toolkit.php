@@ -32,6 +32,10 @@ final class Toolkit {
 			'file'  => 'modules/duplicator/class-duplicator-module.php',
 			'class' => '\ErudaToolkit\Modules\Duplicator\Duplicator_Module',
 		),
+		'impact'     => array(
+			'file'  => 'modules/impact/class-impact-module.php',
+			'class' => '\ErudaToolkit\Modules\Impact\Impact_Module',
+		),
 	);
 
 	/**

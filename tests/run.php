@@ -15,6 +15,7 @@ require_once __DIR__ . '/bootstrap.php';
 
 use ErudaToolkit\Toolkit;
 use ErudaToolkit\Modules\Duplicator\Duplicator;
+use ErudaToolkit\Modules\Impact\Impact_Content;
 
 /**
  * Undo wp_slash(), so a round trip can be asserted.
@@ -185,6 +186,127 @@ check( 'a sparse source still yields a draft', 'draft', $sparse['post_status'] )
 check( 'post type defaults to post', 'post', $sparse['post_type'] );
 check( 'parent defaults to zero', 0, $sparse['post_parent'] );
 check( 'comment status defaults to closed', 'closed', $sparse['comment_status'] );
+
+
+/* ------------------------------------------------ Impact_Content::parse_list --- */
+
+check( 'an empty list yields nothing', array(), Impact_Content::parse_list( '' ) );
+check( 'whitespace only yields nothing', array(), Impact_Content::parse_list( "  \n\t\n " ) );
+check( 'a non-string yields nothing', array(), Impact_Content::parse_list( null ) );
+
+check(
+	'a single line becomes one item with no sub-bullets',
+	array( array( 'text' => 'Minimal permitting complexity', 'sub' => array() ) ),
+	Impact_Content::parse_list( 'Minimal permitting complexity' )
+);
+
+check(
+	'two lines become two items',
+	array(
+		array( 'text' => 'Minimal permitting complexity', 'sub' => array() ),
+		array( 'text' => 'Designed for retrofit and new-build applications', 'sub' => array() ),
+	),
+	Impact_Content::parse_list( "Minimal permitting complexity\nDesigned for retrofit and new-build applications" )
+);
+
+// Card 6 of the source artwork: one check item carrying two nested bullets.
+check(
+	'a dash-prefixed line nests under the item above it',
+	array(
+		array(
+			'text' => 'Cloud-connected ThermStar Power Intelligence',
+			'sub'  => array( 'Real-time performance monitoring', 'Decarbonization reporting' ),
+		),
+	),
+	Impact_Content::parse_list( "Cloud-connected ThermStar Power Intelligence\n- Real-time performance monitoring\n- Decarbonization reporting" )
+);
+
+check(
+	'nesting resets at the next top-level line',
+	array(
+		array( 'text' => 'First', 'sub' => array( 'One' ) ),
+		array( 'text' => 'Second', 'sub' => array() ),
+	),
+	Impact_Content::parse_list( "First\n- One\nSecond" )
+);
+
+check(
+	'bullet, en dash and asterisk all mark a sub-bullet',
+	array( array( 'text' => 'Top', 'sub' => array( 'a', 'b', 'c' ) ) ),
+	Impact_Content::parse_list( "Top\n* a\n\xe2\x80\xa2 b\n\xe2\x80\x93 c" )
+);
+
+/*
+ * Content must never vanish silently. A list whose very first line is already
+ * a sub-bullet has nothing to nest under, so it is promoted rather than
+ * dropped -- an editor who indents everything still sees all of their text.
+ */
+check(
+	'a leading sub-bullet is promoted rather than dropped',
+	array( array( 'text' => 'Orphan', 'sub' => array() ) ),
+	Impact_Content::parse_list( '- Orphan' )
+);
+
+check(
+	'blank lines between items are ignored',
+	array(
+		array( 'text' => 'One', 'sub' => array() ),
+		array( 'text' => 'Two', 'sub' => array() ),
+	),
+	Impact_Content::parse_list( "One\n\n\nTwo\n" )
+);
+
+check(
+	'carriage returns are handled',
+	array(
+		array( 'text' => 'One', 'sub' => array( 'a' ) ),
+		array( 'text' => 'Two', 'sub' => array() ),
+	),
+	Impact_Content::parse_list( "One\r\n-\ta\r\nTwo\r\n" )
+);
+
+// A dash inside the text is only a marker at the start of the line.
+check(
+	'an internal dash is left alone',
+	array( array( 'text' => 'More exhaust heat = more recoverable energy', 'sub' => array() ) ),
+	Impact_Content::parse_list( 'More exhaust heat = more recoverable energy' )
+);
+
+check(
+	'a line of nothing but a marker is dropped',
+	array( array( 'text' => 'Top', 'sub' => array() ) ),
+	Impact_Content::parse_list( "Top\n-\n-   " )
+);
+
+/* --------------------------------------------- Impact_Content::is_countable --- */
+
+// Every figure printed on the source artwork must animate.
+foreach ( array( '165,000,000', '26,015', '30,400', '57,352,423', '5,631,400' ) as $figure ) {
+	check( "{$figure} counts up", true, Impact_Content::is_countable( $figure ) );
+}
+
+check( 'a bare integer counts up', true, Impact_Content::is_countable( '400' ) );
+check( 'a decimal counts up', true, Impact_Content::is_countable( '26.5' ) );
+check( 'a grouped decimal counts up', true, Impact_Content::is_countable( '1,234.56' ) );
+check( 'surrounding spaces are tolerated', true, Impact_Content::is_countable( '  30,400 ' ) );
+
+check( 'an approximation is left static', false, Impact_Content::is_countable( '~5' ) );
+check( 'a range is left static', false, Impact_Content::is_countable( '10-20' ) );
+check( 'a figure with a suffix is left static', false, Impact_Content::is_countable( '30,400+' ) );
+check( 'a percentage is left static', false, Impact_Content::is_countable( '45%' ) );
+check( 'text is left static', false, Impact_Content::is_countable( 'Varies' ) );
+check( 'an empty value is left static', false, Impact_Content::is_countable( '' ) );
+check( 'a non-string is left static', false, Impact_Content::is_countable( array() ) );
+check( 'mis-grouped digits are left static', false, Impact_Content::is_countable( '1,23,456' ) );
+
+/* -------------------------------------------- Impact_Content::format_number --- */
+
+check( 'plain numbering starts at one', '1', Impact_Content::format_number( 0, 'plain', 1 ) );
+check( 'plain numbering follows position', '6', Impact_Content::format_number( 5, 'plain', 1 ) );
+check( 'padded numbering pads to two digits', '01', Impact_Content::format_number( 0, 'pad', 1 ) );
+check( 'padded numbering stops padding past nine', '10', Impact_Content::format_number( 9, 'pad', 1 ) );
+check( 'numbering can start elsewhere', '7', Impact_Content::format_number( 0, 'plain', 7 ) );
+check( 'numbering can be switched off', '', Impact_Content::format_number( 0, 'none', 1 ) );
 
 /* ------------------------------------------------------------- report --- */
 
