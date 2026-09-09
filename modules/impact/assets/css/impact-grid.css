@@ -1,0 +1,468 @@
+/**
+ * Impact Grid for Elementor
+ *
+ * All colours, sizes and motion values arrive as custom properties written by
+ * the Elementor style controls, so this file never needs editing to re-skin.
+ *
+ * Two rules govern everything below:
+ *
+ * 1. The default state is the finished state. A visitor with no JavaScript, an
+ *    ancient browser, or a failed asset load sees a complete, readable grid.
+ *    Motion is layered on only after the script adds .eimp--anim.
+ * 2. Reveals are animations, not transitions. An animation with a delay and
+ *    fill-mode: backwards holds its opening frame while it waits and then
+ *    hands the element back to its declared style -- which leaves hover
+ *    transforms free to work the moment a card has landed. Transitions with
+ *    delays fight hover; animations do not.
+ */
+
+.eimp {
+	--eimp-primary: #2f6b33;
+	--eimp-secondary: #1c3f94;
+
+	--eimp-card-bg: #fbfbf8;
+	--eimp-radius: 14px;
+	--eimp-border-width: 2px;
+	--eimp-border-alpha: 0.55;
+
+	--eimp-badge-fg: #ffffff;
+	--eimp-badge-size: 46px;
+
+	--eimp-caption: #2c3a44;
+	--eimp-check-text: #2c3a44;
+	--eimp-check-gap: 14px;
+
+	--eimp-rule: #c9cfc6;
+	--eimp-rule-width: 1px;
+
+	--eimp-icon-size: 150px;
+	--eimp-icon-gap: 18px;
+
+	--eimp-columns: 3;
+	--eimp-gap: 20px;
+	--eimp-align: center;
+
+	--eimp-duration: 800ms;
+	--eimp-stagger: 90ms;
+	--eimp-rise: 24px;
+	--eimp-count-duration: 1600ms;
+	--eimp-lift: 4px;
+
+	/* A long, soft decelerate. The tail is what reads as "expensive". */
+	--eimp-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+	display: grid;
+	grid-template-columns: repeat(var(--eimp-columns), minmax(0, 1fr));
+	gap: var(--eimp-gap);
+	text-align: var(--eimp-align);
+}
+
+/* --------------------------------------------------------------- card --- */
+
+.eimp-card {
+	--eimp-accent: var(--eimp-primary);
+
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: var(--eimp-align);
+	box-sizing: border-box;
+	padding: 28px 26px 30px;
+	background-color: var(--eimp-card-bg);
+	border: var(--eimp-border-width) solid var(--eimp-accent);
+	border-radius: var(--eimp-radius);
+	box-shadow: 0 1px 2px rgba(20, 32, 26, 0.04);
+	transition:
+		transform 420ms var(--eimp-ease),
+		box-shadow 420ms var(--eimp-ease),
+		border-color 420ms var(--eimp-ease);
+	will-change: transform;
+}
+
+/*
+ * Softening the border to a fraction of the accent. Declared after the solid
+ * border above, so a browser without color-mix keeps the solid one rather than
+ * losing the border entirely.
+ */
+@supports (color: color-mix(in srgb, red 50%, transparent)) {
+	.eimp-card {
+		border-color: color-mix(in srgb, var(--eimp-accent) calc(var(--eimp-border-alpha) * 100%), transparent);
+	}
+}
+
+.eimp-card--secondary {
+	--eimp-accent: var(--eimp-secondary);
+}
+
+.eimp-card:hover {
+	transform: translate3d(0, calc(var(--eimp-lift) * -1), 0);
+	border-color: var(--eimp-accent);
+	box-shadow: 0 14px 30px -12px rgba(20, 32, 26, 0.18);
+}
+
+/* --------------------------------------------------------------- head --- */
+
+.eimp-card__head {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	width: 100%;
+	text-align: left;
+}
+
+.eimp-card__badge {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: var(--eimp-badge-size);
+	height: var(--eimp-badge-size);
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--eimp-badge-fg);
+	background-color: var(--eimp-accent);
+	border-radius: 50%;
+	transition: transform 420ms var(--eimp-ease);
+}
+
+.eimp-card:hover .eimp-card__badge {
+	transform: scale(1.08);
+}
+
+.eimp-card__title {
+	margin: 0;
+	font-size: 21px;
+	font-weight: 800;
+	line-height: 1.15;
+	text-transform: uppercase;
+	color: var(--eimp-title, var(--eimp-accent));
+}
+
+/* -------------------------------------------------------------- media --- */
+
+.eimp-card__media {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	margin: var(--eimp-icon-gap) 0;
+}
+
+.eimp-card__img {
+	display: block;
+	width: auto;
+	max-width: var(--eimp-icon-size);
+	height: auto;
+}
+
+/* --------------------------------------------------------------- body --- */
+
+.eimp-card__body {
+	display: flex;
+	flex-direction: column;
+	align-items: var(--eimp-align);
+	width: 100%;
+	margin-top: auto;
+}
+
+.eimp-figure {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: center;
+	gap: 0 10px;
+	margin: 0;
+	color: var(--eimp-figure, var(--eimp-accent));
+}
+
+.eimp-figure--lead .eimp-figure__value {
+	font-size: 46px;
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: -1px;
+}
+
+.eimp-figure--lead .eimp-figure__unit {
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.eimp-figure--sub {
+	margin-top: 14px;
+	font-size: 30px;
+	font-weight: 800;
+	line-height: 1.1;
+}
+
+/*
+ * Fixed-width digits. Without this the figure changes width on almost every
+ * frame of the count-up and everything below it jitters.
+ */
+.eimp-figure__value {
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: "tnum" 1;
+}
+
+.eimp-card__rule {
+	display: block;
+	width: 100%;
+	height: var(--eimp-rule-width);
+	margin: 18px 0 0;
+	background-color: var(--eimp-rule);
+	transform-origin: center;
+}
+
+.eimp-card__caption {
+	margin: 12px 0 0;
+	font-size: 16px;
+	line-height: 1.45;
+	color: var(--eimp-caption);
+}
+
+/* ---------------------------------------------------------- checklist --- */
+
+.eimp-checks {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	text-align: left;
+}
+
+.eimp-check {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 0 10px;
+	color: var(--eimp-check-text);
+}
+
+.eimp-check + .eimp-check {
+	margin-top: var(--eimp-check-gap);
+}
+
+.eimp-check__tick {
+	display: block;
+	width: 22px;
+	height: 22px;
+	/* Optical alignment with the cap height of the first line of text. */
+	margin-top: 1px;
+	color: var(--eimp-tick, var(--eimp-accent));
+}
+
+.eimp-check__tick svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	overflow: visible;
+}
+
+.eimp-check__text {
+	font-size: 17px;
+	line-height: 1.45;
+}
+
+.eimp-check__sub {
+	grid-column: 2;
+	margin: 8px 0 0;
+	padding-left: 18px;
+	list-style: disc;
+}
+
+.eimp-check__sub li {
+	margin-top: 4px;
+	font-size: 0.94em;
+	line-height: 1.4;
+}
+
+/* ------------------------------------------------------ screen readers --- */
+
+/*
+ * Carries the true figure while the animated one is aria-hidden. Clipped
+ * rather than display:none, which would take it out of the accessibility tree
+ * along with everything else.
+ */
+.eimp-sr-only {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* ------------------------------------------------------------- motion --- */
+
+/*
+ * Everything from here down is inert until the script confirms it can run the
+ * reveal, at which point it adds .eimp--anim to the grid.
+ */
+
+.eimp--anim .eimp-card {
+	opacity: 0;
+}
+
+.eimp--anim .eimp-card.is-in {
+	opacity: 1;
+	animation: eimp-rise var(--eimp-duration) var(--eimp-ease) backwards;
+	animation-delay: calc(var(--eimp-i, 0) * var(--eimp-stagger));
+}
+
+@keyframes eimp-rise {
+	from {
+		opacity: 0;
+		transform: translate3d(0, var(--eimp-rise), 0);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/* The icon lands a beat after its card, and comes up from slightly small. */
+.eimp--anim .eimp-card.is-in .eimp-card__media {
+	animation: eimp-pop calc(var(--eimp-duration) * 0.9) var(--eimp-ease) backwards;
+	animation-delay: calc((var(--eimp-i, 0) * var(--eimp-stagger)) + var(--eimp-duration) * 0.2);
+}
+
+@keyframes eimp-pop {
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/* The rule draws itself outwards from the middle. */
+.eimp--anim .eimp-card.is-in .eimp-card__rule {
+	animation: eimp-sweep var(--eimp-duration) var(--eimp-ease) backwards;
+	animation-delay: calc((var(--eimp-i, 0) * var(--eimp-stagger)) + var(--eimp-duration) * 0.35);
+}
+
+@keyframes eimp-sweep {
+	from {
+		transform: scaleX(0);
+	}
+
+	to {
+		transform: scaleX(1);
+	}
+}
+
+/* The second figure and the caption follow the rule. */
+.eimp--anim .eimp-card.is-in .eimp-figure--sub,
+.eimp--anim .eimp-card.is-in .eimp-card__caption {
+	animation: eimp-rise calc(var(--eimp-duration) * 0.8) var(--eimp-ease) backwards;
+	animation-delay: calc((var(--eimp-i, 0) * var(--eimp-stagger)) + var(--eimp-duration) * 0.45);
+}
+
+/* Check items cascade one after another once their card has settled. */
+.eimp--anim .eimp-card.is-in .eimp-check,
+.eimp--anim .eimp-card.is-in .eimp-check__sub li {
+	animation: eimp-rise calc(var(--eimp-duration) * 0.75) var(--eimp-ease) backwards;
+	animation-delay: calc(
+		(var(--eimp-i, 0) * var(--eimp-stagger)) +
+		var(--eimp-duration) * 0.3 +
+		var(--eimp-j, 0) * 80ms
+	);
+}
+
+/* Each tick draws its ring, then its mark. */
+.eimp--anim .eimp-card.is-in .eimp-tick__ring {
+	--eimp-dash: 64;
+	stroke-dasharray: 64;
+	animation: eimp-draw 620ms var(--eimp-ease) backwards;
+	animation-delay: calc(
+		(var(--eimp-i, 0) * var(--eimp-stagger)) +
+		var(--eimp-duration) * 0.35 +
+		var(--eimp-j, 0) * 80ms
+	);
+}
+
+.eimp--anim .eimp-card.is-in .eimp-tick__mark {
+	--eimp-dash: 20;
+	stroke-dasharray: 20;
+	animation: eimp-draw 380ms var(--eimp-ease) backwards;
+	animation-delay: calc(
+		(var(--eimp-i, 0) * var(--eimp-stagger)) +
+		var(--eimp-duration) * 0.35 +
+		var(--eimp-j, 0) * 80ms + 260ms
+	);
+}
+
+/*
+ * Each shape declares its own --eimp-dash, so one keyframe can draw both the
+ * ring and the much shorter check mark. A shared literal would start the mark
+ * part-way through its dash pattern and it would appear already half-drawn.
+ */
+@keyframes eimp-draw {
+	from {
+		stroke-dashoffset: var(--eimp-dash);
+	}
+
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+
+/* ----------------------------------------------------------- responsive --- */
+
+@media (max-width: 1024px) {
+	.eimp-card__title {
+		font-size: 19px;
+	}
+
+	.eimp-figure--lead .eimp-figure__value {
+		font-size: 38px;
+	}
+
+	.eimp-figure--sub {
+		font-size: 26px;
+	}
+}
+
+@media (max-width: 767px) {
+	.eimp-card__badge {
+		font-size: 17px;
+	}
+
+	.eimp-figure--lead .eimp-figure__value {
+		font-size: 34px;
+	}
+}
+
+/* ------------------------------------------------------- reduced motion --- */
+
+/*
+ * Nothing moves, nothing counts, everything is simply there. The script checks
+ * the same query and prints final figures rather than animating to them, so
+ * this block and the count-up cannot disagree.
+ */
+@media (prefers-reduced-motion: reduce) {
+	.eimp--anim .eimp-card,
+	.eimp--anim .eimp-card.is-in,
+	.eimp--anim .eimp-card.is-in *,
+	.eimp--anim .eimp-card.is-in .eimp-tick__ring,
+	.eimp--anim .eimp-card.is-in .eimp-tick__mark {
+		opacity: 1;
+		animation: none !important;
+		transform: none !important;
+	}
+
+	.eimp-card,
+	.eimp-card__badge {
+		transition-duration: 1ms !important;
+	}
+}

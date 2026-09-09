@@ -1,0 +1,657 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-09 11:36+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#. translators: 1: required PHP version, 2: current PHP version
+#: numbered-accordion-elementor.php:96
+#, php-format
+msgid "Eruda Toolkit requires PHP %1$s or greater. You are running %2$s."
+msgstr ""
+
+#: includes/class-settings.php:61 includes/class-settings.php:62
+#: includes/class-settings.php:116
+msgid "Eruda Toolkit"
+msgstr ""
+
+#: includes/class-settings.php:117
+msgid "Switch individual modules on or off. Modules are on by default."
+msgstr ""
+
+#: modules/accordion/class-accordion-module.php:39
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:39
+msgid "Numbered Accordion"
+msgstr ""
+
+#: modules/accordion/class-accordion-module.php:48
+msgid "Adds a \"Numbered Accordion\" widget to the Elementor panel."
+msgstr ""
+
+#: modules/accordion/class-accordion-module.php:74
+#: modules/impact/class-impact-module.php:70
+msgid "Elementor is not installed or not activated."
+msgstr ""
+
+#. translators: %s: required Elementor version
+#: modules/accordion/class-accordion-module.php:81
+#: modules/impact/class-impact-module.php:77
+#, php-format
+msgid "Elementor %s or greater is required."
+msgstr ""
+
+#: modules/impact/class-impact-module.php:39
+#: modules/impact/widgets/class-impact-grid-widget.php:44
+msgid "Impact Grid"
+msgstr ""
+
+#: modules/impact/class-impact-module.php:48
+msgid ""
+"Adds an \"Impact Grid\" widget to the Elementor panel: numbered stat and "
+"checklist cards that animate into view."
+msgstr ""
+
+#: modules/duplicator/class-duplicator-module.php:42
+msgid "Duplicate Pages"
+msgstr ""
+
+#: modules/duplicator/class-duplicator-module.php:51
+msgid ""
+"Adds a Duplicate link to pages and posts. The copy is always created as a "
+"draft."
+msgstr ""
+
+#. translators: %s: post title
+#: modules/duplicator/class-duplicator-module.php:165
+#, php-format
+msgid "Duplicate \"%s\" as a new draft"
+msgstr ""
+
+#: modules/duplicator/class-duplicator-module.php:169
+#: modules/duplicator/class-duplicator-module.php:182
+msgid "Duplicate"
+msgstr ""
+
+#: modules/duplicator/class-duplicator-module.php:193
+msgid "No item was given to duplicate."
+msgstr ""
+
+#: modules/duplicator/class-duplicator-module.php:201
+#: modules/duplicator/class-duplicator.php:146
+msgid "That item no longer exists."
+msgstr ""
+
+#: modules/duplicator/class-duplicator-module.php:205
+msgid "You are not allowed to duplicate this item."
+msgstr ""
+
+#. translators: %s: number of items duplicated
+#: modules/duplicator/class-duplicator-module.php:304
+#, php-format
+msgid "%s item duplicated as a draft."
+msgid_plural "%s items duplicated as drafts."
+msgstr[0] ""
+msgstr[1] ""
+
+#: modules/duplicator/class-duplicator-module.php:314
+msgid "Edit the copy"
+msgstr ""
+
+#. translators: %s: number of items that could not be duplicated
+#: modules/duplicator/class-duplicator-module.php:331
+#, php-format
+msgid "%s item could not be duplicated."
+msgid_plural "%s items could not be duplicated."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: the title of the post being duplicated
+#: modules/duplicator/class-duplicator.php:94
+#, php-format
+msgid "%s (Copy)"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:124
+msgid "Items"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:134
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:536
+#: modules/impact/widgets/class-impact-grid-widget.php:169
+#: modules/impact/widgets/class-impact-grid-widget.php:655
+msgid "Title"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:136
+msgid "Accordion item"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:145
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:485
+msgid "Eyebrow"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:146
+msgid ""
+"Small label shown above the title while the item is open. Leave empty to "
+"hide."
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:157
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:594
+msgid "Description"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:169
+msgid "Open by default"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:171
+msgid "Yes"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:172
+msgid "No"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:181
+msgid "Accordion items"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:187
+msgid "Lepido™ Heat Recovery Unit"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:188
+msgid "Recover"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:189
+msgid ""
+"Captures waste heat from the exhaust stream before it leaves the building, "
+"then hands it back to the system that needs it most."
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:193
+msgid "Closed-Loop Thermal Transfer"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:194
+msgid "Deliver"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:195
+msgid ""
+"A sealed glycol circuit carries recovered energy from the exhaust to "
+"wherever the heat is needed. Contaminated exhaust and clean building air "
+"never meet. Designed for rooftop or in-building installation."
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:199
+msgid "HeatCore HX™ Coil"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:200
+msgid "Transfer"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:201
+msgid ""
+"A high-surface-area exchanger built for grease-laden and particulate-heavy "
+"air, sized to keep pressure drop low across the run."
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:205
+msgid "ThermStar Power Intelligence™"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:206
+msgid "Control"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:207
+msgid ""
+"Continuous monitoring balances recovery against demand in real time and "
+"reports verified savings back to the building management system."
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:224
+#: modules/impact/widgets/class-impact-grid-widget.php:345
+msgid "Settings"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:232
+#: modules/impact/widgets/class-impact-grid-widget.php:353
+msgid "Title HTML tag"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:242
+#: modules/impact/widgets/class-impact-grid-widget.php:363
+msgid "Number format"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:245
+#: modules/impact/widgets/class-impact-grid-widget.php:367
+msgid "Padded (01, 02)"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:246
+#: modules/impact/widgets/class-impact-grid-widget.php:366
+msgid "Plain (1, 2)"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:247
+#: modules/impact/widgets/class-impact-grid-widget.php:368
+msgid "Hidden"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:256
+#: modules/impact/widgets/class-impact-grid-widget.php:377
+msgid "Start counting at"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:269
+msgid "Allow multiple open"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:279
+msgid "Allow closing every item"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:280
+msgid "When off, one item always stays open."
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:297
+msgid "Item"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:305
+msgid "Row padding"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:325
+msgid "Open panel padding"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:345
+msgid "Divider"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:354
+#: modules/impact/widgets/class-impact-grid-widget.php:823
+msgid "Thickness"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:371
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:436
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:507
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:557
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:614
+#: modules/impact/widgets/class-impact-grid-widget.php:678
+#: modules/impact/widgets/class-impact-grid-widget.php:793
+#: modules/impact/widgets/class-impact-grid-widget.php:813
+#: modules/impact/widgets/class-impact-grid-widget.php:859
+msgid "Colour"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:383
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:456
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:577
+msgid "Colour when open"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:384
+msgid "Sweeps in from the left as the item opens."
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:396
+msgid "Line above first item"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:414
+msgid "Number"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:446
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:567
+msgid "Colour on hover"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:466
+msgid "Gap from title"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:517
+msgid "Space below"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:624
+#: modules/impact/widgets/class-impact-grid-widget.php:704
+msgid "Maximum width"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:646
+#: modules/impact/widgets/class-impact-grid-widget.php:939
+msgid "Motion"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:654
+msgid "Duration (ms)"
+msgstr ""
+
+#: modules/accordion/widgets/class-numbered-accordion-widget.php:667
+msgid ""
+"Motion is automatically disabled for visitors who have \"reduce motion\" "
+"enabled in their operating system."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:132
+#: modules/impact/widgets/class-impact-grid-widget.php:271
+msgid "Cards"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:142
+msgid "Card type"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:145
+#: modules/impact/widgets/class-impact-grid-widget.php:192
+msgid "Figure"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:146
+#: modules/impact/widgets/class-impact-grid-widget.php:257
+#: modules/impact/widgets/class-impact-grid-widget.php:876
+msgid "Checklist"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:155
+msgid "Accent"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:156
+msgid "Both colours are set once, under Style → Accents."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:159
+#: modules/impact/widgets/class-impact-grid-widget.php:574
+msgid "Primary"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:160
+#: modules/impact/widgets/class-impact-grid-widget.php:584
+msgid "Secondary"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:171
+msgid "Card title"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:180
+#: modules/impact/widgets/class-impact-grid-widget.php:696
+msgid "Icon"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:193
+msgid ""
+"A plain number counts up from zero. Anything else — a range, a plus sign, a "
+"percentage — is shown exactly as typed."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:205
+msgid "Unit"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:217
+msgid "Second figure"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:218
+msgid "Shown below the rule. Leave empty to hide."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:230
+msgid "Second unit"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:242
+#: modules/impact/widgets/class-impact-grid-widget.php:838
+msgid "Caption"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:258
+msgid ""
+"One item per line. Start a line with a dash to nest it as a plain bullet "
+"under the item above."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:292
+msgid "Total Energy Savings"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:294
+msgid "kWh"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:296
+msgid "therms"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:297
+msgid "Total energy saved"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:302
+msgid "CO₂ Reduction"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:304
+msgid "metric tons"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:306
+msgid "lbs CO₂"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:307
+msgid "Estimated 5-year CO₂ reduction"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:312
+msgid "Environmental Equivalent"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:314
+msgid "acres of forest"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:315
+msgid "5-year CO₂ reduction = one year of CO₂ sequestration"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:320
+msgid "Continuous Energy Recovery"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:321
+msgid ""
+"Operates independent of weather conditions\n"
+"More exhaust heat = more recoverable energy"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:326
+msgid "Low Deployment Risk"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:327
+msgid ""
+"Minimal permitting complexity\n"
+"Designed for retrofit and new-build applications"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:332
+msgid "Measurable & Verified"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:333
+msgid ""
+"Cloud-connected ThermStar Power Intelligence™\n"
+"- Real-time performance monitoring\n"
+"- Decarbonization reporting"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:397
+msgid "Layout"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:405
+msgid "Columns"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:425
+msgid "Gap"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:440
+msgid "Alignment"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:444
+msgid "Left"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:448
+msgid "Centre"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:467
+msgid "Card"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:475
+msgid "Background"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:485
+msgid "Padding"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:505
+msgid "Corner radius"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:520
+msgid "Border thickness"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:535
+msgid "Border strength"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:536
+msgid "How much of the card accent the border shows."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:566
+msgid "Accents"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:601
+msgid "Number badge"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:623
+msgid "Number colour"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:633
+msgid "Diameter"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:679
+#: modules/impact/widgets/class-impact-grid-widget.php:794
+#: modules/impact/widgets/class-impact-grid-widget.php:907
+msgid "Leave empty to use each card's accent."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:722
+msgid "Space around"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:744
+msgid "Figures"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:767
+msgid "Unit typography"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:780
+msgid "Second figure typography"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:804
+msgid "Rule"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:896
+msgid "Text colour"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:906
+msgid "Tick colour"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:917
+msgid "Space between items"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:947
+msgid "Reveal duration (ms)"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:962
+msgid "Stagger between cards (ms)"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:963
+msgid "Each card waits this much longer than the one before it."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:978
+msgid "Rise distance"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:993
+msgid "Count-up duration (ms)"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:994
+msgid "Set to zero to print figures without counting."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:1009
+msgid "Hover lift"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:1025
+msgid ""
+"Motion is automatically disabled for visitors who have \"reduce motion\" "
+"enabled in their operating system: cards appear in place and figures print "
+"their final value."
+msgstr ""
