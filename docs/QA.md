@@ -90,6 +90,20 @@ The parsing, the figure detection and the numbering are covered by
       style section
 - [ ] Columns responds at tablet and mobile breakpoints
 
+### Stacking
+
+- [ ] At mobile width the cards pin and pile, each leaving a ledge of the one
+      beneath, and the pile scrolls away cleanly at the end
+- [ ] At desktop width the cards behave as an ordinary grid, with no card
+      shifted down the page
+- [ ] Setting Card layout to stack on desktop piles them there too
+- [ ] The Stack ledge slider changes the visible sliver
+- [ ] With a sticky site header, Stack offset from top clears it
+- [ ] Stacking still reads correctly with the card background left opaque, and
+      visibly breaks with a transparent one (expected; the control says so)
+- [ ] An Elementor container with overflow hidden above the widget does not
+      kill the pinning
+
 ### Motion
 
 - [ ] Scrolling the grid into view reveals the cards left to right in a

@@ -42,6 +42,9 @@
 	--eimp-gap: 20px;
 	--eimp-align: center;
 
+	--eimp-stack-ledge: 12px;
+	--eimp-stack-top: 0px;
+
 	--eimp-duration: 800ms;
 	--eimp-stagger: 90ms;
 	--eimp-rise: 24px;
@@ -59,10 +62,25 @@
 
 /* --------------------------------------------------------------- card --- */
 
+/*
+ * position is sticky rather than relative even when the cards are not stacking.
+ * A sticky box whose inset properties are all auto is laid out exactly as a
+ * relative one with no offset, so this costs nothing in grid mode -- and it
+ * means switching to the stacked layout is a change of `top` alone, which a
+ * single Elementor control can write per breakpoint. Toggling `position`
+ * itself would need `top` toggled in step, or a relative card would be shoved
+ * down the page by the ledge offset.
+ *
+ * The stacked `top` is written straight onto the card by the Card layout
+ * control, and must be: it multiplies --eimp-i, and a custom property holding
+ * that calc would have to be declared on the grid, where it would resolve the
+ * index once -- to its fallback -- and every card would pin at the same place.
+ */
 .eimp-card {
 	--eimp-accent: var(--eimp-primary);
 
-	position: relative;
+	position: sticky;
+	top: auto;
 	display: flex;
 	flex-direction: column;
 	align-items: var(--eimp-align);

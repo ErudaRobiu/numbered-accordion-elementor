@@ -434,6 +434,73 @@ class Impact_Grid_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_responsive_control(
+			'card_layout',
+			array(
+				'label'                => esc_html__( 'Card layout', 'numbered-accordion' ),
+				'description'          => esc_html__( 'Stacking pins each card while the next slides over it, leaving a ledge of the one beneath. It needs an opaque card background to read properly.', 'numbered-accordion' ),
+				'type'                 => Controls_Manager::SELECT,
+				'options'              => array(
+					'grid'  => esc_html__( 'Grid', 'numbered-accordion' ),
+					'stack' => esc_html__( 'Stack on scroll', 'numbered-accordion' ),
+				),
+				'default'              => 'grid',
+				'tablet_default'       => 'grid',
+				'mobile_default'       => 'stack',
+				/*
+				 * The whole behaviour is one `top` value. A stacked card pins
+				 * at its own index times the ledge; a grid card has top:auto,
+				 * which makes its sticky positioning a no-op. See the note on
+				 * .eimp-card in the stylesheet.
+				 *
+				 * Written onto the card rather than the grid on purpose. The
+				 * calc multiplies --eimp-i, which only exists per card, so
+				 * routing it through a custom property on the container would
+				 * resolve the index once, to its fallback of zero, and pin
+				 * every card at the same height.
+				 */
+				'selectors_dictionary' => array(
+					'grid'  => 'auto',
+					'stack' => 'calc(var(--eimp-stack-top) + var(--eimp-i, 0) * var(--eimp-stack-ledge))',
+				),
+				'selectors'            => array(
+					'{{WRAPPER}} .eimp-card' => 'top: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'stack_ledge',
+			array(
+				'label'       => esc_html__( 'Stack ledge', 'numbered-accordion' ),
+				'description' => esc_html__( 'How much of each buried card stays visible. Applies where Card layout is set to stack.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 60 ) ),
+				'default'     => array(
+					'unit' => 'px',
+					'size' => 12,
+				),
+				'selectors'   => array( '{{WRAPPER}} .eimp' => '--eimp-stack-ledge: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'stack_top',
+			array(
+				'label'       => esc_html__( 'Stack offset from top', 'numbered-accordion' ),
+				'description' => esc_html__( 'Clears a sticky site header, so the first card does not pin underneath it.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 200 ) ),
+				'default'     => array(
+					'unit' => 'px',
+					'size' => 0,
+				),
+				'selectors'   => array( '{{WRAPPER}} .eimp' => '--eimp-stack-top: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
 		$this->add_control(
 			'align',
 			array(

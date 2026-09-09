@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.1
+Stable tag: 2.2.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -92,9 +92,9 @@ error, and every duplicator hook is admin-side only.
 
 == Upgrade Notice ==
 
-= 2.1.1 =
-Fixes the Impact Grid icon width control, which stopped responding above the
-width of the uploaded file.
+= 2.2.0 =
+Impact Grid cards can now stack on scroll, and the icon width control works
+above the width of the uploaded file.
 
 = 2.1.0 =
 From 2.0.0, this adds an Impact Grid widget and changes nothing else. From
@@ -110,7 +110,12 @@ untouched, and nothing needs re-saving.
 
 == Changelog ==
 
-= 2.1.1 =
+= 2.2.0 =
+* New: Impact Grid cards can stack on scroll. Style > Layout > Card layout,
+  set per breakpoint: each card pins while the next slides over it, leaving a
+  ledge of the one beneath. Stacked on mobile by default, grid elsewhere, with
+  sliders for the ledge and for clearing a sticky site header. It is pure CSS,
+  so there is no scroll handler to stutter on a slow phone.
 * Fix: the Impact Grid's icon width control did nothing above a certain size.
   It set a maximum width, which can only shrink an image below its natural
   size, never enlarge it - so the slider stopped responding at the width of the

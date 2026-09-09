@@ -111,6 +111,15 @@ is left exactly as typed rather than counted to a value the widget guessed at.
 The count-up derives its thousands separators and decimal places from the string
 the editor typed, not from the visitor's locale.
 
+Stacking is one `top` value and nothing else. A card is `position: sticky` at
+all times -- a sticky box with `auto` insets lays out exactly like a relative
+one, so grid mode costs nothing -- and the Card layout control switches `top`
+between `auto` and a calc of the card's index times the ledge. That declaration
+has to land on the card, not the grid: the calc multiplies `--eimp-i`, which
+only exists per card, so routing it through a custom property on the container
+resolves the index once, to its fallback of zero, and pins every card at the
+same height. It looks like it works until you scroll.
+
 The icon width control sets `width`, not `max-width`. That is not a style
 preference: `max-width` on a replaced element with `width: auto` can only shrink
 it below its intrinsic size, so the control silently stopped responding above

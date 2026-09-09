@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-09 12:40+0100\n"
+"POT-Creation-Date: 2026-09-09 12:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -132,7 +132,7 @@ msgstr ""
 #: modules/accordion/widgets/class-numbered-accordion-widget.php:134
 #: modules/accordion/widgets/class-numbered-accordion-widget.php:536
 #: modules/impact/widgets/class-impact-grid-widget.php:169
-#: modules/impact/widgets/class-impact-grid-widget.php:655
+#: modules/impact/widgets/class-impact-grid-widget.php:722
 msgid "Title"
 msgstr ""
 
@@ -293,7 +293,7 @@ msgid "Divider"
 msgstr ""
 
 #: modules/accordion/widgets/class-numbered-accordion-widget.php:354
-#: modules/impact/widgets/class-impact-grid-widget.php:823
+#: modules/impact/widgets/class-impact-grid-widget.php:890
 msgid "Thickness"
 msgstr ""
 
@@ -302,10 +302,10 @@ msgstr ""
 #: modules/accordion/widgets/class-numbered-accordion-widget.php:507
 #: modules/accordion/widgets/class-numbered-accordion-widget.php:557
 #: modules/accordion/widgets/class-numbered-accordion-widget.php:614
-#: modules/impact/widgets/class-impact-grid-widget.php:678
-#: modules/impact/widgets/class-impact-grid-widget.php:793
-#: modules/impact/widgets/class-impact-grid-widget.php:813
-#: modules/impact/widgets/class-impact-grid-widget.php:859
+#: modules/impact/widgets/class-impact-grid-widget.php:745
+#: modules/impact/widgets/class-impact-grid-widget.php:860
+#: modules/impact/widgets/class-impact-grid-widget.php:880
+#: modules/impact/widgets/class-impact-grid-widget.php:926
 msgid "Colour"
 msgstr ""
 
@@ -345,7 +345,7 @@ msgid "Maximum width"
 msgstr ""
 
 #: modules/accordion/widgets/class-numbered-accordion-widget.php:646
-#: modules/impact/widgets/class-impact-grid-widget.php:939
+#: modules/impact/widgets/class-impact-grid-widget.php:1006
 msgid "Motion"
 msgstr ""
 
@@ -375,7 +375,7 @@ msgstr ""
 
 #: modules/impact/widgets/class-impact-grid-widget.php:146
 #: modules/impact/widgets/class-impact-grid-widget.php:257
-#: modules/impact/widgets/class-impact-grid-widget.php:876
+#: modules/impact/widgets/class-impact-grid-widget.php:943
 msgid "Checklist"
 msgstr ""
 
@@ -388,12 +388,12 @@ msgid "Both colours are set once, under Style → Accents."
 msgstr ""
 
 #: modules/impact/widgets/class-impact-grid-widget.php:159
-#: modules/impact/widgets/class-impact-grid-widget.php:574
+#: modules/impact/widgets/class-impact-grid-widget.php:641
 msgid "Primary"
 msgstr ""
 
 #: modules/impact/widgets/class-impact-grid-widget.php:160
-#: modules/impact/widgets/class-impact-grid-widget.php:584
+#: modules/impact/widgets/class-impact-grid-widget.php:651
 msgid "Secondary"
 msgstr ""
 
@@ -402,7 +402,7 @@ msgid "Card title"
 msgstr ""
 
 #: modules/impact/widgets/class-impact-grid-widget.php:180
-#: modules/impact/widgets/class-impact-grid-widget.php:696
+#: modules/impact/widgets/class-impact-grid-widget.php:763
 msgid "Icon"
 msgstr ""
 
@@ -429,7 +429,7 @@ msgid "Second unit"
 msgstr ""
 
 #: modules/impact/widgets/class-impact-grid-widget.php:242
-#: modules/impact/widgets/class-impact-grid-widget.php:838
+#: modules/impact/widgets/class-impact-grid-widget.php:905
 msgid "Caption"
 msgstr ""
 
@@ -527,132 +527,169 @@ msgid "Gap"
 msgstr ""
 
 #: modules/impact/widgets/class-impact-grid-widget.php:440
-msgid "Alignment"
+msgid "Card layout"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:441
+msgid ""
+"Stacking pins each card while the next slides over it, leaving a ledge of "
+"the one beneath. It needs an opaque card background to read properly."
 msgstr ""
 
 #: modules/impact/widgets/class-impact-grid-widget.php:444
-msgid "Left"
+msgid "Grid"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:448
-msgid "Centre"
-msgstr ""
-
-#: modules/impact/widgets/class-impact-grid-widget.php:467
-msgid "Card"
+#: modules/impact/widgets/class-impact-grid-widget.php:445
+msgid "Stack on scroll"
 msgstr ""
 
 #: modules/impact/widgets/class-impact-grid-widget.php:475
+msgid "Stack ledge"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:476
+msgid ""
+"How much of each buried card stays visible. Applies where Card layout is set "
+"to stack."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:491
+msgid "Stack offset from top"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:492
+msgid ""
+"Clears a sticky site header, so the first card does not pin underneath it."
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:507
+msgid "Alignment"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:511
+msgid "Left"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:515
+msgid "Centre"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:534
+msgid "Card"
+msgstr ""
+
+#: modules/impact/widgets/class-impact-grid-widget.php:542
 msgid "Background"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:485
+#: modules/impact/widgets/class-impact-grid-widget.php:552
 msgid "Padding"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:505
+#: modules/impact/widgets/class-impact-grid-widget.php:572
 msgid "Corner radius"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:520
+#: modules/impact/widgets/class-impact-grid-widget.php:587
 msgid "Border thickness"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:535
+#: modules/impact/widgets/class-impact-grid-widget.php:602
 msgid "Border strength"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:536
+#: modules/impact/widgets/class-impact-grid-widget.php:603
 msgid "How much of the card accent the border shows."
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:566
+#: modules/impact/widgets/class-impact-grid-widget.php:633
 msgid "Accents"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:601
+#: modules/impact/widgets/class-impact-grid-widget.php:668
 msgid "Number badge"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:623
+#: modules/impact/widgets/class-impact-grid-widget.php:690
 msgid "Number colour"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:633
+#: modules/impact/widgets/class-impact-grid-widget.php:700
 msgid "Diameter"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:679
-#: modules/impact/widgets/class-impact-grid-widget.php:794
-#: modules/impact/widgets/class-impact-grid-widget.php:907
+#: modules/impact/widgets/class-impact-grid-widget.php:746
+#: modules/impact/widgets/class-impact-grid-widget.php:861
+#: modules/impact/widgets/class-impact-grid-widget.php:974
 msgid "Leave empty to use each card's accent."
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:704
+#: modules/impact/widgets/class-impact-grid-widget.php:771
 msgid "Width"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:722
+#: modules/impact/widgets/class-impact-grid-widget.php:789
 msgid "Space around"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:744
+#: modules/impact/widgets/class-impact-grid-widget.php:811
 msgid "Figures"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:767
+#: modules/impact/widgets/class-impact-grid-widget.php:834
 msgid "Unit typography"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:780
+#: modules/impact/widgets/class-impact-grid-widget.php:847
 msgid "Second figure typography"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:804
+#: modules/impact/widgets/class-impact-grid-widget.php:871
 msgid "Rule"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:896
+#: modules/impact/widgets/class-impact-grid-widget.php:963
 msgid "Text colour"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:906
+#: modules/impact/widgets/class-impact-grid-widget.php:973
 msgid "Tick colour"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:917
+#: modules/impact/widgets/class-impact-grid-widget.php:984
 msgid "Space between items"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:947
+#: modules/impact/widgets/class-impact-grid-widget.php:1014
 msgid "Reveal duration (ms)"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:962
+#: modules/impact/widgets/class-impact-grid-widget.php:1029
 msgid "Stagger between cards (ms)"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:963
+#: modules/impact/widgets/class-impact-grid-widget.php:1030
 msgid "Each card waits this much longer than the one before it."
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:978
+#: modules/impact/widgets/class-impact-grid-widget.php:1045
 msgid "Rise distance"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:993
+#: modules/impact/widgets/class-impact-grid-widget.php:1060
 msgid "Count-up duration (ms)"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:994
+#: modules/impact/widgets/class-impact-grid-widget.php:1061
 msgid "Set to zero to print figures without counting."
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:1009
+#: modules/impact/widgets/class-impact-grid-widget.php:1076
 msgid "Hover lift"
 msgstr ""
 
-#: modules/impact/widgets/class-impact-grid-widget.php:1025
+#: modules/impact/widgets/class-impact-grid-widget.php:1092
 msgid ""
 "Motion is automatically disabled for visitors who have \"reduce motion\" "
 "enabled in their operating system: cards appear in place and figures print "
