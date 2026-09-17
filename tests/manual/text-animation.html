@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eruda text animations - harness</title>
+<link rel="stylesheet" href="../../modules/motion/assets/css/text-animation.css">
+<style>
+	body { font: 16px/1.5 system-ui, sans-serif; margin: 0; padding: 0 24px 80vh; max-width: 860px; }
+	h2 { font-size: clamp(28px, 6vw, 56px); line-height: 1.05; margin: 0; }
+	.case { padding: 40vh 0 0; border-bottom: 1px solid #eee; }
+	.case > p.note { font-size: 13px; color: #666; margin: 8px 0 0; }
+	.controls { position: fixed; top: 0; right: 0; background: #111; color: #fff; padding: 8px 12px; font-size: 12px; z-index: 10; }
+</style>
+</head>
+<body>
+
+<div class="controls">scroll down &mdash; each block animates once</div>
+
+<div class="case">
+	<div class="elementor-element eanm-preset-words-up eanm-ease-out-expo eanm-trigger-scroll">
+		<div class="elementor-widget-container">
+			<h2 class="elementor-heading-title">Words rising gently</h2>
+		</div>
+	</div>
+	<p class="note">words-up &mdash; check descenders on "g" and "y" are not clipped</p>
+</div>
+
+<div class="case">
+	<div class="elementor-element eanm-preset-chars-cascade eanm-ease-out-expo eanm-trigger-scroll">
+		<div class="elementor-widget-container">
+			<h2 class="elementor-heading-title">Every single letter arrives</h2>
+		</div>
+	</div>
+	<p class="note">chars-cascade</p>
+</div>
+
+<div class="case">
+	<div class="elementor-element eanm-preset-chars-flip eanm-ease-out-back eanm-trigger-scroll">
+		<div class="elementor-widget-container">
+			<h2 class="elementor-heading-title">Flipping letters</h2>
+		</div>
+	</div>
+	<p class="note">chars-flip, overshoot easing</p>
+</div>
+
+<div class="case">
+	<div class="elementor-element eanm-preset-words-up eanm-ease-out-expo eanm-trigger-scroll">
+		<div class="elementor-widget-container">
+			<h2 class="elementor-heading-title">Keeps <strong>bold</strong> and <a href="#x">a working link</a><br>across a manual break</h2>
+		</div>
+	</div>
+	<p class="note">markup preservation &mdash; the bold must still be bold, the link must still be clickable, and the break must still break</p>
+</div>
+
+<div class="case">
+	<div class="elementor-element eanm-preset-lines-mask eanm-ease-out-expo eanm-trigger-scroll">
+		<div class="elementor-widget-container">
+			<h2 class="elementor-heading-title">A longer headline with <strong>bold words set inside it</strong> that wraps onto several lines so the line grouping has something to group</h2>
+		</div>
+	</div>
+	<p class="note">lines-mask &mdash; resize the window and scroll back; lines must regroup, and the bold must group with its neighbours</p>
+</div>
+
+<div class="case">
+	<div class="elementor-element eanm-preset-blur-in eanm-ease-out-quart eanm-trigger-scroll">
+		<div class="elementor-widget-container">
+			<h2 class="elementor-heading-title">Blurring into focus</h2>
+		</div>
+	</div>
+	<p class="note">blur-in &mdash; splits nothing; inspect and confirm there are no spans inside</p>
+</div>
+
+<div class="case">
+	<div class="elementor-element eanm-preset-scale-pop eanm-ease-out-back eanm-trigger-scroll eanm-replay-yes">
+		<div class="elementor-widget-container">
+			<h2 class="elementor-heading-title">Pops back every time</h2>
+		</div>
+	</div>
+	<p class="note">scale-pop with replay on &mdash; scroll past and back, it must animate again</p>
+</div>
+
+<div class="case">
+	<div class="elementor-element eanm-preset-slide-left eanm-ease-out-expo eanm-trigger-scroll">
+		<div class="elementor-widget-container">
+			<p>A text editor holds more than one paragraph.</p>
+			<p>The stagger carries on across both of them rather than restarting.</p>
+		</div>
+	</div>
+	<p class="note">slide-left on a multi-paragraph text editor</p>
+</div>
+
+<script src="../../modules/motion/assets/js/text-animation.js"></script>
+</body>
+</html>
