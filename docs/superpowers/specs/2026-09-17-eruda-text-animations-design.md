@@ -8,10 +8,10 @@ Status: approved
 Add a fourth module, `motion`, that animates text as it enters the viewport:
 words rising out of a mask, characters cascading, lines revealing behind a clip.
 
-The animations apply to text that already exists on the page. Selecting any
-Elementor widget — a native Heading, a Text Editor, a Button, a third-party
-widget — and opening its Advanced tab reveals an "Eruda Text Animation" section.
-No widget is added, and no page needs rebuilding to use this.
+The animations apply to text that already exists on the page. Selecting a
+Heading or a Text Editor widget and opening its Advanced tab reveals an "Eruda
+Text Animation" section. No widget is added, and no page needs rebuilding to use
+this.
 
 ## Constraints
 
@@ -93,12 +93,45 @@ add_action(
 );
 ```
 
-`common` covers every widget, native and third-party. The section is registered
-on the Advanced tab.
+`common` fires for every widget, so the callback returns early unless the widget
+is one whose content is plain text:
 
-Containers and sections are deliberately out of scope. Text lives in widgets;
-animating a container would mean animating whatever text happens to be nested
-inside it, which is a different and much vaguer feature.
+```php
+public function inject( $element, $args ) {
+    if ( ! $element instanceof \Elementor\Widget_Base ) {
+        return;
+    }
+
+    if ( ! in_array( $element->get_name(), self::supported_widgets(), true ) ) {
+        return;
+    }
+
+    // start_controls_section( 'eanm_section', [ 'tab' => TAB_ADVANCED ] ) ...
+}
+
+public static function supported_widgets() {
+    return apply_filters(
+        'eruda_motion_supported_widgets',
+        array( 'heading', 'text-editor' )
+    );
+}
+```
+
+The `common` hook is kept in preference to per-widget hooks
+(`elementor/element/heading/section_title/after_section_end` and friends)
+because those attach relative to a named section of that specific widget, which
+would land the controls on the Content tab and break if Elementor ever renames
+the section. The `common` hook puts the section on the Advanced tab of every
+supported widget, from one code path, with one list to extend.
+
+The list is the whole extension point: a site that wants the controls on a
+Button, or on a theme-builder Post Title, adds the widget name through the
+filter and nothing else changes. Everything downstream — splitting, triggering,
+the presets — is widget-agnostic already.
+
+Buttons, Icon Boxes and containers are out of scope by default. A widget that
+holds several distinct pieces of text raises a question this feature has no good
+answer to: whether the title and the description are one staggered run or two.
 
 ### How values reach the DOM
 
@@ -130,14 +163,13 @@ The module therefore writes no markup and no inline styles at all.
 | Easing | `eanm_ease` | select, 5 named curves | `out-expo` |
 | Start at | `eanm_threshold` | slider, 0–100% | 20 |
 | Replay on re-entry | `eanm_replay` | switcher | off |
-| Target selector | `eanm_target` | text, advanced | empty |
 
 Every control except `eanm_preset` declares
 `'condition' => array( 'eanm_preset!' => 'none' )`, so the section stays a single
 dropdown until it is actually in use.
 
-`eanm_target` is the escape hatch for a widget holding several pieces of text
-(an Icon Box, a Price Table). Empty means the module picks targets itself.
+There is deliberately no target-selector control. It existed to disambiguate
+widgets holding several pieces of text, and those are no longer supported.
 
 ## Presets
 
@@ -182,11 +214,17 @@ stagger sweeps the full heading rather than restarting inside every `<strong>`.
 
 ### Choosing targets
 
-With `eanm_target` set, `querySelectorAll` within the wrapper.
+`h1, h2, h3, h4, h5, h6, p, li, blockquote` within the widget wrapper, falling
+back to the wrapper's container element when none match.
 
-Otherwise: `h1, h2, h3, h4, h5, h6, p, li, blockquote, .elementor-button-text`
-within the wrapper, falling back to the wrapper itself when none match and it
-holds text directly.
+The fallback is what covers a Heading, whose title is rendered as an `<a>` when
+linked rather than as a heading tag, and a Text Editor holding a bare string
+with no `<p>` around it.
+
+A Text Editor with several paragraphs animates them as one continuous run:
+indices carry on across blocks rather than restarting, so the stagger sweeps the
+whole widget top to bottom. On a long passage with a per-character preset that
+is slow by construction, and the fix is a smaller stagger.
 
 ### Idempotency
 
@@ -248,6 +286,8 @@ re-render.
 - Every numeric control declares a `selectors` entry, and each one names a CSS
   custom property the stylesheet actually reads
 - Every control but `eanm_preset` carries the `eanm_preset!` condition
+- `supported_widgets()` returns `heading` and `text-editor`, and survives a
+  filter that adds to it or empties it entirely
 
 The class on the wrapper is Elementor's to write, not this module's, so there is
 nothing of ours to unit-test there. It is covered in QA instead.
@@ -255,8 +295,11 @@ nothing of ours to unit-test there. It is covered in QA instead.
 ### `docs/QA.md`
 
 - Settings lists four modules; unchecking Text Animations removes the Advanced
-  section from every widget
+  section from the Heading and Text Editor widgets
+- The section appears on Heading and Text Editor, and on nothing else: Button,
+  Icon Box, Image Box and a container all show an unchanged Advanced tab
 - A native Heading with Words Up animates on the live page and in the editor
+- A Text Editor of three paragraphs staggers continuously across all three
 - A heading containing `<strong>` and `<a>` keeps both, and the link still works
 - A heading containing `<br>` still breaks in the same place
 - Text stays selectable and copyable after splitting
@@ -276,6 +319,9 @@ and the changelog updated. `bin/release.sh` as usual.
 - A dedicated "Animated Text" widget. The controls work on the native Heading;
   a second way to do the same thing would need its own typography controls, its
   own QA, and could not be applied to text that already exists.
+- Any widget beyond Heading and Text Editor. Composite widgets need an answer
+  for how their several pieces of text relate, and the `eruda_motion_supported_widgets`
+  filter is there for a site that has one.
 - Scroll-scrubbed animation, which is what would have justified GSAP.
 - Animating containers and sections.
 - Exit animations.
