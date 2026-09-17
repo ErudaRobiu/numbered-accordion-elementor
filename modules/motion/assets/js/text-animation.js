@@ -393,6 +393,19 @@
 
 			el.setAttribute( READY_ATTR, '' );
 
+			// Commit the pre-animation state before anything can flip it.
+			//
+			// Without this, an element already on screen can have both
+			// attributes set inside one style recalculation: the browser then
+			// only ever computes the finished state, no transition runs, and
+			// the text simply appears. It shows up worst on the presets that
+			// split nothing, where the target carries the transition itself
+			// and there is no freshly-inserted span to force the work.
+			//
+			// Reading a layout property is what forces that recalculation.
+			// Once per animated element, on a page that has some.
+			void el.offsetWidth;
+
 			if ( onLoad ) {
 				window.requestAnimationFrame( function () {
 					el.setAttribute( IN_ATTR, '' );

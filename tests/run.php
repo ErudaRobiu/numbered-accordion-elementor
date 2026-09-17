@@ -339,10 +339,10 @@ check( 'a non-array yields no hint', '', Impact_Content::icon_sizes_attr( null )
 
 $presets = Motion_Presets::all();
 
-check( 'nine presets including none', 9, count( $presets ) );
+check( 'ten presets including none', 10, count( $presets ) );
 check( 'none is present', true, isset( $presets['none'] ) );
 
-foreach ( array( 'words-up', 'words-fade', 'chars-cascade', 'chars-flip', 'lines-mask', 'blur-in', 'scale-pop', 'slide-left' ) as $value ) {
+foreach ( array( 'fade-in', 'words-up', 'words-fade', 'chars-cascade', 'chars-flip', 'lines-mask', 'blur-in', 'scale-pop', 'slide-left' ) as $value ) {
 	check( "preset {$value} exists", true, isset( $presets[ $value ] ) );
 }
 
@@ -364,6 +364,17 @@ check( 'words-up splits by word', Motion_Presets::SPLIT_WORDS, Motion_Presets::s
 check( 'chars-flip splits by character', Motion_Presets::SPLIT_CHARS, Motion_Presets::split_mode( 'chars-flip' ) );
 check( 'lines-mask splits by line', Motion_Presets::SPLIT_LINES, Motion_Presets::split_mode( 'lines-mask' ) );
 check( 'blur-in does not split', Motion_Presets::SPLIT_NONE, Motion_Presets::split_mode( 'blur-in' ) );
+check( 'fade-in does not split', Motion_Presets::SPLIT_NONE, Motion_Presets::split_mode( 'fade-in' ) );
+
+// Direction only means something for a preset that moves as one block.
+check( 'the directional presets', array( 'fade-in', 'words-fade' ), Motion_Presets::directional() );
+check( 'five directions', 5, count( Motion_Presets::directions() ) );
+check( 'the default direction exists', true, isset( Motion_Presets::directions()['up'] ) );
+check( 'a direction for no movement exists', true, isset( Motion_Presets::directions()['none'] ) );
+
+foreach ( Motion_Presets::directional() as $value ) {
+	check( "the directional preset {$value} is a real preset", true, Motion_Presets::is_valid( $value ) );
+}
 
 // An unknown value must degrade to "do nothing", never to a split mode.
 check( 'an unknown preset does not split', Motion_Presets::SPLIT_NONE, Motion_Presets::split_mode( 'nonsense' ) );
@@ -438,7 +449,7 @@ $controls = Motion_Controls::control_definitions();
 
 check(
 	'the section carries exactly the frozen control ids',
-	array( 'eanm_preset', 'eanm_trigger', 'eanm_duration', 'eanm_stagger', 'eanm_delay', 'eanm_ease', 'eanm_threshold', 'eanm_replay' ),
+	array( 'eanm_preset', 'eanm_trigger', 'eanm_direction', 'eanm_distance', 'eanm_duration', 'eanm_stagger', 'eanm_delay', 'eanm_ease', 'eanm_threshold', 'eanm_replay' ),
 	array_keys( $controls )
 );
 
@@ -452,6 +463,17 @@ check( 'the easing control offers every easing', array_keys( Motion_Presets::eas
 foreach ( $controls as $id => $definition ) {
 	if ( 'eanm_preset' === $id ) {
 		check( 'the preset control is never conditional', false, isset( $definition['condition'] ) );
+		continue;
+	}
+
+	// The directional pair names the presets it serves outright, which is a
+	// stricter condition than "anything but none".
+	if ( isset( $definition['condition']['eanm_preset'] ) ) {
+		check(
+			"{$id} names the presets it applies to",
+			true,
+			is_array( $definition['condition']['eanm_preset'] ) && ! in_array( 'none', $definition['condition']['eanm_preset'], true )
+		);
 		continue;
 	}
 
@@ -508,6 +530,18 @@ check( 'stagger defaults to 60ms', 60, $controls['eanm_stagger']['default']['siz
 check( 'delay defaults to none', 0, $controls['eanm_delay']['default']['size'] );
 check( 'threshold defaults to 20 per cent', 20, $controls['eanm_threshold']['default']['size'] );
 check( 'replay is off by default', '', $controls['eanm_replay']['default'] );
+
+check( 'direction offers every direction', array_keys( Motion_Presets::directions() ), array_keys( $controls['eanm_direction']['options'] ) );
+check( 'direction writes the wrapper class', 'eanm-dir-', $controls['eanm_direction']['prefix_class'] );
+check( 'direction defaults to coming from below', 'up', $controls['eanm_direction']['default'] );
+check( 'travel writes --eanm-distance', array( '{{WRAPPER}}' => '--eanm-distance: {{SIZE}}px;' ), $controls['eanm_distance']['selectors'] );
+check( 'travel defaults to 24px', 24, $controls['eanm_distance']['default']['size'] );
+
+// Both are shown only for the presets that can use them, and travel is
+// pointless once the direction is "no movement".
+check( 'direction is shown only for the directional presets', Motion_Presets::directional(), $controls['eanm_direction']['condition']['eanm_preset'] );
+check( 'travel is shown only for the directional presets', Motion_Presets::directional(), $controls['eanm_distance']['condition']['eanm_preset'] );
+check( 'travel hides when nothing moves', 'none', $controls['eanm_distance']['condition']['eanm_direction!'] );
 
 /* ------------------------------------------------- Toolkit registry --- */
 

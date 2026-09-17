@@ -128,6 +128,35 @@ final class Motion_Controls {
 				'render_type'  => 'template',
 				'condition'    => $active,
 			),
+			'eanm_direction' => array(
+				'label'        => esc_html__( 'Comes from', 'numbered-accordion' ),
+				'type'         => 'select',
+				'default'      => 'up',
+				'options'      => Motion_Presets::directions(),
+				'prefix_class' => 'eanm-dir-',
+				'condition'    => array( 'eanm_preset' => Motion_Presets::directional() ),
+			),
+			'eanm_distance'  => array(
+				'label'      => esc_html__( 'Travel', 'numbered-accordion' ),
+				'type'       => 'slider',
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min'  => 0,
+						'max'  => 200,
+						'step' => 2,
+					),
+				),
+				'default'    => array(
+					'unit' => 'px',
+					'size' => 24,
+				),
+				'selectors'  => array( '{{WRAPPER}}' => '--eanm-distance: {{SIZE}}px;' ),
+				'condition'  => array(
+					'eanm_preset'    => Motion_Presets::directional(),
+					'eanm_direction!' => 'none',
+				),
+			),
 			'eanm_duration'  => array(
 				'label'      => esc_html__( 'Duration', 'numbered-accordion' ),
 				'type'       => 'slider',

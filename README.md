@@ -142,9 +142,16 @@ and Text Editor widgets. Pick a preset and the widget's existing text animates
 as it scrolls into view — nothing is retyped, and a page built before this
 module shipped can use it without being rebuilt.
 
-Eight presets: words up, words fade, characters cascade, characters flip, lines
-reveal, blur in, scale pop and slide in. Alongside them: duration, stagger,
-delay, easing, how far into view it starts, and whether it replays every time.
+Nine presets: fade in, words up, words fade, characters cascade, characters
+flip, lines reveal, blur in, scale pop and slide in. Alongside them: duration,
+stagger, delay, easing, how far into view it starts, and whether it replays
+every time.
+
+Fade In and Words Fade also take a direction and a travel distance. Directions
+are named for where the text comes **from** — "From the left" rather than "Fade
+left", which never says which end it starts at. The presets read `--eanm-dx`
+and `--eanm-dy` rather than hard-coding an axis, so one pair of rules serves
+every direction.
 
 Three things are worth knowing before changing any of it.
 
@@ -157,6 +164,19 @@ section is silently never added. `elementor/element/after_section_end` fires on
 the real widget, so the guard works there; the section is added the first time
 a permitted widget closes any section, and a per-element flag stops it being
 added again.
+
+**Commit the start state before flipping it.** A preset that splits nothing —
+Fade In, Blur In — puts the transition on the target element itself, which
+already exists in the HTML. Setting `data-eanm-ready` and `data-eanm-in` inside
+one style recalculation means the browser only ever computes the finished
+state: no transition runs and the text just appears. The script reads
+`offsetWidth` between the two to force the recalculation. The split presets
+were partly shielded by their spans being freshly inserted; that is luck, not
+design, so the fix applies to all of them.
+
+**Every `var()` needs a fallback.** A custom property that fails to resolve
+makes the entire declaration invalid, so `transition-duration: var(--eanm-duration)`
+silently becomes `0s` and the animation looks broken rather than mistuned.
 
 **It writes no markup.** Every value reaches the DOM through Elementor's own
 `prefix_class` and `selectors`, which Elementor applies live in the editor as

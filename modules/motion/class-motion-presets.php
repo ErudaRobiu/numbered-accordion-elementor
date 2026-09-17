@@ -43,6 +43,10 @@ final class Motion_Presets {
 				'label' => esc_html__( 'None', 'numbered-accordion' ),
 				'split' => self::SPLIT_NONE,
 			),
+			'fade-in'       => array(
+				'label' => esc_html__( 'Fade In', 'numbered-accordion' ),
+				'split' => self::SPLIT_NONE,
+			),
 			'words-up'      => array(
 				'label' => esc_html__( 'Words Up', 'numbered-accordion' ),
 				'split' => self::SPLIT_WORDS,
@@ -125,6 +129,33 @@ final class Motion_Presets {
 		}
 
 		return array_key_exists( $value, self::all() );
+	}
+
+	/**
+	 * Presets that move as one block and so take a direction.
+	 *
+	 * @return string[]
+	 */
+	public static function directional() {
+		return array( 'fade-in', 'words-fade' );
+	}
+
+	/**
+	 * Where the text travels from, as a SELECT's options.
+	 *
+	 * Named for the origin rather than the destination: "Fade Left" is
+	 * ambiguous about which end it starts at, "From the left" is not.
+	 *
+	 * @return array<string, string>
+	 */
+	public static function directions() {
+		return array(
+			'up'    => esc_html__( 'From below', 'numbered-accordion' ),
+			'down'  => esc_html__( 'From above', 'numbered-accordion' ),
+			'left'  => esc_html__( 'From the left', 'numbered-accordion' ),
+			'right' => esc_html__( 'From the right', 'numbered-accordion' ),
+			'none'  => esc_html__( 'No movement', 'numbered-accordion' ),
+		);
 	}
 
 	/**

@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.3.1
+Stable tag: 2.3.2
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,20 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.3.2 =
+* New "Fade In" preset: the plain one, the whole block at once, with a
+  direction control (from below, above, left, right, or no movement) and a
+  travel distance.
+* "Words Fade" takes the same direction and travel controls.
+* Fix: Blur In could finish before it started. An element already on screen
+  could have its start and end states applied inside one style recalculation,
+  so no transition ran and the text simply appeared. The start state is now
+  committed first. This affected the presets that split nothing hardest, Blur
+  In among them.
+* Fix: every CSS custom property now carries a fallback. One that failed to
+  resolve invalidated the whole declaration, which dropped transition-duration
+  to zero and looked exactly like a broken animation.
 
 = 2.3.1 =
 * Fix: the Eruda Text Animation controls did not appear in Elementor at all.
