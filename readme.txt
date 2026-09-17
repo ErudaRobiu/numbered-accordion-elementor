@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.3.0
+Stable tag: 2.3.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,13 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.3.1 =
+* Fix: the Eruda Text Animation controls did not appear in Elementor at all.
+  They were registered on a hook that fires once on Elementor's shared common
+  stack rather than on each widget, so the widget check never matched and the
+  section was never added. The controls now live on the Style tab of the
+  Heading and Text Editor widgets.
 
 = 2.3.0 =
 * New Text Animations module: an "Eruda Text Animation" section on the Advanced

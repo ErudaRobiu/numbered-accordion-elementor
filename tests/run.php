@@ -421,6 +421,19 @@ unset( $GLOBALS['eruda_test_filters']['eruda_motion_supported_widgets'] );
 
 check( 'the defaults come back once the filter is gone', true, Motion_Controls::is_supported( 'heading' ) );
 
+// The 2.3.0 regression. The common controls stack is not a widget: Elementor
+// registers it once, named 'common', and merges it into everything. A guard
+// that sees that name must not conclude it is looking at a Heading -- and the
+// hook it arrived on must be one that fires on the real widget.
+foreach ( array( 'common', 'common-base', 'common-optimized' ) as $stack ) {
+	check( "the {$stack} stack is not mistaken for a widget", false, Motion_Controls::is_supported( $stack ) );
+}
+
+check( 'a supported widget is injected once', true, Motion_Controls::should_inject( 'heading', false ) );
+check( 'the same widget is never injected twice', false, Motion_Controls::should_inject( 'heading', true ) );
+check( 'an unsupported widget is never injected', false, Motion_Controls::should_inject( 'button', false ) );
+check( 'the common stack is never injected', false, Motion_Controls::should_inject( 'common', false ) );
+
 $controls = Motion_Controls::control_definitions();
 
 check(

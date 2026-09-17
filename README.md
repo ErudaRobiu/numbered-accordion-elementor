@@ -137,7 +137,7 @@ list that lost text would look like a bug in the widget.
 
 ### Text animations
 
-Adds an **Eruda Text Animation** section to the **Advanced** tab of the Heading
+Adds an **Eruda Text Animation** section to the **Style** tab of the Heading
 and Text Editor widgets. Pick a preset and the widget's existing text animates
 as it scrolls into view — nothing is retyped, and a page built before this
 module shipped can use it without being rebuilt.
@@ -147,6 +147,16 @@ reveal, blur in, scale pop and slide in. Alongside them: duration, stagger,
 delay, easing, how far into view it starts, and whether it replays every time.
 
 Three things are worth knowing before changing any of it.
+
+**Use the generic section hook, never the common one.** This is what 2.3.0 got
+wrong, and it made the whole feature invisible. `elementor/element/common/…`
+does not fire per widget: Elementor registers the common controls once, on a
+shared `Widget_Common` stack whose `get_name()` is `'common'`, then merges them
+into every widget. A widget-name guard on that hook matches nothing, and the
+section is silently never added. `elementor/element/after_section_end` fires on
+the real widget, so the guard works there; the section is added the first time
+a permitted widget closes any section, and a per-element flag stops it being
+added again.
 
 **It writes no markup.** Every value reaches the DOM through Elementor's own
 `prefix_class` and `selectors`, which Elementor applies live in the editor as
@@ -166,8 +176,9 @@ could make content disappear.
 
 **Two widgets only, by design.** A composite widget like an Icon Box raises a
 question the feature has no good answer to: whether its title and description
-are one staggered run or two. Everything downstream is widget-agnostic, so a
-site that wants the controls elsewhere adds a name to the list:
+are one staggered run or two. Everything downstream is widget-agnostic, and the
+hook needs no per-widget anchor, so a site that wants the controls elsewhere
+adds a name to the list and nothing else changes:
 
 ```php
 // Offer the animation controls on the Button widget too.

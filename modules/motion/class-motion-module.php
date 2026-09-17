@@ -119,7 +119,11 @@ final class Motion_Module implements Module {
 		add_action( 'elementor/frontend/after_register_scripts', array( $this, 'register_scripts' ) );
 
 		$controls = new Motion_Controls();
-		add_action( 'elementor/element/common/_section_style/after_section_end', array( $controls, 'inject' ), 10, 2 );
+
+		// The generic per-section hook, not the common one: common controls
+		// are registered once on a shared stack and merged into every widget,
+		// so a widget-name guard there never matches. See Motion_Controls.
+		add_action( 'elementor/element/after_section_end', array( $controls, 'inject' ), 10, 3 );
 
 		// Front end: load nothing until a widget actually asks for it.
 		add_action( 'elementor/frontend/before_render', array( $this, 'maybe_enqueue' ) );

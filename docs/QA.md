@@ -136,11 +136,17 @@ The parsing, the figure detection and the numbering are covered by
 
 ## Text animations
 
-- [ ] Unchecking Text Animations removes the Advanced section from the Heading
-      and Text Editor widgets
+- [ ] **The section is actually there.** Select a Heading, open **Style**, and
+      find "Eruda Text Animation". This is the 2.3.0 regression: the controls
+      were registered on a hook that never fires per widget, so the feature
+      shipped invisible. Check this first, on every release that touches the
+      hook
+- [ ] Unchecking Text Animations removes the Style section from the Heading and
+      Text Editor widgets
 - [ ] The section appears on Heading and Text Editor, and on nothing else:
       Button, Icon Box, Image Box and a container all show an unchanged
-      Advanced tab
+      Style tab
+- [ ] The section appears exactly once on a widget, not repeated
 - [ ] A native Heading with Words Up animates on the live page and in the editor
 - [ ] Changing the preset in the editor re-splits and animates the new way
 - [ ] Dragging the Stagger slider changes the timing without a re-render

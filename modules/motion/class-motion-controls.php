@@ -14,18 +14,43 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Adds an "Eruda Text Animation" section to the Advanced tab of the widgets
- * whose content is a single block of plain text.
+ * Adds an "Eruda Text Animation" section to the Style tab of the widgets whose
+ * content is a single block of plain text.
  *
  * The module writes no markup and no inline styles. Every value reaches the
  * DOM through Elementor's own prefix_class and selectors, which Elementor
  * applies live in the editor as well as on the front end -- a render-time
  * attribute would never appear on a widget with a content_template(), and the
  * native Heading has one.
+ *
+ * A note on the hook, because the obvious one is wrong.
+ *
+ * 2.3.0 hooked elementor/element/common/_section_style/after_section_end and
+ * filtered it by widget name. That hook never fires per widget: Elementor
+ * registers the common controls once, on a shared Widget_Common stack whose
+ * get_name() is 'common', and merges them into every widget afterwards. The
+ * guard rejected every call and the section was never added to anything.
+ *
+ * So this hooks the generic per-section hook instead, which does fire on the
+ * real widget, and adds the section the first time it sees one the list
+ * allows. The first section end is used as the anchor because it is the only
+ * one every widget is guaranteed to have -- the tab the section lands on is
+ * declared, not inherited from the anchor.
  */
 final class Motion_Controls {
 
 	const SECTION_ID = 'eanm_section';
+
+	/**
+	 * Elements already given the section this request, by object id.
+	 *
+	 * Controls are registered once per widget type, but the generic hook fires
+	 * for every section that widget closes, so without this the section would
+	 * be added several times over and Elementor would die on the duplicate.
+	 *
+	 * @var array<int, bool>
+	 */
+	private static $injected = array();
 
 	/**
 	 * Which widgets get the section.
@@ -200,28 +225,51 @@ final class Motion_Controls {
 	}
 
 	/**
+	 * Should this element get the section now?
+	 *
+	 * Pure, so the guard that 2.3.0 got wrong is covered by the test suite.
+	 *
+	 * @param mixed $name Widget name, or whatever get_name() returned.
+	 * @param bool  $done Has this element already been given the section?
+	 * @return bool
+	 */
+	public static function should_inject( $name, $done ) {
+		if ( $done ) {
+			return false;
+		}
+
+		return self::is_supported( $name );
+	}
+
+	/**
 	 * Register the section on a widget.
 	 *
-	 * Hooked to elementor/element/common/_section_style/after_section_end,
-	 * which fires for every widget, so the guard does the selecting.
+	 * Hooked to elementor/element/after_section_end, which fires on the real
+	 * widget for every section it closes. See the note on this class for why
+	 * the common hook cannot be used here.
 	 *
-	 * @param mixed $element Element being built.
-	 * @param array $args    Section arguments.
+	 * @param mixed  $element    Element being built.
+	 * @param string $section_id Section that just ended.
+	 * @param array  $args       Section arguments.
 	 */
-	public function inject( $element, $args ) {
+	public function inject( $element, $section_id = '', $args = array() ) {
 		if ( ! $element instanceof \Elementor\Widget_Base ) {
 			return;
 		}
 
-		if ( ! self::is_supported( $element->get_name() ) ) {
+		$key = spl_object_id( $element );
+
+		if ( ! self::should_inject( $element->get_name(), isset( self::$injected[ $key ] ) ) ) {
 			return;
 		}
+
+		self::$injected[ $key ] = true;
 
 		$element->start_controls_section(
 			self::SECTION_ID,
 			array(
 				'label' => esc_html__( 'Eruda Text Animation', 'numbered-accordion' ),
-				'tab'   => Controls_Manager::TAB_ADVANCED,
+				'tab'   => Controls_Manager::TAB_STYLE,
 			)
 		);
 
