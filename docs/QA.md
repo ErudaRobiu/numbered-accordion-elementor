@@ -20,7 +20,7 @@ The 2.0.0 rebrand is display-only, and this is the part most worth proving.
 
 ## Modules and settings
 
-- [ ] **Settings → Eruda Toolkit** lists all three modules, all checked
+- [ ] **Settings → Eruda Toolkit** lists all four modules, all checked
 - [ ] Unchecking Duplicate Pages and saving removes the Duplicate row action
 - [ ] Unchecking Numbered Accordion and saving removes the widget from the
       Elementor panel
@@ -133,3 +133,37 @@ The parsing, the figure detection and the numbering are covered by
 - [ ] The CSS and JS load only on pages carrying the widget
 - [ ] A screen reader reads each figure once, at its final value, and does not
       read a mid-animation number
+
+## Text animations
+
+- [ ] Unchecking Text Animations removes the Advanced section from the Heading
+      and Text Editor widgets
+- [ ] The section appears on Heading and Text Editor, and on nothing else:
+      Button, Icon Box, Image Box and a container all show an unchanged
+      Advanced tab
+- [ ] A native Heading with Words Up animates on the live page and in the editor
+- [ ] Changing the preset in the editor re-splits and animates the new way
+- [ ] Dragging the Stagger slider changes the timing without a re-render
+- [ ] Setting Starts to "On page load" hides "Starts at" and "Replay every time"
+- [ ] A Text Editor of three paragraphs staggers continuously across all three,
+      sweeping top to bottom rather than each paragraph restarting
+- [ ] A heading containing `<strong>` and `<a>` keeps both, and the link works
+- [ ] A heading containing `<br>` still breaks in the same place
+- [ ] Text stays selectable, and copies with normal single spaces
+- [ ] Descenders (the tails on g, y, p) are not clipped by a masked preset
+- [ ] Lines Reveal groups correctly, and regroups after a resize from desktop
+      width to mobile width
+- [ ] Lines Reveal on a heading with `<strong>` mid-line groups the bold words
+      with their neighbours rather than on a line of their own
+- [ ] With JavaScript disabled, every animated heading renders plainly and
+      completely
+- [ ] With Reduce Motion on in the OS, nothing splits and nothing moves
+- [ ] A page with no animated widget loads neither `text-animation.css` nor
+      `text-animation.js`
+- [ ] A 1.0.x-era accordion page is unaffected
+
+Everything above the Lines Reveal items, plus the markup, Reduce Motion and
+trigger behaviour, is covered headlessly by the jsdom harness described in
+`docs/superpowers/plans/2026-09-17-eruda-text-animations.md`. What genuinely
+needs a browser is line grouping (jsdom reports every `offsetTop` as 0), the
+descender clipping, and anything visual.

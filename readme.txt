@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.2.0
+Stable tag: 2.3.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,17 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.3.0 =
+* New Text Animations module: an "Eruda Text Animation" section on the Advanced
+  tab of the Heading and Text Editor widgets.
+* Eight presets: words up, words fade, characters cascade, characters flip,
+  lines reveal, blur in, scale pop and slide in.
+* Duration, stagger, delay, easing, how far into view it starts, and whether it
+  replays on every entry.
+* Animated text stays readable with JavaScript disabled, and does not animate at
+  all when the operating system asks for reduced motion.
+* Pages with no animated widget load neither the stylesheet nor the script.
 
 = 2.2.0 =
 * New: Impact Grid cards can stack on scroll. Style > Layout > Card layout,

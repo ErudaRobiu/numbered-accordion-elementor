@@ -33,6 +33,7 @@ numbered-accordion-elementor.php   bootstrap, update channel
 includes/                          module registry and settings screen
 modules/accordion/                 the accordion widget and its assets
 modules/impact/                    the impact grid widget and its assets
+modules/motion/                    the text animation controls and assets
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -69,6 +70,7 @@ existing pages render empty:
 - the widget names `nacc-numbered-accordion` and `eimp-impact-grid`
 - every `.nacc*` and `.eimp*` CSS class
 - every Elementor control ID
+- every text animation preset value (`words-up`, `chars-cascade`, and the rest)
 
 PHP namespaces, class names and asset handles are runtime-only and safe to rename.
 
@@ -132,6 +134,57 @@ text: one item per line, and a line opening with a dash, asterisk or bullet
 nests under the item above it. `Impact_Content::parse_list()` owns that, and
 promotes an orphan sub-bullet to a top-level item rather than dropping it — a
 list that lost text would look like a bug in the widget.
+
+### Text animations
+
+Adds an **Eruda Text Animation** section to the **Advanced** tab of the Heading
+and Text Editor widgets. Pick a preset and the widget's existing text animates
+as it scrolls into view — nothing is retyped, and a page built before this
+module shipped can use it without being rebuilt.
+
+Eight presets: words up, words fade, characters cascade, characters flip, lines
+reveal, blur in, scale pop and slide in. Alongside them: duration, stagger,
+delay, easing, how far into view it starts, and whether it replays every time.
+
+Three things are worth knowing before changing any of it.
+
+**It writes no markup.** Every value reaches the DOM through Elementor's own
+`prefix_class` and `selectors`, which Elementor applies live in the editor as
+well as on the front end. A render-time attribute would not work: the native
+Heading has a `content_template()`, so in the editor it is rendered client-side
+by Backbone and never goes through PHP. The animation would work on the live
+page and be invisible exactly where you need to see it.
+
+**The text survives the script.** The stylesheet hides nothing on its own —
+every rule that makes something invisible is scoped to `[data-eanm-ready]`, and
+only the script sets that. Script blocked, browser too old, Reduce Motion on:
+the heading renders plainly and completely. Keep it that way. It is also why
+enqueuing the stylesheet late costs nothing, and why the scroll threshold
+clamps below 1.0 — an element taller than the viewport can never be fully
+visible, and an animation that never fires would be the one way this module
+could make content disappear.
+
+**Two widgets only, by design.** A composite widget like an Icon Box raises a
+question the feature has no good answer to: whether its title and description
+are one staggered run or two. Everything downstream is widget-agnostic, so a
+site that wants the controls elsewhere adds a name to the list:
+
+```php
+// Offer the animation controls on the Button widget too.
+add_filter(
+	'eruda_motion_supported_widgets',
+	function ( $widgets ) {
+		$widgets[] = 'button';
+		return $widgets;
+	}
+);
+```
+
+One fact is deliberately duplicated: which preset splits by word, character or
+line is stated in `Motion_Presets::all()` and again as a `--eanm-split` custom
+property in the stylesheet. The script reads the CSS copy; the PHP copy is for
+the tests and for the lazy-enqueue check. Add a preset and you must add it in
+both places.
 
 ### The duplicator
 
