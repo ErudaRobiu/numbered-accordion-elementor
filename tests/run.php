@@ -16,6 +16,8 @@ require_once __DIR__ . '/bootstrap.php';
 use ErudaToolkit\Toolkit;
 use ErudaToolkit\Modules\Duplicator\Duplicator;
 use ErudaToolkit\Modules\Impact\Impact_Content;
+use ErudaToolkit\Modules\Motion\Motion_Presets;
+use ErudaToolkit\Modules\Motion\Motion_Controls;
 
 /**
  * Undo wp_slash(), so a round trip can be asserted.
@@ -333,7 +335,176 @@ check( 'a non-numeric size yields no hint', '', Impact_Content::icon_sizes_attr(
 check( 'an empty array yields no hint', '', Impact_Content::icon_sizes_attr( array() ) );
 check( 'a non-array yields no hint', '', Impact_Content::icon_sizes_attr( null ) );
 
+/* --------------------------------------------------- Motion_Presets --- */
+
+$presets = Motion_Presets::all();
+
+check( 'nine presets including none', 9, count( $presets ) );
+check( 'none is present', true, isset( $presets['none'] ) );
+
+foreach ( array( 'words-up', 'words-fade', 'chars-cascade', 'chars-flip', 'lines-mask', 'blur-in', 'scale-pop', 'slide-left' ) as $value ) {
+	check( "preset {$value} exists", true, isset( $presets[ $value ] ) );
+}
+
+foreach ( $presets as $value => $preset ) {
+	check( "preset {$value} has a label", true, isset( $preset['label'] ) && '' !== $preset['label'] );
+	check(
+		"preset {$value} has a valid split mode",
+		true,
+		in_array(
+			isset( $preset['split'] ) ? $preset['split'] : null,
+			array( Motion_Presets::SPLIT_NONE, Motion_Presets::SPLIT_WORDS, Motion_Presets::SPLIT_CHARS, Motion_Presets::SPLIT_LINES ),
+			true
+		)
+	);
+}
+
+check( 'options() maps every value to its label', array_keys( $presets ), array_keys( Motion_Presets::options() ) );
+check( 'words-up splits by word', Motion_Presets::SPLIT_WORDS, Motion_Presets::split_mode( 'words-up' ) );
+check( 'chars-flip splits by character', Motion_Presets::SPLIT_CHARS, Motion_Presets::split_mode( 'chars-flip' ) );
+check( 'lines-mask splits by line', Motion_Presets::SPLIT_LINES, Motion_Presets::split_mode( 'lines-mask' ) );
+check( 'blur-in does not split', Motion_Presets::SPLIT_NONE, Motion_Presets::split_mode( 'blur-in' ) );
+
+// An unknown value must degrade to "do nothing", never to a split mode.
+check( 'an unknown preset does not split', Motion_Presets::SPLIT_NONE, Motion_Presets::split_mode( 'nonsense' ) );
+check( 'null does not split', Motion_Presets::SPLIT_NONE, Motion_Presets::split_mode( null ) );
+
+check( 'a known preset is valid', true, Motion_Presets::is_valid( 'scale-pop' ) );
+check( 'an unknown preset is not valid', false, Motion_Presets::is_valid( 'nonsense' ) );
+check( 'an array is not a valid preset', false, Motion_Presets::is_valid( array() ) );
+check( 'null is not a valid preset', false, Motion_Presets::is_valid( null ) );
+
+$easings = Motion_Presets::easings();
+
+check( 'five easings', 5, count( $easings ) );
+check( 'the default easing exists', true, isset( $easings['out-expo'] ) );
+
+/* -------------------------------------------------- Motion_Controls --- */
+
+check(
+	'only the two plain-text widgets are supported',
+	array( 'heading', 'text-editor' ),
+	Motion_Controls::supported_widgets()
+);
+
+check( 'heading is supported', true, Motion_Controls::is_supported( 'heading' ) );
+check( 'text-editor is supported', true, Motion_Controls::is_supported( 'text-editor' ) );
+check( 'a button is not supported', false, Motion_Controls::is_supported( 'button' ) );
+check( 'an icon box is not supported', false, Motion_Controls::is_supported( 'icon-box' ) );
+check( "this plugin's own accordion is not supported", false, Motion_Controls::is_supported( 'nacc-numbered-accordion' ) );
+check( 'an empty name is not supported', false, Motion_Controls::is_supported( '' ) );
+check( 'null is not supported', false, Motion_Controls::is_supported( null ) );
+
+// The filter is the documented extension point. A site adding a widget must
+// work, and a site returning nonsense must not produce a PHP warning.
+$GLOBALS['eruda_test_filters']['eruda_motion_supported_widgets'] = function ( $list ) {
+	$list[] = 'button';
+	return $list;
+};
+
+check( 'the filter can add a widget', true, Motion_Controls::is_supported( 'button' ) );
+check( 'the filter keeps the defaults', true, Motion_Controls::is_supported( 'heading' ) );
+
+$GLOBALS['eruda_test_filters']['eruda_motion_supported_widgets'] = function () {
+	return array();
+};
+
+check( 'a filter can switch the section off entirely', false, Motion_Controls::is_supported( 'heading' ) );
+
+$GLOBALS['eruda_test_filters']['eruda_motion_supported_widgets'] = function () {
+	return 'not an array';
+};
+
+check( 'a corrupt filter return supports nothing', false, Motion_Controls::is_supported( 'heading' ) );
+
+unset( $GLOBALS['eruda_test_filters']['eruda_motion_supported_widgets'] );
+
+check( 'the defaults come back once the filter is gone', true, Motion_Controls::is_supported( 'heading' ) );
+
+$controls = Motion_Controls::control_definitions();
+
+check(
+	'the section carries exactly the frozen control ids',
+	array( 'eanm_preset', 'eanm_trigger', 'eanm_duration', 'eanm_stagger', 'eanm_delay', 'eanm_ease', 'eanm_threshold', 'eanm_replay' ),
+	array_keys( $controls )
+);
+
+check( 'the preset control offers every preset', array_keys( Motion_Presets::all() ), array_keys( $controls['eanm_preset']['options'] ) );
+check( 'the preset control defaults to none', 'none', $controls['eanm_preset']['default'] );
+check( 'the preset control writes the wrapper class', 'eanm-preset-', $controls['eanm_preset']['prefix_class'] );
+check( 'the easing control offers every easing', array_keys( Motion_Presets::easings() ), array_keys( $controls['eanm_ease']['options'] ) );
+
+// Everything but the preset dropdown stays hidden until a preset is chosen,
+// so the section reads as a single control when it is not in use.
+foreach ( $controls as $id => $definition ) {
+	if ( 'eanm_preset' === $id ) {
+		check( 'the preset control is never conditional', false, isset( $definition['condition'] ) );
+		continue;
+	}
+
+	check(
+		"{$id} is hidden while the preset is none",
+		'none',
+		isset( $definition['condition']['eanm_preset!'] ) ? $definition['condition']['eanm_preset!'] : null
+	);
+}
+
+// Neither of these means anything for an animation that fires on load.
+foreach ( array( 'eanm_threshold', 'eanm_replay' ) as $id ) {
+	check(
+		"{$id} is hidden unless the trigger is scroll",
+		'scroll',
+		isset( $controls[ $id ]['condition']['eanm_trigger'] ) ? $controls[ $id ]['condition']['eanm_trigger'] : null
+	);
+}
+
+// Every value has to reach the DOM somehow: a class, or a custom property.
+// A control with neither is a control that does nothing.
+foreach ( $controls as $id => $definition ) {
+	check(
+		"{$id} reaches the DOM",
+		true,
+		isset( $definition['prefix_class'] ) || isset( $definition['selectors'] )
+	);
+}
+
+// The custom properties the stylesheet and the script read by name.
+check(
+	'duration writes --eanm-duration',
+	array( '{{WRAPPER}}' => '--eanm-duration: {{SIZE}}ms;' ),
+	$controls['eanm_duration']['selectors']
+);
+check(
+	'stagger writes --eanm-stagger',
+	array( '{{WRAPPER}}' => '--eanm-stagger: {{SIZE}}ms;' ),
+	$controls['eanm_stagger']['selectors']
+);
+check(
+	'delay writes --eanm-delay',
+	array( '{{WRAPPER}}' => '--eanm-delay: {{SIZE}}ms;' ),
+	$controls['eanm_delay']['selectors']
+);
+check(
+	'threshold writes --eanm-threshold',
+	array( '{{WRAPPER}}' => '--eanm-threshold: {{SIZE}};' ),
+	$controls['eanm_threshold']['selectors']
+);
+
+check( 'duration defaults to 800ms', 800, $controls['eanm_duration']['default']['size'] );
+check( 'stagger defaults to 60ms', 60, $controls['eanm_stagger']['default']['size'] );
+check( 'delay defaults to none', 0, $controls['eanm_delay']['default']['size'] );
+check( 'threshold defaults to 20 per cent', 20, $controls['eanm_threshold']['default']['size'] );
+check( 'replay is off by default', '', $controls['eanm_replay']['default'] );
+
+/* ------------------------------------------------- Toolkit registry --- */
+
+check( 'the motion module is registered', true, in_array( 'motion', Toolkit::instance()->ids(), true ) );
+check( 'four modules ship', 4, count( Toolkit::instance()->ids() ) );
+check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
+check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
+
 /* ------------------------------------------------------------- report --- */
+
 
 echo "\n";
 

@@ -36,6 +36,10 @@ final class Toolkit {
 			'file'  => 'modules/impact/class-impact-module.php',
 			'class' => '\ErudaToolkit\Modules\Impact\Impact_Module',
 		),
+		'motion'     => array(
+			'file'  => 'modules/motion/class-motion-module.php',
+			'class' => '\ErudaToolkit\Modules\Motion\Motion_Module',
+		),
 	);
 
 	/**
