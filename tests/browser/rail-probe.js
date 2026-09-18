@@ -62,9 +62,13 @@ const x = t => {
       const barCost = barBox
         ? barBox.offsetHeight + parseFloat(getComputedStyle(barBox).marginTop)
         : 0;
+      const spacerEl = document.querySelector('.erail__spacer');
       return {
         rootH: root.offsetHeight,
         stageH: stage.offsetHeight,
+        // Pinned buys its scrolling with a spacer after the section it holds,
+        // not by growing the widget, so that is where the runway now is.
+        runway: spacerEl ? spacerEl.offsetHeight : Math.max(0, root.offsetHeight - stage.offsetHeight),
         cardH: card.offsetHeight,
         wants: Math.round(card.offsetHeight + pad + barCost),
         afterTop: Math.round(after.getBoundingClientRect().top + window.scrollY),
@@ -89,39 +93,48 @@ const x = t => {
       'px, inline height ' + flowCost.inline);
 
   check('flow does not push what follows it down the page',
-    flowCost.afterTop < pinnedCost.afterTop &&
-    pinnedCost.afterTop - flowCost.afterTop === pinnedCost.rootH - flowCost.rootH,
+    flowCost.runway === 0 &&
+    pinnedCost.afterTop - flowCost.afterTop === pinnedCost.runway,
     'content after the rail starts at ' + flowCost.afterTop + 'px in flow and ' +
       pinnedCost.afterTop + 'px pinned — ' + (pinnedCost.afterTop - flowCost.afterTop) + 'px of push');
 
-  check('pinned still buys itself a runway',
-    pinnedCost.rootH > pinnedCost.stageH,
-    'section ' + pinnedCost.rootH + 'px against a stage of ' + pinnedCost.stageH + 'px');
+  check('pinned buys its runway with a spacer, leaving the section its own height',
+    pinnedCost.runway > 0 && pinnedCost.rootH === pinnedCost.stageH,
+    'a ' + pinnedCost.runway + 'px spacer, with the widget still ' + pinnedCost.rootH + 'px');
 
   check('and the document is shorter in flow by exactly that runway',
-    pinnedCost.docH - flowCost.docH === pinnedCost.rootH - pinnedCost.stageH,
+    pinnedCost.docH - flowCost.docH === pinnedCost.runway,
     'document ' + flowCost.docH + 'px in flow, ' + pinnedCost.docH + 'px pinned');
 
   // Pinned is still pinned: it is on the pinned page right now.
   const centring = await page.evaluate(async () => {
-    const stage = document.querySelector('.erail__stage');
+    const held = document.querySelector('.erail__spacer')
+      ? document.querySelector('.erail__spacer').previousElementSibling
+      : document.querySelector('.erail__stage');
     const max = document.body.scrollHeight - innerHeight;
     const out = [];
     for (const f of [0.35, 0.5, 0.65]) {
       window.scrollTo(0, Math.round(f * max));
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-      const r = stage.getBoundingClientRect();
+      const r = held.getBoundingClientRect();
       out.push({
-        position: getComputedStyle(stage).position,
+        position: getComputedStyle(held).position,
         top: Math.round(r.top),
         bottom: Math.round(innerHeight - r.bottom),
+        fits: r.height <= innerHeight,
       });
     }
     return out;
   });
-  check('pinned holds the stage centred on screen',
-    centring.every(c => c.position === 'sticky' && Math.abs(c.top - c.bottom) <= 1),
-    centring.map(c => c.top + '/' + c.bottom).join(' '));
+  /*
+   * Centred when it fits, against the top when it does not. A section taller
+   * than the window cannot be centred without cropping both ends, and the
+   * heading -- the part worth keeping -- is the part at the top.
+   */
+  check('pinned holds what it is pinning centred, or against the top if it will not fit',
+    centring.every(c => c.position === 'sticky' &&
+      (c.fits ? Math.abs(c.top - c.bottom) <= 1 : c.top === 0)),
+    centring.map(c => c.top + '/' + c.bottom + (c.fits ? '' : ' (taller than the window)')).join(' '));
 
   // Everything after this runs against pinned, the default.
   await page.goto('http://127.0.0.1:8732/tests/browser/rail.html', { waitUntil: 'load' });
@@ -205,6 +218,12 @@ const x = t => {
     const root = document.querySelector('.erail');
     const stage = document.querySelector('.erail__stage');
     const track = document.querySelector('.erail__track');
+    // What the reader is actually watching: the heading above the row, which
+    // is a sibling of the widget and not part of it.
+    const heading = document.getElementById('heading');
+    const held = document.querySelector('.erail__spacer')
+      ? document.querySelector('.erail__spacer').previousElementSibling
+      : stage;
     const max = document.body.scrollHeight - innerHeight;
     const at = t => Math.abs(/matrix(?:3d)?\(([^)]+)\)/.exec(t)[1].split(',').map(Number)[4]);
     const seen = [];
@@ -215,6 +234,8 @@ const x = t => {
         y,
         off: at(getComputedStyle(track).transform),
         stageTop: Math.round(stage.getBoundingClientRect().top),
+        headTop: Math.round(heading.getBoundingClientRect().top),
+        heldTop: Math.round(held.getBoundingClientRect().top),
       });
     }
     const furthest = Math.max(...seen.map(s => s.off));
@@ -228,12 +249,14 @@ const x = t => {
      * frames the stage sits at the offset it sticks to -- and not from the
      * top of the document, which would count the page above the section too.
      */
-    const parked = seen[first].stageTop;
-    const pinFrom = seen.findIndex(s => Math.abs(s.stageTop - parked) <= 1);
+    const parked = seen[first].heldTop;
+    const pinFrom = seen.findIndex(s => Math.abs(s.heldTop - parked) <= 1);
     let pinTo = pinFrom;
-    while (pinTo + 1 < seen.length && Math.abs(seen[pinTo + 1].stageTop - parked) <= 1) {
+    while (pinTo + 1 < seen.length && Math.abs(seen[pinTo + 1].heldTop - parked) <= 1) {
       pinTo += 1;
     }
+
+    const heads = seen.slice(first, last + 1).map(s => s.headTop);
 
     return {
       furthest,
@@ -243,8 +266,18 @@ const x = t => {
       held: (pinTo - pinFrom) * 10,
       stuckSpread: stuck.length ? Math.max(...stuck) - Math.min(...stuck) : -1,
       stageTopWhileCrossing: stuck.length ? stuck[0] : -1,
+      headSpread: heads.length ? Math.max(...heads) - Math.min(...heads) : -1,
+      headTopWhileCrossing: heads.length ? heads[0] : -1,
+      hostTag: root.getAttribute('data-erail-host') !== null
+        ? document.querySelector('.erail__spacer') ? 'spacer present' : 'no spacer'
+        : 'widget only',
     };
   });
+
+  check('the heading above the row does not move while the row crosses',
+    pinned.headSpread >= 0 && pinned.headSpread <= 1,
+    'the heading sat at ' + pinned.headTopWhileCrossing + 'px down the screen for the whole ' +
+      pinned.crossing + 'px crossing, moving ' + pinned.headSpread + 'px (' + pinned.hostTag + ')');
 
   check('the page is held still while the row crosses',
     pinned.stuckSpread >= 0 && pinned.stuckSpread <= 1,
@@ -262,6 +295,36 @@ const x = t => {
   check('the crossing costs about a pixel of scroll per pixel of row',
     Math.abs(pinned.crossing - pinned.furthest) / pinned.furthest < 0.05,
     pinned.crossing + 'px of scroll for ' + Math.round(pinned.furthest) + 'px of row');
+
+  // --- and that holding the widget alone is what used to lose it ----------
+  /*
+   * The complaint that produced all of this. With only the widget held, the
+   * heading and the copy above it are not part of what is pinned, so they
+   * scroll away while the cards are still crossing. This reproduces that,
+   * so the fix above cannot quietly stop working.
+   */
+  await page.goto('http://127.0.0.1:8732/tests/browser/rail.html?pin=self', { waitUntil: 'load' });
+  await page.evaluate(() => new Promise(r => setTimeout(r, 250)));
+  const selfPinned = await page.evaluate(async () => {
+    const track = document.querySelector('.erail__track');
+    const heading = document.getElementById('heading');
+    const max = document.body.scrollHeight - innerHeight;
+    const at = t => Math.abs(/matrix(?:3d)?\(([^)]+)\)/.exec(t)[1].split(',').map(Number)[4]);
+    const seen = [];
+    for (let y = 0; y <= max; y += 10) {
+      window.scrollTo(0, y);
+      await new Promise(r => requestAnimationFrame(r));
+      seen.push({ off: at(getComputedStyle(track).transform), headTop: heading.getBoundingClientRect().top });
+    }
+    const furthest = Math.max(...seen.map(s => s.off));
+    const first = seen.findIndex(s => s.off > 1);
+    const last = seen.findIndex(s => s.off >= furthest - 1);
+    const heads = seen.slice(first, last + 1).map(s => s.headTop);
+    return { spread: Math.round(Math.max(...heads) - Math.min(...heads)) };
+  });
+  check('holding the widget alone still lets the heading scroll away, as it should',
+    selfPinned.spread > 100,
+    'the heading moved ' + selfPinned.spread + 'px during the crossing with only the row held');
 
   // --- flow still travels while you can see the cards ----------------------
   /*

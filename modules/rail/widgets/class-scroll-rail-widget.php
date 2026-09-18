@@ -655,6 +655,34 @@ class Scroll_Rail_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'pin_target',
+			array(
+				'label'       => esc_html__( 'What holds still', 'numbered-accordion' ),
+				'description' => esc_html__( 'Holding the row alone holds the row and nothing else, so a heading and an introduction above it scroll away while the cards are still crossing. Holding the whole section keeps them exactly where they are and moves only the cards.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'section',
+				'options'     => array(
+					'section' => esc_html__( 'The whole section around it', 'numbered-accordion' ),
+					'self'    => esc_html__( 'Just the row of cards', 'numbered-accordion' ),
+					'custom'  => esc_html__( 'A specific element', 'numbered-accordion' ),
+				),
+				'condition'   => array( 'mode' => 'pinned' ),
+			)
+		);
+
+		$this->add_control(
+			'pin_selector',
+			array(
+				'label'       => esc_html__( 'Which element', 'numbered-accordion' ),
+				'description' => esc_html__( 'A CSS selector for an ancestor of this widget — a class you have put on the container, usually. Give that container a CSS class in Elementor\'s Advanced tab and name it here, with the dot: .industries-section', 'numbered-accordion' ),
+				'type'        => Controls_Manager::TEXT,
+				'placeholder' => '.my-section',
+				'default'     => '',
+				'condition'   => array( 'mode' => 'pinned', 'pin_target' => 'custom' ),
+			)
+		);
+
+		$this->add_control(
 			'pace',
 			array(
 				'label'       => esc_html__( 'Scroll distance', 'numbered-accordion' ),
@@ -837,6 +865,17 @@ class Scroll_Rail_Widget extends Widget_Base {
 		$pauseIn  = $this->slider( $settings, 'pause_in', 30, 0, 150 ) / 100;
 		$pauseOut = $this->slider( $settings, 'pause_out', 30, 0, 150 ) / 100;
 		$mode     = isset( $settings['mode'] ) && 'flow' === $settings['mode'] ? 'flow' : 'pinned';
+
+		$target = isset( $settings['pin_target'] ) ? $settings['pin_target'] : 'section';
+		$pin    = 'section';
+
+		if ( 'self' === $target ) {
+			$pin = 'self';
+		} elseif ( 'custom' === $target ) {
+			// Empty is the same as not pinning an ancestor at all, which is
+			// what the script does with it.
+			$pin = isset( $settings['pin_selector'] ) ? trim( (string) $settings['pin_selector'] ) : '';
+		}
 		$start  = $this->slider( $settings, 'travel_start', 80, 0, 100 ) / 100;
 		$finish = $this->slider( $settings, 'travel_finish', 80, 0, 100 ) / 100;
 		$extra  = $this->slider( $settings, 'extra', 0, 0, 200 ) / 100;
@@ -847,6 +886,7 @@ class Scroll_Rail_Widget extends Widget_Base {
 			data-erail-pace="<?php echo esc_attr( (string) $pace ); ?>"
 			data-erail-pause-in="<?php echo esc_attr( (string) $pauseIn ); ?>"
 			data-erail-pause-out="<?php echo esc_attr( (string) $pauseOut ); ?>"
+			data-erail-pin="<?php echo esc_attr( $pin ); ?>"
 			data-erail-start="<?php echo esc_attr( (string) $start ); ?>"
 			data-erail-finish="<?php echo esc_attr( (string) $finish ); ?>"
 			data-erail-extra="<?php echo esc_attr( (string) $extra ); ?>"

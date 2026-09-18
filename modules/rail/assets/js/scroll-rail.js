@@ -89,10 +89,142 @@
 
 		// Pinned only, and all in pixels once measured: the still stretch
 		// before the row sets off, the stretch it travels for, and where the
-		// stage sticks.
+		// pinned element sticks.
 		var pauseIn = 0;
 		var travel = 0;
 		var stickyTop = 0;
+
+		/*
+		 * What actually holds still.
+		 *
+		 * Pinning the widget alone holds the row and nothing else, so a
+		 * heading and an introduction sitting above it in the same section
+		 * scroll away while the cards are still crossing -- which looks like
+		 * the row shoving the rest of the page out of the way, because from
+		 * the reader's side that is what it is.
+		 *
+		 * `host` is the ancestor to hold instead: the whole section, so the
+		 * heading, the copy and the row all stay exactly where they are and
+		 * only the cards move. It is found with closest(), so it is whatever
+		 * the page already has rather than anything this widget has to own.
+		 */
+		var host = null;
+		var spacer = null;
+		var wrapper = null;
+
+		function resolveHost() {
+			var want = ( root.getAttribute( 'data-erail-pin' ) || '' ).trim();
+
+			if ( '' === want || 'self' === want ) {
+				return null;
+			}
+
+			var selector = 'section' === want
+				? '.e-con, .elementor-section, section'
+				: want;
+			var found;
+
+			try {
+				found = root.parentElement ? root.parentElement.closest( selector ) : null;
+			} catch ( e ) {
+				// A selector someone typed by hand is allowed to be nonsense.
+				return null;
+			}
+
+			// Pinning something that cannot contain the runway, or that is the
+			// scrolling element itself, would hold the whole page forever.
+			if ( ! found || ! found.parentElement || found === document.body ||
+				found === document.documentElement ) {
+				return null;
+			}
+
+			return found;
+		}
+
+		/**
+		 * Hold the host still for `runway` pixels of scrolling.
+		 *
+		 * The host and its runway go inside a wrapper of their own, and this
+		 * is not tidiness -- it is the only thing that bounds the hold. A
+		 * sticky element sticks for as long as its containing block has room
+		 * left, so a section made sticky where it stands has the whole page
+		 * for a containing block and stays stuck until the page runs out: the
+		 * row finishes crossing and the section keeps holding, for screens.
+		 * Wrapping it means the containing block is exactly the host plus the
+		 * runway, and the hold is exactly the runway.
+		 *
+		 * GSAP's ScrollTrigger does the same thing for the same reason, which
+		 * is what its pin-spacer element is.
+		 *
+		 * @param {number} runway Pixels of scrolling to hold for.
+		 */
+		function pin( runway ) {
+			wrapper = document.createElement( 'div' );
+			wrapper.className = 'erail__pin';
+			wrapper.style.width = '100%';
+			wrapper.style.flex = '0 0 auto';
+			wrapper.style.alignSelf = 'stretch';
+
+			host.parentNode.insertBefore( wrapper, host );
+			wrapper.appendChild( host );
+
+			spacer = document.createElement( 'div' );
+			spacer.className = 'erail__spacer';
+			spacer.setAttribute( 'aria-hidden', 'true' );
+			spacer.style.flex = '0 0 auto';
+			spacer.style.height = Math.round( runway ) + 'px';
+			wrapper.appendChild( spacer );
+
+			host.style.position = 'sticky';
+			host.style.top = stickyTop + 'px';
+			root.setAttribute( 'data-erail-host', '' );
+		}
+
+		/**
+		 * Put the page back exactly as it was found.
+		 */
+		function release() {
+			if ( host ) {
+				host.style.position = '';
+				host.style.top = '';
+			}
+
+			// The host goes back where it was before the wrapper goes away,
+			// or it goes away with it.
+			if ( wrapper && wrapper.parentNode ) {
+				if ( host && host.parentNode === wrapper ) {
+					wrapper.parentNode.insertBefore( host, wrapper );
+				}
+
+				wrapper.parentNode.removeChild( wrapper );
+			}
+
+			wrapper = null;
+			spacer = null;
+			root.removeAttribute( 'data-erail-host' );
+		}
+
+		/**
+		 * The pinned element's top edge in the window, as it would be if it
+		 * were not pinned.
+		 *
+		 * Once something is stuck its own rect stops moving -- it reports the
+		 * offset it is stuck at, every frame -- so progress cannot be read
+		 * from it. The spacer is never stuck, and it sits immediately after
+		 * the host, so the host's unstuck top is the spacer's top less the
+		 * host's height. When the widget pins itself the stage is the stuck
+		 * thing and the widget's own box still moves, so that can be read
+		 * directly.
+		 *
+		 * @return {number}
+		 */
+		function staticTop() {
+			if ( host && spacer ) {
+				return spacer.getBoundingClientRect().top - host.offsetHeight;
+			}
+
+			return root.getBoundingClientRect().top;
+		}
 
 		/**
 		 * Should the script drive the row at all?
@@ -132,6 +264,8 @@
 			if ( ! driving ) {
 				track.style.transform = '';
 				root.removeAttribute( READY );
+				release();
+				host = null;
 				return;
 			}
 
@@ -143,6 +277,8 @@
 
 			if ( 'pinned' !== mode ) {
 				stage.style.top = '';
+				release();
+				host = null;
 
 				// Flow adds nothing by default. Extra is opt-in, and it is the
 				// only thing here that costs the page any height at all.
@@ -155,11 +291,24 @@
 				return;
 			}
 
-			// Centred on the screen, from the height the stage turned out to
-			// be rather than the height it was asked for -- which is usually
-			// `auto`, because the cards decide it.
-			stickyTop = Math.max( 0, Math.round( ( height - stage.offsetHeight ) / 2 ) );
-			stage.style.top = stickyTop + 'px';
+			// Measured unpinned, so release first: a host still carrying last
+			// pass's sticky offset reports the height it is stuck at.
+			release();
+			host = resolveHost();
+
+			var pinned = host || stage;
+
+			/*
+			 * Centred on the screen, from the height the pinned element turned
+			 * out to be rather than the height it was asked for -- the stage's
+			 * is usually `auto`, because the cards decide it.
+			 *
+			 * A section taller than the window cannot be centred without
+			 * cropping both ends, so it is held against the top instead. The
+			 * heading is the part worth keeping, and it is the part at the
+			 * top.
+			 */
+			stickyTop = Math.max( 0, Math.round( ( height - pinned.offsetHeight ) / 2 ) );
 
 			/*
 			 * The runway is three stretches, not one.
@@ -185,7 +334,14 @@
 
 			travel = distance > 0 ? distance * readData( root, 'data-erail-pace', 1 ) : 0;
 
-			root.style.height = Math.round( stage.offsetHeight + pauseIn + travel + pauseOut ) + 'px';
+			var runway = Math.round( pauseIn + travel + pauseOut );
+
+			if ( host ) {
+				pin( runway );
+			} else {
+				stage.style.top = stickyTop + 'px';
+				root.style.height = Math.round( stage.offsetHeight + runway ) + 'px';
+			}
 		}
 
 		/**
@@ -203,14 +359,13 @@
 				}
 
 				/*
-				 * The stage sticks at `stickyTop` down the screen, so the pin
-				 * begins when the section's top edge reaches that line, not
-				 * when it reaches the top of the window. Measuring from the
+				 * The pinned element sticks at `stickyTop` down the screen, so
+				 * the pin begins when its top edge reaches that line, not when
+				 * it reaches the top of the window. Measuring from the
 				 * window's top instead puts every position out by the sticky
-				 * offset, which is most of a card's height once the stage is
-				 * centred.
+				 * offset, which is most of a card's height once it is centred.
 				 */
-				var into = stickyTop - rect.top;
+				var into = stickyTop - staticTop();
 
 				return clamp01( ( into - pauseIn ) / travel );
 			} else {
@@ -306,9 +461,23 @@
 			} );
 		}
 
+		var resizing = false;
+
 		function onResize() {
-			measure();
-			update();
+			if ( resizing ) {
+				return;
+			}
+
+			resizing = true;
+
+			// Measuring now takes the host out of its wrapper and puts it
+			// back, so dragging a window edge must not do that on every one of
+			// the hundred resize events that produces.
+			window.requestAnimationFrame( function () {
+				measure();
+				update();
+				resizing = false;
+			} );
 		}
 
 		/*
@@ -341,7 +510,7 @@
 			var target;
 
 			if ( 'pinned' === mode ) {
-				target = window.pageYOffset + rect.top - stickyTop + pauseIn + wanted * travel;
+				target = window.pageYOffset + staticTop() - stickyTop + pauseIn + wanted * travel;
 			} else {
 				var basis = Math.min( rect.height, height );
 				var tStart = height - basis * readData( root, 'data-erail-start', 0.8 );

@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.12.0
+Stable tag: 2.13.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,18 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.13.0 =
+* Scroll Rail now holds the whole section still, not just the row. A heading
+  and an introduction above the cards stay exactly where they are while the
+  cards cross, instead of scrolling away as though the row were pushing them
+  out of the way. New "What holds still" setting, which defaults to the
+  section and can be pointed at any container by its CSS class.
+* Fix: a held section could stay held for screens after the row had finished,
+  because a sticky element keeps sticking for as long as its containing block
+  has room and the containing block was the whole page. The section and its
+  scrolling now sit in a wrapper of their own, so the hold is exactly as long
+  as it should be.
 
 = 2.12.0 =
 * Scroll Rail is pinned by default again, and pinning now works the way it

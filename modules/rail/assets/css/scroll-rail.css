@@ -47,6 +47,40 @@
 	top: 0;
 }
 
+/*
+ * The two elements the script inserts when it holds a whole section: a wrapper
+ * around that section, which is what bounds the hold, and the spacer inside it
+ * that the hold is spent against. Declared here so a theme's own layout rules
+ * cannot give either of them a margin, a border or a background.
+ */
+.erail__pin {
+	display: block;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+}
+
+.erail__spacer {
+	display: block;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	pointer-events: none;
+}
+
+/*
+ * When a whole section is being held instead, that section is the sticky one
+ * and the stage must not be: two nested sticky elements each stick against
+ * their own containing block, and the inner one would slide inside the outer
+ * for the length of the hold.
+ */
+.erail[data-erail-host] .erail__stage {
+	position: relative;
+	top: auto;
+}
+
 .erail__viewport {
 	width: 100%;
 	/* Until the script takes over this is a real scroller, so the row is

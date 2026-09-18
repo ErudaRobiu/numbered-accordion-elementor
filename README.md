@@ -514,8 +514,34 @@ pads the timeline for the same reason. Without it the row starts moving on the
 frame the section pins and the page is released on the frame it stops, and both
 read as a jolt.
 
-The stage sticks partway down the screen rather than at the top, so the pin
-begins when the section's top edge reaches *that* line. Measuring the progress
+**What holds still is the whole section, not the widget.** Pinning the widget
+alone pins the row and nothing else, so a heading and an introduction sitting
+above it in the same section scroll away while the cards are still crossing —
+which looks like the row shoving the rest of the page out of the way, because
+from the reader's side that is what it is. The default is to hold the nearest
+Elementor container or `<section>` above the widget, found with `closest()`, so
+it is whatever the page already has rather than anything this widget has to
+own. "Just the row of cards" and a custom selector are both still available.
+
+**The held section goes inside a wrapper of its own, and that is not
+tidiness — it is the only thing that bounds the hold.** A sticky element sticks
+for as long as its containing block has room left, so a section made sticky
+where it stands has the whole page for a containing block: the row finishes
+crossing and the section keeps holding, for screens. Wrapping it means the
+containing block is exactly the host plus its runway, and the hold is exactly
+the runway. GSAP's ScrollTrigger does the same thing for the same reason, which
+is what its `pin-spacer` element is. Measured on the test page, the hold went
+from "still stuck 1,350px after the row arrived" to "releases 270px after",
+which is what it was asked for.
+
+A section taller than the window cannot be centred without cropping both ends,
+so it is held against the top instead — the heading is the part worth keeping
+and it is the part at the top. If the cards are being clipped at the bottom,
+the section is too tall for the screen: trim the card height or the section's
+padding.
+
+The pinned element sticks partway down the screen rather than at the top, so
+the pin begins when its top edge reaches *that* line. Measuring the progress
 from the top of the window instead puts every position out by the sticky
 offset, which once the stage is centred is most of a card's height.
 

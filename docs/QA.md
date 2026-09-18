@@ -335,6 +335,21 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
       into the section: it settles in the middle of the screen, holds still for
       a moment, the row crosses without the page moving at all, it holds again,
       and only then does the page carry on
+- [ ] **The heading and copy above the row do not move while the row crosses.**
+      This is the whole point of "What holds still", which defaults to the
+      section. Set it to "Just the row of cards" and they should scroll away
+      again, which is the behaviour it replaced
+- [ ] The section lets go promptly once the row has arrived and the pause is
+      spent. If it stays stuck for screens afterwards, the wrapper that bounds
+      the hold is not being created — check the browser console
+- [ ] With "A specific element", a class you put on a container in Elementor's
+      Advanced tab and type here with the dot works, and a selector that
+      matches nothing falls back to holding the row alone rather than breaking
+- [ ] Nothing is left behind when the rail is not driving: resize to a phone
+      width and the wrapper and spacer should be gone from the DOM
+- [ ] If the section is taller than the window it is held against the top so
+      the heading stays visible, and the cards are clipped at the bottom. That
+      is the trade — trim the card height or the section padding
 - [ ] "Pause before it sets off" and "Pause before it lets go" lengthen those
       two held moments
 - [ ] Pinned makes the section taller, and what follows sits further down the
