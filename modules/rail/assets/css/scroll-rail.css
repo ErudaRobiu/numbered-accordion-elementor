@@ -19,9 +19,15 @@
  * The stage is what pins. Its height is the panel; the runway that drives it
  * is the extra height the script puts on .erail itself.
  */
+/*
+ * No height of its own by default. The stage is as tall as the cards make it,
+ * plus whatever breathing room is asked for -- a fixed height in vh is a
+ * setting, not the starting point, because a section sized in screen-heights
+ * has no idea how tall a card is and leaves dead space above and below it.
+ */
 .erail__stage {
 	position: relative;
-	height: var(--erail-height, 78vh);
+	height: var(--erail-height, auto);
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -31,12 +37,14 @@
  * Only the pinned mode sticks, and only the pinned mode is handed extra page
  * height to stick for. In flow the section is exactly as tall as its row and
  * everything after it sits where it would have anyway.
+ *
+ * The offset that centres it is set by the script, from the height the stage
+ * turns out to be. It cannot be a calc here: the stage's height is usually
+ * `auto`, and there is no arithmetic to be done on that.
  */
 .erail[data-erail-mode="pinned"] .erail__stage {
 	position: sticky;
-	/* Centred on the screen whatever height it is asked for, so changing the
-	   section height cannot leave the row sitting low or high. */
-	top: calc((100vh - var(--erail-height, 78vh)) / 2);
+	top: 0;
 }
 
 .erail__viewport {
@@ -64,7 +72,9 @@
 	display: flex;
 	align-items: stretch;
 	gap: var(--erail-gap, 28px);
-	padding: var(--erail-pad-y, 8px) var(--erail-lead, 0px);
+	/* The vertical padding is what a card's shadow and its hover lift need in
+	   order not to be clipped by the viewport's overflow. */
+	padding: var(--erail-pad-y, 24px) var(--erail-lead, 0px);
 	width: max-content;
 	will-change: transform;
 }

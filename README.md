@@ -497,11 +497,46 @@ exactly the width of the row. On a 1440px window with six 420px cards that is
 1360px — a screen and a half of push, which is what it looks like when a
 carousel "moves the rest of the page down".
 
-Flow spends the section's passage across the screen instead. The row starts as
-the section arrives from the bottom and finishes as it leaves at the top, and
-the section is exactly as tall as its own cards. `tests/browser/rail-probe.js`
-measures this rather than taking it on trust: it loads the page in both modes
-and compares where the content *after* the rail begins.
+Flow spends the section's passage across the screen instead, and the section is
+exactly as tall as its own cards. `tests/browser/rail-probe.js` measures the
+difference rather than taking it on trust: it loads the page in both modes and
+compares where the content *after* the rail begins.
+
+**The section is sized by its cards, not by the screen.** A height in
+screen-heights has no idea how tall a card is, so it leaves dead space above
+and below the row — a 78vh stage around a 521px card is a hundred-odd pixels of
+nothing at each end. The stage is `height: auto`; the cards decide, plus the
+padding a card's shadow and hover lift need in order not to be clipped. A fixed
+share of the screen is still available as a setting. It also means the sticky
+offset that centres the pinned stage cannot be a CSS `calc` — there is no
+arithmetic to do on `auto` — so the script sets it from the height the stage
+turns out to be.
+
+**Flow travels while the section is on screen, not across its whole journey.**
+Spending the full entry-to-exit journey is the obvious thing to do and it is
+wrong: the row is already moving while the section is a sliver at the bottom of
+the window and has finished while it is a sliver at the top, so the cards you
+actually see are the middle ones and the first and last go past unread. Both
+ends are given as how much of the section has to be showing — 80% by default,
+at either end — and the probe walks the page in 10px steps to check the frame
+the row sets off on and the frame it arrives on against that.
+
+The arithmetic works off whichever is smaller, the section or the window, so a
+section taller than the screen measures against how much of the *screen* it
+fills rather than how much of itself is showing:
+
+```
+basis  = min(section height, window height)
+start  = window height - basis × how-much-showing-before-it-sets-off
+finish = basis × how-much-still-showing-when-it-arrives - section height
+```
+
+**What flow cannot do is make itself longer.** It can only spend the scrolling
+the section already has, which on a 900px window with a 599px section is about
+540px — so a row that overflows by 1360px crosses at roughly two and a half
+times scroll speed. That is the price of adding no height. An "Extra scroll"
+control buys more, in screen-heights, and is the one thing in flow that does
+push what follows further down the page; it defaults to zero.
 
 **In pinned mode the runway is measured, not guessed.** The section is given
 the stage plus however far the row overflows its viewport, times a pace

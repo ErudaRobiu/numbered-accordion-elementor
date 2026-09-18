@@ -334,8 +334,19 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
 - [ ] **On the default (Flow), the rail does not push anything down.** Put a
       section after it, note where it starts, then switch to Pinned: it should
       move down by roughly the width of the row, and back again on Flow
-- [ ] On Flow the section is exactly as tall as its cards, and the row crosses
-      as the section crosses the screen
+- [ ] On Flow the section is exactly as tall as its cards, with no dead space
+      above or below the row. Change the card width or shape and the section
+      follows
+- [ ] **The row does not start moving until you can see the cards**, and has
+      not finished before you have read them. Scroll slowly into the section
+      and watch: at the frame it sets off, most of the section should be on
+      screen
+- [ ] "Starts once this much is on screen" and "Finishes while this much is
+      still on screen" move those two moments
+- [ ] "Extra scroll" at zero adds nothing. Raising it makes the crossing
+      gentler and does push what follows down, which is the trade it is for
+- [ ] Switching "Section height" to a fixed share of the screen brings the vh
+      slider back and works
 - [ ] On Pinned the section holds still on screen while the row crosses, and
       the stage stays centred
 - [ ] "Scroll distance" appears only on Pinned, where it is the only thing it

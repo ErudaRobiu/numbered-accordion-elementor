@@ -54,9 +54,19 @@ const x = t => {
       const root = document.querySelector('.erail');
       const stage = document.querySelector('.erail__stage');
       const after = document.getElementById('after');
+      const card = document.querySelector('.erail__card');
+      const track = document.querySelector('.erail__track');
+      const pad = parseFloat(getComputedStyle(track).paddingTop) +
+                  parseFloat(getComputedStyle(track).paddingBottom);
+      const barBox = document.querySelector('.erail__progress');
+      const barCost = barBox
+        ? barBox.offsetHeight + parseFloat(getComputedStyle(barBox).marginTop)
+        : 0;
       return {
         rootH: root.offsetHeight,
         stageH: stage.offsetHeight,
+        cardH: card.offsetHeight,
+        wants: Math.round(card.offsetHeight + pad + barCost),
         afterTop: Math.round(after.getBoundingClientRect().top + window.scrollY),
         docH: document.body.scrollHeight,
         inline: root.style.height || '(none)',
@@ -66,6 +76,11 @@ const x = t => {
 
   const flowCost = await cost('flow');
   const pinnedCost = await cost('pinned');
+
+  check('the section is as tall as its cards make it, not a share of the screen',
+    Math.abs(flowCost.stageH - flowCost.wants) <= 1 && flowCost.stageH < 900,
+    'stage ' + flowCost.stageH + 'px for a ' + flowCost.cardH +
+      'px card plus its padding and bar (' + flowCost.wants + 'px), in a 900px window');
 
   check('flow adds no height to the page at all',
     flowCost.rootH === flowCost.stageH && flowCost.inline === '(none)',
@@ -179,11 +194,51 @@ const x = t => {
   check('the same scroll position gives the same offset either way', same,
     same ? 'all match' : 'drifted');
 
-  // --- it holds still at each end -----------------------------------------
-  const held = fwd.filter(s => Math.round(x(s.tx)) === 0).length;
-  check('the row is still for a moment before it sets off',
-    held >= 1,
-    held + ' of ' + fwd.length + ' sampled stops sit at zero');
+  // --- the travel happens while you can see the cards ----------------------
+  /*
+   * The complaint this was built to answer: the row used to be moving while
+   * the section was a sliver at the bottom of the window and finished while it
+   * was a sliver at the top, so the first and last cards went past unread.
+   *
+   * Walked in fine steps rather than sampled, because what matters is the
+   * exact frame the row sets off and the exact frame it arrives.
+   */
+  const window_ = await page.evaluate(async () => {
+    const root = document.querySelector('.erail');
+    const track = document.querySelector('.erail__track');
+    const max = document.body.scrollHeight - innerHeight;
+    const seen = [];
+    const at = t => /matrix(?:3d)?\(([^)]+)\)/.exec(t)[1].split(',').map(Number).slice(4)[0];
+    const visible = () => {
+      const r = root.getBoundingClientRect();
+      const on = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
+      return on / Math.min(r.height, innerHeight);
+    };
+    for (let y = 0; y <= max; y += 10) {
+      window.scrollTo(0, y);
+      await new Promise(r => requestAnimationFrame(r));
+      seen.push({ y, off: Math.abs(at(getComputedStyle(track).transform)), vis: visible() });
+    }
+    const moving = seen.filter(s => s.off > 1);
+    const done = seen.filter(s => s.off > 0);
+    const first = moving[0];
+    const last = done[done.length - 1];
+    // The last frame at which the row is still short of the end.
+    const arrives = seen.find(s => s.off >= Math.max(...seen.map(q => q.off)) - 1);
+    return {
+      startVis: first ? first.vis : 0,
+      endVis: arrives ? arrives.vis : 0,
+      furthest: Math.max(...seen.map(s => s.off)),
+    };
+  });
+
+  check('the row waits until the section is on screen before it sets off',
+    window_.startVis >= 0.75,
+    Math.round(window_.startVis * 100) + '% of the section was showing on the frame it started');
+
+  check('and finishes while the section is still on screen',
+    window_.endVis >= 0.75,
+    Math.round(window_.endVis * 100) + '% still showing on the frame it arrived');
 
   // --- the progress bar ----------------------------------------------------
   const bars = fwd.map(s => {

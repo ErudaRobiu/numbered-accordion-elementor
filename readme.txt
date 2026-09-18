@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.10.0
+Stable tag: 2.11.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,21 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.11.0 =
+* Scroll Rail sections are now as tall as their cards make them, instead of a
+  fixed share of the screen that left dead space above and below the row. A
+  fixed height is still available from the new "Section height" setting.
+* Fix: the row started travelling while the section was barely in view and had
+  finished before it left, so the first and last cards went past unread. It now
+  waits until the section is on screen and finishes while it still is, with
+  both moments as controls.
+* New "Space above and below" setting, which is the room a card's shadow and
+  its hover lift need in order not to be clipped.
+* New "Extra scroll" setting for Flow. Flow can only spend the scrolling the
+  section already has, so a very wide row crosses quickly; this buys more. It
+  is the one setting in Flow that does push what follows down the page, and it
+  defaults to zero.
 
 = 2.10.0 =
 * Scroll Rail no longer pushes the rest of the page down. Pinning a section

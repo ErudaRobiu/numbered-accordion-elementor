@@ -257,16 +257,43 @@ class Scroll_Rail_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'height_mode',
+			array(
+				'label'       => esc_html__( 'Section height', 'numbered-accordion' ),
+				'description' => esc_html__( 'A height in screen-heights has no idea how tall a card is, so it leaves dead space above and below the row. Fitting the cards is almost always what you want.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'fit',
+				'options'     => array(
+					'fit'   => esc_html__( 'Fit the cards', 'numbered-accordion' ),
+					'fixed' => esc_html__( 'A fixed share of the screen', 'numbered-accordion' ),
+				),
+			)
+		);
+
 		$this->add_responsive_control(
 			'stage_height',
 			array(
-				'label'       => esc_html__( 'Section height', 'numbered-accordion' ),
-				'description' => esc_html__( 'How much of the screen the pinned row takes up.', 'numbered-accordion' ),
+				'label'      => esc_html__( 'How much of the screen', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'vh' ),
+				'range'      => array( 'vh' => array( 'min' => 40, 'max' => 100 ) ),
+				'default'    => array( 'unit' => 'vh', 'size' => 78 ),
+				'selectors'  => array( '{{WRAPPER}} .erail' => '--erail-height: {{SIZE}}vh;' ),
+				'condition'  => array( 'height_mode' => 'fixed' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'pad_y',
+			array(
+				'label'       => esc_html__( 'Space above and below', 'numbered-accordion' ),
+				'description' => esc_html__( 'Room for a card\'s shadow and its hover lift, which the row would otherwise clip.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => array( 'vh' ),
-				'range'       => array( 'vh' => array( 'min' => 40, 'max' => 100 ) ),
-				'default'     => array( 'unit' => 'vh', 'size' => 78 ),
-				'selectors'   => array( '{{WRAPPER}} .erail' => '--erail-height: {{SIZE}}vh;' ),
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 120 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 24 ),
+				'selectors'   => array( '{{WRAPPER}} .erail' => '--erail-pad-y: {{SIZE}}px;' ),
 			)
 		);
 
@@ -648,6 +675,46 @@ class Scroll_Rail_Widget extends Widget_Base {
 				'size_units'  => array( '%' ),
 				'range'       => array( '%' => array( 'min' => 0, 'max' => 40 ) ),
 				'default'     => array( 'unit' => '%', 'size' => 8 ),
+				'condition'   => array( 'mode' => 'pinned' ),
+			)
+		);
+
+		$this->add_control(
+			'travel_start',
+			array(
+				'label'       => esc_html__( 'Starts once this much is on screen', 'numbered-accordion' ),
+				'description' => esc_html__( 'How much of the section has to be in view before the row sets off. At 100 it waits until the whole section is showing, so nothing moves before you can see it.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( '%' ),
+				'range'       => array( '%' => array( 'min' => 0, 'max' => 100 ) ),
+				'default'     => array( 'unit' => '%', 'size' => 80 ),
+				'condition'   => array( 'mode' => 'flow' ),
+			)
+		);
+
+		$this->add_control(
+			'travel_finish',
+			array(
+				'label'       => esc_html__( 'Finishes while this much is still on screen', 'numbered-accordion' ),
+				'description' => esc_html__( 'How much of the section is still showing when the row reaches the end. At 100 it is done before the section starts to leave, so the last cards are read rather than glimpsed.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( '%' ),
+				'range'       => array( '%' => array( 'min' => 0, 'max' => 100 ) ),
+				'default'     => array( 'unit' => '%', 'size' => 80 ),
+				'condition'   => array( 'mode' => 'flow' ),
+			)
+		);
+
+		$this->add_control(
+			'extra',
+			array(
+				'label'       => esc_html__( 'Extra scroll', 'numbered-accordion' ),
+				'description' => esc_html__( 'Flow can only spend the scrolling the section already has, so a very wide row crosses quickly. This buys more, in screen-heights, and is the one thing here that does push what follows further down the page. Zero adds nothing.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'vh' ),
+				'range'       => array( 'vh' => array( 'min' => 0, 'max' => 200, 'step' => 10 ) ),
+				'default'     => array( 'unit' => 'vh', 'size' => 0 ),
+				'condition'   => array( 'mode' => 'flow' ),
 			)
 		);
 
@@ -755,13 +822,19 @@ class Scroll_Rail_Widget extends Widget_Base {
 
 		$pace = $this->slider( $settings, 'pace', 1, 0.4, 2.5 );
 		$hold = $this->slider( $settings, 'hold', 8, 0, 40 ) / 100;
-		$mode = isset( $settings['mode'] ) && 'pinned' === $settings['mode'] ? 'pinned' : 'flow';
+		$mode   = isset( $settings['mode'] ) && 'pinned' === $settings['mode'] ? 'pinned' : 'flow';
+		$start  = $this->slider( $settings, 'travel_start', 80, 0, 100 ) / 100;
+		$finish = $this->slider( $settings, 'travel_finish', 80, 0, 100 ) / 100;
+		$extra  = $this->slider( $settings, 'extra', 0, 0, 200 ) / 100;
 		?>
 		<div
 			class="erail"
 			data-erail-mode="<?php echo esc_attr( $mode ); ?>"
 			data-erail-pace="<?php echo esc_attr( (string) $pace ); ?>"
 			data-erail-hold="<?php echo esc_attr( (string) $hold ); ?>"
+			data-erail-start="<?php echo esc_attr( (string) $start ); ?>"
+			data-erail-finish="<?php echo esc_attr( (string) $finish ); ?>"
+			data-erail-extra="<?php echo esc_attr( (string) $extra ); ?>"
 		>
 			<div class="erail__stage">
 				<div class="erail__viewport">

@@ -134,10 +134,26 @@
 
 			distance = Math.max( 0, track.scrollWidth - viewport.clientWidth );
 
+			var height = window.innerHeight || document.documentElement.clientHeight || 0;
+
 			if ( 'pinned' !== mode ) {
-				// Flow adds nothing. This is the whole point of it.
+				stage.style.top = '';
+
+				// Flow adds nothing by default. Extra is opt-in, and it is the
+				// only thing here that costs the page any height at all.
+				var extra = readData( root, 'data-erail-extra', 0 );
+
+				if ( extra > 0 ) {
+					root.style.height = Math.round( stage.offsetHeight + extra * height ) + 'px';
+				}
+
 				return;
 			}
+
+			// Centred on the screen, from the height the stage turned out to
+			// be rather than the height it was asked for -- which is usually
+			// `auto`, because the cards decide it.
+			stage.style.top = Math.max( 0, Math.round( ( height - stage.offsetHeight ) / 2 ) ) + 'px';
 
 			// Spend one page-height of scrolling for each screen-width of row,
 			// so the sideways speed feels the same whatever the row's length.
@@ -167,22 +183,46 @@
 
 				raw = clamp01( -rect.top / span );
 			} else {
-				// The travel is the section's own passage across the screen:
-				// nought when its top edge is at the bottom of the window, one
-				// when its bottom edge is at the top. No page height is
-				// involved, which is why nothing below the rail moves.
-				var journey = height + rect.height;
+				/*
+				 * The travel happens while the section is on screen, not
+				 * across its whole journey on and off it.
+				 *
+				 * Spending the full journey is the obvious thing to do and it
+				 * is wrong: the row is already moving while the section is a
+				 * sliver at the bottom of the window, and it has finished
+				 * while the section is a sliver at the top, so the cards you
+				 * can actually see are the middle ones and the first and last
+				 * go past unread.
+				 *
+				 * Both ends are instead given as how much of the section has
+				 * to be on screen: `start` before the row sets off, `finish`
+				 * still showing when it arrives. One is the top edge of the
+				 * window the row travels in, the other is the bottom.
+				 *
+				 *   basis   the section, or the screen, whichever is smaller,
+				 *           so a section taller than the window measures
+				 *           against how much of the *screen* it fills
+				 *   tStart  where the section's top is when it sets off
+				 *   tEnd    where it is when the row is done
+				 */
+				var h = rect.height;
+				var basis = Math.min( h, height );
+				var tStart = height - basis * readData( root, 'data-erail-start', 0.8 );
+				var tEnd = basis * readData( root, 'data-erail-finish', 0.8 ) - h;
+				var span = tStart - tEnd;
 
-				if ( journey <= 0 ) {
-					return 0;
+				if ( span <= 0 ) {
+					return rect.top <= tEnd ? 1 : 0;
 				}
 
-				raw = clamp01( ( height - rect.top ) / journey );
+				return clamp01( ( tStart - rect.top ) / span );
 			}
 
-			// Ease the two ends so the row is still for a moment as it arrives
-			// and as it leaves, instead of snapping into motion on the frame
-			// the section reaches the top of the screen.
+			// Pinned only. The runway is one long stretch of scrolling with
+			// nothing else happening in it, so a moment of stillness at each
+			// end stops the row snapping into motion on the frame the section
+			// reaches the top of the screen. Flow has its start and finish
+			// controls for the same job.
 			if ( hold <= 0 || hold >= 0.5 ) {
 				return raw;
 			}
@@ -279,9 +319,17 @@
 			var rect = root.getBoundingClientRect();
 			var height = window.innerHeight || document.documentElement.clientHeight || 0;
 			var raw = hold > 0 && hold < 0.5 ? wanted * ( 1 - hold * 2 ) + hold : wanted;
-			var target = 'pinned' === mode
-				? window.pageYOffset + rect.top + raw * ( rect.height - stage.offsetHeight )
-				: window.pageYOffset + rect.top - height + raw * ( height + rect.height );
+			var target;
+
+			if ( 'pinned' === mode ) {
+				target = window.pageYOffset + rect.top + raw * ( rect.height - stage.offsetHeight );
+			} else {
+				var basis = Math.min( rect.height, height );
+				var tStart = height - basis * readData( root, 'data-erail-start', 0.8 );
+				var tEnd = basis * readData( root, 'data-erail-finish', 0.8 ) - rect.height;
+
+				target = window.pageYOffset + rect.top - tStart + wanted * ( tStart - tEnd );
+			}
 
 			window.scrollTo( { top: Math.round( target ), behavior: 'auto' } );
 			update();
