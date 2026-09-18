@@ -55,6 +55,10 @@ final class Motion_Presets {
 				'label' => esc_html__( 'Words Fade', 'numbered-accordion' ),
 				'split' => self::SPLIT_WORDS,
 			),
+			'words-build'   => array(
+				'label' => esc_html__( 'Words Build', 'numbered-accordion' ),
+				'split' => self::SPLIT_WORDS,
+			),
 			'chars-cascade' => array(
 				'label' => esc_html__( 'Characters Cascade', 'numbered-accordion' ),
 				'split' => self::SPLIT_CHARS,

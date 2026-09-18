@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.4.0
+Stable tag: 2.4.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,12 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.4.1 =
+* New "Words Build" preset: the sentence assembles a word at a time, each word
+  landing before the next begins. Unlike the existing staggered presets, which
+  have every word in flight at once, this one is deliberately sequential.
+  Duration and Stagger still apply; the preset scales them.
 
 = 2.4.0 =
 * New Smooth Scrolling module: eases the whole page's scrolling, the way a

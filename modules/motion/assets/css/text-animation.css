@@ -12,6 +12,7 @@
 .eanm-preset-fade-in       { --eanm-split: none; }
 .eanm-preset-words-up      { --eanm-split: words; }
 .eanm-preset-words-fade    { --eanm-split: words; }
+.eanm-preset-words-build  { --eanm-split: words; }
 .eanm-preset-chars-cascade { --eanm-split: chars; }
 .eanm-preset-chars-flip    { --eanm-split: chars; }
 .eanm-preset-lines-mask    { --eanm-split: lines; }
@@ -125,6 +126,25 @@
 .eanm-preset-scale-pop [data-eanm-ready] .eanm-i {
 	opacity: 0;
 	transform: scale(0.8);
+}
+
+/*
+ * Words Build assembles the sentence a word at a time.
+ *
+ * What separates a build from an ordinary stagger is not the movement, it is
+ * the timing: a stagger has every word in flight at once with offset starts,
+ * while a build lets each word land before the next one leaves. So the gap is
+ * stretched and each word's own move is shortened -- both relative to whatever
+ * the sliders say, so Duration and Stagger still do what the labels promise.
+ */
+.eanm-preset-words-build [data-eanm-ready] .eanm-i {
+	opacity: 0;
+	transform: translate3d(0, 0.18em, 0);
+}
+
+.eanm-preset-words-build [data-eanm-armed] .eanm-i {
+	transition-duration: calc(var(--eanm-duration, 800ms) * 0.35);
+	transition-delay: calc(var(--eanm-delay, 0ms) + var(--eanm-stagger, 60ms) * 2.6 * var(--eanm-i, 0));
 }
 
 /* fade-in and blur-in split nothing: the target element is itself the moving

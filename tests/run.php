@@ -340,10 +340,10 @@ check( 'a non-array yields no hint', '', Impact_Content::icon_sizes_attr( null )
 
 $presets = Motion_Presets::all();
 
-check( 'ten presets including none', 10, count( $presets ) );
+check( 'eleven presets including none', 11, count( $presets ) );
 check( 'none is present', true, isset( $presets['none'] ) );
 
-foreach ( array( 'fade-in', 'words-up', 'words-fade', 'chars-cascade', 'chars-flip', 'lines-mask', 'blur-in', 'scale-pop', 'slide-left' ) as $value ) {
+foreach ( array( 'fade-in', 'words-up', 'words-fade', 'words-build', 'chars-cascade', 'chars-flip', 'lines-mask', 'blur-in', 'scale-pop', 'slide-left' ) as $value ) {
 	check( "preset {$value} exists", true, isset( $presets[ $value ] ) );
 }
 
@@ -365,6 +365,7 @@ check( 'words-up splits by word', Motion_Presets::SPLIT_WORDS, Motion_Presets::s
 check( 'chars-flip splits by character', Motion_Presets::SPLIT_CHARS, Motion_Presets::split_mode( 'chars-flip' ) );
 check( 'lines-mask splits by line', Motion_Presets::SPLIT_LINES, Motion_Presets::split_mode( 'lines-mask' ) );
 check( 'blur-in does not split', Motion_Presets::SPLIT_NONE, Motion_Presets::split_mode( 'blur-in' ) );
+check( 'words-build splits by word', Motion_Presets::SPLIT_WORDS, Motion_Presets::split_mode( 'words-build' ) );
 check( 'fade-in does not split', Motion_Presets::SPLIT_NONE, Motion_Presets::split_mode( 'fade-in' ) );
 
 // Direction only means something for a preset that moves as one block.
