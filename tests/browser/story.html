@@ -2,15 +2,25 @@
 <link rel="stylesheet" href="../../modules/story/assets/css/scroll-story.css">
 <style>
  body{font:16px/1.6 system-ui;margin:0 auto;padding:0 40px;max-width:1280px}
- .estry{--estry-media-bw:3px;--estry-media-border:#052424;--estry-h-lit:#052424;--estry-b-lit:#3a4a4a}
+ .estry{--estry-media-bw:3px;--estry-media-border:#052424;--estry-h-lit:#052424;--estry-b-lit:#3a4a4a;--estry-radius:44px}
  .estry__title{font-size:2.4rem;line-height:1.1}
  .estry__body{font-size:1.25rem}
  .pad{height:60vh}
+
+ /*
+  * A hostile theme, on purpose. Nearly every WordPress theme ships the first
+  * of these and plenty of Elementor themes ship something like the second;
+  * either one used to be enough to shrink the media off the panel and leave
+  * the panel's background showing as a band. If the media still fills under
+  * this, it fills anywhere.
+  */
+ img,video{max-width:100%;height:auto}
+ .estry img,.estry video{width:auto;height:auto;object-fit:contain;max-height:60%}
 </style></head><body>
 <div class="pad"></div>
 <div class="estry"
      data-estry-lead="0.85" data-estry-tail="0.45" data-estry-switch="0.15"
-     data-estry-transition="wipe" style="--estry-drift-to:1.06">
+     data-estry-transition="reveal" style="--estry-drift-to:1.06">
  <div class="estry__items">
   <div class="estry__item">
    <span class="estry__eyebrow"><span class="estry__dot" aria-hidden="true"></span><span class="estry__eyebrow-text">Yard execution</span></span>
@@ -30,9 +40,11 @@
  </div>
  <div class="estry__media">
   <div class="estry__frame" data-estry-notch>
+   <!-- Deliberately awkward shapes and sizes: very tall, very wide, and one
+        far smaller than the panel it has to fill. -->
    <div class="estry__slide" data-estry-for="0"><div class="estry__inner"><img class="estry__img" id="im0" alt="one" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='1400'%3E%3Crect width='400' height='1400' fill='%238a5a3b'/%3E%3C/svg%3E"></div></div>
    <div class="estry__slide" data-estry-for="1"><div class="estry__inner"><img class="estry__img" id="im1" alt="two" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='400'%3E%3Crect width='1600' height='400' fill='%23244d4d'/%3E%3C/svg%3E"></div></div>
-   <div class="estry__slide" data-estry-for="2"><div class="estry__inner"><img class="estry__img" id="im2" alt="three" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect width='800' height='1000' fill='%23101010'/%3E%3C/svg%3E"></div></div>
+   <div class="estry__slide" data-estry-for="2"><div class="estry__inner"><img class="estry__img" id="im2" alt="three" width="60" height="40" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='40'%3E%3Crect width='60' height='40' fill='%23101010'/%3E%3C/svg%3E"></div></div>
   </div>
  </div>
 </div>

@@ -256,8 +256,13 @@ a real site.
       stays put and the incoming one arrives over it
 - [ ] Each of the four transitions plays, and each is mirrored when you scroll
       back up rather than repeating the downward version
-- [ ] An image of any shape fills the panel with no bars. Try a very tall one
-      and a very wide one
+- [ ] An image of any shape fills the panel with no bars. Try a very tall one,
+      a very wide one, and one far smaller than the panel — a small picture is
+      scaled up to fill, not centred in a gap
+- [ ] On a theme that styles images heavily, the media still fills. This is the
+      one that used to break in the wild and never in the test page
+- [ ] Let a change finish, then look hard at the top and bottom of the settled
+      picture: no band, no gradient, no veil left over from the transition
 - [ ] "Focal point" changes which part of a cropped image survives
 - [ ] A video item plays muted and looped while it is the one being read, and
       pauses when it is not
@@ -279,8 +284,17 @@ a real site.
       leaving it stretched or clipped
 - [ ] With a border width set, the border follows the notch instead of being
       clipped away, and it is the width asked for
-- [ ] Turning the notch off restores the corner radius control, the radius
-      works, and the border becomes an ordinary CSS border
+- [ ] **The notch depth, length and travel controls actually do something.**
+      All three were dead until 2.8.0 because the panel shadowed the value they
+      wrote
+- [ ] **A notched panel still has rounded corners**, the radius control works
+      with the notch on, and the border follows the corners as well as the
+      notch
+- [ ] Turn the radius up to its maximum with a long notch: the notch still has
+      a straight stretch of edge above and below it and never merges into a
+      corner
+- [ ] Turning the notch off leaves the radius working as an ordinary CSS
+      radius, and the border becomes an ordinary CSS border
 
 ### Labels and type
 

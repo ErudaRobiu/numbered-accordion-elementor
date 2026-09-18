@@ -733,13 +733,13 @@ class Scroll_Story_Widget extends Widget_Base {
 		$this->add_control(
 			'radius',
 			array(
-				'label'      => esc_html__( 'Corner radius', 'numbered-accordion' ),
-				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 64 ) ),
-				'default'    => array( 'unit' => 'px', 'size' => 16 ),
-				'selectors'  => array( '{{WRAPPER}} .estry' => '--estry-radius: {{SIZE}}px;' ),
-				'condition'  => array( 'notch!' => 'yes' ),
+				'label'       => esc_html__( 'Corner radius', 'numbered-accordion' ),
+				'description' => esc_html__( 'Applies with the notch on as well: the notch is built with rounded corners, and the band stays clear of them.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 96 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 16 ),
+				'selectors'   => array( '{{WRAPPER}} .estry' => '--estry-radius: {{SIZE}}px;' ),
 			)
 		);
 
@@ -828,10 +828,12 @@ class Scroll_Story_Widget extends Widget_Base {
 		$this->add_control(
 			'transition',
 			array(
-				'label'   => esc_html__( 'Transition', 'numbered-accordion' ),
-				'type'    => Controls_Manager::SELECT,
-				'default' => 'wipe',
-				'options' => array(
+				'label'       => esc_html__( 'Transition', 'numbered-accordion' ),
+				'description' => esc_html__( 'Every one of these is mirrored when you scroll back up, and the picture being replaced eases away underneath rather than sitting still.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'reveal',
+				'options'     => array(
+					'reveal'   => esc_html__( 'Reveal - a soft-edged sweep, both pictures visible through it', 'numbered-accordion' ),
 					'wipe'     => esc_html__( 'Wipe - a hard edge travels with the scroll', 'numbered-accordion' ),
 					'zoom'     => esc_html__( 'Zoom - arrives oversized and out of focus', 'numbered-accordion' ),
 					'push'     => esc_html__( 'Push - slides in over the one below', 'numbered-accordion' ),
@@ -972,7 +974,7 @@ class Scroll_Story_Widget extends Widget_Base {
 		$mode       = isset( $settings['label_mode'] ) ? $settings['label_mode'] : 'eyebrow';
 		$dot        = ! isset( $settings['eyebrow_dot'] ) || 'yes' === $settings['eyebrow_dot'];
 		$notched    = isset( $settings['notch'] ) && 'yes' === $settings['notch'];
-		$transition = isset( $settings['transition'] ) ? $settings['transition'] : 'wipe';
+		$transition = isset( $settings['transition'] ) ? $settings['transition'] : 'reveal';
 		$tag        = isset( $settings['title_tag'] ) ? $settings['title_tag'] : 'h3';
 		$tag        = in_array( $tag, array( 'h2', 'h3', 'h4', 'h5', 'div', 'span' ), true ) ? $tag : 'h3';
 

@@ -164,6 +164,16 @@
 }
 
 /*
+ * A notched panel keeps its corner radius. clip-path and border-radius clip
+ * the same box, so the radius cannot come from CSS here -- it is built into
+ * the generated path instead, which rounds all four corners and keeps the
+ * notch band clear of them. Zeroing it here stops the two fighting.
+ */
+.estry__frame[data-estry-notch] {
+	border-radius: 0;
+}
+
+/*
  * A plain CSS border can only be used when nothing is clipping the frame.
  * Under a notch it would be cut away with everything else outside the path,
  * so the notched panel is outlined by a stroked copy of the same path
@@ -182,16 +192,26 @@
  * is in user units and has to be rebuilt whenever the panel resizes. These two
  * properties are what it reads.
  *
- * clip-path replaces border-radius rather than combining with it -- both clip
- * the same box -- so a notched panel has square corners by design.
+ * The corner radius is built into the same path, so a notched panel is rounded
+ * like any other.
  */
-.estry__frame[data-estry-notch] {
-	border-radius: 0;
+/*
+ * The notch's three numbers are declared on .estry, not on the frame.
+ *
+ * Every control writes to `{{WRAPPER}} .estry`, and a custom property declared
+ * on the frame itself beats one inherited from an ancestor no matter how
+ * specific the ancestor's selector is. Declaring them here once killed the
+ * notch depth, length and travel controls outright: they wrote a value the
+ * frame then shadowed, and the panel never changed.
+ *
+ *   --estry-notch         how far the notch cuts in
+ *   --estry-band-size     the straight length of the inset section
+ *   --estry-notch-travel  how much of the panel's height the band crosses,
+ *                         the rest being split evenly above and below it
+ */
+.estry {
 	--estry-notch: 30px;
 	--estry-band-size: 280px;
-	/* How much of the panel's height the band crosses. The rest is split
-	   evenly above and below it, which is what keeps the notch clear of both
-	   corners however tall the panel is. */
 	--estry-notch-travel: 40;
 }
 
@@ -247,16 +267,37 @@
 	filter: blur(0);
 }
 
-.estry__img,
-.estry__vid {
+/*
+ * Cover, always, and not negotiable.
+ *
+ * The panel is a fixed height and the media is whatever shape and whatever
+ * size someone uploads; anything but a filled box leaves the panel's own
+ * background showing through as a band. `object-fit: cover` scales a small
+ * picture up as happily as it crops a large one, so size is not the problem --
+ * being overruled is. Nearly every theme ships `img { height: auto }` and many
+ * Elementor themes reach further than that, at a specificity this cannot beat
+ * from a plugin stylesheet. These four are therefore forced.
+ *
+ * The transition is for the hand-off out of the drift: when a slide stops
+ * being the active one its animation is removed and the computed transform
+ * jumps back, which is visible through a feathered entrance unless it is
+ * eased.
+ */
+.estry .estry__img,
+.estry .estry__vid {
 	display: block;
-	width: 100%;
-	height: 100%;
-	/* Cover, always. The panel is a fixed height and the media is whatever
-	   shape it is; anything but cover leaves the frame showing through. */
-	object-fit: cover;
-	object-position: var(--estry-obj-pos, 50% 50%);
+	position: absolute;
+	inset: 0;
+	width: 100% !important;
+	height: 100% !important;
+	min-width: 100%;
+	min-height: 100%;
+	max-width: none;
+	max-height: none;
+	object-fit: cover !important;
+	object-position: var(--estry-obj-pos, 50% 50%) !important;
 	will-change: transform;
+	transition: transform var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 /*
@@ -274,6 +315,8 @@
 .estry__slide {
 	transition:
 		clip-path var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1)),
+		-webkit-mask-position var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1)),
+		mask-position var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1)),
 		transform var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1)),
 		opacity var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1));
 }
@@ -366,6 +409,78 @@
 }
 
 /*
+ * Reveal: a soft-edged sweep, and the default.
+ *
+ * A hard wipe announces itself as an effect. This is the same move with the
+ * edge feathered, done with a mask three times the panel's height that slides
+ * across it. Only mask-position animates, which is cheap and, unlike a
+ * gradient whose stops move, actually interpolates everywhere.
+ *
+ * The stops are not free choices. The panel is one third of the mask, so the
+ * settled window is the mask's last third and the hidden window is its first:
+ * anything other than solid across 66.7%-100% leaves a permanent veil over
+ * part of a settled picture, and anything other than clear across 0%-33.3%
+ * means the entrance starts already half visible. The feather therefore has
+ * to live strictly between them -- here 45% to 60%, which is 45% of the
+ * panel's height of soft edge.
+ *
+ * Because the edge is soft you see both pictures at once through it, which is
+ * what makes the counter-move below worth having.
+ */
+[data-estry-transition="reveal"] .estry__slide {
+	--estry-mask-dir: to bottom;
+	--estry-mask-hidden: 0% 0%;
+	--estry-mask-shown: 0% 100%;
+	-webkit-mask-image: linear-gradient(var(--estry-mask-dir), transparent 0%, transparent 45%, #000 60%, #000 100%);
+	mask-image: linear-gradient(var(--estry-mask-dir), transparent 0%, transparent 45%, #000 60%, #000 100%);
+	-webkit-mask-size: 100% 300%;
+	mask-size: 100% 300%;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: var(--estry-mask-shown);
+	mask-position: var(--estry-mask-shown);
+}
+
+[data-estry-transition="reveal"][data-estry-dir="up"] .estry__slide {
+	--estry-mask-dir: to top;
+	--estry-mask-hidden: 0% 100%;
+	--estry-mask-shown: 0% 0%;
+}
+
+[data-estry-transition="reveal"] .estry__slide.is-entering {
+	-webkit-mask-position: var(--estry-mask-hidden);
+	mask-position: var(--estry-mask-hidden);
+}
+
+[data-estry-transition="reveal"] .estry__slide.is-entering .estry__inner {
+	transform: scale(1.12) translateY(-3%);
+}
+
+[data-estry-transition="reveal"][data-estry-dir="up"] .estry__slide.is-entering .estry__inner {
+	transform: scale(1.12) translateY(3%);
+}
+
+/*
+ * The counter-move. The picture being replaced eases back and away while the
+ * new one arrives over it, so for the length of the change the panel has two
+ * things moving at different speeds rather than one thing moving and one thing
+ * sitting still. Under a feathered entrance you can see it happen; under a
+ * hard-edged one it is doing no harm.
+ *
+ * The drift is held at its end value here rather than released, because
+ * dropping a finished animation snaps the transform back, and the snap is
+ * exactly what this is trying to avoid.
+ */
+.estry__slide.is-leaving .estry__inner {
+	transform: scale(0.94);
+}
+
+.estry__slide.is-leaving .estry__img,
+.estry__slide.is-leaving .estry__vid {
+	transform: scale(var(--estry-drift-to, 1.06));
+}
+
+/*
  * Without the script the slides are a plain stack, so the last one in the
  * markup would win. Showing the first is the sensible no-JavaScript state.
  */
@@ -409,6 +524,11 @@
 	.estry__slide,
 	.estry__inner {
 		transition: none;
+	}
+
+	[data-estry-transition="reveal"] .estry__slide {
+		-webkit-mask-image: none;
+		mask-image: none;
 	}
 
 	.estry__slide[data-estry-on] .estry__img,

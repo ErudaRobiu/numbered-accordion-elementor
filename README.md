@@ -382,12 +382,29 @@ in a clip path is in user units: `clip-path: path()` and an SVG `clipPath` with
 `userSpaceOnUse` both need rebuilding whenever the panel resizes. A polygon in
 percentages would scale on its own but cannot hold a fixed-radius curve.
 
-Because `clip-path` and `border-radius` clip the same box, a notched panel has
-square corners by design; the radius control appears only when the notch is
-off. A CSS border is clipped away for the same reason, so the panel's border is
-a stroked copy of the same path, drawn at twice the asked-for width and clipped
-by that path — which leaves exactly the asked-for width on the inside of the
-edge, notch included.
+`clip-path` and `border-radius` clip the same box, so a notched panel cannot
+take a radius from CSS. It takes one from the path instead: all four corners
+are arcs in the same `d`, and the band is kept between them rather than between
+the corners, so a panel can have a notch and a 96px radius at once and the two
+can never meet. A CSS border is clipped away for the same reason, so the
+panel's border is a stroked copy of that path, drawn at twice the asked-for
+width and clipped by it — which leaves exactly the asked-for width on the
+inside of the edge, corners and notch included.
+
+The band also never consumes all the room it has: one shoulder's worth is held
+back so there is always a straight stretch of edge between the notch and each
+corner. Without that, a generous radius or a long band puts the notch's first
+contact exactly where the corner curve begins and the two read as one dent. On
+the reference's own proportions the reserve changes nothing — it has room to
+spare, which is how `tests/browser/story-probe.js` can still reproduce its
+66.25 and 460.25 to the decimal.
+
+**The notch's three numbers are declared on `.estry`, not on the frame.** Every
+control writes to `{{WRAPPER}} .estry`, and a custom property declared on the
+frame itself beats one inherited from an ancestor however specific that
+ancestor's selector is. Declaring the defaults on `.estry__frame` silently
+killed the notch depth, length and travel controls: they wrote a value the
+frame then shadowed.
 
 **The panel is centred on the screen, always.** Its sticky offset is derived
 from its own height rather than set directly, so changing the panel height, the
@@ -405,10 +422,30 @@ scrolling down rather than a repeat of it:
 
 | | |
 |---|---|
+| Reveal | a soft-edged sweep, both pictures visible through the feather — the default |
 | Wipe | a hard edge travels with the scroll, over a picture already oversized and relaxing into place |
 | Zoom | arrives oversized and out of focus, resolves as it lands |
 | Push | slides in over the one below |
 | Dissolve | a plain cross-fade |
+
+Reveal is a mask three times the panel's height sliding across it, so only
+`mask-position` animates — cheap, and unlike a gradient whose stops move, it
+interpolates everywhere. Its stops are not free choices. The panel is one third
+of the mask, so the settled window is the mask's last third and the hidden
+window is its first: anything but solid across 66.7–100% leaves a permanent
+veil over part of a picture that has finished arriving, and anything but clear
+across 0–33.3% means the entrance starts already half visible. The first
+attempt had the feather ending at 70% and left a band across the top of every
+settled panel, subtle enough to pass a visual check and be caught only by
+sampling the pixels — which the probe now does.
+
+Because that edge is soft you see both pictures through it, which is what makes
+the counter-move worth having: the picture being replaced eases back and away
+while the new one arrives over it, so for the length of a change the panel has
+two things moving at different speeds rather than one moving and one sitting
+still. The drift is held at its end value during that, because dropping a
+finished animation snaps the transform back and the snap is what it is there to
+avoid.
 
 Three layers do this, because one element cannot hold two transforms or two
 clip paths: `.estry__slide` owns the entrance edge, `.estry__inner` owns the
@@ -418,8 +455,14 @@ running keyframe animation wins outright over a transitioned transform on the
 same element, and swallows the parallax whole.
 
 Media always fills the panel: `object-fit: cover`, with the focal point as a
-control. There is no shape of image that can leave the panel's background
-showing.
+control. `cover` scales a small picture up as happily as it crops a large one,
+so no shape or size of image can leave the panel's background showing — being
+overruled is the only real risk, and nearly every theme ships
+`img { height: auto }` at a specificity a plugin stylesheet cannot beat. Width,
+height, `object-fit` and `object-position` are therefore forced, and
+`tests/browser/story.html` carries a deliberately hostile theme block so the
+probe proves it: a 60×40 picture fills a 576×792 panel under
+`width: auto; height: auto; object-fit: contain; max-height: 60%`.
 
 **What was not copied:** their panel is a `<canvas>` playing a scroll-scrubbed
 image sequence, which needs hundreds of exported frames and a decode pipeline.

@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.7.0
+Stable tag: 2.8.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,26 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.8.0 =
+* Fix: the notch depth, length and travel controls did nothing. Their defaults
+  were declared on the panel itself, which overrode the value the controls
+  wrote onto its container.
+* A notched panel now keeps its corner radius. The corners are built into the
+  same generated path as the notch, and the notch band is kept between them, so
+  the two can never meet. The radius control is no longer hidden when the notch
+  is on, and the panel's border follows the rounded corners too.
+* The notch always leaves a straight stretch of edge between itself and each
+  corner, so a generous radius or a long band can no longer leave it starting
+  exactly where the corner curve does.
+* New "Reveal" transition, now the default: a soft-edged sweep with both
+  pictures visible through the feather.
+* The picture being replaced now eases back and away while the new one arrives
+  over it, rather than sitting still underneath.
+* Fix: media could still be shrunk off the panel by a theme's own
+  `img { height: auto }` rule, leaving the panel's background showing as a
+  band. Size, fit and focal point are now forced and cannot be overridden.
+  A picture smaller than the panel is scaled up to fill it.
 
 = 2.7.0 =
 * The Scroll Story highlight now follows your scroll instead of playing on a

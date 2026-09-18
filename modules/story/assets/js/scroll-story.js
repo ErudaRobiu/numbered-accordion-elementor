@@ -63,40 +63,62 @@
 	 * Generated in script rather than written as CSS because a curve in a clip
 	 * path is in user units: it has to be rebuilt whenever the panel resizes.
 	 *
+	 * The four corners are rounded in the same path. They have to be: a
+	 * clip path and a border radius clip the same box, so a notched panel
+	 * cannot take its radius from CSS. Rounding them here is what lets a panel
+	 * have both, and the band is kept inside the corner arcs so the two can
+	 * never meet.
+	 *
 	 * @param {number} w        Panel width.
 	 * @param {number} h        Panel height.
 	 * @param {number} depth    How far the notch cuts in.
 	 * @param {number} run      Straight length of the inset section.
 	 * @param {number} progress How far through the section, 0 to 1.
 	 * @param {number} span     Share of the panel height the band travels.
+	 * @param {number} radius   Corner radius.
 	 * @return {string} An SVG path.
 	 */
-	function notchPath( w, h, depth, run, progress, span ) {
+	function notchPath( w, h, depth, run, progress, span, radius ) {
 		var r = 0.939 * depth;
 		var arcRise = 0.4933 * depth;
 		var arcRun = 0.1405 * depth;
 		var diagRise = 1.1633 * depth;
 		var transition = 2.15 * depth;
+		var c = Math.max( 0, Math.min( radius, w / 2, h / 2 ) );
 
-		// Keep the whole notch on the panel, however short the panel is.
+		// The band lives between the corner arcs, not between the corners.
+		var usable = Math.max( 0, h - c * 2 );
 		var needed = run + transition * 2;
 
-		if ( needed > h ) {
-			run = Math.max( 0, h - transition * 2 );
+		if ( needed > usable ) {
+			run = Math.max( 0, usable - transition * 2 );
 			needed = run + transition * 2;
 		}
 
-		var free = Math.max( 0, h - needed );
-		var travel = Math.min( span * h, free );
-		var top = ( free - travel ) / 2 + clamp01( progress ) * travel;
+		/*
+		 * The band never consumes all the room it has. One shoulder's worth is
+		 * held back so there is always a straight stretch of edge between the
+		 * notch and each corner -- without it, a generous corner radius or a
+		 * long band leaves the notch starting exactly where the corner curve
+		 * does, and the two read as one dent. On the reference's proportions
+		 * this reserve changes nothing: it has room to spare.
+		 */
+		var free = Math.max( 0, usable - needed );
+		var reserve = Math.min( transition, free * 0.4 );
+		var travel = Math.min( span * h, Math.max( 0, free - reserve ) );
+		var top = c + ( free - travel ) / 2 + clamp01( progress ) * travel;
 		var bottom = top + needed;
 
-		// Down the left edge, into the notch, along it, and back out.
+		// Round the top, down the right, round the bottom, then up the left
+		// edge, into the notch, along it, and back out.
 		return [
-			'M 0,0',
-			'L ' + w + ',0',
-			'L ' + w + ',' + h,
-			'L 0,' + h,
+			'M ' + c.toFixed( 2 ) + ',0',
+			'L ' + ( w - c ).toFixed( 2 ) + ',0',
+			'A ' + c.toFixed( 2 ) + ',' + c.toFixed( 2 ) + ' 0 0 1 ' + w + ',' + c.toFixed( 2 ),
+			'L ' + w + ',' + ( h - c ).toFixed( 2 ),
+			'A ' + c.toFixed( 2 ) + ',' + c.toFixed( 2 ) + ' 0 0 1 ' + ( w - c ).toFixed( 2 ) + ',' + h,
+			'L ' + c.toFixed( 2 ) + ',' + h,
+			'A ' + c.toFixed( 2 ) + ',' + c.toFixed( 2 ) + ' 0 0 1 0,' + ( h - c ).toFixed( 2 ),
 			'L 0,' + bottom.toFixed( 2 ),
 			'A ' + r.toFixed( 2 ) + ',' + r.toFixed( 2 ) + ' 0 0 1 ' + arcRun.toFixed( 2 ) + ',' + ( bottom - arcRise ).toFixed( 2 ),
 			'L ' + ( depth - arcRun ).toFixed( 2 ) + ',' + ( bottom - arcRise - diagRise ).toFixed( 2 ),
@@ -105,6 +127,8 @@
 			'A ' + r.toFixed( 2 ) + ',' + r.toFixed( 2 ) + ' 0 0 0 ' + ( depth - arcRun ).toFixed( 2 ) + ',' + ( top + arcRise + diagRise ).toFixed( 2 ),
 			'L ' + arcRun.toFixed( 2 ) + ',' + ( top + arcRise ).toFixed( 2 ),
 			'A ' + r.toFixed( 2 ) + ',' + r.toFixed( 2 ) + ' 0 0 1 0,' + top.toFixed( 2 ),
+			'L 0,' + c.toFixed( 2 ),
+			'A ' + c.toFixed( 2 ) + ',' + c.toFixed( 2 ) + ' 0 0 1 ' + c.toFixed( 2 ) + ',0',
 			'Z',
 		].join( ' ' );
 	}
@@ -394,6 +418,7 @@
 		var current = -1;
 		var shown = -1;
 		var zTop = 0;
+		var leaveTimer = null;
 
 		/**
 		 * Bring a slide to the top of the stack.
@@ -430,6 +455,25 @@
 			}
 
 			if ( arm && ! reduced ) {
+				var previous = shown > -1 ? slides[ shown ] : null;
+
+				// The picture being replaced eases back while the new one
+				// arrives over it. Under a feathered entrance both are on
+				// screen at once, and two things moving at different speeds is
+				// the difference between a change and a swap.
+				slides.forEach( function ( other ) {
+					other.classList.remove( 'is-leaving' );
+				} );
+
+				if ( previous && previous !== slide ) {
+					previous.classList.add( 'is-leaving' );
+
+					window.clearTimeout( leaveTimer );
+					leaveTimer = window.setTimeout( function () {
+						previous.classList.remove( 'is-leaving' );
+					}, readNumber( root, '--estry-fade', 900 ) + 80 );
+				}
+
 				// Putting the slide into its entrance state must not itself
 				// animate, so transitions are switched off for exactly as
 				// long as it takes the browser to record that state.
@@ -499,7 +543,8 @@
 				var depth = readNumber( frame, '--estry-notch', 30 );
 				var run = readNumber( frame, '--estry-band-size', 280 );
 				var span = readNumber( frame, '--estry-notch-travel', 40 ) / 100;
-				var d = notchPath( w, h, depth, run, through, span );
+				var corner = readNumber( frame, '--estry-radius', 16 );
+				var d = notchPath( w, h, depth, run, through, span, corner );
 
 				clipPath.setAttribute( 'd', d );
 
