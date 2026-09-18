@@ -3,7 +3,7 @@
  * Plugin Name:       Eruda Toolkit
  * Plugin URI:        https://erudarobiu.com/
  * Description:       A small toolkit of site-building modules for Elementor: a numbered accordion, an impact grid, a scroll story, text animations and smooth scrolling, plus a page duplicator.
- * Version:           2.6.0
+ * Version:           2.6.1
  * Author:            Eruda Robiu
  * Author URI:        https://erudarobiu.com/
  * License:           GPL-2.0-or-later
@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'ERUDA_VERSION', '2.6.0' );
+define( 'ERUDA_VERSION', '2.6.1' );
 define( 'ERUDA_FILE', __FILE__ );
 define( 'ERUDA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ERUDA_URL', plugin_dir_url( __FILE__ ) );
@@ -148,16 +148,23 @@ add_action(
 );
 
 /**
- * Never auto-update this plugin.
+ * Install this plugin's own updates, unless told not to.
  *
- * The update notice appears in wp-admin, but installing it stays a deliberate
- * click. A bad release must not roll itself out across live client sites.
+ * Until 2.7.0 this always returned false, on the reasoning that a bad release
+ * must not roll itself out across live client sites. That reasoning is sound
+ * and the risk is real -- it is now a setting rather than a rule, defaulting
+ * to on, and Settings -> Eruda Toolkit turns it off per site.
+ *
+ * What makes the default defensible is that bin/release.sh refuses to build
+ * unless every file parses and the test suite passes, and that the animations
+ * are measured in a real browser before a release is cut. See
+ * tests/browser/README.md for why that last part exists.
  */
 add_filter(
 	'auto_update_plugin',
 	function ( $update, $item ) {
 		if ( isset( $item->plugin ) && plugin_basename( ERUDA_FILE ) === $item->plugin ) {
-			return false;
+			return \ErudaToolkit\Toolkit::auto_update_enabled( get_option( \ErudaToolkit\Toolkit::OPTION, array() ) );
 		}
 		return $update;
 	},

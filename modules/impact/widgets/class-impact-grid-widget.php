@@ -59,7 +59,7 @@ class Impact_Grid_Widget extends Widget_Base {
 	 * @return array
 	 */
 	public function get_categories() {
-		return array( 'general' );
+		return array( \ErudaToolkit\Panel_Category::SLUG );
 	}
 
 	/**

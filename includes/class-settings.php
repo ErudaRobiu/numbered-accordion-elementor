@@ -98,6 +98,10 @@ final class Settings {
 			$clean[ $id ] = ! empty( $submitted[ $id ] );
 		}
 
+		// Not a module, so it has to be carried across by hand or saving the
+		// page would silently switch it back on.
+		$clean[ Toolkit::AUTO_UPDATE ] = ! empty( $submitted[ Toolkit::AUTO_UPDATE ] );
+
 		return $clean;
 	}
 
@@ -159,6 +163,29 @@ final class Settings {
 						<?php
 					}
 					?>
+					</tbody>
+				</table>
+
+				<h2><?php esc_html_e( 'Updates', 'numbered-accordion' ); ?></h2>
+
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Automatic updates', 'numbered-accordion' ); ?></th>
+							<td>
+								<label for="eruda-auto-update">
+									<input type="checkbox"
+										id="eruda-auto-update"
+										name="<?php echo esc_attr( Toolkit::OPTION . '[' . Toolkit::AUTO_UPDATE . ']' ); ?>"
+										value="1"
+										<?php checked( Toolkit::auto_update_enabled( $stored ) ); ?> />
+									<?php esc_html_e( 'Install new versions of Eruda Toolkit automatically.', 'numbered-accordion' ); ?>
+								</label>
+								<p class="description">
+									<?php esc_html_e( 'Off means updates still appear in Dashboard \u2192 Updates, but installing one stays a deliberate click.', 'numbered-accordion' ); ?>
+								</p>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 

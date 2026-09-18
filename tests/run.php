@@ -576,6 +576,95 @@ check( 'six modules ship', 6, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
+/* ----------------------------------------------------- auto update --- */
+
+// A missing key means yes, which is what turns it on for sites installed
+// before the setting existed.
+check( 'auto update is on by default', true, Toolkit::auto_update_enabled( array() ) );
+check( 'a new install inherits it', true, Toolkit::auto_update_enabled( array( 'accordion' => true ) ) );
+check( 'it can be switched off', false, Toolkit::auto_update_enabled( array( Toolkit::AUTO_UPDATE => false ) ) );
+check( 'stored "0" is off', false, Toolkit::auto_update_enabled( array( Toolkit::AUTO_UPDATE => '0' ) ) );
+check( 'stored "1" is on', true, Toolkit::auto_update_enabled( array( Toolkit::AUTO_UPDATE => '1' ) ) );
+check( 'a corrupt option falls back to on', true, Toolkit::auto_update_enabled( 'not an array' ) );
+
+// It lives in the module option but must never be mistaken for a module.
+check( 'the key is reserved', '_auto_update', Toolkit::AUTO_UPDATE );
+check( 'it is not a module id', false, in_array( Toolkit::AUTO_UPDATE, Toolkit::instance()->ids(), true ) );
+
+foreach ( Toolkit::instance()->ids() as $id ) {
+	check( "module id {$id} cannot collide with the reserved key", true, 0 !== strpos( $id, '_' ) );
+}
+
+/* --------------------------------------------------- panel category --- */
+
+// All three widgets belong in the plugin's own section of the panel, not
+// scattered through Elementor's General.
+foreach ( array(
+	'modules/accordion/widgets/class-numbered-accordion-widget.php',
+	'modules/impact/widgets/class-impact-grid-widget.php',
+	'modules/story/widgets/class-scroll-story-widget.php',
+) as $relative ) {
+	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
+
+	check( "{$relative} uses the plugin's panel category", true, false !== strpos( $source, 'Panel_Category::SLUG' ) );
+	check( "{$relative} is no longer in General", false, false !== strpos( $source, "array( 'general' )" ) );
+}
+
+check( 'the category slug', 'eruda-toolkit', \ErudaToolkit\Panel_Category::SLUG );
+
+/* ------------------------------------------- module / widget wiring --- */
+
+/*
+ * Every widget class a module registers must actually exist.
+ *
+ * Both 2.3.0 and 2.6.0 shipped a feature that was simply absent from the
+ * Elementor panel, because register_widgets() is guarded by class_exists() and
+ * a name that matches nothing fails silently. The widget files cannot be
+ * loaded here -- they extend Elementor's Widget_Base -- so this reads the
+ * names out of the source instead, which is enough to catch a typo or a
+ * rename.
+ */
+$module_files = array(
+	'modules/accordion/class-accordion-module.php',
+	'modules/impact/class-impact-module.php',
+	'modules/story/class-story-module.php',
+);
+
+foreach ( $module_files as $relative ) {
+	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
+
+	// The fully-qualified names this module expects to instantiate.
+	preg_match_all( '/class_exists\(\s*\x27(\\\\ErudaToolkit\\\\Modules\\\\[A-Za-z_\\\\]+)\x27/', $source, $matches );
+
+	$wanted = isset( $matches[1] ) ? $matches[1] : array();
+
+	check( "{$relative} names a widget class", true, count( $wanted ) > 0 );
+
+	foreach ( $wanted as $fqn ) {
+		$short = substr( $fqn, strrpos( $fqn, '\\' ) + 1 );
+
+		// It must also be the one new'd up a line later.
+		check(
+			"{$relative} instantiates {$short}",
+			true,
+			false !== strpos( $source, 'new Widgets\\' . $short . '(' )
+		);
+
+		// And a file in that module must declare it.
+		$module_dir = dirname( __DIR__ ) . '/' . dirname( $relative ) . '/widgets';
+		$declared   = false;
+
+		foreach ( (array) glob( $module_dir . '/*.php' ) as $widget_file ) {
+			if ( preg_match( '/class\s+' . preg_quote( $short, '/' ) . '\s+extends/', (string) file_get_contents( $widget_file ) ) ) {
+				$declared = true;
+				break;
+			}
+		}
+
+		check( "{$short} is declared by a file in {$module_dir}", true, $declared );
+	}
+}
+
 /* ------------------------------------------------- SmoothScroll_Module --- */
 
 // Needs no Elementor: a classic theme gets the same benefit.

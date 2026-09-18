@@ -153,8 +153,8 @@ final class Story_Module implements Module {
 
 			require_once ERUDA_PATH . 'modules/story/widgets/class-scroll-story-widget.php';
 
-			if ( class_exists( '\ErudaToolkit\Modules\Story\Widgets\Story_Grid_Widget' ) ) {
-				$widgets_manager->register( new Widgets\Story_Grid_Widget() );
+			if ( class_exists( '\ErudaToolkit\Modules\Story\Widgets\Scroll_Story_Widget' ) ) {
+				$widgets_manager->register( new Widgets\Scroll_Story_Widget() );
 			}
 		} catch ( \Throwable $e ) {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {

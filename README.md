@@ -64,6 +64,29 @@ that order, with the accordion missing from live pages in between.
 
 The text domain stays `numbered-accordion` for the same reason.
 
+### Widgets register through a silent guard
+
+`register_widgets()` is wrapped in `class_exists()` so a malformed widget
+cannot take the editor down. The cost is that a widget class named wrongly
+simply never appears, with no error anywhere. That has now shipped twice:
+2.3.0, where the controls hook never matched, and 2.6.0, where a search and
+replace left the module looking for `Story_Grid_Widget` while the file
+declared `Scroll_Story_Widget`.
+
+`tests/run.php` now reads the names out of the module sources and checks that
+some file in that module's `widgets/` directory declares each one. The widget
+files cannot be loaded in the test suite -- they extend Elementor's
+`Widget_Base` -- so a static check is the most that is available, and it is
+enough to catch a typo or a rename.
+
+### Everything lives in one panel category
+
+`includes/class-panel-category.php` registers an "Eruda Toolkit" section and
+every widget returns its slug from `get_categories()`. Registered once from
+`Toolkit::boot()` rather than per module, so three modules do not race to
+create the same category. The slug is panel-only: Elementor saves a widget's
+name in a layout, never its category, so changing it cannot affect a live page.
+
 ### Strings that must never change
 
 Live client pages carry these inside saved Elementor JSON. Change one and

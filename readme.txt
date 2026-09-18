@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.6.0
+Stable tag: 2.6.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,18 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.6.1 =
+* Fix: the Scroll Story widget never appeared in the Elementor panel. The
+  module looked for a widget class under the wrong name, and that check fails
+  silently by design, so 2.6.0 shipped the widget without a way to add it.
+* All of this plugin's widgets now live in their own "Eruda Toolkit" section of
+  the widget panel instead of being mixed into General.
+* New "Automatic updates" setting, on by default: Eruda Toolkit installs its
+  own updates. Turn it off in Settings > Eruda Toolkit to go back to a
+  deliberate click.
+* Tests now assert that every widget class a module registers actually exists,
+  which is what would have caught this release's bug and 2.3.0's.
 
 = 2.6.0 =
 * New "Scroll Story" widget: numbered text items on the left, a pinned panel on

@@ -75,6 +75,9 @@ final class Toolkit {
 	public function boot() {
 		Settings::instance()->boot();
 
+		require_once ERUDA_PATH . 'includes/class-panel-category.php';
+		Panel_Category::boot();
+
 		foreach ( array_keys( self::$registry ) as $id ) {
 			$class = $this->load( $id );
 
@@ -133,6 +136,31 @@ final class Toolkit {
 	 */
 	public function ids() {
 		return array_keys( self::$registry );
+	}
+
+	/**
+	 * Key for the auto-update preference, kept in the same option.
+	 *
+	 * The leading underscore is what keeps it out of the module namespace: a
+	 * module id is a directory name and can never start with one.
+	 */
+	const AUTO_UPDATE = '_auto_update';
+
+	/**
+	 * Should this plugin install its own updates?
+	 *
+	 * A missing key counts as yes, which is what turns it on for sites that
+	 * were installed before the setting existed.
+	 *
+	 * @param array $stored The stored option value.
+	 * @return bool
+	 */
+	public static function auto_update_enabled( $stored ) {
+		if ( ! is_array( $stored ) || ! array_key_exists( self::AUTO_UPDATE, $stored ) ) {
+			return true;
+		}
+
+		return (bool) $stored[ self::AUTO_UPDATE ];
 	}
 
 	/**

@@ -21,6 +21,11 @@ The 2.0.0 rebrand is display-only, and this is the part most worth proving.
 ## Modules and settings
 
 - [ ] **Settings → Eruda Toolkit** lists all six modules, all checked
+- [ ] The widget panel has an "Eruda Toolkit" section holding the accordion,
+      the impact grid and the scroll story, and none of them appear in General
+- [ ] **Automatic updates** is checked by default; unchecking it and saving
+      makes an available update wait for a deliberate click
+- [ ] With automatic updates on, a new release installs itself within a day
 - [ ] Unchecking Duplicate Pages and saving removes the Duplicate row action
 - [ ] Unchecking Numbered Accordion and saving removes the widget from the
       Elementor panel
@@ -219,6 +224,8 @@ mechanics. These are the things only a real site shows.
 `tests/browser/story.html` covers the tracking, the cross-fade and the notch.
 These need a real site.
 
+- [ ] **Scroll Story is actually in the panel.** Search the widget panel for
+      "Scroll Story" and add it. 2.6.0 shipped without it being addable at all
 - [ ] Dropping the widget in gives three items and a pinned panel
 - [ ] Scrolling lights each item in turn, and the panel cross-fades to that
       item's image
