@@ -571,7 +571,8 @@ check( 'travel hides when nothing moves', 'none', $controls['eanm_distance']['co
 
 check( 'the motion module is registered', true, in_array( 'motion', Toolkit::instance()->ids(), true ) );
 check( 'the smooth scroll module is registered', true, in_array( 'smoothscroll', Toolkit::instance()->ids(), true ) );
-check( 'five modules ship', 5, count( Toolkit::instance()->ids() ) );
+check( 'the scroll story module is registered', true, in_array( 'story', Toolkit::instance()->ids(), true ) );
+check( 'six modules ship', 6, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 

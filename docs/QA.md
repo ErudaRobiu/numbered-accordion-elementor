@@ -20,7 +20,7 @@ The 2.0.0 rebrand is display-only, and this is the part most worth proving.
 
 ## Modules and settings
 
-- [ ] **Settings → Eruda Toolkit** lists all five modules, all checked
+- [ ] **Settings → Eruda Toolkit** lists all six modules, all checked
 - [ ] Unchecking Duplicate Pages and saving removes the Duplicate row action
 - [ ] Unchecking Numbered Accordion and saving removes the widget from the
       Elementor panel
@@ -213,3 +213,29 @@ mechanics. These are the things only a real site shows.
       neither lenis.min.js nor lenis.css is loaded
 - [ ] A very long page still reaches the bottom, and the scrollbar is the right
       length
+
+## Scroll Story
+
+`tests/browser/story.html` covers the tracking, the cross-fade and the notch.
+These need a real site.
+
+- [ ] Dropping the widget in gives three items and a pinned panel
+- [ ] Scrolling lights each item in turn, and the panel cross-fades to that
+      item's image
+- [ ] Each letter passes through the flash colour on its way from waiting to
+      read, rather than fading straight across
+- [ ] An item with no image leaves the previous image showing rather than
+      going blank
+- [ ] The panel stays pinned for the whole section and releases at the end
+- [ ] "Pin below" clears a sticky site header
+- [ ] The notch travels down the panel's left edge as you scroll the section
+- [ ] Turning the notch off restores the corner radius control, and the radius
+      works
+- [ ] Below 1024px the panel stops being pinned, sits above the text, and the
+      text reads as an ordinary column
+- [ ] With JavaScript disabled: every item's text is readable in its read
+      colour, and the first image is visible
+- [ ] With Reduce Motion on: no letter sweep, no cross-fade scaling; the
+      section still tracks and is still readable
+- [ ] Editing an item in the editor re-renders it and the tracking still works
+- [ ] Two Scroll Story widgets on one page track independently

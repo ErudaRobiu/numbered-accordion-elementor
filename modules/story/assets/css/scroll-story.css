@@ -1,0 +1,180 @@
+/**
+ * Eruda Toolkit - Scroll Story
+ *
+ * A column of text items on the left, a pinned panel on the right that
+ * cross-fades to whichever item you are reading.
+ *
+ * Two rules govern everything here, both the same rule really: if the script
+ * never runs, the section must still be complete and readable.
+ *
+ *   - Text is its lit colour by default. The dim colour is only applied under
+ *     [data-estry-ready], which only the script sets. A stylesheet that dimmed
+ *     text on its own would leave #ddd text on white for anyone whose
+ *     JavaScript failed.
+ *   - The first image shows by default. The script takes over only once it has
+ *     marked the panel ready.
+ */
+
+.estry {
+	display: grid;
+	grid-template-columns: var(--estry-text, 1fr) var(--estry-media, 1fr);
+	gap: var(--estry-gap, 48px);
+	align-items: start;
+}
+
+/* ------------------------------------------------------------- the text --- */
+
+.estry__items {
+	display: flex;
+	flex-direction: column;
+	gap: var(--estry-item-gap, 45vh);
+	/* Space above and below so the first and last items can reach the middle
+	   of the screen, which is where an item becomes the active one. */
+	padding: 35vh 0;
+}
+
+.estry__num {
+	display: block;
+	margin-bottom: 1.2em;
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 0.75rem;
+	letter-spacing: 0.08em;
+	color: var(--estry-num, #9aa4a4);
+}
+
+.estry__title {
+	margin: 0 0 0.6em;
+}
+
+.estry__body {
+	margin: 0;
+}
+
+/* The per-character sweep. Lit is the default; dim needs the script. */
+.estry-c {
+	display: inline;
+	color: inherit;
+}
+
+[data-estry-ready] .estry-c {
+	color: var(--estry-dim, #dddddd);
+}
+
+[data-estry-ready] .estry__item[data-estry-on] .estry-c {
+	animation: estry-sweep var(--estry-sweep, 500ms) linear var(--estry-d, 0s) forwards;
+}
+
+/*
+ * The three-stop journey, which is what makes this read as expensive rather
+ * than as a plain fade: the leading edge of the sweep flashes the accent
+ * colour for a fraction of a second before settling.
+ */
+@keyframes estry-sweep {
+	0% {
+		color: var(--estry-dim, #dddddd);
+	}
+
+	30% {
+		color: var(--estry-flash, #abff04);
+	}
+
+	100% {
+		color: var(--estry-lit, #052424);
+	}
+}
+
+/* ------------------------------------------------------------ the panel --- */
+
+.estry__media {
+	position: sticky;
+	top: var(--estry-top, 0px);
+	height: var(--estry-height, 100vh);
+}
+
+.estry__frame {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	border-radius: var(--estry-radius, 16px);
+	background: var(--estry-frame-bg, #0b0b0b);
+}
+
+/*
+ * The notch: the panel's left edge steps outwards inside a travelling band,
+ * which the script moves with scroll progress.
+ *
+ * clip-path replaces border-radius rather than combining with it -- both
+ * clip the same box -- so a notched frame has square corners by design.
+ */
+.estry__frame[data-estry-notch] {
+	border-radius: 0;
+	clip-path: polygon(
+		var(--estry-notch, 24px) 0%,
+		100% 0%,
+		100% 100%,
+		var(--estry-notch, 24px) 100%,
+		var(--estry-notch, 24px) calc(var(--estry-band, 50%) + var(--estry-band-size, 90px)),
+		0% calc(var(--estry-band, 50%) + var(--estry-band-size, 90px)),
+		0% calc(var(--estry-band, 50%) - var(--estry-band-size, 90px)),
+		var(--estry-notch, 24px) calc(var(--estry-band, 50%) - var(--estry-band-size, 90px))
+	);
+}
+
+.estry__img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	opacity: 0;
+	transition: opacity var(--estry-fade, 600ms) ease, transform var(--estry-fade, 600ms) ease;
+	/* A whisper of scale keeps a cross-fade from looking like a slideshow. */
+	transform: scale(1.03);
+}
+
+/* Without the script, the first image is simply the picture. */
+.estry__frame:not([data-estry-ready]) .estry__img:first-child {
+	opacity: 1;
+	transform: none;
+}
+
+.estry__img[data-estry-on] {
+	opacity: 1;
+	transform: none;
+}
+
+/* ------------------------------------------------------------- narrow --- */
+
+@media (max-width: 1024px) {
+	.estry {
+		grid-template-columns: 1fr;
+	}
+
+	.estry__items {
+		/* Nothing is pinned any more, so the breathing room that existed to
+		   let items reach the middle of the screen is just a long gap. */
+		gap: var(--estry-item-gap-mobile, 64px);
+		padding: 0;
+		order: 2;
+	}
+
+	.estry__media {
+		position: relative;
+		top: auto;
+		height: var(--estry-height-mobile, 56vh);
+		order: 1;
+		margin-bottom: 32px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-estry-ready] .estry__item[data-estry-on] .estry-c {
+		animation: none;
+	}
+
+	.estry__img {
+		transition: none;
+		transform: none;
+	}
+}

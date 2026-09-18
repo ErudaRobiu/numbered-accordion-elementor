@@ -34,6 +34,7 @@ includes/                          module registry and settings screen
 modules/accordion/                 the accordion widget and its assets
 modules/impact/                    the impact grid widget and its assets
 modules/motion/                    the text animation controls and assets
+modules/story/                     the Scroll Story widget and its assets
 modules/smoothscroll/              eases the whole page's scrolling
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
@@ -288,6 +289,51 @@ line is stated in `Motion_Presets::all()` and again as a `--eanm-split` custom
 property in the stylesheet. The script reads the CSS copy; the PHP copy is for
 the tests and for the lazy-enqueue check. Add a preset and you must add it in
 both places.
+
+### Scroll Story
+
+A column of numbered text items on the left, a pinned panel on the right that
+cross-fades to whichever item you are reading. Each item carries its own
+heading, description and image.
+
+Modelled on the "Why Terminal" section of terminal-industries.com, rebuilt with
+no libraries. Three things were worth copying and one was not.
+
+**The three-stop colour sweep.** Their text is split per character, and each
+character runs a 0.5s keyframe animation staggered 14ms apart:
+
+```css
+0%   { color: <waiting>; }   /* light grey */
+30%  { color: <flash>;   }   /* the accent, for a fraction of a second */
+100% { color: <read>;    }   /* near-black */
+```
+
+That flash at 30% is the whole trick. A two-stop fade looks ordinary; the
+leading edge glowing the brand colour is what reads as expensive. All three
+colours and both timings are controls.
+
+**Triggered, not scrubbed.** The script adds an attribute when an item becomes
+active and CSS does the rest, so there is no per-frame JavaScript touching
+hundreds of character spans. Compare the `scroll-highlight` preset in the
+motion module, which *is* scrubbed and so must recompute every word every
+frame. Both are right for different jobs.
+
+**The travelling notch.** The panel's left edge steps outwards inside a band
+that moves down as you scroll the section, via a `clip-path` polygon whose band
+position the script writes. Because `clip-path` and `border-radius` clip the
+same box, a notched panel has square corners by design; the radius control
+appears only when the notch is off.
+
+**What was not copied:** their panel is a `<canvas>` playing a scroll-scrubbed
+image sequence, which needs hundreds of exported frames and a decode pipeline.
+This cross-fades between one image per item instead — the same effect at
+reading pace, from images a client can actually swap in the media library.
+
+Safe without the script, like everything else here: the text is its read colour
+and the first image is simply the picture. Dimming only happens under
+`[data-estry-ready]`, which only the script sets. A stylesheet that dimmed on
+its own would leave light grey text on white for anyone whose JavaScript
+failed.
 
 ### Smooth scrolling
 

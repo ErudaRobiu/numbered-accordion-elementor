@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.5.0
+Stable tag: 2.6.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,17 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.6.0 =
+* New "Scroll Story" widget: numbered text items on the left, a pinned panel on
+  the right that cross-fades to whichever item you are reading.
+* Each letter sweeps from a waiting colour through a flash colour to its read
+  colour, staggered along the line. All three colours and both timings are
+  controls.
+* Optional notched panel edge that travels as you scroll the section.
+* Controls for the column split, gap, panel height, how far apart the items
+  are, and how far below a sticky header the panel pins.
+* Stacks to one column below 1024px, where nothing is pinned.
 
 = 2.5.0 =
 * New "Scroll Highlight" preset: the words sit dim and light up as the
