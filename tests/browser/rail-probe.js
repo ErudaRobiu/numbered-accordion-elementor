@@ -126,15 +126,40 @@ const x = t => {
     }
     return out;
   });
-  /*
-   * Centred when it fits, against the top when it does not. A section taller
-   * than the window cannot be centred without cropping both ends, and the
-   * heading -- the part worth keeping -- is the part at the top.
-   */
-  check('pinned holds what it is pinning centred, or against the top if it will not fit',
-    centring.every(c => c.position === 'sticky' &&
-      (c.fits ? Math.abs(c.top - c.bottom) <= 1 : c.top === 0)),
+  check('pinned holds what it is pinning, and holds it still',
+    centring.every(c => c.position === 'sticky'),
     centring.map(c => c.top + '/' + c.bottom + (c.fits ? '' : ' (taller than the window)')).join(' '));
+
+  /*
+   * A section that does not fit has to lose something off an edge. Losing the
+   * bottom of the cards is the wrong choice: they are the thing that moves,
+   * and a row you cannot see the bottom of is not much of a carousel. The
+   * offset is worked back from where the row sits inside the section so the
+   * row lands in the middle of the screen instead.
+   */
+  const railCentring = await page.evaluate(async () => {
+    const stage = document.querySelector('.erail__stage');
+    const spacerEl = document.querySelector('.erail__spacer');
+    const held = spacerEl ? spacerEl.previousElementSibling : stage;
+    const max = document.body.scrollHeight - innerHeight;
+    const out = [];
+    for (const f of [0.35, 0.5, 0.6]) {
+      window.scrollTo(0, Math.round(f * max));
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const r = stage.getBoundingClientRect();
+      out.push({
+        above: Math.round(r.top),
+        below: Math.round(innerHeight - r.bottom),
+        clipped: r.top < 0 || r.bottom > innerHeight,
+      });
+    }
+    return { out, hostH: held.offsetHeight };
+  });
+
+  check('the row itself is centred on screen, not clipped at the bottom',
+    railCentring.out.every(c => !c.clipped && Math.abs(c.above - c.below) <= 2),
+    railCentring.out.map(c => c.above + ' above / ' + c.below + ' below').join('  ') +
+      ', in a section ' + railCentring.hostH + 'px tall');
 
   // Everything after this runs against pinned, the default.
   await page.goto('http://127.0.0.1:8732/tests/browser/rail.html', { waitUntil: 'load' });

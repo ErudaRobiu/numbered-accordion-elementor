@@ -534,11 +534,26 @@ is what its `pin-spacer` element is. Measured on the test page, the hold went
 from "still stuck 1,350px after the row arrived" to "releases 270px after",
 which is what it was asked for.
 
-A section taller than the window cannot be centred without cropping both ends,
-so it is held against the top instead — the heading is the part worth keeping
-and it is the part at the top. If the cards are being clipped at the bottom,
-the section is too tall for the screen: trim the card height or the section's
-padding.
+**A section that does not fit has to lose something off an edge, and the offset
+is worked out rather than assumed.** Holding its top keeps the heading whole
+and cuts the cards off at the bottom, which is the wrong way round: the cards
+are the thing that moves, and a row you cannot see the bottom of is not much of
+a carousel. So the row's position inside the section is measured — with nothing
+stuck, so every rect is the static one — and the offset worked back from it:
+
+```
+sticky top = min(0, (window height - row height) / 2 - row's top within the section)
+```
+
+far enough up that the row lands in the middle of the screen, letting the top
+of the section run off instead. What goes first is the heading's top margin,
+long before any of its words. On a 976px section in a 900px window that puts
+the row at 151px above and 151px below, unclipped, with 163px of section above
+the fold.
+
+A section that *does* fit is still centred whole, with everything in it on
+screen. "Keep centred" chooses between the two outright when the automatic
+answer is not the wanted one.
 
 The pinned element sticks partway down the screen rather than at the top, so
 the pin begins when its top edge reaches *that* line. Measuring the progress

@@ -299,16 +299,42 @@
 			var pinned = host || stage;
 
 			/*
-			 * Centred on the screen, from the height the pinned element turned
-			 * out to be rather than the height it was asked for -- the stage's
-			 * is usually `auto`, because the cards decide it.
+			 * Where to hold it.
 			 *
-			 * A section taller than the window cannot be centred without
-			 * cropping both ends, so it is held against the top instead. The
-			 * heading is the part worth keeping, and it is the part at the
-			 * top.
+			 * Measured, not assumed, and measured now -- release() has just
+			 * run, so nothing is stuck and every rect is the static one.
+			 *
+			 * A section that fits is centred whole and everything in it is on
+			 * screen. A section that does not fit cannot be: something has to
+			 * go off an edge, and the only question is what. Holding its top
+			 * keeps the heading whole and cuts the cards off at the bottom,
+			 * which is the wrong way round -- the cards are the thing that
+			 * moves, and a row you cannot see the bottom of is not much of a
+			 * carousel.
+			 *
+			 * So the offset is worked back from where the row sits inside the
+			 * section: far enough up that the row lands in the middle of the
+			 * screen, which lets the top of the section run off instead. The
+			 * heading stays legible because what goes is its top margin long
+			 * before any of its words.
 			 */
-			stickyTop = Math.max( 0, Math.round( ( height - pinned.offsetHeight ) / 2 ) );
+			var railHeight = stage.offsetHeight;
+			var railWithin = host
+				? stage.getBoundingClientRect().top - host.getBoundingClientRect().top
+				: 0;
+			var want = ( root.getAttribute( 'data-erail-centre' ) || 'auto' ).trim();
+			var fits = pinned.offsetHeight <= height;
+
+			if ( ! host || ( 'auto' === want && fits ) || 'section' === want ) {
+				stickyTop = Math.max( 0, Math.round( ( height - pinned.offsetHeight ) / 2 ) );
+			} else {
+				// Never positive: pushing a section that already overflows
+				// further down the screen only loses more of it.
+				stickyTop = Math.min(
+					0,
+					Math.round( ( height - railHeight ) / 2 - railWithin )
+				);
+			}
 
 			/*
 			 * The runway is three stretches, not one.

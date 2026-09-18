@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.13.0
+Stable tag: 2.14.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,15 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.14.0 =
+* Scroll Rail now works out where to hold a section from where the row sits
+  inside it, so the cards are centred on screen and never clipped at the
+  bottom, even when the section is taller than the window. The top of the
+  section runs off above them instead, which costs the heading its top margin
+  long before any of its words.
+* A section that does fit on screen is still centred whole. New "Keep centred"
+  setting forces either answer when the automatic one is not the wanted one.
 
 = 2.13.0 =
 * Scroll Rail now holds the whole section still, not just the row. A heading

@@ -683,6 +683,22 @@ class Scroll_Rail_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'centre_on',
+			array(
+				'label'       => esc_html__( 'Keep centred', 'numbered-accordion' ),
+				'description' => esc_html__( 'A section that fits on screen is centred whole. One that does not has to lose something off an edge, and this is the choice of what: the cards, held in the middle of the screen with the top of the section running off above them, or the section, held against the top with the cards cut off at the bottom.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'auto',
+				'options'     => array(
+					'auto'    => esc_html__( 'The section if it fits, otherwise the cards', 'numbered-accordion' ),
+					'cards'   => esc_html__( 'Always the cards', 'numbered-accordion' ),
+					'section' => esc_html__( 'Always the section', 'numbered-accordion' ),
+				),
+				'condition'   => array( 'mode' => 'pinned' ),
+			)
+		);
+
+		$this->add_control(
 			'pace',
 			array(
 				'label'       => esc_html__( 'Scroll distance', 'numbered-accordion' ),
@@ -866,6 +882,9 @@ class Scroll_Rail_Widget extends Widget_Base {
 		$pauseOut = $this->slider( $settings, 'pause_out', 30, 0, 150 ) / 100;
 		$mode     = isset( $settings['mode'] ) && 'flow' === $settings['mode'] ? 'flow' : 'pinned';
 
+		$centre = isset( $settings['centre_on'] ) ? $settings['centre_on'] : 'auto';
+		$centre = in_array( $centre, array( 'auto', 'cards', 'section' ), true ) ? $centre : 'auto';
+
 		$target = isset( $settings['pin_target'] ) ? $settings['pin_target'] : 'section';
 		$pin    = 'section';
 
@@ -887,6 +906,7 @@ class Scroll_Rail_Widget extends Widget_Base {
 			data-erail-pause-in="<?php echo esc_attr( (string) $pauseIn ); ?>"
 			data-erail-pause-out="<?php echo esc_attr( (string) $pauseOut ); ?>"
 			data-erail-pin="<?php echo esc_attr( $pin ); ?>"
+			data-erail-centre="<?php echo esc_attr( $centre ); ?>"
 			data-erail-start="<?php echo esc_attr( (string) $start ); ?>"
 			data-erail-finish="<?php echo esc_attr( (string) $finish ); ?>"
 			data-erail-extra="<?php echo esc_attr( (string) $extra ); ?>"

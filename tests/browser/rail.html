@@ -37,6 +37,7 @@
 <div class="erail" data-erail-mode="pinned" data-erail-pace="1"
      data-erail-pause-in="0.3" data-erail-pause-out="0.3"
      data-erail-pin="section"
+     data-erail-centre="auto"
      data-erail-start="0.8" data-erail-finish="0.8" data-erail-extra="0">
  <div class="erail__stage">
   <div class="erail__viewport">
@@ -98,6 +99,7 @@
  var el = document.querySelector( '.erail' );
  if ( q.get( 'mode' ) ) { el.setAttribute( 'data-erail-mode', q.get( 'mode' ) ); }
  if ( q.get( 'pin' ) ) { el.setAttribute( 'data-erail-pin', q.get( 'pin' ) ); }
+ if ( q.get( 'centre' ) ) { el.setAttribute( 'data-erail-centre', q.get( 'centre' ) ); }
 </script>
 <script src="../../modules/rail/assets/js/scroll-rail.js"></script>
 </body></html>

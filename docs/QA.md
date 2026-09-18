@@ -347,9 +347,13 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
       matches nothing falls back to holding the row alone rather than breaking
 - [ ] Nothing is left behind when the rail is not driving: resize to a phone
       width and the wrapper and spacer should be gone from the DOM
-- [ ] If the section is taller than the window it is held against the top so
-      the heading stays visible, and the cards are clipped at the bottom. That
-      is the trade — trim the card height or the section padding
+- [ ] **The row is centred on screen and never clipped**, including when the
+      section is taller than the window. Shrink the browser until the section
+      cannot fit: the cards should stay whole and centred, and the top of the
+      section should run off above them instead
+- [ ] A section that does fit is centred whole, with everything in it on screen
+- [ ] "Keep centred" forces either answer: Always the cards, or Always the
+      section (which is the old behaviour — heading whole, cards clipped)
 - [ ] "Pause before it sets off" and "Pause before it lets go" lengthen those
       two held moments
 - [ ] Pinned makes the section taller, and what follows sits further down the
