@@ -35,6 +35,7 @@ modules/accordion/                 the accordion widget and its assets
 modules/impact/                    the impact grid widget and its assets
 modules/motion/                    the text animation controls and assets
 modules/story/                     the Scroll Story widget and its assets
+modules/rail/                      the Scroll Rail widget and its assets
 modules/smoothscroll/              eases the whole page's scrolling
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
@@ -475,6 +476,54 @@ and the first slide is simply the picture. Dimming only happens under
 `[data-estry-ready]`, which only the script sets. A stylesheet that dimmed on
 its own would leave light grey text on white for anyone whose JavaScript
 failed.
+
+### Scroll Rail
+
+A row of linked cards that travels sideways while the section is pinned, so
+reading the row left to right is the same gesture as reading the page.
+
+**The runway is measured, not guessed.** The section is given the height its
+own travel needs: the stage, plus however far the row overflows its viewport,
+times a pace control. A row of three cards is therefore short and a row of
+twelve is long, and neither leaves you scrolling past a rail that stopped
+moving several screens ago. It is re-measured on resize and after pictures
+load, because a card's width is a responsive custom property and the row's
+width follows its content.
+
+A hold at each end keeps the row still for a moment as it arrives and as it
+leaves, instead of snapping into motion on the frame the section reaches the
+top of the screen.
+
+**`overflow: hidden` stops a person scrolling an element; it does not stop the
+browser.** Focusing a child scrolls its nearest scrollable ancestor to reveal
+it — and while the rail is pinned, that ancestor is the viewport whose scroll
+is meant to stay at zero because the row is being moved by transform instead.
+A tabbed-to card was therefore shifted twice, once by the transform and once by
+a scroll nobody asked for, and landed off the far side of the screen. The
+viewport's scroll is now held at zero whenever the rail is pinned, and tabbing
+to a card scrolls the *page* to the position that brings it into view.
+
+**Nothing pins on a phone.** A pinned rail takes a gesture people already know
+— swipe the row — and replaces it with one they have to discover, on the axis
+their thumb is worst at. Below 1024px, and under reduced motion, the row is a
+plain horizontally scrollable strip with snap points. That is also exactly what
+it is before the script runs, which is the no-JavaScript state: the markup is a
+real scroller and the stylesheet only stops being one once the script has set
+`data-erail-ready`.
+
+**The card says it is clickable before you touch it.** A hover-only affordance
+arrives after you have already guessed, so the cue — an arrow out of the
+corner, an arrow straight on, or a plus — sits on the picture at a low opacity
+from the start, and blooms on hover or keyboard focus: it fills in, grows to
+full size, and the arrow travels the way it is pointing, while the card lifts,
+its border brightens and its picture returns from desaturated to full colour.
+
+A card with no link is rendered as a `div` rather than an `a`, gets no cue, and
+keeps the default cursor. It is still a card; it just does not pretend.
+
+Pictures are forced to cover for the same reason as the Scroll Story panel, and
+the rail's test page carries the same deliberately hostile theme block so the
+probe proves it.
 
 ### Smooth scrolling
 

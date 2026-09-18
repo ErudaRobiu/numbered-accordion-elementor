@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.8.0
+Stable tag: 2.9.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,21 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.9.0 =
+* New "Scroll Rail" widget: a row of linked cards that travels sideways as you
+  scroll down past it. The section is given exactly the height its own travel
+  needs, so adding or removing cards changes how far you scroll without
+  touching a setting, and you never scroll past a rail that stopped moving.
+* Each card carries a picture, a title, a description and a link, with the
+  picture desaturated at rest and returning to full colour on hover.
+* Cards say they are clickable before you touch them: an arrow sits on the
+  picture from the start and fills in, grows and travels on hover or keyboard
+  focus. A card with no link is not a link, shows no arrow and keeps the
+  default cursor.
+* Nothing pins on a phone or under Reduce Motion. The row is a plain swipeable
+  strip with snap points, which is also what it is before the script runs.
+* Tabbing through the cards brings each one into view as it takes focus.
 
 = 2.8.0 =
 * Fix: the notch depth, length and travel controls did nothing. Their defaults

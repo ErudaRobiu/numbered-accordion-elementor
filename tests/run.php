@@ -572,7 +572,8 @@ check( 'travel hides when nothing moves', 'none', $controls['eanm_distance']['co
 check( 'the motion module is registered', true, in_array( 'motion', Toolkit::instance()->ids(), true ) );
 check( 'the smooth scroll module is registered', true, in_array( 'smoothscroll', Toolkit::instance()->ids(), true ) );
 check( 'the scroll story module is registered', true, in_array( 'story', Toolkit::instance()->ids(), true ) );
-check( 'six modules ship', 6, count( Toolkit::instance()->ids() ) );
+check( 'the scroll rail module is registered', true, in_array( 'rail', Toolkit::instance()->ids(), true ) );
+check( 'seven modules ship', 7, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -597,12 +598,13 @@ foreach ( Toolkit::instance()->ids() as $id ) {
 
 /* --------------------------------------------------- panel category --- */
 
-// All three widgets belong in the plugin's own section of the panel, not
+// Every widget belongs in the plugin's own section of the panel, not
 // scattered through Elementor's General.
 foreach ( array(
 	'modules/accordion/widgets/class-numbered-accordion-widget.php',
 	'modules/impact/widgets/class-impact-grid-widget.php',
 	'modules/story/widgets/class-scroll-story-widget.php',
+	'modules/rail/widgets/class-scroll-rail-widget.php',
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -628,6 +630,7 @@ $module_files = array(
 	'modules/accordion/class-accordion-module.php',
 	'modules/impact/class-impact-module.php',
 	'modules/story/class-story-module.php',
+	'modules/rail/class-rail-module.php',
 );
 
 foreach ( $module_files as $relative ) {

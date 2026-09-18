@@ -1,0 +1,362 @@
+/**
+ * Eruda Toolkit - Scroll Rail
+ *
+ * A row of linked cards that travels sideways while the section is pinned, so
+ * scrolling down reads the row left to right.
+ *
+ * The same rule as everything else here: if the script never runs, the section
+ * must still be complete and usable. Without it this is an ordinary
+ * horizontally scrollable row with snap points -- which is also exactly what
+ * it becomes on a narrow screen and under reduced motion, because a pinned
+ * rail is worse than a swipe on a phone.
+ */
+
+.erail {
+	position: relative;
+}
+
+/*
+ * The stage is what pins. Its height is the panel; the runway that drives it
+ * is the extra height the script puts on .erail itself.
+ */
+.erail__stage {
+	position: sticky;
+	/* Centred on the screen whatever height it is asked for, so changing the
+	   section height cannot leave the row sitting low or high. */
+	top: calc((100vh - var(--erail-height, 78vh)) / 2);
+	height: var(--erail-height, 78vh);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.erail__viewport {
+	width: 100%;
+	/* Until the script takes over this is a real scroller, so the row is
+	   usable with a trackpad, a touch screen or a scrollbar. */
+	overflow-x: auto;
+	overflow-y: hidden;
+	scroll-snap-type: x mandatory;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: none;
+}
+
+.erail__viewport::-webkit-scrollbar {
+	display: none;
+}
+
+/* Once the script is driving, the row is moved rather than scrolled. */
+.erail[data-erail-ready] .erail__viewport {
+	overflow: hidden;
+	scroll-snap-type: none;
+}
+
+.erail__track {
+	display: flex;
+	align-items: stretch;
+	gap: var(--erail-gap, 28px);
+	padding: var(--erail-pad-y, 8px) var(--erail-lead, 0px);
+	width: max-content;
+	will-change: transform;
+}
+
+/* ------------------------------------------------------------- the card --- */
+
+.erail__card {
+	position: relative;
+	display: block;
+	flex: 0 0 auto;
+	width: var(--erail-card, 420px);
+	aspect-ratio: var(--erail-ratio, 0.81);
+	border-radius: var(--erail-radius, 20px);
+	border: var(--erail-border-w, 1px) solid var(--erail-border, rgba(255, 255, 255, 0.1));
+	background: var(--erail-card-bg, #0c1116);
+	overflow: hidden;
+	scroll-snap-align: center;
+	text-decoration: none;
+	color: inherit;
+	isolation: isolate;
+	transition:
+		transform var(--erail-hover-ms, 500ms) cubic-bezier(0.16, 1, 0.3, 1),
+		border-color var(--erail-hover-ms, 500ms) ease,
+		box-shadow var(--erail-hover-ms, 500ms) ease;
+}
+
+/* A card that is not a link is still a card; it just does not pretend. */
+.erail__card:not([href]) {
+	cursor: default;
+}
+
+.erail__media {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	z-index: 0;
+}
+
+/*
+ * Cover, always, and forced for the same reason as the Scroll Story panel:
+ * nearly every theme ships `img { height: auto }` at a specificity a plugin
+ * stylesheet cannot beat, and the result is the card's background showing
+ * through as a band.
+ */
+.erail .erail__img {
+	display: block;
+	position: absolute;
+	inset: 0;
+	width: 100% !important;
+	height: 100% !important;
+	min-width: 100%;
+	min-height: 100%;
+	max-width: none;
+	max-height: none;
+	object-fit: cover !important;
+	object-position: var(--erail-obj-pos, 50% 50%) !important;
+	filter: grayscale(var(--erail-grey, 0.85)) brightness(var(--erail-bright, 0.9));
+	transform: scale(1);
+	transition:
+		transform var(--erail-hover-ms, 500ms) cubic-bezier(0.16, 1, 0.3, 1),
+		filter var(--erail-hover-ms, 500ms) ease;
+}
+
+/*
+ * The scrim. Two stops rather than one: a long, almost-nothing wash over the
+ * top half so the picture sits back, then the real darkening under the words.
+ * A single gradient dark enough to read against would flatten the whole
+ * picture.
+ */
+.erail__scrim {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	pointer-events: none;
+	background: linear-gradient(
+		to bottom,
+		transparent 0%,
+		color-mix(in srgb, var(--erail-scrim, #0c1116) 18%, transparent) 42%,
+		color-mix(in srgb, var(--erail-scrim, #0c1116) 82%, transparent) 72%,
+		var(--erail-scrim, #0c1116) 100%
+	);
+}
+
+/* color-mix is recent. Without it the card still gets a readable scrim. */
+@supports not (background: color-mix(in srgb, #000 50%, transparent)) {
+	.erail__scrim {
+		background: linear-gradient(to bottom, transparent 30%, var(--erail-scrim, #0c1116) 100%);
+	}
+}
+
+.erail__text {
+	position: absolute;
+	inset: auto 0 0 0;
+	z-index: 2;
+	padding: var(--erail-text-pad, 32px);
+}
+
+.erail__title {
+	margin: 0 0 0.45em;
+	color: var(--erail-title, #ffffff);
+	font-size: var(--erail-title-size, 2rem);
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: 0.005em;
+	text-transform: uppercase;
+	text-wrap: balance;
+}
+
+.erail__copy {
+	margin: 0;
+	color: var(--erail-copy, #c3ccd6);
+	font-size: var(--erail-copy-size, 1rem);
+	line-height: 1.45;
+}
+
+/* ---------------------------------------------------------- the cue --- */
+
+/*
+ * The thing that says "this opens something".
+ *
+ * It is visible before you touch the card, not only on hover: a hover-only
+ * affordance tells you a card is clickable exactly when you have already
+ * guessed. So it sits there quietly at a low opacity, and blooms -- fills in,
+ * grows, and the arrow travels the way it is pointing -- when the card is
+ * hovered or focused.
+ */
+.erail__cue {
+	position: absolute;
+	top: var(--erail-cue-inset, 20px);
+	right: var(--erail-cue-inset, 20px);
+	z-index: 3;
+	display: grid;
+	place-items: center;
+	width: var(--erail-cue-size, 44px);
+	height: var(--erail-cue-size, 44px);
+	border-radius: 50%;
+	border: 1px solid var(--erail-cue-border, rgba(255, 255, 255, 0.45));
+	background: var(--erail-cue-bg, rgba(12, 17, 22, 0.35));
+	color: var(--erail-cue-fg, #ffffff);
+	opacity: var(--erail-cue-idle, 0.55);
+	transform: scale(0.92);
+	pointer-events: none;
+	-webkit-backdrop-filter: blur(6px);
+	backdrop-filter: blur(6px);
+	transition:
+		opacity var(--erail-hover-ms, 500ms) ease,
+		transform var(--erail-hover-ms, 500ms) cubic-bezier(0.16, 1, 0.3, 1),
+		background-color var(--erail-hover-ms, 500ms) ease,
+		border-color var(--erail-hover-ms, 500ms) ease,
+		color var(--erail-hover-ms, 500ms) ease;
+}
+
+.erail__cue[data-erail-cue="left"] {
+	right: auto;
+	left: var(--erail-cue-inset, 20px);
+}
+
+.erail__cue svg {
+	width: 45%;
+	height: 45%;
+	display: block;
+	transition: transform var(--erail-hover-ms, 500ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ------------------------------------------------------------- hover --- */
+
+.erail__card[href]:hover,
+.erail__card[href]:focus-visible {
+	transform: translateY(calc(var(--erail-lift, 8px) * -1));
+	border-color: var(--erail-border-hover, rgba(255, 255, 255, 0.28));
+	box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.75);
+}
+
+.erail__card[href]:hover .erail__img,
+.erail__card[href]:focus-visible .erail__img {
+	transform: scale(1.05);
+	filter: grayscale(var(--erail-grey-hover, 0)) brightness(var(--erail-bright-hover, 1));
+}
+
+.erail__card[href]:hover .erail__cue,
+.erail__card[href]:focus-visible .erail__cue {
+	opacity: 1;
+	transform: scale(1);
+	background: var(--erail-cue-bg-hover, #ffffff);
+	border-color: var(--erail-cue-bg-hover, #ffffff);
+	color: var(--erail-cue-fg-hover, #0c1116);
+}
+
+.erail__card[href]:hover .erail__cue svg,
+.erail__card[href]:focus-visible .erail__cue svg {
+	transform: translate(2px, -2px);
+}
+
+/* The arrow that points straight right has nowhere to go but right. */
+.erail__cue[data-erail-icon="right"] svg {
+	transform: translate(0, 0);
+}
+
+.erail__card[href]:hover .erail__cue[data-erail-icon="right"] svg,
+.erail__card[href]:focus-visible .erail__cue[data-erail-icon="right"] svg {
+	transform: translate(3px, 0);
+}
+
+.erail__card[href]:focus-visible {
+	outline: 2px solid var(--erail-focus, #ffffff);
+	outline-offset: 3px;
+}
+
+/* --------------------------------------------------------- progress --- */
+
+.erail__progress {
+	position: relative;
+	height: var(--erail-bar-h, 2px);
+	margin-top: var(--erail-bar-gap, 28px);
+	background: var(--erail-bar-track, rgba(255, 255, 255, 0.12));
+	border-radius: 999px;
+	overflow: hidden;
+}
+
+.erail__progress span {
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 100%;
+	border-radius: inherit;
+	background: var(--erail-bar-fill, rgba(255, 255, 255, 0.75));
+	transform: scaleX(0);
+	transform-origin: 0 50%;
+}
+
+/* ----------------------------------------------------------- narrow --- */
+
+/*
+ * Nothing pins below this width. A pinned rail on a phone takes a gesture
+ * people already know -- swipe the row -- and replaces it with one they have
+ * to discover, on the axis their thumb is worst at.
+ */
+@media (max-width: 1024px) {
+	.erail,
+	.erail[data-erail-ready] {
+		height: auto !important;
+	}
+
+	.erail__stage {
+		position: static;
+		height: auto;
+	}
+
+	.erail[data-erail-ready] .erail__viewport {
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+	}
+
+	.erail__track {
+		transform: none !important;
+		padding-left: var(--erail-lead-mobile, 16px);
+		padding-right: var(--erail-lead-mobile, 16px);
+	}
+
+	.erail__card {
+		width: var(--erail-card-mobile, 78vw);
+	}
+
+	.erail__progress {
+		display: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.erail,
+	.erail[data-erail-ready] {
+		height: auto !important;
+	}
+
+	.erail__stage {
+		position: static;
+		height: auto;
+	}
+
+	.erail[data-erail-ready] .erail__viewport {
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+	}
+
+	.erail__track {
+		transform: none !important;
+	}
+
+	.erail__card,
+	.erail__img,
+	.erail__cue,
+	.erail__cue svg {
+		transition: none;
+	}
+
+	/* The cue stops being a flourish and is simply always there. */
+	.erail__cue {
+		opacity: 1;
+		transform: none;
+	}
+
+	.erail__progress {
+		display: none;
+	}
+}

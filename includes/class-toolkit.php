@@ -48,6 +48,10 @@ final class Toolkit {
 			'file'  => 'modules/smoothscroll/class-smoothscroll-module.php',
 			'class' => '\ErudaToolkit\Modules\SmoothScroll\SmoothScroll_Module',
 		),
+		'rail'       => array(
+			'file'  => 'modules/rail/class-rail-module.php',
+			'class' => '\ErudaToolkit\Modules\Rail\Rail_Module',
+		),
 	);
 
 	/**

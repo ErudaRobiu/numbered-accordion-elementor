@@ -317,3 +317,49 @@ a real site.
       the panel still changes and the section is still readable
 - [ ] Editing an item in the editor re-renders it and the tracking still works
 - [ ] Two Scroll Story widgets on one page track independently
+
+## Scroll Rail
+
+`node tests/browser/rail-probe.js` measures the travel, the runway, the
+centring, the cue and the narrow-screen fallback in headless Chrome, against
+`tests/browser/rail.html`. Run it before touching any of them.
+
+- [ ] **Scroll Rail is in the panel.** Search the widget panel for "Scroll
+      Rail" and add it. Two releases have shipped a widget nobody could add
+- [ ] Dropping it in gives four cards in a row
+- [ ] Scrolling down moves the row sideways, and scrolling up moves it back
+- [ ] The row is still for a moment as it arrives and as it leaves, rather than
+      snapping into motion
+- [ ] The row finishes exactly as the last card reaches the edge. You never
+      scroll past a rail that has stopped moving
+- [ ] Adding or removing cards changes how far you scroll, without touching a
+      setting
+- [ ] "Scroll distance" makes the same row cost more or less scrolling
+- [ ] The stage sits centred on the screen, and stays centred when you change
+      the section height
+- [ ] A picture of any shape or size fills its card, including one smaller than
+      the card. Try it on a theme that styles images heavily
+- [ ] The progress bar fills as the row travels
+
+### The click cue
+
+- [ ] Every linked card shows the cue **before** you hover it
+- [ ] Hovering fills the cue in, grows it, moves the arrow, lifts the card,
+      brightens its border and brings the picture back to colour
+- [ ] A card with no link has no cue, is not a link, and shows no pointer
+- [ ] Tab through the cards: each one is brought into view as it takes focus,
+      and the focus ring is visible. This was doubly-offset before 2.9.0 and
+      put the focused card off the far side of the screen
+- [ ] The cue's corner, mark, size and colours all work
+
+### Everything else
+
+- [ ] Below 1024px nothing pins: the row is a plain swipeable strip with snap
+      points and no progress bar
+- [ ] With Reduce Motion on, the same. No pinning, no hover transitions, and
+      the cue is simply always visible
+- [ ] With JavaScript disabled the row is still a usable horizontal scroller
+- [ ] Resizing between wide and narrow switches between the two cleanly, with
+      no leftover height or transform
+- [ ] Editing a card in the editor re-renders it and the rail still works
+- [ ] Two Scroll Rails on one page travel independently

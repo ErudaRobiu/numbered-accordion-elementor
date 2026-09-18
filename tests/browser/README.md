@@ -14,6 +14,7 @@ npm install puppeteer-core          # once, anywhere; not a plugin dependency
 python3 -m http.server 8732         # from the repository root
 node tests/browser/probe.js         # text animation presets
 node tests/browser/story-probe.js   # Scroll Story
+node tests/browser/rail-probe.js    # Scroll Rail
 ```
 
 Both run headless on purpose. A scrubbed animation is driven by
@@ -21,6 +22,14 @@ Both run headless on purpose. A scrubbed animation is driven by
 visible — drive a real window and every measurement freezes the moment the
 window loses focus, which reads exactly like a broken build. That cost an hour
 once already.
+
+`rail-probe.js` asserts too: that the section is given exactly the runway its
+row needs, that the row travels sideways and back and lands with the row used
+up rather than overshooting, that the stage stays centred, that a picture of
+any shape fills its card, that a linked card's cue is visible before hover and
+blooms on it, that a card with no link does not pretend to be one, that tabbing
+to a card off to the side brings it into view, and that a narrow screen gets a
+swipeable row rather than a pinned rail.
 
 `story-probe.js` asserts rather than prints: it checks that the sweep advances
 with scroll and retreats on the way back, that the same scroll position gives
