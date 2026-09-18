@@ -1,11 +1,11 @@
 <?php
 /**
- * Hotspot stats module.
+ * Spin badge module.
  *
  * @package ErudaToolkit
  */
 
-namespace ErudaToolkit\Modules\Spots;
+namespace ErudaToolkit\Modules\Badge;
 
 use ErudaToolkit\Module;
 
@@ -14,12 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Registers assets and the Hotspot Stats widget.
+ * Registers assets and the Spin Badge widget.
  */
-final class Spots_Module implements Module {
+final class Badge_Module implements Module {
 
-	const STYLE_HANDLE  = 'espot-hotspot-stats';
-	const SCRIPT_HANDLE = 'espot-hotspot-stats';
+	const STYLE_HANDLE  = 'ebdg-spin-badge';
+	const SCRIPT_HANDLE = 'ebdg-spin-badge';
 
 	/**
 	 * Module id.
@@ -27,7 +27,7 @@ final class Spots_Module implements Module {
 	 * @return string
 	 */
 	public static function id() {
-		return 'spots';
+		return 'badge';
 	}
 
 	/**
@@ -36,7 +36,7 @@ final class Spots_Module implements Module {
 	 * @return string
 	 */
 	public static function label() {
-		return esc_html__( 'Hotspot Stats', 'numbered-accordion' );
+		return esc_html__( 'Spin Badge', 'numbered-accordion' );
 	}
 
 	/**
@@ -45,7 +45,7 @@ final class Spots_Module implements Module {
 	 * @return string
 	 */
 	public static function description() {
-		return esc_html__( 'Adds a "Hotspot Stats" widget: figures pinned to points on a product photograph, joined by leader lines that draw themselves in.', 'numbered-accordion' );
+		return esc_html__( 'Adds a "Spin Badge" widget: a round link whose text turns around its edge and slows to a stop under the pointer.', 'numbered-accordion' );
 	}
 
 	/**
@@ -116,7 +116,7 @@ final class Spots_Module implements Module {
 	public function register_styles() {
 		wp_register_style(
 			self::STYLE_HANDLE,
-			ERUDA_URL . 'modules/spots/assets/css/hotspot-stats.css',
+			ERUDA_URL . 'modules/badge/assets/css/spin-badge.css',
 			array(),
 			ERUDA_VERSION
 		);
@@ -128,7 +128,7 @@ final class Spots_Module implements Module {
 	public function register_scripts() {
 		wp_register_script(
 			self::SCRIPT_HANDLE,
-			ERUDA_URL . 'modules/spots/assets/js/hotspot-stats.js',
+			ERUDA_URL . 'modules/badge/assets/js/spin-badge.js',
 			array(),
 			ERUDA_VERSION,
 			true
@@ -151,15 +151,15 @@ final class Spots_Module implements Module {
 				return;
 			}
 
-			require_once ERUDA_PATH . 'modules/spots/widgets/class-hotspot-stats-widget.php';
+			require_once ERUDA_PATH . 'modules/badge/widgets/class-spin-badge-widget.php';
 
-			if ( class_exists( '\ErudaToolkit\Modules\Spots\Widgets\Hotspot_Stats_Widget' ) ) {
-				$widgets_manager->register( new Widgets\Hotspot_Stats_Widget() );
+			if ( class_exists( '\ErudaToolkit\Modules\Badge\Widgets\Spin_Badge_Widget' ) ) {
+				$widgets_manager->register( new Widgets\Spin_Badge_Widget() );
 			}
 		} catch ( \Throwable $e ) {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				error_log( 'Eruda Toolkit: failed to register the hotspot stats widget - ' . $e->getMessage() );
+				error_log( 'Eruda Toolkit: failed to register the spin badge widget - ' . $e->getMessage() );
 			}
 		}
 	}

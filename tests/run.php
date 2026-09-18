@@ -573,7 +573,7 @@ check( 'the motion module is registered', true, in_array( 'motion', Toolkit::ins
 check( 'the smooth scroll module is registered', true, in_array( 'smoothscroll', Toolkit::instance()->ids(), true ) );
 check( 'the scroll story module is registered', true, in_array( 'story', Toolkit::instance()->ids(), true ) );
 check( 'the scroll rail module is registered', true, in_array( 'rail', Toolkit::instance()->ids(), true ) );
-check( 'the hotspot stats module is registered', true, in_array( 'spots', Toolkit::instance()->ids(), true ) );
+check( 'the spin badge module is registered', true, in_array( 'badge', Toolkit::instance()->ids(), true ) );
 check( 'eight modules ship', 8, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
@@ -606,7 +606,7 @@ foreach ( array(
 	'modules/impact/widgets/class-impact-grid-widget.php',
 	'modules/story/widgets/class-scroll-story-widget.php',
 	'modules/rail/widgets/class-scroll-rail-widget.php',
-	'modules/spots/widgets/class-hotspot-stats-widget.php',
+	'modules/badge/widgets/class-spin-badge-widget.php',
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -633,7 +633,7 @@ $module_files = array(
 	'modules/impact/class-impact-module.php',
 	'modules/story/class-story-module.php',
 	'modules/rail/class-rail-module.php',
-	'modules/spots/class-spots-module.php',
+	'modules/badge/class-badge-module.php',
 );
 
 foreach ( $module_files as $relative ) {

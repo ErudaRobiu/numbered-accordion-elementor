@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.15.0
+Stable tag: 2.16.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,21 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.16.0 =
+* New "Spin Badge" widget: a round link whose text turns around its edge,
+  slows to a stop under the pointer, and lifts. Built for a "calculate
+  savings" sticker and useful for any round call to action.
+* The ring is drawn as text on a circle rather than as a picture of one, so it
+  stays sharp at any size on any screen and costs no image request. Nothing in
+  it is blurred or scaled.
+* However many times the text goes round, it is stretched to meet itself
+  exactly once around the circle, so it never laps itself or falls short --
+  including after a webfont has loaded.
+* Hovering slows it down evenly rather than stopping it dead, the way a wheel
+  stops. On a touch screen it starts again when you lift your finger.
+* Under Reduce Motion it does not turn at all, and is still a link.
+* Removed: the "Hotspot Stats" widget added in 2.15.0.
 
 = 2.15.0 =
 * New "Hotspot Stats" widget: figures pinned to points on a photograph, joined

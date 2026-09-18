@@ -36,7 +36,7 @@ modules/impact/                    the impact grid widget and its assets
 modules/motion/                    the text animation controls and assets
 modules/story/                     the Scroll Story widget and its assets
 modules/rail/                      the Scroll Rail widget and its assets
-modules/spots/                     the Hotspot Stats widget and its assets
+modules/badge/                     the Spin Badge widget and its assets
 modules/smoothscroll/              eases the whole page's scrolling
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
@@ -642,52 +642,53 @@ Pictures are forced to cover for the same reason as the Scroll Story panel, and
 the rail's test page carries the same deliberately hostile theme block so the
 probe proves it.
 
-### Hotspot Stats
+### Spin Badge
 
-Figures pinned to points on a photograph, joined to them by leader lines that
-draw themselves in.
+A round link whose text turns around its edge, slows to a stop under the
+pointer, and lifts.
 
-**Everything is positioned as a percentage of the picture, not in pixels.**
-That is the whole difference between a figure that survives a responsive
-layout and one that comes apart: a hotspot given pixel coordinates drifts off
-its rivet the moment the column it sits in changes width, and the picture never
-stops changing width. Each hotspot carries four of them — where its point is,
-and where its label is — as custom properties on the repeater item.
+**The ring is SVG text on a circular path, not a picture of a circle of
+text.** A bitmap badge is soft the moment it is scaled or rotated, and this one
+is always rotating; a glyph on a path is re-rasterised every frame at whatever
+size it happens to be, so it is sharp at 96px, sharp at 400px and sharp on a
+retina screen, from no image request at all. Nothing in the widget uses a
+filter, a backdrop-filter or a scaled raster, and the probe walks every element
+in it to confirm that.
 
-**The leaders have to be drawn in script.** A leader runs between two points
-given as percentages of a picture whose rendered size is whatever the column
-happens to be, so it only exists in pixels once the browser has laid it out,
-and it has to be rebuilt every time that changes. A `ResizeObserver` on the
-frame catches the case a resize listener never hears about: the column changing
-width while the window does not.
+**Slowing down is the whole reason it has a script.** A CSS animation can only
+be paused, and `animation-play-state: paused` stops it on the frame it is told
+to — which on something turning steadily reads as a jam, not a stop. The Web
+Animations API lets an animation's `playbackRate` be changed while it runs,
+keeping its position, so easing that rate from one to nought is a real
+spin-down: constant angular deceleration, the way a wheel actually stops. The
+stylesheet keeps a plain CSS rotation for any browser without
+`element.animate`, and the script only removes it once its own animation
+exists, so the ring is never stopped in between the two.
 
-It leaves the label's own edge rather than the position the label is anchored
-at — otherwise it starts underneath the words — runs level for a short stub,
-and only then turns for the dot. A single diagonal from a word to a rivet reads
-as a stray mark; the stub is what makes it read as a leader on a drawing. The
-dash used to draw it is the path's own `getTotalLength()`, or the draw would
-finish early on a short leader and late on a long one.
+Measured under a pointer: 2.48 degrees per frame at first, nothing by the end,
+still turning twelve frames in.
 
-**Hovering one hotspot dims the others** rather than brightening the hovered
-one, so the picture never gets louder than it started and the eye is led by
-contrast instead of glare. `:focus-within` does the same, so tabbing through
-behaves identically.
+**The ring is fitted to the circle rather than trusted to fit it.** The phrase
+is repeated a whole number of times, so on its own it either falls short or
+laps itself and collides — which is the single most obvious way a badge like
+this looks wrong. Setting `textLength` to the circle's own circumference with
+`lengthAdjust="spacing"` hands the browser the job of distributing the
+difference between the letters, so it meets itself exactly at any size, in any
+font, and it is re-fitted once a webfont has swapped in. This text is 410 units
+against a 490 circle, so unstretched it would end 59 degrees short; it ends
+0.8 degrees from where it started.
 
-**The figures count up to what is already in the markup.** The value is a plain
-text field — `13+`, `1,240`, `$4.5m` — and the script pulls the number out of
-the middle, counts that, and puts the rest back exactly as typed, thousands
-separators included. Decelerating into the value rather than stopping dead is
-what makes it read as counted rather than cut off, and `tabular-nums` stops the
-digits jittering on the way.
+The lift lives on the link and the rotation on the ring inside it, so the two
+transforms never have to share an element — the same lesson as the Scroll
+Story's three layers.
 
-Safe without the script, like everything else here: every label is readable and
-every figure is already its final value, because the markup carries them. The
-script only adds the lines between them and the counting.
+Touch gets its own handling, because a finger is not a pointer: there is no
+hovering out of it, so without `touchend` the badge would stay stopped for good
+after one tap.
 
-**Below 768px the annotation comes off the picture.** Leader lines need room to
-travel and a phone has none: they would cross each other and the labels would
-cover the product. So the picture keeps itself and the figures become the plain
-list they always were underneath.
+Under reduced motion it does not turn at all. It is still a round link and it
+still answers the pointer, with the lift alone — a state change rather than
+continuous motion.
 
 ### Smooth scrolling
 

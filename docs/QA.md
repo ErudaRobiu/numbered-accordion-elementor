@@ -414,35 +414,32 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
 - [ ] Editing a card in the editor re-renders it and the rail still works
 - [ ] Two Scroll Rails on one page travel independently
 
-## Hotspot Stats
+## Spin Badge
 
-`node tests/browser/spots-probe.js` measures the leaders, the counting, the
-dimming and the phone fallback in headless Chrome, against
-`tests/browser/spots.html`.
+`node tests/browser/badge-probe.js` measures the turning, the spin-down, the
+ring fit and the reduced-motion case, against `tests/browser/badge.html`.
 
-- [ ] **Hotspot Stats is in the panel.** Search for it and add it
-- [ ] Dropping it in gives six hotspots over a placeholder
-- [ ] Each leader runs from its label to its dot, with a short level run before
-      it turns
-- [ ] **Resize the browser slowly.** Every dot stays on the same part of the
-      picture and every leader follows it. This is the thing that breaks in
-      every hotspot plugin
-- [ ] Put the widget in a narrow column without resizing the window: the
-      leaders still follow
-- [ ] The figures count up when you scroll to them, and land on exactly what
-      was typed — try `1,240`, `$4.5m` and `13+`
-- [ ] Setting the counting length to zero leaves them at their final values
-- [ ] Hovering one hotspot dims the others; the hovered dot grows and rings
-- [ ] Tabbing reaches any hotspot with a link, and does the same thing hovering
-      does
-- [ ] A hotspot with no link is not focusable and shows no underline
-- [ ] The icon picker works, and the icon sits on the outside of the label on
-      whichever side the label runs from
-- [ ] Below 768px the lines and dots go, and the figures become a list under
-      the picture with no sideways scroll
-- [ ] With JavaScript disabled every label and figure is readable, and only the
-      leaders are missing
-- [ ] With Reduce Motion on nothing draws and nothing counts; the figure is
-      simply finished
-- [ ] Editing a hotspot in the editor re-renders it and the leaders redraw
-- [ ] Two Hotspot Stats on one page behave independently
+- [ ] **Spin Badge is in the panel.** Search for it and add it
+- [ ] It turns on its own, slowly, without being scrolled to
+- [ ] **Hovering slows it to a stop rather than stopping it dead**, and the
+      badge lifts. Taking the pointer away starts it again
+- [ ] "Takes this long to stop" lengthens and shortens that
+- [ ] The ring text meets itself exactly once around, with no overlap and no
+      gap. Try one, two and three times round, and a very long phrase
+- [ ] Change the badge size from small to large: the text stays sharp and
+      keeps its proportions. **Nothing should ever look soft** — if it does,
+      something is scaling a bitmap
+- [ ] Pick a webfont in the typography control: the ring re-fits once it loads
+- [ ] "Distance from the middle" and "Starts at" move the ring in and around
+- [ ] With no icon chosen the drawn arrow is used; choosing one from the
+      library replaces it and the line-weight control disappears
+- [ ] On a touch screen, tapping slows it and it starts again on release
+      rather than staying stopped
+- [ ] Tab to it: it takes focus, shows a ring, slows and lifts the same way
+- [ ] A screen reader reads the spoken label once, not the ring text several
+      times over
+- [ ] Two badges on one page turn independently and neither takes the other's
+      text (they must not share a path id)
+- [ ] With Reduce Motion on it does not turn at all, and is still a link
+- [ ] With JavaScript disabled it still turns, from the stylesheet, and simply
+      does not slow down
