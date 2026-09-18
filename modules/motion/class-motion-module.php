@@ -20,6 +20,7 @@ final class Motion_Module implements Module {
 
 	const STYLE_HANDLE  = 'eanm-text-animation';
 	const SCRIPT_HANDLE = 'eanm-text-animation';
+	const EDITOR_HANDLE = 'eanm-text-animation-editor';
 
 	/**
 	 * Have the assets been enqueued for this request?
@@ -132,6 +133,9 @@ final class Motion_Module implements Module {
 		// picked. Four kilobytes inside the editor is not worth conditioning.
 		add_action( 'elementor/preview/enqueue_styles', array( $this, 'enqueue' ) );
 		add_action( 'elementor/preview/enqueue_scripts', array( $this, 'enqueue' ) );
+
+		// Editor panel: the Replay button's other half.
+		add_action( 'elementor/editor/after_enqueue_scripts', array( $this, 'enqueue_editor' ) );
 	}
 
 	/**
@@ -192,6 +196,22 @@ final class Motion_Module implements Module {
 		}
 
 		$this->enqueue();
+	}
+
+	/**
+	 * Load the panel-side script behind the Replay button.
+	 *
+	 * Panel only. It talks to the preview iframe from outside, so it must not
+	 * be the same handle as the animation itself.
+	 */
+	public function enqueue_editor() {
+		wp_enqueue_script(
+			self::EDITOR_HANDLE,
+			ERUDA_URL . 'modules/motion/assets/js/editor.js',
+			array( 'jquery' ),
+			ERUDA_VERSION,
+			true
+		);
 	}
 
 	/**

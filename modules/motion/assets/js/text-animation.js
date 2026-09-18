@@ -454,6 +454,45 @@
 		} );
 	}
 
+	/**
+	 * Play a widget's animation again from the start, wherever it is on the
+	 * page and whatever its trigger says.
+	 *
+	 * For the editor's Replay button. Re-splitting alone is not enough: an
+	 * element that has already animated is sitting in its finished state, and
+	 * simply taking the finished state away would animate it backwards. So
+	 * disarm, reset, commit, re-arm, then play -- the same ordering the
+	 * initial arming uses, for the same reason.
+	 *
+	 * @param {Element} root Widget wrapper.
+	 */
+	function replay( root ) {
+		if ( ! root || 1 !== root.nodeType || ! PRESET_CLASS.test( root.className || '' ) ) {
+			return;
+		}
+
+		initRoot( root );
+
+		targets( root ).forEach( function ( el ) {
+			el.removeAttribute( ARMED_ATTR );
+			el.removeAttribute( IN_ATTR );
+			void el.offsetWidth;
+			el.setAttribute( ARMED_ATTR, '' );
+
+			window.requestAnimationFrame( function () {
+				el.setAttribute( IN_ATTR, '' );
+			} );
+		} );
+	}
+
+	/**
+	 * The editor needs a way in. Nothing on the front end uses this.
+	 */
+	window.erudaMotion = {
+		init: initAll,
+		replay: replay,
+	};
+
 	if ( prefersReducedMotion() || ! isSupported() ) {
 		return;
 	}

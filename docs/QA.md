@@ -154,6 +154,11 @@ The parsing, the figure detection and the numbering are covered by
 - [ ] A native Heading with Words Up animates on the live page and in the editor
 - [ ] Changing the preset in the editor re-splits and animates the new way
 - [ ] Dragging the Stagger slider changes the timing without a re-render
+- [ ] **Replay animation** plays it again in the preview, without a reload
+- [ ] Replay works repeatedly on the same widget without duplicating or
+      mangling the text, and on a heading containing bold and a link
+- [ ] Replay works after changing the preset, and after changing the duration
+- [ ] No "Replay animation" button appears on the live page
 - [ ] Setting Starts to "On page load" hides "Starts at" and "Replay every time"
 - [ ] A Text Editor of three paragraphs staggers continuously across all three,
       sweeping top to bottom rather than each paragraph restarting

@@ -147,6 +147,14 @@ flip, lines reveal, blur in, scale pop and slide in. Alongside them: duration,
 stagger, delay, easing, how far into view it starts, and whether it replays
 every time.
 
+There is a **Replay animation** button in the editor. Elementor's button
+control fires `elementor.channels.editor.trigger( 'eanm:replay', controlView )`
+in the panel; `assets/js/editor.js` listens there and reaches into the preview
+iframe to call `erudaMotion.replay()`, which text-animation.js exposes on the
+preview window. Replaying disarms, resets, commits and re-arms before playing,
+for the same reason the initial arming does: taking the finished state away
+from an armed element animates it backwards.
+
 Fade In and Words Fade also take a direction and a travel distance. Directions
 are named for where the text comes **from** — "From the left" rather than "Fade
 left", which never says which end it starts at. The presets read `--eanm-dx`

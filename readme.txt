@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.3.3
+Stable tag: 2.3.4
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,12 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.3.4 =
+* New "Replay animation" button in the editor, under the animation controls.
+  Plays the animation again in the preview without reloading, so you can tune
+  duration and stagger and see each change. Editor only; it adds nothing to the
+  live page.
 
 = 2.3.3 =
 * Fix: Fade In and Blur In did not animate. The transition was declared in the

@@ -128,6 +128,15 @@ final class Motion_Controls {
 				'render_type'  => 'template',
 				'condition'    => $active,
 			),
+			'eanm_replay_preview' => array(
+				'label'       => esc_html__( 'Preview', 'numbered-accordion' ),
+				'type'        => 'button',
+				'button_type' => 'default',
+				'text'        => esc_html__( 'Replay animation', 'numbered-accordion' ),
+				'event'       => 'eanm:replay',
+				'description' => esc_html__( 'Plays it again here in the editor. Does nothing on the live page.', 'numbered-accordion' ),
+				'condition'   => $active,
+			),
 			'eanm_direction' => array(
 				'label'        => esc_html__( 'Comes from', 'numbered-accordion' ),
 				'type'         => 'select',
@@ -324,6 +333,8 @@ final class Motion_Controls {
 				return Controls_Manager::SLIDER;
 			case 'switcher':
 				return Controls_Manager::SWITCHER;
+			case 'button':
+				return Controls_Manager::BUTTON;
 		}
 
 		return Controls_Manager::TEXT;

@@ -449,7 +449,7 @@ $controls = Motion_Controls::control_definitions();
 
 check(
 	'the section carries exactly the frozen control ids',
-	array( 'eanm_preset', 'eanm_trigger', 'eanm_direction', 'eanm_distance', 'eanm_duration', 'eanm_stagger', 'eanm_delay', 'eanm_ease', 'eanm_threshold', 'eanm_replay' ),
+	array( 'eanm_preset', 'eanm_trigger', 'eanm_replay_preview', 'eanm_direction', 'eanm_distance', 'eanm_duration', 'eanm_stagger', 'eanm_delay', 'eanm_ease', 'eanm_threshold', 'eanm_replay' ),
 	array_keys( $controls )
 );
 
@@ -494,8 +494,15 @@ foreach ( array( 'eanm_threshold', 'eanm_replay' ) as $id ) {
 }
 
 // Every value has to reach the DOM somehow: a class, or a custom property.
-// A control with neither is a control that does nothing.
+// A control with neither is a control that does nothing -- except the Replay
+// button, which stores no value at all and fires an editor event instead.
 foreach ( $controls as $id => $definition ) {
+	if ( 'button' === $definition['type'] ) {
+		check( 'the replay button fires an editor event', 'eanm:replay', $definition['event'] );
+		check( 'the replay button stores no value', false, isset( $definition['default'] ) );
+		continue;
+	}
+
 	check(
 		"{$id} reaches the DOM",
 		true,
