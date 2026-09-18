@@ -482,22 +482,43 @@ failed.
 A row of linked cards that travels sideways while the section is pinned, so
 reading the row left to right is the same gesture as reading the page.
 
-**The runway is measured, not guessed.** The section is given the height its
-own travel needs: the stage, plus however far the row overflows its viewport,
-times a pace control. A row of three cards is therefore short and a row of
-twelve is long, and neither leaves you scrolling past a rail that stopped
-moving several screens ago. It is re-measured on resize and after pictures
-load, because a card's width is a responsive custom property and the row's
-width follows its content.
+**Two ways of doing that, and the difference is what it costs the page.**
+Sideways travel has to be spent against *something*, and the obvious something
+is scrolling. Where that scrolling comes from is the whole choice:
+
+| | |
+|---|---|
+| Flow | the section's own journey across the screen. Adds no height — the default |
+| Pinned | extra page height, bought so the section can stand still while the row crosses |
+
+Pinning is the more familiar effect and it reads more deliberately, but the
+height it buys is real: everything after the rail sits further down the page by
+exactly the width of the row. On a 1440px window with six 420px cards that is
+1360px — a screen and a half of push, which is what it looks like when a
+carousel "moves the rest of the page down".
+
+Flow spends the section's passage across the screen instead. The row starts as
+the section arrives from the bottom and finishes as it leaves at the top, and
+the section is exactly as tall as its own cards. `tests/browser/rail-probe.js`
+measures this rather than taking it on trust: it loads the page in both modes
+and compares where the content *after* the rail begins.
+
+**In pinned mode the runway is measured, not guessed.** The section is given
+the stage plus however far the row overflows its viewport, times a pace
+control. A row of three cards is therefore short and a row of twelve is long,
+and neither leaves you scrolling past a rail that stopped moving several
+screens ago. It is re-measured on resize and after pictures load, because a
+card's width is a responsive custom property and the row's width follows its
+content.
 
 A hold at each end keeps the row still for a moment as it arrives and as it
-leaves, instead of snapping into motion on the frame the section reaches the
-top of the screen.
+leaves, instead of snapping into motion the instant the section is in play.
 
 **`overflow: hidden` stops a person scrolling an element; it does not stop the
 browser.** Focusing a child scrolls its nearest scrollable ancestor to reveal
-it — and while the rail is pinned, that ancestor is the viewport whose scroll
-is meant to stay at zero because the row is being moved by transform instead.
+it — and while the script is driving, that ancestor is the viewport whose
+scroll is meant to stay at zero because the row is being moved by transform
+instead.
 A tabbed-to card was therefore shifted twice, once by the transform and once by
 a scroll nobody asked for, and landed off the far side of the screen. The
 viewport's scroll is now held at zero whenever the rail is pinned, and tabbing

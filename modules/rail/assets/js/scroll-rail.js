@@ -1,13 +1,22 @@
 /**
  * Eruda Toolkit - Scroll Rail
  *
- * Pins a row of cards and moves it sideways by however far you have scrolled
- * down past it, so reading the row left to right is the same gesture as
- * reading the page.
+ * Moves a row of cards sideways as you scroll down past it, so reading the row
+ * left to right is the same gesture as reading the page.
  *
- * The runway -- the extra page height that the sideways travel is spent
- * against -- is measured from the row itself rather than guessed, so a row of
- * three cards is short and a row of twelve is long, and neither strands you
+ * Two ways of doing that, and the difference is what it costs the page.
+ *
+ * Flow, the default, adds no height at all. The section is exactly as tall as
+ * its row, and the travel is spent against the section's own passage across
+ * the screen: the row starts as the section arrives from the bottom and
+ * finishes as it leaves at the top. Nothing below it moves down by a pixel.
+ *
+ * Pinned holds the section still and hands it extra page height to spend, so
+ * the row crosses while the screen does not. It reads more deliberately and it
+ * is the more familiar effect, but that extra height is real -- everything
+ * after the rail sits further down the page by exactly the width of the row.
+ * The runway is measured from the row rather than guessed, so a row of three
+ * cards is short and a row of twelve is long, and neither strands you
  * scrolling past a rail that stopped moving.
  *
  * Vanilla, no dependencies, safe to run twice. If it never runs, or if the
@@ -73,15 +82,15 @@
 			return;
 		}
 
-		// How much of the runway is spent standing still at each end, so the
+		// How much of the travel is spent standing still at each end, so the
 		// row does not start moving the instant its first pixel appears.
 		var hold = readData( root, 'data-erail-hold', 0.08 );
-		var pinned = false;
+		var mode = 'pinned' === root.getAttribute( 'data-erail-mode' ) ? 'pinned' : 'flow';
+		var driving = false;
 		var distance = 0;
-		var runway = 0;
 
 		/**
-		 * Should this rail pin at all?
+		 * Should the script drive the row at all?
 		 *
 		 * Below the breakpoint, and under reduced motion, the row stays a
 		 * plain scroller. Both are checked live rather than once, because a
@@ -89,7 +98,7 @@
 		 *
 		 * @return {bool}
 		 */
-		function shouldPin() {
+		function shouldDrive() {
 			if ( prefersReducedMotion() ) {
 				return false;
 			}
@@ -108,10 +117,14 @@
 		 * its content.
 		 */
 		function measure() {
-			pinned = shouldPin();
+			driving = shouldDrive();
 
-			if ( ! pinned ) {
-				root.style.height = '';
+			// Cleared first either way: the track's own width is what is being
+			// measured, and a stale inline height on the root changes the
+			// stage it is measured against.
+			root.style.height = '';
+
+			if ( ! driving ) {
 				track.style.transform = '';
 				root.removeAttribute( READY );
 				return;
@@ -119,21 +132,18 @@
 
 			root.setAttribute( READY, '' );
 
-			// Cleared first: the track's own width is what is being measured,
-			// and a transform left over from the last pass does not change it,
-			// but a stale inline height on the root does change the stage.
-			root.style.height = '';
-
 			distance = Math.max( 0, track.scrollWidth - viewport.clientWidth );
 
-			var stageHeight = stage.offsetHeight;
+			if ( 'pinned' !== mode ) {
+				// Flow adds nothing. This is the whole point of it.
+				return;
+			}
 
-			// Travel one screen-height of scrolling for each screen-width of
-			// row, so the sideways speed feels the same whatever the row's
-			// length, plus the hold at each end.
-			runway = distance > 0 ? distance * readData( root, 'data-erail-pace', 1 ) : 0;
+			// Spend one page-height of scrolling for each screen-width of row,
+			// so the sideways speed feels the same whatever the row's length.
+			var runway = distance > 0 ? distance * readData( root, 'data-erail-pace', 1 ) : 0;
 
-			root.style.height = Math.round( stageHeight + runway ) + 'px';
+			root.style.height = Math.round( stage.offsetHeight + runway ) + 'px';
 		}
 
 		/**
@@ -143,13 +153,32 @@
 		 */
 		function progress() {
 			var rect = root.getBoundingClientRect();
-			var span = rect.height - stage.offsetHeight;
+			var height = window.innerHeight || document.documentElement.clientHeight || 0;
+			var raw;
 
-			if ( span <= 0 ) {
-				return 0;
+			if ( 'pinned' === mode ) {
+				// The travel is the runway: the stretch of scrolling during
+				// which the stage is stuck to the screen.
+				var span = rect.height - stage.offsetHeight;
+
+				if ( span <= 0 ) {
+					return 0;
+				}
+
+				raw = clamp01( -rect.top / span );
+			} else {
+				// The travel is the section's own passage across the screen:
+				// nought when its top edge is at the bottom of the window, one
+				// when its bottom edge is at the top. No page height is
+				// involved, which is why nothing below the rail moves.
+				var journey = height + rect.height;
+
+				if ( journey <= 0 ) {
+					return 0;
+				}
+
+				raw = clamp01( ( height - rect.top ) / journey );
 			}
-
-			var raw = clamp01( -rect.top / span );
 
 			// Ease the two ends so the row is still for a moment as it arrives
 			// and as it leaves, instead of snapping into motion on the frame
@@ -162,7 +191,7 @@
 		}
 
 		function update() {
-			if ( ! pinned ) {
+			if ( ! driving ) {
 				if ( bar ) {
 					bar.style.transform = 'scaleX(0)';
 				}
@@ -196,7 +225,7 @@
 		 * is not.
 		 */
 		function lock() {
-			if ( pinned && viewport.scrollLeft !== 0 ) {
+			if ( driving && viewport.scrollLeft !== 0 ) {
 				viewport.scrollLeft = 0;
 			}
 		}
@@ -229,7 +258,7 @@
 		 * and fight the transform.
 		 */
 		function onFocus( event ) {
-			if ( ! pinned || ! distance ) {
+			if ( ! driving || ! distance ) {
 				return;
 			}
 
@@ -248,9 +277,11 @@
 			);
 
 			var rect = root.getBoundingClientRect();
-			var span = rect.height - stage.offsetHeight;
+			var height = window.innerHeight || document.documentElement.clientHeight || 0;
 			var raw = hold > 0 && hold < 0.5 ? wanted * ( 1 - hold * 2 ) + hold : wanted;
-			var target = window.pageYOffset + rect.top + raw * span;
+			var target = 'pinned' === mode
+				? window.pageYOffset + rect.top + raw * ( rect.height - stage.offsetHeight )
+				: window.pageYOffset + rect.top - height + raw * ( height + rect.height );
 
 			window.scrollTo( { top: Math.round( target ), behavior: 'auto' } );
 			update();

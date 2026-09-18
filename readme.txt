@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.9.0
+Stable tag: 2.10.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,16 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.10.0 =
+* Scroll Rail no longer pushes the rest of the page down. Pinning a section
+  works by giving it extra page height to scroll against, and that height moved
+  everything after it down by the width of the row. The new "How it travels"
+  setting defaults to Flow, which spends the section's own journey across the
+  screen instead and adds no height at all.
+* Pinned is still there for when the more deliberate effect is wanted, and
+  "Scroll distance" now appears only on that setting, where it is the only
+  thing it could mean.
 
 = 2.9.0 =
 * New "Scroll Rail" widget: a row of linked cards that travels sideways as you

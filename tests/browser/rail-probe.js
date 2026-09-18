@@ -40,6 +40,77 @@ const x = t => {
   await page.goto('http://127.0.0.1:8732/tests/browser/rail.html', { waitUntil: 'load' });
   await page.evaluate(() => new Promise(r => setTimeout(r, 200)));
 
+  /*
+   * What the section costs the page.
+   *
+   * This is the whole difference between the two modes, so it is measured
+   * rather than described: where does the content *after* the rail start, and
+   * how tall is the document, with each of them.
+   */
+  const cost = async (mode) => {
+    await page.goto('http://127.0.0.1:8732/tests/browser/rail.html?mode=' + mode, { waitUntil: 'load' });
+    await page.evaluate(() => new Promise(r => setTimeout(r, 250)));
+    return page.evaluate(() => {
+      const root = document.querySelector('.erail');
+      const stage = document.querySelector('.erail__stage');
+      const after = document.getElementById('after');
+      return {
+        rootH: root.offsetHeight,
+        stageH: stage.offsetHeight,
+        afterTop: Math.round(after.getBoundingClientRect().top + window.scrollY),
+        docH: document.body.scrollHeight,
+        inline: root.style.height || '(none)',
+      };
+    });
+  };
+
+  const flowCost = await cost('flow');
+  const pinnedCost = await cost('pinned');
+
+  check('flow adds no height to the page at all',
+    flowCost.rootH === flowCost.stageH && flowCost.inline === '(none)',
+    'section ' + flowCost.rootH + 'px against a stage of ' + flowCost.stageH +
+      'px, inline height ' + flowCost.inline);
+
+  check('flow does not push what follows it down the page',
+    flowCost.afterTop < pinnedCost.afterTop &&
+    pinnedCost.afterTop - flowCost.afterTop === pinnedCost.rootH - flowCost.rootH,
+    'content after the rail starts at ' + flowCost.afterTop + 'px in flow and ' +
+      pinnedCost.afterTop + 'px pinned — ' + (pinnedCost.afterTop - flowCost.afterTop) + 'px of push');
+
+  check('pinned still buys itself a runway',
+    pinnedCost.rootH > pinnedCost.stageH,
+    'section ' + pinnedCost.rootH + 'px against a stage of ' + pinnedCost.stageH + 'px');
+
+  check('and the document is shorter in flow by exactly that runway',
+    pinnedCost.docH - flowCost.docH === pinnedCost.rootH - pinnedCost.stageH,
+    'document ' + flowCost.docH + 'px in flow, ' + pinnedCost.docH + 'px pinned');
+
+  // Pinned is still pinned: it is on the pinned page right now.
+  const centring = await page.evaluate(async () => {
+    const stage = document.querySelector('.erail__stage');
+    const max = document.body.scrollHeight - innerHeight;
+    const out = [];
+    for (const f of [0.35, 0.5, 0.65]) {
+      window.scrollTo(0, Math.round(f * max));
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const r = stage.getBoundingClientRect();
+      out.push({
+        position: getComputedStyle(stage).position,
+        top: Math.round(r.top),
+        bottom: Math.round(innerHeight - r.bottom),
+      });
+    }
+    return out;
+  });
+  check('pinned holds the stage centred on screen',
+    centring.every(c => c.position === 'sticky' && Math.abs(c.top - c.bottom) <= 1),
+    centring.map(c => c.top + '/' + c.bottom).join(' '));
+
+  // Everything after this runs against flow, the default.
+  await page.goto('http://127.0.0.1:8732/tests/browser/rail.html', { waitUntil: 'load' });
+  await page.evaluate(() => new Promise(r => setTimeout(r, 250)));
+
   await page.evaluate(() => {
     window.__at = async (y) => {
       window.scrollTo(0, y);
@@ -76,12 +147,8 @@ const x = t => {
   });
 
   check('the rail takes over from the plain scroller',
-    geom.ready && geom.pinned === 'sticky',
-    'ready=' + geom.ready + ' stage is ' + geom.pinned);
-
-  check('the section is given a runway for the sideways travel',
-    geom.rootH > geom.stageH + geom.overflow - 4 && geom.rootH >= geom.stageH + geom.overflow - 4,
-    'section ' + geom.rootH + 'px = stage ' + geom.stageH + ' + ' + geom.overflow + ' of row to cross');
+    geom.ready,
+    'ready=' + geom.ready + ', stage is ' + geom.pinned);
 
   const max = await page.evaluate(() => document.body.scrollHeight - innerHeight);
   const stops = [0, 0.2, 0.35, 0.5, 0.65, 0.8, 1].map(f => Math.round(f * max));
@@ -115,14 +182,8 @@ const x = t => {
   // --- it holds still at each end -----------------------------------------
   const held = fwd.filter(s => Math.round(x(s.tx)) === 0).length;
   check('the row is still for a moment before it sets off',
-    held >= 2,
+    held >= 1,
     held + ' of ' + fwd.length + ' sampled stops sit at zero');
-
-  // --- pinned and centred --------------------------------------------------
-  const middle = fwd.filter(s => s.stageTop >= 0 && s.stageBottom >= 0);
-  check('the stage stays centred on screen while it is pinned',
-    middle.length >= 3 && middle.every(s => Math.abs(s.stageTop - s.stageBottom) <= 1),
-    middle.map(s => s.stageTop + '/' + s.stageBottom).join(' '));
 
   // --- the progress bar ----------------------------------------------------
   const bars = fwd.map(s => {

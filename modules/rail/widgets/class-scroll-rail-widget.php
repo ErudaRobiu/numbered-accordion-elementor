@@ -614,6 +614,20 @@ class Scroll_Rail_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'mode',
+			array(
+				'label'       => esc_html__( 'How it travels', 'numbered-accordion' ),
+				'description' => esc_html__( 'Pinning costs page height. The row needs scrolling to spend on its sideways travel, and pinning buys that by making the section taller, which pushes everything after it down the page by the width of the row. Flow spends the section\'s own journey across the screen instead and adds nothing.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'flow',
+				'options'     => array(
+					'flow'   => esc_html__( 'Flow - travels as the section crosses the screen, adds no height', 'numbered-accordion' ),
+					'pinned' => esc_html__( 'Pinned - holds the section still, adds page height', 'numbered-accordion' ),
+				),
+			)
+		);
+
+		$this->add_control(
 			'pace',
 			array(
 				'label'       => esc_html__( 'Scroll distance', 'numbered-accordion' ),
@@ -621,6 +635,7 @@ class Scroll_Rail_Widget extends Widget_Base {
 				'type'        => Controls_Manager::SLIDER,
 				'range'       => array( 'px' => array( 'min' => 0.4, 'max' => 2.5, 'step' => 0.1 ) ),
 				'default'     => array( 'size' => 1 ),
+				'condition'   => array( 'mode' => 'pinned' ),
 			)
 		);
 
@@ -740,9 +755,11 @@ class Scroll_Rail_Widget extends Widget_Base {
 
 		$pace = $this->slider( $settings, 'pace', 1, 0.4, 2.5 );
 		$hold = $this->slider( $settings, 'hold', 8, 0, 40 ) / 100;
+		$mode = isset( $settings['mode'] ) && 'pinned' === $settings['mode'] ? 'pinned' : 'flow';
 		?>
 		<div
 			class="erail"
+			data-erail-mode="<?php echo esc_attr( $mode ); ?>"
 			data-erail-pace="<?php echo esc_attr( (string) $pace ); ?>"
 			data-erail-hold="<?php echo esc_attr( (string) $hold ); ?>"
 		>

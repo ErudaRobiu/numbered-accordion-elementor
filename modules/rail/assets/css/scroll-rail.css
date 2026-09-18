@@ -20,14 +20,23 @@
  * is the extra height the script puts on .erail itself.
  */
 .erail__stage {
-	position: sticky;
-	/* Centred on the screen whatever height it is asked for, so changing the
-	   section height cannot leave the row sitting low or high. */
-	top: calc((100vh - var(--erail-height, 78vh)) / 2);
+	position: relative;
 	height: var(--erail-height, 78vh);
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+}
+
+/*
+ * Only the pinned mode sticks, and only the pinned mode is handed extra page
+ * height to stick for. In flow the section is exactly as tall as its row and
+ * everything after it sits where it would have anyway.
+ */
+.erail[data-erail-mode="pinned"] .erail__stage {
+	position: sticky;
+	/* Centred on the screen whatever height it is asked for, so changing the
+	   section height cannot leave the row sitting low or high. */
+	top: calc((100vh - var(--erail-height, 78vh)) / 2);
 }
 
 .erail__viewport {

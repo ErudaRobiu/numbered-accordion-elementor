@@ -328,13 +328,24 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
       Rail" and add it. Two releases have shipped a widget nobody could add
 - [ ] Dropping it in gives four cards in a row
 - [ ] Scrolling down moves the row sideways, and scrolling up moves it back
+
+### Flow against pinned
+
+- [ ] **On the default (Flow), the rail does not push anything down.** Put a
+      section after it, note where it starts, then switch to Pinned: it should
+      move down by roughly the width of the row, and back again on Flow
+- [ ] On Flow the section is exactly as tall as its cards, and the row crosses
+      as the section crosses the screen
+- [ ] On Pinned the section holds still on screen while the row crosses, and
+      the stage stays centred
+- [ ] "Scroll distance" appears only on Pinned, where it is the only thing it
+      could mean
 - [ ] The row is still for a moment as it arrives and as it leaves, rather than
       snapping into motion
 - [ ] The row finishes exactly as the last card reaches the edge. You never
       scroll past a rail that has stopped moving
-- [ ] Adding or removing cards changes how far you scroll, without touching a
-      setting
-- [ ] "Scroll distance" makes the same row cost more or less scrolling
+- [ ] On Pinned, adding or removing cards changes how far you scroll without
+      touching a setting
 - [ ] The stage sits centred on the screen, and stays centred when you change
       the section height
 - [ ] A picture of any shape or size fills its card, including one smaller than
