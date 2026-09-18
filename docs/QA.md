@@ -413,3 +413,36 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
       no leftover height or transform
 - [ ] Editing a card in the editor re-renders it and the rail still works
 - [ ] Two Scroll Rails on one page travel independently
+
+## Hotspot Stats
+
+`node tests/browser/spots-probe.js` measures the leaders, the counting, the
+dimming and the phone fallback in headless Chrome, against
+`tests/browser/spots.html`.
+
+- [ ] **Hotspot Stats is in the panel.** Search for it and add it
+- [ ] Dropping it in gives six hotspots over a placeholder
+- [ ] Each leader runs from its label to its dot, with a short level run before
+      it turns
+- [ ] **Resize the browser slowly.** Every dot stays on the same part of the
+      picture and every leader follows it. This is the thing that breaks in
+      every hotspot plugin
+- [ ] Put the widget in a narrow column without resizing the window: the
+      leaders still follow
+- [ ] The figures count up when you scroll to them, and land on exactly what
+      was typed — try `1,240`, `$4.5m` and `13+`
+- [ ] Setting the counting length to zero leaves them at their final values
+- [ ] Hovering one hotspot dims the others; the hovered dot grows and rings
+- [ ] Tabbing reaches any hotspot with a link, and does the same thing hovering
+      does
+- [ ] A hotspot with no link is not focusable and shows no underline
+- [ ] The icon picker works, and the icon sits on the outside of the label on
+      whichever side the label runs from
+- [ ] Below 768px the lines and dots go, and the figures become a list under
+      the picture with no sideways scroll
+- [ ] With JavaScript disabled every label and figure is readable, and only the
+      leaders are missing
+- [ ] With Reduce Motion on nothing draws and nothing counts; the figure is
+      simply finished
+- [ ] Editing a hotspot in the editor re-renders it and the leaders redraw
+- [ ] Two Hotspot Stats on one page behave independently

@@ -1,0 +1,65 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../modules/spots/assets/css/hotspot-stats.css">
+<style>
+ body{font:16px/1.5 system-ui;margin:0;background:#0f2a1e;color:#fff;padding:60px 40px}
+ .pad{height:60vh}
+ .espot{--espot-accent:#4ade80;--espot-line:rgba(255,255,255,.55)}
+ /* Positions as Elementor emits them, per repeater item. */
+ .s1{--espot-ax:30%;--espot-ay:33%;--espot-lx:14%;--espot-ly:16%}
+ .s2{--espot-ax:57%;--espot-ay:38%;--espot-lx:86%;--espot-ly:16%}
+ .s3{--espot-ax:28%;--espot-ay:55%;--espot-lx:9%;--espot-ly:38%}
+ .s4{--espot-ax:65%;--espot-ay:63%;--espot-lx:90%;--espot-ly:45%}
+ .s5{--espot-ax:25%;--espot-ay:68%;--espot-lx:10%;--espot-ly:80%}
+ .s6{--espot-ax:60%;--espot-ay:72%;--espot-lx:52%;--espot-ly:92%}
+
+ /* A theme that styles images heavily, as ever. */
+ img{max-width:100%;height:auto}
+ .espot img{width:auto;height:auto;max-height:40%}
+</style></head><body>
+<div class="pad"></div>
+
+<div class="espot" data-espot-count="600" data-espot-stagger="60" data-espot-stub="18">
+ <div class="espot__frame">
+  <img class="espot__img" alt="The unit"
+   src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='900'%3E%3Crect width='1200' height='900' fill='%23143024'/%3E%3Crect x='330' y='230' width='520' height='440' fill='%23555c5a'/%3E%3C/svg%3E">
+
+  <svg class="espot__lines" aria-hidden="true" preserveAspectRatio="none"></svg>
+
+  <ul class="espot__list">
+   <li class="espot__item s1" data-espot-side="right"><span class="espot__hit">
+     <span class="espot__dot" aria-hidden="true"></span>
+     <span class="espot__label"><span class="espot__head"><span class="espot__title">Countries Installed</span></span>
+      <span class="espot__value" data-espot-value="13+">13+</span></span></span></li>
+
+   <li class="espot__item s2" data-espot-side="left"><span class="espot__hit">
+     <span class="espot__dot" aria-hidden="true"></span>
+     <span class="espot__label"><span class="espot__head"><span class="espot__title">Customer Brands</span></span>
+      <span class="espot__value" data-espot-value="50+">50+</span></span></span></li>
+
+   <li class="espot__item s3" data-espot-side="right"><span class="espot__hit">
+     <span class="espot__dot" aria-hidden="true"></span>
+     <span class="espot__label"><span class="espot__head"><span class="espot__title">Restaurants and Breweries</span></span>
+      <span class="espot__value" data-espot-value="30+">30+</span></span></span></li>
+
+   <li class="espot__item s4" data-espot-side="left"><a class="espot__hit" href="https://example.com/hotels">
+     <span class="espot__dot" aria-hidden="true"></span>
+     <span class="espot__label"><span class="espot__head"><span class="espot__title">Hotel Brands</span></span>
+      <span class="espot__value" data-espot-value="5+">5+</span></span></a></li>
+
+   <li class="espot__item s5" data-espot-side="right"><span class="espot__hit">
+     <span class="espot__dot" aria-hidden="true"></span>
+     <span class="espot__label"><span class="espot__head"><span class="espot__title">Industrial Sites</span></span>
+      <span class="espot__value" data-espot-value="1,240">1,240</span>
+      <span class="espot__note">Food, laundry, paint and manufacturing.</span></span></span></li>
+
+   <li class="espot__item s6" data-espot-side="right"><span class="espot__hit">
+     <span class="espot__dot" aria-hidden="true"></span>
+     <span class="espot__label"><span class="espot__head"><span class="espot__title">School and Office Kitchens</span></span>
+      <span class="espot__value" data-espot-value="8+">8+</span></span></span></li>
+  </ul>
+ </div>
+</div>
+
+<div class="pad"></div>
+<script src="../../modules/spots/assets/js/hotspot-stats.js"></script>
+</body></html>

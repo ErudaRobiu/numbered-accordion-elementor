@@ -52,6 +52,10 @@ final class Toolkit {
 			'file'  => 'modules/rail/class-rail-module.php',
 			'class' => '\ErudaToolkit\Modules\Rail\Rail_Module',
 		),
+		'spots'      => array(
+			'file'  => 'modules/spots/class-spots-module.php',
+			'class' => '\ErudaToolkit\Modules\Spots\Spots_Module',
+		),
 	);
 
 	/**

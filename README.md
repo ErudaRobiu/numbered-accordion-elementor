@@ -36,6 +36,7 @@ modules/impact/                    the impact grid widget and its assets
 modules/motion/                    the text animation controls and assets
 modules/story/                     the Scroll Story widget and its assets
 modules/rail/                      the Scroll Rail widget and its assets
+modules/spots/                     the Hotspot Stats widget and its assets
 modules/smoothscroll/              eases the whole page's scrolling
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
@@ -640,6 +641,53 @@ keeps the default cursor. It is still a card; it just does not pretend.
 Pictures are forced to cover for the same reason as the Scroll Story panel, and
 the rail's test page carries the same deliberately hostile theme block so the
 probe proves it.
+
+### Hotspot Stats
+
+Figures pinned to points on a photograph, joined to them by leader lines that
+draw themselves in.
+
+**Everything is positioned as a percentage of the picture, not in pixels.**
+That is the whole difference between a figure that survives a responsive
+layout and one that comes apart: a hotspot given pixel coordinates drifts off
+its rivet the moment the column it sits in changes width, and the picture never
+stops changing width. Each hotspot carries four of them — where its point is,
+and where its label is — as custom properties on the repeater item.
+
+**The leaders have to be drawn in script.** A leader runs between two points
+given as percentages of a picture whose rendered size is whatever the column
+happens to be, so it only exists in pixels once the browser has laid it out,
+and it has to be rebuilt every time that changes. A `ResizeObserver` on the
+frame catches the case a resize listener never hears about: the column changing
+width while the window does not.
+
+It leaves the label's own edge rather than the position the label is anchored
+at — otherwise it starts underneath the words — runs level for a short stub,
+and only then turns for the dot. A single diagonal from a word to a rivet reads
+as a stray mark; the stub is what makes it read as a leader on a drawing. The
+dash used to draw it is the path's own `getTotalLength()`, or the draw would
+finish early on a short leader and late on a long one.
+
+**Hovering one hotspot dims the others** rather than brightening the hovered
+one, so the picture never gets louder than it started and the eye is led by
+contrast instead of glare. `:focus-within` does the same, so tabbing through
+behaves identically.
+
+**The figures count up to what is already in the markup.** The value is a plain
+text field — `13+`, `1,240`, `$4.5m` — and the script pulls the number out of
+the middle, counts that, and puts the rest back exactly as typed, thousands
+separators included. Decelerating into the value rather than stopping dead is
+what makes it read as counted rather than cut off, and `tabular-nums` stops the
+digits jittering on the way.
+
+Safe without the script, like everything else here: every label is readable and
+every figure is already its final value, because the markup carries them. The
+script only adds the lines between them and the counting.
+
+**Below 768px the annotation comes off the picture.** Leader lines need room to
+travel and a phone has none: they would cross each other and the labels would
+cover the product. So the picture keeps itself and the figures become the plain
+list they always were underneath.
 
 ### Smooth scrolling
 

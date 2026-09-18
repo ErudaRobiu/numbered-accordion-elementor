@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.14.0
+Stable tag: 2.15.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,19 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.15.0 =
+* New "Hotspot Stats" widget: figures pinned to points on a photograph, joined
+  to them by leader lines that draw themselves in when the section arrives.
+* Hotspots are positioned as a percentage of the picture, so one stays on the
+  same part of a product at every screen width and in any column.
+* The figures count up. A figure is written however you want it read -- 13+,
+  1,240, $4.5m -- and only the number in the middle counts; the rest is kept
+  exactly as typed.
+* Hovering or tabbing to one hotspot dims the others, so the eye is led by
+  contrast rather than by anything getting brighter.
+* Below 768px the lines and dots come off the picture and the figures become a
+  plain list under it.
 
 = 2.14.0 =
 * Scroll Rail now works out where to hold a section from where the row sits
