@@ -644,12 +644,12 @@ class Scroll_Rail_Widget extends Widget_Base {
 			'mode',
 			array(
 				'label'       => esc_html__( 'How it travels', 'numbered-accordion' ),
-				'description' => esc_html__( 'Pinning costs page height. The row needs scrolling to spend on its sideways travel, and pinning buys that by making the section taller, which pushes everything after it down the page by the width of the row. Flow spends the section\'s own journey across the screen instead and adds nothing.', 'numbered-accordion' ),
+				'description' => esc_html__( 'Pinned is the usual one: the page stops, the row crosses, it pauses, and then the page carries on. The scrolling it crosses in has to come from somewhere, so the section is made taller by that much and everything after it sits further down the page. That is not a side effect, it is the mechanism. Flow spends the section\'s own journey across the screen instead and adds nothing, at the cost of a quicker crossing.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SELECT,
-				'default'     => 'flow',
+				'default'     => 'pinned',
 				'options'     => array(
+					'pinned' => esc_html__( 'Pinned - the page holds still while the row crosses', 'numbered-accordion' ),
 					'flow'   => esc_html__( 'Flow - travels as the section crosses the screen, adds no height', 'numbered-accordion' ),
-					'pinned' => esc_html__( 'Pinned - holds the section still, adds page height', 'numbered-accordion' ),
 				),
 			)
 		);
@@ -658,7 +658,7 @@ class Scroll_Rail_Widget extends Widget_Base {
 			'pace',
 			array(
 				'label'       => esc_html__( 'Scroll distance', 'numbered-accordion' ),
-				'description' => esc_html__( 'How much scrolling the row costs, against how wide it is. Higher is slower and longer.', 'numbered-accordion' ),
+				'description' => esc_html__( 'How much scrolling the crossing itself costs, against how wide the row is. One is a pixel of scroll per pixel of row; higher is slower.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
 				'range'       => array( 'px' => array( 'min' => 0.4, 'max' => 2.5, 'step' => 0.1 ) ),
 				'default'     => array( 'size' => 1 ),
@@ -667,14 +667,27 @@ class Scroll_Rail_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
-			'hold',
+			'pause_in',
 			array(
-				'label'       => esc_html__( 'Hold at each end', 'numbered-accordion' ),
-				'description' => esc_html__( 'A moment of stillness as the row arrives and as it leaves, instead of it snapping into motion the instant the section reaches the top.', 'numbered-accordion' ),
+				'label'       => esc_html__( 'Pause before it sets off', 'numbered-accordion' ),
+				'description' => esc_html__( 'The page is already held and the row has not moved yet, so the cards arrive, settle in the middle of the screen and can be read before anything travels. In screen-heights of scrolling.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
 				'size_units'  => array( '%' ),
-				'range'       => array( '%' => array( 'min' => 0, 'max' => 40 ) ),
-				'default'     => array( 'unit' => '%', 'size' => 8 ),
+				'range'       => array( '%' => array( 'min' => 0, 'max' => 150, 'step' => 5 ) ),
+				'default'     => array( 'unit' => '%', 'size' => 30 ),
+				'condition'   => array( 'mode' => 'pinned' ),
+			)
+		);
+
+		$this->add_control(
+			'pause_out',
+			array(
+				'label'       => esc_html__( 'Pause before it lets go', 'numbered-accordion' ),
+				'description' => esc_html__( 'The row has finished but the page is still held, so the last cards are read before scrolling carries on down the page.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( '%' ),
+				'range'       => array( '%' => array( 'min' => 0, 'max' => 150, 'step' => 5 ) ),
+				'default'     => array( 'unit' => '%', 'size' => 30 ),
 				'condition'   => array( 'mode' => 'pinned' ),
 			)
 		);
@@ -820,9 +833,10 @@ class Scroll_Rail_Widget extends Widget_Base {
 		$tag = isset( $settings['title_tag'] ) ? $settings['title_tag'] : 'h3';
 		$tag = in_array( $tag, array( 'h2', 'h3', 'h4', 'h5', 'div', 'span' ), true ) ? $tag : 'h3';
 
-		$pace = $this->slider( $settings, 'pace', 1, 0.4, 2.5 );
-		$hold = $this->slider( $settings, 'hold', 8, 0, 40 ) / 100;
-		$mode   = isset( $settings['mode'] ) && 'pinned' === $settings['mode'] ? 'pinned' : 'flow';
+		$pace     = $this->slider( $settings, 'pace', 1, 0.4, 2.5 );
+		$pauseIn  = $this->slider( $settings, 'pause_in', 30, 0, 150 ) / 100;
+		$pauseOut = $this->slider( $settings, 'pause_out', 30, 0, 150 ) / 100;
+		$mode     = isset( $settings['mode'] ) && 'flow' === $settings['mode'] ? 'flow' : 'pinned';
 		$start  = $this->slider( $settings, 'travel_start', 80, 0, 100 ) / 100;
 		$finish = $this->slider( $settings, 'travel_finish', 80, 0, 100 ) / 100;
 		$extra  = $this->slider( $settings, 'extra', 0, 0, 200 ) / 100;
@@ -831,7 +845,8 @@ class Scroll_Rail_Widget extends Widget_Base {
 			class="erail"
 			data-erail-mode="<?php echo esc_attr( $mode ); ?>"
 			data-erail-pace="<?php echo esc_attr( (string) $pace ); ?>"
-			data-erail-hold="<?php echo esc_attr( (string) $hold ); ?>"
+			data-erail-pause-in="<?php echo esc_attr( (string) $pauseIn ); ?>"
+			data-erail-pause-out="<?php echo esc_attr( (string) $pauseOut ); ?>"
 			data-erail-start="<?php echo esc_attr( (string) $start ); ?>"
 			data-erail-finish="<?php echo esc_attr( (string) $finish ); ?>"
 			data-erail-extra="<?php echo esc_attr( (string) $extra ); ?>"

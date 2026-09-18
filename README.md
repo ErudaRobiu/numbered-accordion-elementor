@@ -488,14 +488,36 @@ is scrolling. Where that scrolling comes from is the whole choice:
 
 | | |
 |---|---|
-| Flow | the section's own journey across the screen. Adds no height — the default |
-| Pinned | extra page height, bought so the section can stand still while the row crosses |
+| Pinned | extra page height, bought so the page can stand still while the row crosses — the default |
+| Flow | the section's own journey across the screen. Adds no height |
 
-Pinning is the more familiar effect and it reads more deliberately, but the
-height it buys is real: everything after the rail sits further down the page by
-exactly the width of the row. On a 1440px window with six 420px cards that is
-1360px — a screen and a half of push, which is what it looks like when a
-carousel "moves the rest of the page down".
+**The height pinning buys is not a side effect; it is the mechanism.** A
+pinned section holds the page still while something inside it moves, and the
+scrolling that movement is measured against has to exist somewhere. GSAP's
+ScrollTrigger — which is what most sites doing this are running — reserves it
+the same way, by default: `pinSpacing: true` adds padding the height of the pin
+so the content below catches up when the section releases. Seeing the section's
+height double in DevTools is that working, not breaking. There is no version of
+"the page stops while the row crosses" that does not lengthen the page.
+
+Pinned runs in three stretches, not one:
+
+| | |
+|---|---|
+| Pause in | the page is held and nothing moves, so the cards arrive, settle in the middle of the screen and can be read before anything travels |
+| Travel | the row crosses, a pixel of scroll per pixel of row at a pace of 1 |
+| Pause out | the row is finished and the page is still held, so the last cards are read before scrolling carries on |
+
+Both pauses are controls, in screen-heights, and default to 0.3 each. Padding a
+pinned stretch at both ends is how this is done everywhere — GSAP's own recipe
+pads the timeline for the same reason. Without it the row starts moving on the
+frame the section pins and the page is released on the frame it stops, and both
+read as a jolt.
+
+The stage sticks partway down the screen rather than at the top, so the pin
+begins when the section's top edge reaches *that* line. Measuring the progress
+from the top of the window instead puts every position out by the sticky
+offset, which once the stage is centred is most of a card's height.
 
 Flow spends the section's passage across the screen instead, and the section is
 exactly as tall as its own cards. `tests/browser/rail-probe.js` measures the
@@ -539,15 +561,12 @@ control buys more, in screen-heights, and is the one thing in flow that does
 push what follows further down the page; it defaults to zero.
 
 **In pinned mode the runway is measured, not guessed.** The section is given
-the stage plus however far the row overflows its viewport, times a pace
-control. A row of three cards is therefore short and a row of twelve is long,
-and neither leaves you scrolling past a rail that stopped moving several
+the stage, the two pauses, and however far the row overflows its viewport times
+a pace control. A row of three cards is therefore short and a row of twelve is
+long, and neither leaves you scrolling past a rail that stopped moving several
 screens ago. It is re-measured on resize and after pictures load, because a
 card's width is a responsive custom property and the row's width follows its
 content.
-
-A hold at each end keeps the row still for a moment as it arrives and as it
-leaves, instead of snapping into motion the instant the section is in play.
 
 **`overflow: hidden` stops a person scrolling an element; it does not stop the
 browser.** Focusing a child scrolls its nearest scrollable ancestor to reveal

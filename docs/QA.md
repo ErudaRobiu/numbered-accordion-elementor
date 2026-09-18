@@ -331,9 +331,18 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
 
 ### Flow against pinned
 
-- [ ] **On the default (Flow), the rail does not push anything down.** Put a
-      section after it, note where it starts, then switch to Pinned: it should
-      move down by roughly the width of the row, and back again on Flow
+- [ ] **On the default (Pinned), the page stops while the row crosses.** Scroll
+      into the section: it settles in the middle of the screen, holds still for
+      a moment, the row crosses without the page moving at all, it holds again,
+      and only then does the page carry on
+- [ ] "Pause before it sets off" and "Pause before it lets go" lengthen those
+      two held moments
+- [ ] Pinned makes the section taller, and what follows sits further down the
+      page. That is the mechanism, not a bug — it is what reserves the
+      scrolling the crossing is measured against
+- [ ] **On Flow the rail does not push anything down.** Put a section after it,
+      note where it starts, then switch between the modes: Pinned should move
+      it down, Flow should put it back
 - [ ] On Flow the section is exactly as tall as its cards, with no dead space
       above or below the row. Change the card width or shape and the section
       follows

@@ -77,6 +77,7 @@ const x = t => {
   const flowCost = await cost('flow');
   const pinnedCost = await cost('pinned');
 
+
   check('the section is as tall as its cards make it, not a share of the screen',
     Math.abs(flowCost.stageH - flowCost.wants) <= 1 && flowCost.stageH < 900,
     'stage ' + flowCost.stageH + 'px for a ' + flowCost.cardH +
@@ -122,7 +123,7 @@ const x = t => {
     centring.every(c => c.position === 'sticky' && Math.abs(c.top - c.bottom) <= 1),
     centring.map(c => c.top + '/' + c.bottom).join(' '));
 
-  // Everything after this runs against flow, the default.
+  // Everything after this runs against pinned, the default.
   await page.goto('http://127.0.0.1:8732/tests/browser/rail.html', { waitUntil: 'load' });
   await page.evaluate(() => new Promise(r => setTimeout(r, 250)));
 
@@ -194,7 +195,75 @@ const x = t => {
   check('the same scroll position gives the same offset either way', same,
     same ? 'all match' : 'drifted');
 
-  // --- the travel happens while you can see the cards ----------------------
+  // --- the page is held, the row crosses, and it pauses at both ends -------
+  /*
+   * The behaviour this is all for, walked in 10px steps rather than sampled,
+   * because what matters is the exact frame the row sets off, the exact frame
+   * it arrives, and whether the page moved at all in between.
+   */
+  const pinned = await page.evaluate(async () => {
+    const root = document.querySelector('.erail');
+    const stage = document.querySelector('.erail__stage');
+    const track = document.querySelector('.erail__track');
+    const max = document.body.scrollHeight - innerHeight;
+    const at = t => Math.abs(/matrix(?:3d)?\(([^)]+)\)/.exec(t)[1].split(',').map(Number)[4]);
+    const seen = [];
+    for (let y = 0; y <= max; y += 10) {
+      window.scrollTo(0, y);
+      await new Promise(r => requestAnimationFrame(r));
+      seen.push({
+        y,
+        off: at(getComputedStyle(track).transform),
+        stageTop: Math.round(stage.getBoundingClientRect().top),
+      });
+    }
+    const furthest = Math.max(...seen.map(s => s.off));
+    const first = seen.findIndex(s => s.off > 1);
+    const last = seen.findIndex(s => s.off >= furthest - 1);
+    const stuck = seen.slice(first, last + 1).map(s => s.stageTop);
+
+    /*
+     * The pauses are the held stretches either side of the crossing, so they
+     * are measured from where the pin actually engages -- the first and last
+     * frames the stage sits at the offset it sticks to -- and not from the
+     * top of the document, which would count the page above the section too.
+     */
+    const parked = seen[first].stageTop;
+    const pinFrom = seen.findIndex(s => Math.abs(s.stageTop - parked) <= 1);
+    let pinTo = pinFrom;
+    while (pinTo + 1 < seen.length && Math.abs(seen[pinTo + 1].stageTop - parked) <= 1) {
+      pinTo += 1;
+    }
+
+    return {
+      furthest,
+      before: (first - pinFrom) * 10,
+      after: (pinTo - last) * 10,
+      crossing: (last - first) * 10,
+      held: (pinTo - pinFrom) * 10,
+      stuckSpread: stuck.length ? Math.max(...stuck) - Math.min(...stuck) : -1,
+      stageTopWhileCrossing: stuck.length ? stuck[0] : -1,
+    };
+  });
+
+  check('the page is held still while the row crosses',
+    pinned.stuckSpread >= 0 && pinned.stuckSpread <= 1,
+    'the stage sat at ' + pinned.stageTopWhileCrossing + 'px down the screen for the whole ' +
+      pinned.crossing + 'px crossing, moving ' + pinned.stuckSpread + 'px');
+
+  check('it pauses before it sets off',
+    pinned.before >= 240 && pinned.before <= 300,
+    pinned.before + 'px of scrolling held with nothing moving, of ' + pinned.held + 'px held in all');
+
+  check('and pauses again before it lets the page go',
+    pinned.after >= 240 && pinned.after <= 300,
+    pinned.after + 'px of scrolling after the row arrived, still held');
+
+  check('the crossing costs about a pixel of scroll per pixel of row',
+    Math.abs(pinned.crossing - pinned.furthest) / pinned.furthest < 0.05,
+    pinned.crossing + 'px of scroll for ' + Math.round(pinned.furthest) + 'px of row');
+
+  // --- flow still travels while you can see the cards ----------------------
   /*
    * The complaint this was built to answer: the row used to be moving while
    * the section was a sliver at the bottom of the window and finished while it
@@ -203,6 +272,9 @@ const x = t => {
    * Walked in fine steps rather than sampled, because what matters is the
    * exact frame the row sets off and the exact frame it arrives.
    */
+  await page.goto('http://127.0.0.1:8732/tests/browser/rail.html?mode=flow', { waitUntil: 'load' });
+  await page.evaluate(() => new Promise(r => setTimeout(r, 250)));
+
   const window_ = await page.evaluate(async () => {
     const root = document.querySelector('.erail');
     const track = document.querySelector('.erail__track');
@@ -239,6 +311,10 @@ const x = t => {
   check('and finishes while the section is still on screen',
     window_.endVis >= 0.75,
     Math.round(window_.endVis * 100) + '% still showing on the frame it arrived');
+
+  // Back to the default for the rest.
+  await page.goto('http://127.0.0.1:8732/tests/browser/rail.html', { waitUntil: 'load' });
+  await page.evaluate(() => new Promise(r => setTimeout(r, 250)));
 
   // --- the progress bar ----------------------------------------------------
   const bars = fwd.map(s => {

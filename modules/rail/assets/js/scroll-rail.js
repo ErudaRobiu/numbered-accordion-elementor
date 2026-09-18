@@ -6,15 +6,16 @@
  *
  * Two ways of doing that, and the difference is what it costs the page.
  *
- * Flow, the default, adds no height at all. The section is exactly as tall as
+ * Flow adds no height at all. The section is exactly as tall as
  * its row, and the travel is spent against the section's own passage across
  * the screen: the row starts as the section arrives from the bottom and
  * finishes as it leaves at the top. Nothing below it moves down by a pixel.
  *
- * Pinned holds the section still and hands it extra page height to spend, so
- * the row crosses while the screen does not. It reads more deliberately and it
- * is the more familiar effect, but that extra height is real -- everything
- * after the rail sits further down the page by exactly the width of the row.
+ * Pinned, the default, holds the section still and hands it extra page height
+ * to spend, so the row crosses while the screen does not, with a still stretch
+ * at each end. That extra height is not a flaw in the effect, it *is* the
+ * effect: the scrolling has to come from somewhere, and GSAP's ScrollTrigger
+ * reserves it the same way, with a spacer the height of the pin.
  * The runway is measured from the row rather than guessed, so a row of three
  * cards is short and a row of twelve is long, and neither strands you
  * scrolling past a rail that stopped moving.
@@ -82,12 +83,16 @@
 			return;
 		}
 
-		// How much of the travel is spent standing still at each end, so the
-		// row does not start moving the instant its first pixel appears.
-		var hold = readData( root, 'data-erail-hold', 0.08 );
-		var mode = 'pinned' === root.getAttribute( 'data-erail-mode' ) ? 'pinned' : 'flow';
+		var mode = 'flow' === root.getAttribute( 'data-erail-mode' ) ? 'flow' : 'pinned';
 		var driving = false;
 		var distance = 0;
+
+		// Pinned only, and all in pixels once measured: the still stretch
+		// before the row sets off, the stretch it travels for, and where the
+		// stage sticks.
+		var pauseIn = 0;
+		var travel = 0;
+		var stickyTop = 0;
 
 		/**
 		 * Should the script drive the row at all?
@@ -153,13 +158,34 @@
 			// Centred on the screen, from the height the stage turned out to
 			// be rather than the height it was asked for -- which is usually
 			// `auto`, because the cards decide it.
-			stage.style.top = Math.max( 0, Math.round( ( height - stage.offsetHeight ) / 2 ) ) + 'px';
+			stickyTop = Math.max( 0, Math.round( ( height - stage.offsetHeight ) / 2 ) );
+			stage.style.top = stickyTop + 'px';
 
-			// Spend one page-height of scrolling for each screen-width of row,
-			// so the sideways speed feels the same whatever the row's length.
-			var runway = distance > 0 ? distance * readData( root, 'data-erail-pace', 1 ) : 0;
+			/*
+			 * The runway is three stretches, not one.
+			 *
+			 *   pause in    the section is held and nothing moves, so the row
+			 *               arrives, settles and is read before it goes
+			 *               anywhere
+			 *   travel      the row crosses, a pixel of scroll per pixel of
+			 *               row at a pace of 1
+			 *   pause out   the row is finished and the section is still held,
+			 *               so the last cards are read before the page is
+			 *               given back
+			 *
+			 * Padding a pinned stretch at both ends is how this is done
+			 * everywhere -- GSAP's own recipe pads the timeline for exactly
+			 * the same reason. Without it the row starts moving on the frame
+			 * the section pins and the page is released on the frame it stops,
+			 * and both read as a jolt.
+			 */
+			pauseIn = distance > 0 ? readData( root, 'data-erail-pause-in', 0.3 ) * height : 0;
 
-			root.style.height = Math.round( stage.offsetHeight + runway ) + 'px';
+			var pauseOut = distance > 0 ? readData( root, 'data-erail-pause-out', 0.3 ) * height : 0;
+
+			travel = distance > 0 ? distance * readData( root, 'data-erail-pace', 1 ) : 0;
+
+			root.style.height = Math.round( stage.offsetHeight + pauseIn + travel + pauseOut ) + 'px';
 		}
 
 		/**
@@ -170,18 +196,23 @@
 		function progress() {
 			var rect = root.getBoundingClientRect();
 			var height = window.innerHeight || document.documentElement.clientHeight || 0;
-			var raw;
 
 			if ( 'pinned' === mode ) {
-				// The travel is the runway: the stretch of scrolling during
-				// which the stage is stuck to the screen.
-				var span = rect.height - stage.offsetHeight;
-
-				if ( span <= 0 ) {
+				if ( travel <= 0 ) {
 					return 0;
 				}
 
-				raw = clamp01( -rect.top / span );
+				/*
+				 * The stage sticks at `stickyTop` down the screen, so the pin
+				 * begins when the section's top edge reaches that line, not
+				 * when it reaches the top of the window. Measuring from the
+				 * window's top instead puts every position out by the sticky
+				 * offset, which is most of a card's height once the stage is
+				 * centred.
+				 */
+				var into = stickyTop - rect.top;
+
+				return clamp01( ( into - pauseIn ) / travel );
 			} else {
 				/*
 				 * The travel happens while the section is on screen, not
@@ -218,16 +249,6 @@
 				return clamp01( ( tStart - rect.top ) / span );
 			}
 
-			// Pinned only. The runway is one long stretch of scrolling with
-			// nothing else happening in it, so a moment of stillness at each
-			// end stops the row snapping into motion on the frame the section
-			// reaches the top of the screen. Flow has its start and finish
-			// controls for the same job.
-			if ( hold <= 0 || hold >= 0.5 ) {
-				return raw;
-			}
-
-			return clamp01( ( raw - hold ) / ( 1 - hold * 2 ) );
 		}
 
 		function update() {
@@ -317,12 +338,10 @@
 			);
 
 			var rect = root.getBoundingClientRect();
-			var height = window.innerHeight || document.documentElement.clientHeight || 0;
-			var raw = hold > 0 && hold < 0.5 ? wanted * ( 1 - hold * 2 ) + hold : wanted;
 			var target;
 
 			if ( 'pinned' === mode ) {
-				target = window.pageYOffset + rect.top + raw * ( rect.height - stage.offsetHeight );
+				target = window.pageYOffset + rect.top - stickyTop + pauseIn + wanted * travel;
 			} else {
 				var basis = Math.min( rect.height, height );
 				var tStart = height - basis * readData( root, 'data-erail-start', 0.8 );

@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.11.0
+Stable tag: 2.12.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,19 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.12.0 =
+* Scroll Rail is pinned by default again, and pinning now works the way it
+  should: the page stops, the section settles in the middle of the screen and
+  holds still, the row crosses without the page moving at all, it holds again,
+  and only then does scrolling carry on down the page.
+* New "Pause before it sets off" and "Pause before it lets go" settings, in
+  screen-heights, which are those two held moments.
+* Fix: the crossing was measured from the top of the window rather than from
+  where the section actually pins, putting every position out by most of a
+  card's height once the stage was centred.
+* Flow is still there for when a section cannot afford the height, under
+  "How it travels".
 
 = 2.11.0 =
 * Scroll Rail sections are now as tall as their cards make them, instead of a
