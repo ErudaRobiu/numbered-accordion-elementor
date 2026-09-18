@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.6.1
+Stable tag: 2.6.2
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,15 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.6.2 =
+* The Scroll Story notch is now the right shape: it cuts into the panel's left
+  edge with rounded corners and a diagonal run, rather than stepping outwards
+  with square ones. The proportions are taken from the reference's own clip
+  path, so any notch depth keeps the same shape.
+* The panel is no longer full height. It defaults to 88% of the screen and
+  pins 40px below the top, which leaves the breathing room the reference has.
+* The notch path is rebuilt when the panel is resized.
 
 = 2.6.1 =
 * Fix: the Scroll Story widget never appeared in the Elementor panel. The

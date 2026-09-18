@@ -15,8 +15,94 @@
 	var READY = 'data-estry-ready';
 	var ON = 'data-estry-on';
 
+	var uid = 0;
+
 	function toArray( list ) {
 		return Array.prototype.slice.call( list || [] );
+	}
+
+	/**
+	 * Build the clip path for a notched panel.
+	 *
+	 * The notch cuts *into* the panel along its left edge: flush at the top
+	 * and bottom, stepping inwards by `depth` across a band, with rounded
+	 * corners and a diagonal run between them.
+	 *
+	 * The proportions are taken from the reference, measured off its own clip
+	 * path at a 30px depth, then expressed as ratios of the depth so any depth
+	 * keeps the same shape:
+	 *
+	 *   arc radius    21.5 / 30 = 0.717
+	 *   arc rise      14.05 / 30 = 0.468   arc run  5.23 / 30 = 0.174
+	 *   diagonal rise 22.64 / 30 = 0.755   run     19.54 / 30 = 0.651
+	 *
+	 * One transition is therefore 1.692 x depth tall. Generated in script
+	 * rather than written as CSS because a curve in a clip path is in user
+	 * units: it has to be rebuilt whenever the panel is resized.
+	 *
+	 * @param {number} w      Panel width.
+	 * @param {number} h      Panel height.
+	 * @param {number} depth  How far the notch cuts in.
+	 * @param {number} run    Straight length of the inset section.
+	 * @param {number} centre Where the notch sits, 0 to 1 down the panel.
+	 * @return {string} An SVG path.
+	 */
+	function notchPath( w, h, depth, run, centre ) {
+		var r = 0.717 * depth;
+		var arcRise = 0.468 * depth;
+		var arcRun = 0.174 * depth;
+		var diagRise = 0.755 * depth;
+		var transition = 1.692 * depth;
+
+		// Keep the whole notch on the panel, however short the panel is.
+		var needed = run + transition * 2;
+
+		if ( needed > h ) {
+			run = Math.max( 0, h - transition * 2 );
+			needed = run + transition * 2;
+		}
+
+		var top = ( h - needed ) * Math.min( Math.max( centre, 0 ), 1 );
+		var bottom = top + needed;
+
+		// Down the left edge, into the notch, along it, and back out.
+		return [
+			'M 0,0',
+			'L ' + w + ',0',
+			'L ' + w + ',' + h,
+			'L 0,' + h,
+			'L 0,' + bottom.toFixed( 2 ),
+			'A ' + r.toFixed( 2 ) + ',' + r.toFixed( 2 ) + ' 0 0 1 ' + arcRun.toFixed( 2 ) + ',' + ( bottom - arcRise ).toFixed( 2 ),
+			'L ' + ( depth - arcRun ).toFixed( 2 ) + ',' + ( bottom - arcRise - diagRise ).toFixed( 2 ),
+			'A ' + r.toFixed( 2 ) + ',' + r.toFixed( 2 ) + ' 0 0 0 ' + depth.toFixed( 2 ) + ',' + ( bottom - transition ).toFixed( 2 ),
+			'L ' + depth.toFixed( 2 ) + ',' + ( top + transition ).toFixed( 2 ),
+			'A ' + r.toFixed( 2 ) + ',' + r.toFixed( 2 ) + ' 0 0 0 ' + ( depth - arcRun ).toFixed( 2 ) + ',' + ( top + arcRise + diagRise ).toFixed( 2 ),
+			'L ' + arcRun.toFixed( 2 ) + ',' + ( top + arcRise ).toFixed( 2 ),
+			'A ' + r.toFixed( 2 ) + ',' + r.toFixed( 2 ) + ' 0 0 1 0,' + top.toFixed( 2 ),
+			'Z',
+		].join( ' ' );
+	}
+
+	/**
+	 * Read a length custom property as a plain number of pixels.
+	 *
+	 * @param {Element} el       Element to read from.
+	 * @param {string}  name     Property name.
+	 * @param {number}  fallback Value when unreadable.
+	 * @return {number}
+	 */
+	function readNumber( el, name, fallback ) {
+		var raw = '';
+
+		try {
+			raw = ( window.getComputedStyle( el ).getPropertyValue( name ) || '' ).trim();
+		} catch ( e ) {
+			raw = '';
+		}
+
+		var value = parseFloat( raw );
+
+		return isNaN( value ) ? fallback : value;
 	}
 
 	function prefersReducedMotion() {
@@ -125,6 +211,35 @@
 		var items = toArray( root.querySelectorAll( '.estry__item' ) );
 		var images = toArray( root.querySelectorAll( '.estry__img' ) );
 		var frame = root.querySelector( '.estry__frame' );
+		var notched = frame && frame.hasAttribute( 'data-estry-notch' );
+		var clipPath = null;
+
+		if ( notched ) {
+			uid += 1;
+
+			var id = 'estry-notch-' + uid;
+			var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+
+			svg.setAttribute( 'width', '0' );
+			svg.setAttribute( 'height', '0' );
+			svg.setAttribute( 'aria-hidden', 'true' );
+			svg.style.position = 'absolute';
+
+			var defs = document.createElementNS( 'http://www.w3.org/2000/svg', 'defs' );
+			clipPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'clipPath' );
+			clipPath.setAttribute( 'id', id );
+			clipPath.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
+
+			var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+			clipPath.appendChild( path );
+			defs.appendChild( clipPath );
+			svg.appendChild( defs );
+			frame.parentNode.insertBefore( svg, frame );
+
+			frame.style.clipPath = 'url(#' + id + ')';
+			frame.style.webkitClipPath = 'url(#' + id + ')';
+			clipPath = path;
+		}
 
 		if ( ! items.length ) {
 			return;
@@ -176,13 +291,19 @@
 			}
 
 			// The notch travels with how far you are through the section.
-			if ( frame ) {
+			if ( clipPath ) {
 				var rect = root.getBoundingClientRect();
 				var viewport = window.innerHeight || document.documentElement.clientHeight;
 				var span = rect.height - viewport;
 				var progress = span > 0 ? Math.min( Math.max( -rect.top / span, 0 ), 1 ) : 0;
+				var box = frame.getBoundingClientRect();
+				var depth = parseFloat( readNumber( frame, '--estry-notch', 30 ) );
+				var run = parseFloat( readNumber( frame, '--estry-band-size', 280 ) );
 
-				frame.style.setProperty( '--estry-band', ( 12 + progress * 76 ).toFixed( 2 ) + '%' );
+				clipPath.setAttribute(
+					'd',
+					notchPath( Math.round( box.width ), Math.round( box.height ), depth, run, progress )
+				);
 			}
 		}
 

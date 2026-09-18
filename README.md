@@ -341,11 +341,31 @@ hundreds of character spans. Compare the `scroll-highlight` preset in the
 motion module, which *is* scrubbed and so must recompute every word every
 frame. Both are right for different jobs.
 
-**The travelling notch.** The panel's left edge steps outwards inside a band
-that moves down as you scroll the section, via a `clip-path` polygon whose band
-position the script writes. Because `clip-path` and `border-radius` clip the
-same box, a notched panel has square corners by design; the radius control
-appears only when the notch is off.
+**The travelling notch.** The panel's left edge is flush top and bottom and
+cuts *inwards* across a band, with rounded corners and a diagonal run between
+them. The band travels down as you scroll the section.
+
+The proportions come from measuring the reference's own clip path at a 30px
+depth, then expressing them as ratios of the depth so any depth keeps the
+shape:
+
+```
+arc radius    21.5 / 30  = 0.717
+arc rise      14.05 / 30 = 0.468     arc run  5.23 / 30 = 0.174
+diagonal rise 22.64 / 30 = 0.755     run     19.54 / 30 = 0.651
+```
+
+The path is generated in JavaScript rather than written as CSS, because a curve
+in a clip path is in user units: `clip-path: path()` and an SVG `clipPath` with
+`userSpaceOnUse` both need rebuilding whenever the panel resizes. A polygon in
+percentages would scale on its own but cannot hold a fixed-radius curve.
+
+Because `clip-path` and `border-radius` clip the same box, a notched panel has
+square corners by design; the radius control appears only when the notch is
+off.
+
+**The panel is not full height.** The reference's is 830px in a 900px viewport,
+inset top and bottom. The default here is 88% of the screen, pinned 40px down.
 
 **What was not copied:** their panel is a `<canvas>` playing a scroll-scrubbed
 image sequence, which needs hundreds of exported frames and a decode pipeline.

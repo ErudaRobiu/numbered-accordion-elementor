@@ -214,7 +214,7 @@ class Scroll_Story_Widget extends Widget_Base {
 				'type'        => Controls_Manager::SLIDER,
 				'size_units'  => array( 'px' ),
 				'range'       => array( 'px' => array( 'min' => 0, 'max' => 240 ) ),
-				'default'     => array( 'unit' => 'px', 'size' => 0 ),
+				'default'     => array( 'unit' => 'px', 'size' => 40 ),
 				'selectors'   => array( '{{WRAPPER}} .estry' => '--estry-top: {{SIZE}}px;' ),
 			)
 		);
@@ -226,7 +226,7 @@ class Scroll_Story_Widget extends Widget_Base {
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'vh' ),
 				'range'      => array( 'vh' => array( 'min' => 40, 'max' => 100 ) ),
-				'default'    => array( 'unit' => 'vh', 'size' => 100 ),
+				'default'    => array( 'unit' => 'vh', 'size' => 88 ),
 				'selectors'  => array( '{{WRAPPER}} .estry' => '--estry-height: {{SIZE}}vh;' ),
 			)
 		);
@@ -248,7 +248,7 @@ class Scroll_Story_Widget extends Widget_Base {
 			'notch',
 			array(
 				'label'        => esc_html__( 'Notched edge', 'numbered-accordion' ),
-				'description'  => esc_html__( 'Steps the panel out along its left edge, travelling as you scroll. Replaces the corner radius.', 'numbered-accordion' ),
+				'description'  => esc_html__( 'Cuts a rounded step into the panel\'s left edge, travelling as you scroll. Replaces the corner radius.', 'numbered-accordion' ),
 				'type'         => Controls_Manager::SWITCHER,
 				'default'      => 'yes',
 				'return_value' => 'yes',
@@ -261,8 +261,8 @@ class Scroll_Story_Widget extends Widget_Base {
 				'label'      => esc_html__( 'Notch depth', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 4, 'max' => 80 ) ),
-				'default'    => array( 'unit' => 'px', 'size' => 24 ),
+				'range'      => array( 'px' => array( 'min' => 8, 'max' => 90 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 30 ),
 				'selectors'  => array( '{{WRAPPER}} .estry' => '--estry-notch: {{SIZE}}px;' ),
 				'condition'  => array( 'notch' => 'yes' ),
 			)
@@ -274,8 +274,8 @@ class Scroll_Story_Widget extends Widget_Base {
 				'label'      => esc_html__( 'Notch length', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 30, 'max' => 400 ) ),
-				'default'    => array( 'unit' => 'px', 'size' => 90 ),
+				'range'      => array( 'px' => array( 'min' => 40, 'max' => 600 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 280 ),
 				'selectors'  => array( '{{WRAPPER}} .estry' => '--estry-band-size: {{SIZE}}px;' ),
 				'condition'  => array( 'notch' => 'yes' ),
 			)

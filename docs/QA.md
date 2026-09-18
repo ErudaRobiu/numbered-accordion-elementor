@@ -235,7 +235,12 @@ These need a real site.
       going blank
 - [ ] The panel stays pinned for the whole section and releases at the end
 - [ ] "Pin below" clears a sticky site header
+- [ ] The notch cuts *into* the panel rather than sticking out of it, and its
+      corners are curved rather than square
 - [ ] The notch travels down the panel's left edge as you scroll the section
+- [ ] Resizing the browser rebuilds the notch to the new panel width instead of
+      leaving it stretched or clipped
+- [ ] The panel is inset from the top and bottom of the screen, not full height
 - [ ] Turning the notch off restores the corner radius control, and the radius
       works
 - [ ] Below 1024px the panel stops being pinned, sits above the text, and the
