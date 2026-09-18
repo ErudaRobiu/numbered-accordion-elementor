@@ -146,13 +146,24 @@ module shipped can use it without being rebuilt.
 Ten presets: fade in, words up, words fade, words build, characters cascade,
 characters flip, lines reveal, blur in, scale pop and slide in.
 
-Words Build is the sequential one. What separates a build from a stagger is the
-timing rather than the movement: a stagger has every word in flight at once
-with offset starts, a build lets each word land before the next leaves. The
-preset gets there by stretching the gap and shortening each word's own move,
-both *relative* to the sliders, so Duration and Stagger still mean what their
-labels say. Measured at 165ms into a five-word build: `99 49 0 0 0`, against
-`83 70 49 15` for the same headline on Words Fade. Alongside them: duration,
+Words Build is the standard word reveal, matching the GSAP recipe it is named
+after:
+
+```js
+gsap.from( split.words, {
+  opacity: 0, y: 15, stagger: 0.06, duration: 0.5, ease: 'power2.out'
+} );
+```
+
+Every number there is a default here: Duration 500ms, Stagger 60ms, easing
+"Natural" (which is `power2.out`, easeOutCubic), and a fixed 15px lift rather
+than an em-relative one so it reads the same on a paragraph as on a headline.
+Verified in Chrome: per-word delays come out `0s, 0.06s, 0.12s, 0.18s, 0.24s`
+at `0.5s` each on `cubic-bezier(0.215, 0.61, 0.355, 1)`, from
+`matrix(1, 0, 0, 1, 0, 15)`.
+
+Those defaults now apply to every preset, not just this one. 800ms was slower
+than the convention for text. Alongside them: duration,
 stagger, delay, easing, how far into view it starts, and whether it replays
 every time.
 

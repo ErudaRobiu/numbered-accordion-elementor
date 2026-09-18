@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.4.1
+Stable tag: 2.4.2
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,15 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.4.2 =
+* "Words Build" now matches the standard GSAP word reveal it is named after:
+  words 60ms apart, 500ms each, lifting 15px, on power2.out. The previous
+  version made each word land before the next began, which is a different
+  animation from the one people mean by this name.
+* New "Natural" easing (power2.out / easeOutCubic), now the default.
+* Default duration is 500ms rather than 800ms, which is the convention for
+  text. Widgets already saved keep the timing they were given.
 
 = 2.4.1 =
 * New "Words Build" preset: the sentence assembles a word at a time, each word

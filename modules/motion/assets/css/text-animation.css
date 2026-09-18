@@ -31,6 +31,8 @@
 
 /* Easing. The control stores a name; the curve lives here, so it can be
    retuned later without touching a single saved page. */
+/* GSAP's power2.out, which is easeOutCubic. The usual choice for text. */
+.eanm-ease-natural   { --eanm-ease: cubic-bezier(0.215, 0.61, 0.355, 1); }
 .eanm-ease-out-expo  { --eanm-ease: cubic-bezier(0.16, 1, 0.3, 1); }
 .eanm-ease-out-quart { --eanm-ease: cubic-bezier(0.25, 1, 0.5, 1); }
 .eanm-ease-out-back  { --eanm-ease: cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -39,10 +41,10 @@
 
 /* Defaults, so a widget whose sliders were never touched still animates. */
 [class*="eanm-preset-"] {
-	--eanm-duration: 800ms;
+	--eanm-duration: 500ms;
 	--eanm-stagger: 60ms;
 	--eanm-delay: 0ms;
-	--eanm-ease: cubic-bezier(0.16, 1, 0.3, 1);
+	--eanm-ease: cubic-bezier(0.215, 0.61, 0.355, 1);
 	--eanm-threshold: 20;
 	--eanm-distance: 24px;
 	--eanm-dx: 0;
@@ -73,7 +75,7 @@
  */
 [data-eanm-armed] .eanm-i {
 	transition-property: transform, opacity, filter;
-	transition-duration: var(--eanm-duration, 800ms);
+	transition-duration: var(--eanm-duration, 500ms);
 	transition-timing-function: var(--eanm-ease, cubic-bezier(0.16, 1, 0.3, 1));
 	transition-delay: calc(var(--eanm-delay, 0ms) + var(--eanm-stagger, 60ms) * var(--eanm-i, 0));
 }
@@ -129,22 +131,20 @@
 }
 
 /*
- * Words Build assembles the sentence a word at a time.
+ * Words Build is the standard word reveal, matching the GSAP recipe it is
+ * named after:
  *
- * What separates a build from an ordinary stagger is not the movement, it is
- * the timing: a stagger has every word in flight at once with offset starts,
- * while a build lets each word land before the next one leaves. So the gap is
- * stretched and each word's own move is shortened -- both relative to whatever
- * the sliders say, so Duration and Stagger still do what the labels promise.
+ *   gsap.from( split.words, {
+ *     opacity: 0, y: 15, stagger: 0.06, duration: 0.5, ease: 'power2.out'
+ *   } );
+ *
+ * A fixed 15px lift rather than an em-relative one, so it reads the same on a
+ * 20px paragraph as on a 60px headline. The timing comes straight from the
+ * sliders, whose defaults are that recipe's 500ms and 60ms.
  */
 .eanm-preset-words-build [data-eanm-ready] .eanm-i {
 	opacity: 0;
-	transform: translate3d(0, 0.18em, 0);
-}
-
-.eanm-preset-words-build [data-eanm-armed] .eanm-i {
-	transition-duration: calc(var(--eanm-duration, 800ms) * 0.35);
-	transition-delay: calc(var(--eanm-delay, 0ms) + var(--eanm-stagger, 60ms) * 2.6 * var(--eanm-i, 0));
+	transform: translate3d(0, 15px, 0);
 }
 
 /* fade-in and blur-in split nothing: the target element is itself the moving
@@ -157,7 +157,7 @@
 
 .eanm-preset-fade-in [data-eanm-armed] {
 	transition-property: opacity, transform;
-	transition-duration: var(--eanm-duration, 800ms);
+	transition-duration: var(--eanm-duration, 500ms);
 	transition-timing-function: var(--eanm-ease, cubic-bezier(0.16, 1, 0.3, 1));
 	transition-delay: var(--eanm-delay, 0ms);
 }
@@ -176,7 +176,7 @@
 
 .eanm-preset-blur-in [data-eanm-armed] {
 	transition-property: opacity, filter;
-	transition-duration: var(--eanm-duration, 800ms);
+	transition-duration: var(--eanm-duration, 500ms);
 	transition-timing-function: var(--eanm-ease, cubic-bezier(0.16, 1, 0.3, 1));
 	transition-delay: var(--eanm-delay, 0ms);
 }

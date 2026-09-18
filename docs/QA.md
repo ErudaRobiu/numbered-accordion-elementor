@@ -152,8 +152,8 @@ The parsing, the figure detection and the numbering are covered by
       Style tab
 - [ ] The section appears exactly once on a widget, not repeated
 - [ ] A native Heading with Words Up animates on the live page and in the editor
-- [ ] Words Build reads as one word at a time, not as an overlapping stagger;
-      raising Stagger widens the gaps rather than blurring them together
+- [ ] Words Build matches the GSAP reference out of the box: words 60ms apart,
+      500ms each, lifting 15px, easing "Natural"
 - [ ] Changing the preset in the editor re-splits and animates the new way
 - [ ] Dragging the Stagger slider changes the timing without a re-render
 - [ ] **Replay animation** plays it again in the preview, without a reload

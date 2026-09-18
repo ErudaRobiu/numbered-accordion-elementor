@@ -179,7 +179,7 @@ final class Motion_Controls {
 				),
 				'default'    => array(
 					'unit' => 'ms',
-					'size' => 800,
+					'size' => 500,
 				),
 				'selectors'  => array( '{{WRAPPER}}' => '--eanm-duration: {{SIZE}}ms;' ),
 				'condition'  => $active,
@@ -224,7 +224,7 @@ final class Motion_Controls {
 			'eanm_ease'      => array(
 				'label'        => esc_html__( 'Easing', 'numbered-accordion' ),
 				'type'         => 'select',
-				'default'      => 'out-expo',
+				'default'      => 'natural',
 				'options'      => Motion_Presets::easings(),
 				'prefix_class' => 'eanm-ease-',
 				'condition'    => $active,

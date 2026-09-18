@@ -174,6 +174,7 @@ final class Motion_Presets {
 	 */
 	public static function easings() {
 		return array(
+			'natural'   => esc_html__( 'Natural', 'numbered-accordion' ),
 			'out-expo'  => esc_html__( 'Smooth', 'numbered-accordion' ),
 			'out-quart' => esc_html__( 'Gentle', 'numbered-accordion' ),
 			'out-back'  => esc_html__( 'Overshoot', 'numbered-accordion' ),

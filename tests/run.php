@@ -389,8 +389,9 @@ check( 'null is not a valid preset', false, Motion_Presets::is_valid( null ) );
 
 $easings = Motion_Presets::easings();
 
-check( 'five easings', 5, count( $easings ) );
-check( 'the default easing exists', true, isset( $easings['out-expo'] ) );
+check( 'six easings', 6, count( $easings ) );
+check( 'the default easing exists', true, isset( $easings['natural'] ) );
+check( 'the earlier default is still offered', true, isset( $easings['out-expo'] ) );
 
 /* -------------------------------------------------- Motion_Controls --- */
 
@@ -534,7 +535,9 @@ check(
 	$controls['eanm_threshold']['selectors']
 );
 
-check( 'duration defaults to 800ms', 800, $controls['eanm_duration']['default']['size'] );
+// The reference recipe this is modelled on: 500ms, 60ms apart, power2.out.
+check( 'duration defaults to 500ms', 500, $controls['eanm_duration']['default']['size'] );
+check( 'easing defaults to power2.out', 'natural', $controls['eanm_ease']['default'] );
 check( 'stagger defaults to 60ms', 60, $controls['eanm_stagger']['default']['size'] );
 check( 'delay defaults to none', 0, $controls['eanm_delay']['default']['size'] );
 check( 'threshold defaults to 20 per cent', 20, $controls['eanm_threshold']['default']['size'] );
