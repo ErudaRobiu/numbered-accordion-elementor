@@ -287,6 +287,133 @@
 	}
 
 	/**
+	 * Elements whose progress is tied to the scroll position, and the frame
+	 * loop that updates them. The loop only runs while at least one of them
+	 * is on screen.
+	 *
+	 * @type {Element[]}
+	 */
+	var scrubbing = [];
+	var scrubRunning = false;
+
+	/**
+	 * How wide the lighting-up band is, in words.
+	 *
+	 * 1 would light each word the instant the one before it finished, which
+	 * reads as a hard edge travelling along the line. A little over 1 keeps
+	 * two or three words in flight and reads as a sweep.
+	 */
+	var SCRUB_SOFTNESS = 1.6;
+
+	/**
+	 * How far the element has travelled through the middle of the screen.
+	 *
+	 * 0 when its top reaches the centre, 1 when its bottom does -- the same
+	 * band as a scrub from "top center" to "bottom center".
+	 *
+	 * @param {Element} el Target element.
+	 * @return {number} 0 to 1.
+	 */
+	function scrollProgress( el ) {
+		var rect = el.getBoundingClientRect();
+		var viewport = window.innerHeight || document.documentElement.clientHeight;
+		var middle = viewport / 2;
+
+		if ( rect.height <= 0 ) {
+			return 0;
+		}
+
+		// The band is the element's own height, but never less than a good
+		// part of the screen. A one-line heading is barely forty pixels tall,
+		// and scrubbing a whole sentence across forty pixels of scroll is a
+		// flicker rather than a sweep. Taller paragraphs are unaffected, so
+		// this matches the reference wherever the reference makes sense.
+		var band = Math.max( rect.height, viewport * 0.45 );
+
+		return Math.min( Math.max( ( middle - rect.top ) / band, 0 ), 1 );
+	}
+
+	/**
+	 * Write each word's own share of that progress.
+	 *
+	 * Word i starts lighting once the sweep reaches it and is fully lit a
+	 * softness later, so the words light in order with a little overlap.
+	 *
+	 * @param {Element} el Target element.
+	 */
+	function scrubElement( el ) {
+		var units = el.eanmUnits;
+
+		if ( ! units || ! units.length ) {
+			return;
+		}
+
+		var progress = scrollProgress( el );
+		var reach = progress * ( units.length - 1 + SCRUB_SOFTNESS );
+
+		for ( var i = 0; i < units.length; i++ ) {
+			var own = ( reach - i ) / SCRUB_SOFTNESS;
+
+			units[ i ].style.setProperty( '--eanm-p', Math.min( Math.max( own, 0 ), 1 ).toFixed( 3 ) );
+		}
+	}
+
+	/**
+	 * Run the scrub loop while anything needs it, and stop when nothing does.
+	 */
+	function scrubFrame() {
+		for ( var i = 0; i < scrubbing.length; i++ ) {
+			scrubElement( scrubbing[ i ] );
+		}
+
+		if ( scrubbing.length ) {
+			window.requestAnimationFrame( scrubFrame );
+			return;
+		}
+
+		scrubRunning = false;
+	}
+
+	/**
+	 * Watch an element for as long as it is on screen.
+	 *
+	 * A scrubbed element is only interesting while it is visible, so the
+	 * frame loop is started and stopped by an observer rather than running
+	 * for the life of the page.
+	 *
+	 * @param {Element} el Target element.
+	 */
+	function scrub( el ) {
+		el.eanmUnits = toArray( el.querySelectorAll( '.eanm-u' ) );
+
+		// Correct from the first frame, even if the page loads part-scrolled.
+		scrubElement( el );
+
+		if ( el.eanmScrubObserver ) {
+			el.eanmScrubObserver.disconnect();
+		}
+
+		el.eanmScrubObserver = new window.IntersectionObserver( function ( entries ) {
+			entries.forEach( function ( entry ) {
+				var at = scrubbing.indexOf( entry.target );
+
+				if ( entry.isIntersecting && at === -1 ) {
+					scrubbing.push( entry.target );
+				} else if ( ! entry.isIntersecting && at !== -1 ) {
+					scrubbing.splice( at, 1 );
+				}
+			} );
+
+			if ( scrubbing.length && ! scrubRunning ) {
+				scrubRunning = true;
+				window.requestAnimationFrame( scrubFrame );
+			}
+		} );
+
+		el.eanmScrubObserver.observe( el );
+	}
+
+	/**
 	 * Clamp a percentage into a usable IntersectionObserver threshold.
 	 *
 	 * 1.0 is deliberately unreachable: an element taller than the viewport can
@@ -368,6 +495,7 @@
 		}
 
 		var mode = readProp( root, '--eanm-split', 'none' );
+		var scrubbed = 'scrub' === readProp( root, '--eanm-mode', 'reveal' );
 		var onLoad = root.classList.contains( 'eanm-trigger-load' );
 		var replay = root.classList.contains( 'eanm-replay-yes' );
 		var threshold = clampThreshold( parseFloat( readProp( root, '--eanm-threshold', '20' ) ) );
@@ -411,6 +539,13 @@
 			el.setAttribute( READY_ATTR, '' );
 			void el.offsetWidth;
 			el.setAttribute( ARMED_ATTR, '' );
+
+			if ( scrubbed ) {
+				// The scroll position is the timeline. No trigger, no
+				// finished state, nothing to replay.
+				scrub( el );
+				return;
+			}
 
 			if ( onLoad ) {
 				window.requestAnimationFrame( function () {

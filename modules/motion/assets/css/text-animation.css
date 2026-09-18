@@ -13,6 +13,10 @@
 .eanm-preset-words-up      { --eanm-split: words; }
 .eanm-preset-words-fade    { --eanm-split: words; }
 .eanm-preset-words-build  { --eanm-split: words; }
+
+/* The one preset tied to scroll position rather than played on a trigger.
+   --eanm-mode tells the script to scrub it. */
+.eanm-preset-scroll-highlight { --eanm-split: words; --eanm-mode: scrub; }
 .eanm-preset-chars-cascade { --eanm-split: chars; }
 .eanm-preset-chars-flip    { --eanm-split: chars; }
 .eanm-preset-lines-mask    { --eanm-split: lines; }
@@ -165,6 +169,29 @@
 .eanm-preset-fade-in [data-eanm-ready][data-eanm-in] {
 	opacity: 1;
 	transform: none;
+}
+
+/*
+ * Scroll Highlight: the words start dim and light up as the paragraph passes
+ * through the middle of the screen.
+ *
+ * The script writes --eanm-p per word, from 0 to 1, every frame. That is the
+ * whole of the scrubbing; the sum below turns it into an opacity between the
+ * dim level and full. Continuous rather than a switch, so a word is visibly
+ * mid-way when the scroll stops mid-way.
+ *
+ * The transition has to be switched off explicitly. Every split word carries
+ * the reveal transition once armed -- 500ms with a per-word stagger delay --
+ * and left in place it eases towards each scrubbed value instead of tracking
+ * the scrollbar. Measured: --eanm-p read 1.000 on every word while the
+ * opacities were still crawling through 0.92, 0.86, 0.75, 0.59, 0.35.
+ */
+.eanm-preset-scroll-highlight [data-eanm-ready] .eanm-i {
+	opacity: calc(var(--eanm-dim, 0.15) + (1 - var(--eanm-dim, 0.15)) * var(--eanm-p, 0));
+}
+
+.eanm-preset-scroll-highlight [data-eanm-armed] .eanm-i {
+	transition: none;
 }
 
 /* blur-in splits nothing: the target element is itself the moving part. */

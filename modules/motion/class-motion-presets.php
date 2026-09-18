@@ -59,6 +59,10 @@ final class Motion_Presets {
 				'label' => esc_html__( 'Words Build', 'numbered-accordion' ),
 				'split' => self::SPLIT_WORDS,
 			),
+			'scroll-highlight' => array(
+				'label' => esc_html__( 'Scroll Highlight', 'numbered-accordion' ),
+				'split' => self::SPLIT_WORDS,
+			),
 			'chars-cascade' => array(
 				'label' => esc_html__( 'Characters Cascade', 'numbered-accordion' ),
 				'split' => self::SPLIT_CHARS,
@@ -133,6 +137,19 @@ final class Motion_Presets {
 		}
 
 		return array_key_exists( $value, self::all() );
+	}
+
+	/**
+	 * Presets driven by the scroll position rather than played on a trigger.
+	 *
+	 * These ignore duration, stagger, delay, easing and the trigger controls
+	 * entirely: the scrollbar is the timeline. The controls they ignore are
+	 * hidden rather than left sitting there doing nothing.
+	 *
+	 * @return string[]
+	 */
+	public static function scrubbed() {
+		return array( 'scroll-highlight' );
 	}
 
 	/**

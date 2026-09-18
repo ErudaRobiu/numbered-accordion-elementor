@@ -143,8 +143,33 @@ and Text Editor widgets. Pick a preset and the widget's existing text animates
 as it scrolls into view — nothing is retyped, and a page built before this
 module shipped can use it without being rebuilt.
 
-Ten presets: fade in, words up, words fade, words build, characters cascade,
-characters flip, lines reveal, blur in, scale pop and slide in.
+Eleven presets: fade in, words up, words fade, words build, scroll highlight,
+characters cascade, characters flip, lines reveal, blur in, scale pop and slide
+in.
+
+Scroll Highlight is the only one tied to scroll *position* rather than played
+on a trigger. The words sit dim and light up as the paragraph crosses the
+middle of the screen, following the scrollbar in both directions. It is the
+CSS-side equivalent of:
+
+```js
+gsap.to( split.words, {
+  color: '#fff', stagger: 0.1,
+  scrollTrigger: { trigger: '.text', start: 'top center', end: 'bottom center', scrub: true }
+} );
+```
+
+Two differences worth knowing. It animates opacity rather than colour, so it
+works against any text colour the widget already has instead of needing a
+hard-coded one; "Dimmed to" sets how faint the unlit words are. And the scrub
+band is the element's height *or 45% of the viewport, whichever is larger* — a
+one-line heading is about forty pixels tall, and sweeping a whole sentence
+across forty pixels of scroll is a flicker rather than a sweep. Tall paragraphs
+are unaffected.
+
+Because the scrollbar is its timeline, it ignores Duration, Stagger, Delay,
+Easing and the trigger controls, and those are hidden rather than left sitting
+there doing nothing.
 
 Words Build is the standard word reveal, matching the GSAP recipe it is named
 after:
@@ -216,6 +241,14 @@ design, so the fix applies to all of them.
 **Every `var()` needs a fallback.** A custom property that fails to resolve
 makes the entire declaration invalid, so `transition-duration: var(--eanm-duration)`
 silently becomes `0s` and the animation looks broken rather than mistuned.
+
+**A scrubbed preset must switch the reveal transition off.** Every split word
+carries a transition once armed, and on a scrubbed preset that transition eases
+towards each scrolled value instead of tracking the scrollbar. It looks like the
+scrub is lagging and stuttering. Measured while getting this wrong: `--eanm-p`
+read `1.000` on every word while their opacities were still crawling through
+`0.92, 0.86, 0.75, 0.59, 0.35`. `tests/browser/highlight.html` is the case that
+shows it.
 
 **It writes no markup.** Every value reaches the DOM through Elementor's own
 `prefix_class` and `selectors`, which Elementor applies live in the editor as

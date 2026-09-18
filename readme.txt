@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.4.2
+Stable tag: 2.5.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,16 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.5.0 =
+* New "Scroll Highlight" preset: the words sit dim and light up as the
+  paragraph crosses the middle of the screen, following the scrollbar in both
+  directions rather than playing once.
+* New "Dimmed to" control sets how faint the unlit words are.
+* Scroll Highlight animates opacity rather than a hard-coded colour, so it
+  works against whatever text colour the widget already has.
+* Because the scrollbar is its timeline, it hides the Duration, Stagger, Delay,
+  Easing and trigger controls, which would otherwise do nothing.
 
 = 2.4.2 =
 * "Words Build" now matches the standard GSAP word reveal it is named after:

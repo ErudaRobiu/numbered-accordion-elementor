@@ -340,10 +340,10 @@ check( 'a non-array yields no hint', '', Impact_Content::icon_sizes_attr( null )
 
 $presets = Motion_Presets::all();
 
-check( 'eleven presets including none', 11, count( $presets ) );
+check( 'twelve presets including none', 12, count( $presets ) );
 check( 'none is present', true, isset( $presets['none'] ) );
 
-foreach ( array( 'fade-in', 'words-up', 'words-fade', 'words-build', 'chars-cascade', 'chars-flip', 'lines-mask', 'blur-in', 'scale-pop', 'slide-left' ) as $value ) {
+foreach ( array( 'fade-in', 'words-up', 'words-fade', 'words-build', 'scroll-highlight', 'chars-cascade', 'chars-flip', 'lines-mask', 'blur-in', 'scale-pop', 'slide-left' ) as $value ) {
 	check( "preset {$value} exists", true, isset( $presets[ $value ] ) );
 }
 
@@ -366,6 +366,15 @@ check( 'chars-flip splits by character', Motion_Presets::SPLIT_CHARS, Motion_Pre
 check( 'lines-mask splits by line', Motion_Presets::SPLIT_LINES, Motion_Presets::split_mode( 'lines-mask' ) );
 check( 'blur-in does not split', Motion_Presets::SPLIT_NONE, Motion_Presets::split_mode( 'blur-in' ) );
 check( 'words-build splits by word', Motion_Presets::SPLIT_WORDS, Motion_Presets::split_mode( 'words-build' ) );
+check( 'scroll-highlight splits by word', Motion_Presets::SPLIT_WORDS, Motion_Presets::split_mode( 'scroll-highlight' ) );
+
+// A scrubbed preset takes its timing from the scrollbar, so the controls that
+// would do nothing are hidden rather than left sitting there.
+check( 'the scrubbed presets', array( 'scroll-highlight' ), Motion_Presets::scrubbed() );
+
+foreach ( Motion_Presets::scrubbed() as $value ) {
+	check( "the scrubbed preset {$value} is a real preset", true, Motion_Presets::is_valid( $value ) );
+}
 check( 'fade-in does not split', Motion_Presets::SPLIT_NONE, Motion_Presets::split_mode( 'fade-in' ) );
 
 // Direction only means something for a preset that moves as one block.
@@ -452,7 +461,7 @@ $controls = Motion_Controls::control_definitions();
 
 check(
 	'the section carries exactly the frozen control ids',
-	array( 'eanm_preset', 'eanm_trigger', 'eanm_replay_preview', 'eanm_direction', 'eanm_distance', 'eanm_duration', 'eanm_stagger', 'eanm_delay', 'eanm_ease', 'eanm_threshold', 'eanm_replay' ),
+	array( 'eanm_preset', 'eanm_trigger', 'eanm_replay_preview', 'eanm_dim', 'eanm_direction', 'eanm_distance', 'eanm_duration', 'eanm_stagger', 'eanm_delay', 'eanm_ease', 'eanm_threshold', 'eanm_replay' ),
 	array_keys( $controls )
 );
 
@@ -480,12 +489,15 @@ foreach ( $controls as $id => $definition ) {
 		continue;
 	}
 
-	check(
-		"{$id} is hidden while the preset is none",
-		'none',
-		isset( $definition['condition']['eanm_preset!'] ) ? $definition['condition']['eanm_preset!'] : null
-	);
+	$hidden_for = isset( $definition['condition']['eanm_preset!'] ) ? $definition['condition']['eanm_preset!'] : array();
+
+	check( "{$id} is hidden while the preset is none", true, in_array( 'none', (array) $hidden_for, true ) );
+	check( "{$id} is hidden for a scrubbed preset", true, in_array( 'scroll-highlight', (array) $hidden_for, true ) );
 }
+
+check( 'the dim control is shown only for scrubbed presets', Motion_Presets::scrubbed(), $controls['eanm_dim']['condition']['eanm_preset'] );
+check( 'dim writes --eanm-dim as a fraction', array( '{{WRAPPER}}' => '--eanm-dim: calc({{SIZE}} / 100);' ), $controls['eanm_dim']['selectors'] );
+check( 'dim defaults to 15 per cent', 15, $controls['eanm_dim']['default']['size'] );
 
 // Neither of these means anything for an animation that fires on load.
 foreach ( array( 'eanm_threshold', 'eanm_replay' ) as $id ) {

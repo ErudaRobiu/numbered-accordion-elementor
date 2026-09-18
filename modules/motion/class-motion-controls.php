@@ -98,10 +98,15 @@ final class Motion_Controls {
 	 * @return array<string, array>
 	 */
 	public static function control_definitions() {
-		$active = array( 'eanm_preset!' => 'none' );
+		// "Anything but off." Scrubbed presets are excluded too: they take
+		// their timing from the scrollbar, so a Duration slider on them would
+		// be a control that does nothing.
+		$played = array_merge( array( 'none' ), Motion_Presets::scrubbed() );
+
+		$active = array( 'eanm_preset!' => $played );
 
 		$on_scroll = array(
-			'eanm_preset!' => 'none',
+			'eanm_preset!' => $played,
 			'eanm_trigger' => 'scroll',
 		);
 
@@ -136,6 +141,25 @@ final class Motion_Controls {
 				'event'       => 'eanm:replay',
 				'description' => esc_html__( 'Plays it again here in the editor. Does nothing on the live page.', 'numbered-accordion' ),
 				'condition'   => $active,
+			),
+			'eanm_dim'       => array(
+				'label'       => esc_html__( 'Dimmed to', 'numbered-accordion' ),
+				'description' => esc_html__( 'How faint a word is before the scroll reaches it.', 'numbered-accordion' ),
+				'type'        => 'slider',
+				'size_units'  => array( '%' ),
+				'range'       => array(
+					'%' => array(
+						'min'  => 0,
+						'max'  => 90,
+						'step' => 5,
+					),
+				),
+				'default'     => array(
+					'unit' => '%',
+					'size' => 15,
+				),
+				'selectors'   => array( '{{WRAPPER}}' => '--eanm-dim: calc({{SIZE}} / 100);' ),
+				'condition'   => array( 'eanm_preset' => Motion_Presets::scrubbed() ),
 			),
 			'eanm_direction' => array(
 				'label'        => esc_html__( 'Comes from', 'numbered-accordion' ),

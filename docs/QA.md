@@ -152,6 +152,15 @@ The parsing, the figure detection and the numbering are covered by
       Style tab
 - [ ] The section appears exactly once on a widget, not repeated
 - [ ] A native Heading with Words Up animates on the live page and in the editor
+- [ ] Scroll Highlight sweeps word by word as the paragraph crosses the middle
+      of the screen, and dims again when scrolling back up
+- [ ] Scroll Highlight on a one-line heading still sweeps rather than flicking
+      on all at once
+- [ ] Scroll Highlight hides Duration, Stagger, Delay, Easing and the trigger
+      controls, and shows "Dimmed to" instead
+- [ ] "Dimmed to" changes how faint the unlit words are
+- [ ] Scroll Highlight tracks the scrollbar rather than lagging behind it; if it
+      eases or stutters, a transition is still applied to the words
 - [ ] Words Build matches the GSAP reference out of the box: words 60ms apart,
       500ms each, lifting 15px, easing "Natural"
 - [ ] Changing the preset in the editor re-splits and animates the new way
