@@ -40,6 +40,10 @@ final class Toolkit {
 			'file'  => 'modules/motion/class-motion-module.php',
 			'class' => '\ErudaToolkit\Modules\Motion\Motion_Module',
 		),
+		'smoothscroll' => array(
+			'file'  => 'modules/smoothscroll/class-smoothscroll-module.php',
+			'class' => '\ErudaToolkit\Modules\SmoothScroll\SmoothScroll_Module',
+		),
 	);
 
 	/**

@@ -18,6 +18,7 @@ use ErudaToolkit\Modules\Duplicator\Duplicator;
 use ErudaToolkit\Modules\Impact\Impact_Content;
 use ErudaToolkit\Modules\Motion\Motion_Presets;
 use ErudaToolkit\Modules\Motion\Motion_Controls;
+use ErudaToolkit\Modules\SmoothScroll\SmoothScroll_Module;
 
 /**
  * Undo wp_slash(), so a round trip can be asserted.
@@ -553,9 +554,45 @@ check( 'travel hides when nothing moves', 'none', $controls['eanm_distance']['co
 /* ------------------------------------------------- Toolkit registry --- */
 
 check( 'the motion module is registered', true, in_array( 'motion', Toolkit::instance()->ids(), true ) );
-check( 'four modules ship', 4, count( Toolkit::instance()->ids() ) );
+check( 'the smooth scroll module is registered', true, in_array( 'smoothscroll', Toolkit::instance()->ids(), true ) );
+check( 'five modules ship', 5, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
+
+/* ------------------------------------------------- SmoothScroll_Module --- */
+
+// Needs no Elementor: a classic theme gets the same benefit.
+check( 'smooth scrolling is always available', true, SmoothScroll_Module::is_available() );
+check( 'smooth scrolling reports no unmet requirements', array(), SmoothScroll_Module::requirement_messages() );
+check( 'smooth scrolling is on by default', true, Toolkit::is_enabled( 'smoothscroll', array() ) );
+
+check( 'the default duration', 1.1, SmoothScroll_Module::options()['duration'] );
+
+// The filter is the tuning surface, and a bad value from it must not reach
+// the library: zero would divide by nothing inside Lenis.
+$cases = array(
+	'0 falls back'          => array( 0, 1.1 ),
+	'negative falls back'   => array( -3, 1.1 ),
+	'absurd falls back'     => array( 99, 1.1 ),
+	'a sane value is kept'  => array( 1.6, 1.6 ),
+	'a string is coerced'   => array( '0.9', 0.9 ),
+);
+
+foreach ( $cases as $name => $case ) {
+	$GLOBALS['eruda_test_filters']['eruda_smooth_scroll_options'] = function () use ( $case ) {
+		return array( 'duration' => $case[0] );
+	};
+
+	check( "duration: {$name}", $case[1], SmoothScroll_Module::options()['duration'] );
+}
+
+$GLOBALS['eruda_test_filters']['eruda_smooth_scroll_options'] = function () {
+	return 'not an array';
+};
+
+check( 'a corrupt filter return falls back', 1.1, SmoothScroll_Module::options()['duration'] );
+
+unset( $GLOBALS['eruda_test_filters']['eruda_smooth_scroll_options'] );
 
 /* ------------------------------------------------------------- report --- */
 

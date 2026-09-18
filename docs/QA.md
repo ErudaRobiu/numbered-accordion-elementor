@@ -20,7 +20,7 @@ The 2.0.0 rebrand is display-only, and this is the part most worth proving.
 
 ## Modules and settings
 
-- [ ] **Settings → Eruda Toolkit** lists all four modules, all checked
+- [ ] **Settings → Eruda Toolkit** lists all five modules, all checked
 - [ ] Unchecking Duplicate Pages and saving removes the Duplicate row action
 - [ ] Unchecking Numbered Accordion and saving removes the widget from the
       Elementor panel
@@ -182,3 +182,23 @@ trigger behaviour, is covered headlessly by the jsdom harness described in
 `docs/superpowers/plans/2026-09-17-eruda-text-animations.md`. What genuinely
 needs a browser is line grouping (jsdom reports every `offsetTop` as 0), the
 descender clipping, and anything visual.
+
+## Smooth scrolling
+
+`node tests/browser/probe.js` and `tests/browser/scroll.html` cover the
+mechanics. These are the things only a real site shows.
+
+- [ ] Scrolling the live site eases rather than jumping, on trackpad and on a
+      mouse wheel
+- [ ] A sticky header still sticks
+- [ ] An in-page anchor link glides to its target and lands in the right place
+- [ ] The Elementor editor scrolls normally: the canvas, the panel and drag and
+      drop are all unaffected
+- [ ] wp-admin scrolls normally
+- [ ] On a phone, scrolling feels native -- momentum and rubber-banding intact
+- [ ] With Reduce Motion on in the OS, scrolling is completely normal
+- [ ] Text animations still fire correctly while smooth scrolling is on
+- [ ] Unchecking Smooth Scrolling in Settings restores normal scrolling, and
+      neither lenis.min.js nor lenis.css is loaded
+- [ ] A very long page still reaches the bottom, and the scrollbar is the right
+      length

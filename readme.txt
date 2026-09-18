@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.3.4
+Stable tag: 2.4.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,17 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.4.0 =
+* New Smooth Scrolling module: eases the whole page's scrolling, the way a
+  showcase site does. On by default; switch it off in Settings > Eruda Toolkit.
+* Works on any theme, with or without Elementor.
+* Off inside the Elementor editor, and off for visitors whose system asks for
+  reduced motion.
+* Native momentum is left alone on touch devices, where it is already better
+  than anything a script can impose.
+* In-page anchor links glide rather than jump.
+* Tune the feel with the eruda_smooth_scroll_options filter.
 
 = 2.3.4 =
 * New "Replay animation" button in the editor, under the animation controls.

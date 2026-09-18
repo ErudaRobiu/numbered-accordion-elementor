@@ -34,6 +34,7 @@ includes/                          module registry and settings screen
 modules/accordion/                 the accordion widget and its assets
 modules/impact/                    the impact grid widget and its assets
 modules/motion/                    the text animation controls and assets
+modules/smoothscroll/              eases the whole page's scrolling
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -235,6 +236,39 @@ line is stated in `Motion_Presets::all()` and again as a `--eanm-split` custom
 property in the stylesheet. The script reads the CSS copy; the PHP copy is for
 the tests and for the lazy-enqueue check. Add a preset and you must add it in
 both places.
+
+### Smooth scrolling
+
+Eases the whole page's scrolling. No widget and no controls: it is on or off
+for the whole site, from the settings screen, and it needs no Elementor — a
+classic theme gets the same benefit.
+
+Tuning is a filter, because a scroll feel is set once per site and then left
+alone:
+
+```php
+add_filter(
+	'eruda_smooth_scroll_options',
+	function ( $options ) {
+		$options['duration'] = 1.4; // seconds to settle; clamped to 0-5
+		return $options;
+	}
+);
+```
+
+**Why Lenis rather than our own.** The usual home-made approach translates the
+page with a transform and fakes the scrollbar. That breaks `position: sticky`,
+anchor links, find-in-page, and `IntersectionObserver` — which every text
+animation in this plugin depends on. Lenis drives the real scroll position once
+per frame, so the browser still thinks it is an ordinary scroll. Verified, not
+assumed: `tests/browser/scroll.html` asserts that a sticky header stays sticky
+and that a heading deep down the page still animates while smoothing is on.
+
+**Three things it deliberately does not do.** It does not run in the Elementor
+editor, where it would fight the canvas, the drag and drop, and the panel. It
+does not run for a visitor whose system asks for reduced motion, where forcing
+it is worse than unhelpful. And it does not smooth touch scrolling, because
+phones already have momentum and overriding it makes them feel broken.
 
 ### The duplicator
 
