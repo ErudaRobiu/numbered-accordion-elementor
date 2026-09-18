@@ -17,6 +17,7 @@
 	var PRESET_CLASS = /(?:^|\s)eanm-preset-([a-z-]+)/;
 	var TARGET_SELECTOR = 'h1, h2, h3, h4, h5, h6, p, li, blockquote';
 	var READY_ATTR = 'data-eanm-ready';
+	var ARMED_ATTR = 'data-eanm-armed';
 	var IN_ATTR = 'data-eanm-in';
 
 	/**
@@ -113,6 +114,8 @@
 	 * @param {Element} el Target element.
 	 */
 	function restore( el ) {
+		el.removeAttribute( ARMED_ATTR );
+
 		if ( typeof el.eanmOriginal === 'string' ) {
 			el.innerHTML = el.eanmOriginal;
 			return;
@@ -391,20 +394,23 @@
 				watchResize( el, firstLine );
 			}
 
+			// Arming is two steps, and the order matters.
+			//
+			// READY applies the start state while no transition exists, so
+			// the element snaps to it. Reading a layout property forces the
+			// browser to commit that. Only then does ARMED switch the
+			// transitions on, so the journey back out is the one that
+			// animates.
+			//
+			// Doing it in one step is what broke Fade In and Blur In: those
+			// presets animate the target itself, which is already on the page
+			// and already visible, so "become invisible" was itself a
+			// transition. Measured in Chrome, an above-the-fold Fade In went
+			// 1 -> 0.996 -> 1 and never appeared to animate at all.
+			el.removeAttribute( ARMED_ATTR );
 			el.setAttribute( READY_ATTR, '' );
-
-			// Commit the pre-animation state before anything can flip it.
-			//
-			// Without this, an element already on screen can have both
-			// attributes set inside one style recalculation: the browser then
-			// only ever computes the finished state, no transition runs, and
-			// the text simply appears. It shows up worst on the presets that
-			// split nothing, where the target carries the transition itself
-			// and there is no freshly-inserted span to force the work.
-			//
-			// Reading a layout property is what forces that recalculation.
-			// Once per animated element, on a page that has some.
 			void el.offsetWidth;
+			el.setAttribute( ARMED_ATTR, '' );
 
 			if ( onLoad ) {
 				window.requestAnimationFrame( function () {

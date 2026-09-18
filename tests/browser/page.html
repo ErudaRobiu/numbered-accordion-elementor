@@ -1,0 +1,48 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../modules/motion/assets/css/text-animation.css">
+<style>
+ body{font:16px system-ui;margin:0;padding:0 20px}
+ h2{font-size:40px;margin:0}
+ .case{padding:8px 0}
+ .spacer{height:150vh}
+</style></head><body>
+
+<!-- above the fold: the case that was breaking -->
+<div class="case">
+ <div id="w-fade" class="elementor-element eanm-preset-fade-in eanm-ease-out-expo eanm-trigger-scroll eanm-dir-up">
+  <div class="elementor-widget-container"><h2 id="t-fade">Fade in above fold</h2></div>
+ </div>
+</div>
+
+<div class="case">
+ <div id="w-blur" class="elementor-element eanm-preset-blur-in eanm-ease-out-quart eanm-trigger-scroll">
+  <div class="elementor-widget-container"><h2 id="t-blur">Blur in above fold</h2></div>
+ </div>
+</div>
+
+<div class="case">
+ <div id="w-words" class="elementor-element eanm-preset-words-fade eanm-ease-out-expo eanm-trigger-scroll eanm-dir-up">
+  <div class="elementor-widget-container"><h2 id="t-words">Words fade above fold</h2></div>
+ </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- below the fold -->
+<div class="case">
+ <div id="w-fade2" class="elementor-element eanm-preset-fade-in eanm-ease-out-expo eanm-trigger-scroll eanm-dir-left">
+  <div class="elementor-widget-container"><h2 id="t-fade2">Fade in below fold</h2></div>
+ </div>
+</div>
+
+<script>
+// Record every transition the page actually runs, before the module loads.
+window.__fired = [];
+['transitionstart','transitionrun','transitionend'].forEach(function(evt){
+  document.addEventListener(evt, function(e){
+    window.__fired.push({type:evt, target:(e.target.id||e.target.className), prop:e.propertyName});
+  }, true);
+});
+</script>
+<script src="../../modules/motion/assets/js/text-animation.js"></script>
+</body></html>

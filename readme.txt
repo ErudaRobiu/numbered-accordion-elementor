@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.3.2
+Stable tag: 2.3.3
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,16 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.3.3 =
+* Fix: Fade In and Blur In did not animate. The transition was declared in the
+  same rule as the start state, so applying the start state was itself
+  animated: the text transitioned into being hidden instead of snapping there,
+  then reversed a frame later. Above the fold nothing appeared to happen; below
+  the fold the text visibly faded out before it faded in. The start state is
+  now applied with transitions off and switched on afterwards.
+* Added a browser test that measures whether an animation actually animates.
+  This class of bug cannot be caught by reading the code.
 
 = 2.3.2 =
 * New "Fade In" preset: the plain one, the whole block at once, with a

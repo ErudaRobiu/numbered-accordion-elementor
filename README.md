@@ -165,6 +165,17 @@ the real widget, so the guard works there; the section is added the first time
 a permitted widget closes any section, and a per-element flag stops it being
 added again.
 
+**Never declare a transition in the same rule as the start state.** This is the
+one that broke Fade In and Blur In through three releases. Those presets
+animate the target element itself, which is already on the page and already
+visible, so with a transition already live, "become invisible" *was* a
+transition. The element animated into hiding and then reversed. The script now
+applies the start state under `data-eanm-ready`, forces a reflow, and only then
+sets `data-eanm-armed`, which is what the transition rules key off.
+
+`tests/browser/` measures this. Reading the CSS will not catch it; sampling
+opacity over time will.
+
 **Commit the start state before flipping it.** A preset that splits nothing —
 Fade In, Blur In — puts the transition on the target element itself, which
 already exists in the HTML. Setting `data-eanm-ready` and `data-eanm-in` inside

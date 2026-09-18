@@ -136,6 +136,10 @@ The parsing, the figure detection and the numbering are covered by
 
 ## Text animations
 
+- [ ] `node tests/browser/probe.js` shows every above-the-fold case starting at
+      its start value. Run this before any release that touches the CSS or the
+      script; three releases shipped dead animations because nothing measured
+      them
 - [ ] **The section is actually there.** Select a Heading, open **Style**, and
       find "Eruda Text Animation". This is the 2.3.0 regression: the controls
       were registered on a hook that never fires per widget, so the feature

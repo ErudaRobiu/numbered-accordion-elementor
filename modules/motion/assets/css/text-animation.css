@@ -56,6 +56,21 @@
 
 .eanm-i {
 	display: inline-block;
+}
+
+/*
+ * Transitions switch on only once the element is armed, which the script does
+ * a forced reflow after it applies the start state.
+ *
+ * Declaring the transition alongside the start state is what broke Fade In and
+ * Blur In: those presets animate the target element itself, which is already
+ * on the page and already visible, so "become invisible" was itself a
+ * transition. Above the fold it reversed a frame later and nothing appeared to
+ * happen; below the fold the heading visibly faded out before it ever faded in.
+ * The split presets hid the bug, because their spans are created already
+ * hidden and a freshly inserted element does not transition its first style.
+ */
+[data-eanm-armed] .eanm-i {
 	transition-property: transform, opacity, filter;
 	transition-duration: var(--eanm-duration, 800ms);
 	transition-timing-function: var(--eanm-ease, cubic-bezier(0.16, 1, 0.3, 1));
@@ -117,11 +132,14 @@
 .eanm-preset-fade-in [data-eanm-ready] {
 	opacity: 0;
 	transform: translate3d(var(--eanm-dx, 0), var(--eanm-dy, 24px), 0);
+	will-change: opacity, transform;
+}
+
+.eanm-preset-fade-in [data-eanm-armed] {
 	transition-property: opacity, transform;
 	transition-duration: var(--eanm-duration, 800ms);
 	transition-timing-function: var(--eanm-ease, cubic-bezier(0.16, 1, 0.3, 1));
 	transition-delay: var(--eanm-delay, 0ms);
-	will-change: opacity, transform;
 }
 
 .eanm-preset-fade-in [data-eanm-ready][data-eanm-in] {
@@ -133,11 +151,14 @@
 .eanm-preset-blur-in [data-eanm-ready] {
 	opacity: 0;
 	filter: blur(12px);
+	will-change: opacity, filter;
+}
+
+.eanm-preset-blur-in [data-eanm-armed] {
 	transition-property: opacity, filter;
 	transition-duration: var(--eanm-duration, 800ms);
 	transition-timing-function: var(--eanm-ease, cubic-bezier(0.16, 1, 0.3, 1));
 	transition-delay: var(--eanm-delay, 0ms);
-	will-change: opacity, filter;
 }
 
 /* The animated state. Specificity has to beat every pre-state above, which is
@@ -157,9 +178,8 @@
  * only for the case where the setting changes after a split has happened.
  */
 @media (prefers-reduced-motion: reduce) {
-	.eanm-i,
-	.eanm-preset-fade-in [data-eanm-ready],
-	.eanm-preset-blur-in [data-eanm-ready] {
+	[data-eanm-armed],
+	[data-eanm-armed] .eanm-i {
 		transition: none;
 	}
 }
