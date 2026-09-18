@@ -110,6 +110,40 @@ untouched, and nothing needs re-saving.
 
 == Changelog ==
 
+= 2.7.0 =
+* The Scroll Story highlight now follows your scroll instead of playing on a
+  timer. Stop mid-sentence and it stops mid-sentence; scroll back up and the
+  letters go out again in reverse. How fast you scroll is how fast it sweeps,
+  so the old "letter stagger" control has gone.
+* New "Highlight starts at" and "finishes at" controls set where on screen the
+  sweep runs.
+* The media panel is now centred on the screen whatever its height, and stays
+  centred when you change the panel height, the column gap or the spacing
+  between items. "Pin below" is now a vertical nudge on top of that.
+* The notch no longer runs into the panel's corners. It travels a share of the
+  panel height -- 40% by default, and a control -- centred in what is left
+  over, so it always stops short of both ends.
+* The notch shape is closer to the reference: its proportions were re-measured
+  off the live clip path.
+* New panel transitions: Wipe, Zoom, Push and Dissolve, each mirrored when you
+  scroll back up rather than repeating the downward version, with easing and
+  length controls and an optional slow drift.
+* Fix: the panel no longer flashes its own background part-way through a
+  change. Pictures now stack rather than cross-fading both ways at once.
+* Media always fills the panel whatever shape it is, with a new "Focal point"
+  control for which part of a cropped picture survives.
+* Items can now use a video instead of an image. It plays muted and looped
+  only while its item is the one being read.
+* Fix: an item with no image used to shift every item below it onto the wrong
+  picture. An item without media now simply keeps showing the one above it.
+* Item numbers are now eyebrow pills -- a dot and a short uppercase line --
+  with controls for the text, dot, border, background, radius and padding.
+  Numbers are still available from the new "Item label" setting.
+* Heading and description are now styled entirely separately, each with its
+  own typography and its own waiting, flash and read colours.
+* New border width and colour for the panel. Under a notch the border follows
+  the notch instead of being clipped away.
+
 = 2.6.2 =
 * The Scroll Story notch is now the right shape: it cuts into the panel's left
   edge with rounded corners and a diagonal run, rather than stepping outwards
