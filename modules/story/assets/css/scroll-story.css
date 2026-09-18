@@ -2,7 +2,7 @@
  * Eruda Toolkit - Scroll Story
  *
  * A column of text items on the left, a pinned panel on the right that
- * cross-fades to whichever item you are reading.
+ * follows whichever item you are reading.
  *
  * Two rules govern everything here, both the same rule really: if the script
  * never runs, the section must still be complete and readable.
@@ -11,8 +11,13 @@
  *     [data-estry-ready], which only the script sets. A stylesheet that dimmed
  *     text on its own would leave #ddd text on white for anyone whose
  *     JavaScript failed.
- *   - The first image shows by default. The script takes over only once it has
- *     marked the panel ready.
+ *   - Every media slide is opaque by default and they simply stack, so the
+ *     last one wins. The script gives slide 0 the top of the stack the moment
+ *     it is ready, and moves the stack from there.
+ *
+ * The highlight is scrubbed by scroll position, not played on a timer. The
+ * script decides how many characters are lit from how far the item has
+ * travelled up the screen, so scrolling back up puts them out again.
  */
 
 .estry {
@@ -28,11 +33,43 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--estry-item-gap, 45vh);
-	/* Space above and below so the first and last items can reach the middle
-	   of the screen, which is where an item becomes the active one. */
-	padding: 35vh 0;
+	/* Room above and below so the first and last items can travel the whole
+	   reading band that the sweep is measured against. */
+	padding: 30vh 0 40vh;
 }
 
+/* ---------------------------------------------------------- the eyebrow --- */
+
+/*
+ * A pill: hairline border, a filled dot, then short uppercase text. It is
+ * inline-flex so the pill is exactly as wide as its contents.
+ */
+.estry__eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--estry-eb-gap, 10px);
+	margin-bottom: var(--estry-eb-space, 24px);
+	padding: var(--estry-eb-pad-y, 10px) var(--estry-eb-pad-x, 20px);
+	border: var(--estry-eb-bw, 1px) solid var(--estry-eb-border, #d5e3d9);
+	border-radius: var(--estry-eb-radius, 999px);
+	background: var(--estry-eb-bg, transparent);
+	color: var(--estry-eb-colour, #2f7d4f);
+	font-size: 0.8125rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	line-height: 1;
+	text-transform: uppercase;
+}
+
+.estry__dot {
+	flex: 0 0 auto;
+	width: var(--estry-eb-dot-size, 10px);
+	height: var(--estry-eb-dot-size, 10px);
+	border-radius: 50%;
+	background: var(--estry-eb-dot, currentColor);
+}
+
+/* The old numeric label, kept for stories that were built with it. */
 .estry__num {
 	display: block;
 	margin-bottom: 1.2em;
@@ -43,31 +80,51 @@
 }
 
 .estry__title {
-	margin: 0 0 0.6em;
+	margin: 0 0 var(--estry-title-space, 0.6em);
+	/* Heading and description each own a full set of sweep colours. The
+	   keyframes read these three names, and var() inside a keyframe resolves
+	   against the element being animated, so one animation serves both. */
+	--estry-dim: var(--estry-h-dim, #dddddd);
+	--estry-flash: var(--estry-h-flash, #abff04);
+	--estry-lit: var(--estry-h-lit, #052424);
+	color: var(--estry-h-lit, #052424);
 }
 
 .estry__body {
 	margin: 0;
+	--estry-dim: var(--estry-b-dim, #dddddd);
+	--estry-flash: var(--estry-b-flash, #abff04);
+	--estry-lit: var(--estry-b-lit, #052424);
+	color: var(--estry-b-lit, #052424);
 }
 
-/* The per-character sweep. Lit is the default; dim needs the script. */
+/* ------------------------------------------------------------ the sweep --- */
+
 .estry-c {
 	display: inline;
 	color: inherit;
 }
 
+/*
+ * Lit is the default; dim needs the script. The transition is what reverses
+ * the sweep: when the script takes `is-on` off a character -- which is what
+ * scrolling back up does -- it falls back to the dim colour over this time,
+ * with no flash on the way out.
+ */
 [data-estry-ready] .estry-c {
 	color: var(--estry-dim, #dddddd);
+	transition: color var(--estry-unsweep, 400ms) ease;
 }
 
-[data-estry-ready] .estry__item[data-estry-on] .estry-c {
-	animation: estry-sweep var(--estry-sweep, 500ms) linear var(--estry-d, 0s) forwards;
+[data-estry-ready] .estry-c.is-on {
+	animation: estry-sweep var(--estry-sweep, 500ms) ease forwards;
 }
 
 /*
  * The three-stop journey, which is what makes this read as expensive rather
- * than as a plain fade: the leading edge of the sweep flashes the accent
- * colour for a fraction of a second before settling.
+ * than as a plain fade: a character passes through the flash colour before it
+ * settles. Because the sweep is scrubbed, the stagger between one character
+ * and the next is your scroll speed rather than a fixed delay.
  */
 @keyframes estry-sweep {
 	0% {
@@ -85,9 +142,15 @@
 
 /* ------------------------------------------------------------ the panel --- */
 
+/*
+ * The panel sits in the middle of the screen, always. Its sticky offset is
+ * derived from its own height rather than set directly, so changing the panel
+ * height, the gap or the spacing between items cannot push it off centre.
+ * --estry-top is a nudge on top of that, for a tall sticky site header.
+ */
 .estry__media {
 	position: sticky;
-	top: var(--estry-top, 0px);
+	top: calc((100vh - var(--estry-height, 88vh)) / 2 + var(--estry-top, 0px));
 	height: var(--estry-height, 88vh);
 }
 
@@ -97,7 +160,17 @@
 	height: 100%;
 	overflow: hidden;
 	border-radius: var(--estry-radius, 16px);
-	background: var(--estry-frame-bg, #0b0b0b);
+	background: var(--estry-frame-bg, transparent);
+}
+
+/*
+ * A plain CSS border can only be used when nothing is clipping the frame.
+ * Under a notch it would be cut away with everything else outside the path,
+ * so the notched panel is outlined by a stroked copy of the same path
+ * instead -- see .estry__outline.
+ */
+.estry__frame:not([data-estry-notch]) {
+	border: var(--estry-media-bw, 0px) solid var(--estry-media-border, #052424);
 }
 
 /*
@@ -116,29 +189,188 @@
 	border-radius: 0;
 	--estry-notch: 30px;
 	--estry-band-size: 280px;
+	/* How much of the panel's height the band crosses. The rest is split
+	   evenly above and below it, which is what keeps the notch clear of both
+	   corners however tall the panel is. */
+	--estry-notch-travel: 40;
 }
 
-.estry__img {
+/* The stroked outline that stands in for a border on a notched panel. It is
+   drawn at twice the asked-for width and clipped by the same path, so exactly
+   the asked-for width survives on the inside of the edge. */
+.estry__outline {
 	position: absolute;
 	inset: 0;
 	width: 100%;
 	height: 100%;
+	pointer-events: none;
+	z-index: 30;
+}
+
+/* ------------------------------------------------------------ the slides --- */
+
+/*
+ * Every slide is opaque and fills the frame. They stack, and the script
+ * raises the incoming one above the rest, so a change is always something
+ * arriving over a solid picture. Nothing ever fades out to reveal the frame
+ * behind it, which is what used to flash the panel's background mid-change.
+ */
+/*
+ * Three layers, because three things move at once and a single element cannot
+ * hold two transforms or two clip paths:
+ *
+ *   .estry__slide  the entrance edge -- clip path, offset, opacity
+ *   .estry__inner  the entrance parallax -- transform and blur
+ *   the media      the drift -- a keyframe animation, which would otherwise
+ *                  win outright over any transform transitioned on the same
+ *                  element and swallow the parallax whole.
+ */
+.estry__slide {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	z-index: 0;
+	/*
+	 * An explicit full-frame inset, not `none`. A clip path only animates
+	 * between two paths of the same kind, so an entrance that wiped from
+	 * inset() to none would simply snap at the end of its duration.
+	 */
+	clip-path: inset(0 0 0 0);
+	transform: translateY(0);
+	opacity: 1;
+}
+
+.estry__inner {
+	position: absolute;
+	inset: 0;
+	transform: scale(1) translateY(0);
+	filter: blur(0);
+}
+
+.estry__img,
+.estry__vid {
+	display: block;
+	width: 100%;
+	height: 100%;
+	/* Cover, always. The panel is a fixed height and the media is whatever
+	   shape it is; anything but cover leaves the frame showing through. */
 	object-fit: cover;
+	object-position: var(--estry-obj-pos, 50% 50%);
+	will-change: transform;
+}
+
+/*
+ * A slow drift on whatever is showing, so a held panel is never quite still.
+ * It runs on the media, leaving the slide's own transform free for the
+ * entrance.
+ */
+.estry__slide[data-estry-on] .estry__img,
+.estry__slide[data-estry-on] .estry__vid {
+	animation: estry-drift var(--estry-drift, 14s) ease-out forwards;
+}
+
+/* ------------------------------------------------------ what moves where --- */
+
+.estry__slide {
+	transition:
+		clip-path var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1)),
+		transform var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1)),
+		opacity var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.estry__inner {
+	transition:
+		transform var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1)),
+		filter var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+@keyframes estry-drift {
+	from {
+		transform: scale(1);
+	}
+
+	to {
+		transform: scale(var(--estry-drift-to, 1.06));
+	}
+}
+
+/* --------------------------------------------------------- the entrance --- */
+
+/*
+ * Four ways in, all of them the same shape: the incoming slide starts in an
+ * "enter" state, the script clears it on the next frame, and it settles over
+ * the picture below. Direction comes from data-estry-dir, so scrolling back
+ * up is the mirror of scrolling down rather than a repeat of it.
+ *
+ * The easing is a hard expo-out: most of the distance is covered immediately
+ * and the last of it is a long settle. That difference in pacing is most of
+ * what separates this from a linear cross-fade.
+ */
+/*
+ * Putting a slide into its "enter" state must not itself be animated, or the
+ * slide would travel *out* to the start of the entrance before playing it.
+ * The script sets this for one frame while it arms the slide.
+ */
+.estry__slide.is-instant,
+.estry__slide.is-instant .estry__inner {
+	transition: none;
+}
+
+/* Dissolve: the plain one, kept because sometimes a section wants calm. */
+[data-estry-transition="dissolve"] .estry__slide.is-entering {
 	opacity: 0;
-	transition: opacity var(--estry-fade, 600ms) ease, transform var(--estry-fade, 600ms) ease;
-	/* A whisper of scale keeps a cross-fade from looking like a slideshow. */
-	transform: scale(1.03);
 }
 
-/* Without the script, the first image is simply the picture. */
-.estry__frame:not([data-estry-ready]) .estry__img:first-child {
-	opacity: 1;
-	transform: none;
+/*
+ * Wipe: a hard edge travelling across the panel in the direction of travel,
+ * with the picture behind that edge already oversized and relaxing into
+ * place. The offset parallax between edge and picture is the cinematic part.
+ */
+[data-estry-transition="wipe"] .estry__slide.is-entering {
+	clip-path: inset(100% 0 0 0);
 }
 
-.estry__img[data-estry-on] {
-	opacity: 1;
-	transform: none;
+[data-estry-transition="wipe"][data-estry-dir="up"] .estry__slide.is-entering {
+	clip-path: inset(0 0 100% 0);
+}
+
+[data-estry-transition="wipe"] .estry__slide.is-entering .estry__inner {
+	transform: scale(1.18) translateY(-4%);
+}
+
+[data-estry-transition="wipe"][data-estry-dir="up"] .estry__slide.is-entering .estry__inner {
+	transform: scale(1.18) translateY(4%);
+}
+
+/* Push: the incoming panel slides over the one below it. */
+[data-estry-transition="push"] .estry__slide.is-entering {
+	transform: translateY(100%);
+}
+
+[data-estry-transition="push"][data-estry-dir="up"] .estry__slide.is-entering {
+	transform: translateY(-100%);
+}
+
+[data-estry-transition="push"] .estry__slide.is-entering .estry__inner {
+	transform: scale(1.12);
+}
+
+/* Zoom: arrives out of focus and oversized, resolves as it lands. */
+[data-estry-transition="zoom"] .estry__slide.is-entering {
+	opacity: 0;
+}
+
+[data-estry-transition="zoom"] .estry__slide.is-entering .estry__inner {
+	transform: scale(1.22);
+	filter: blur(18px);
+}
+
+/*
+ * Without the script the slides are a plain stack, so the last one in the
+ * markup would win. Showing the first is the sensible no-JavaScript state.
+ */
+.estry__frame:not([data-estry-ready]) .estry__slide:first-child {
+	z-index: 1;
 }
 
 /* ------------------------------------------------------------- narrow --- */
@@ -150,7 +382,7 @@
 
 	.estry__items {
 		/* Nothing is pinned any more, so the breathing room that existed to
-		   let items reach the middle of the screen is just a long gap. */
+		   let items travel the reading band is just a long gap. */
 		gap: var(--estry-item-gap-mobile, 64px);
 		padding: 0;
 		order: 2;
@@ -166,12 +398,21 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	[data-estry-ready] .estry__item[data-estry-on] .estry-c {
+	/* Everything is simply read. The script skips the scrub entirely, so
+	   nothing here has to undo a half-finished sweep. */
+	[data-estry-ready] .estry-c {
+		color: inherit;
+		transition: none;
 		animation: none;
 	}
 
-	.estry__img {
+	.estry__slide,
+	.estry__inner {
 		transition: none;
-		transform: none;
+	}
+
+	.estry__slide[data-estry-on] .estry__img,
+	.estry__slide[data-estry-on] .estry__vid {
+		animation: none;
 	}
 }

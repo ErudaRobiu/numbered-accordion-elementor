@@ -45,7 +45,7 @@ final class Story_Module implements Module {
 	 * @return string
 	 */
 	public static function description() {
-		return esc_html__( 'Adds a "Scroll Story" widget: numbered text items beside a pinned panel that cross-fades to whichever item you are reading.', 'numbered-accordion' );
+		return esc_html__( 'Adds a "Scroll Story" widget: text items whose highlight is scrubbed by scroll, beside a centred panel that changes to whichever item you are reading.', 'numbered-accordion' );
 	}
 
 	/**

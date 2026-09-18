@@ -1,8 +1,15 @@
 /**
  * Eruda Toolkit - Scroll Story
  *
- * Decides which item you are reading, lights its text, and cross-fades the
- * pinned panel to that item's image.
+ * Scrubs a per-character highlight down the text as you scroll, and moves a
+ * pinned panel to whichever item you have reached.
+ *
+ * The highlight is not played on a timer. How far an item has travelled up
+ * the screen decides how many of its characters are lit, so the sweep runs
+ * forwards as you scroll down and retreats as you scroll back up. A character
+ * lighting up plays a short flash; a character going out simply transitions
+ * back, which is the asymmetry that makes the reverse feel like an undo
+ * rather than a second animation.
  *
  * Vanilla, no dependencies, safe to run twice. If it never runs, the section
  * is a column of readable text beside its first image -- which is why the
@@ -21,6 +28,14 @@
 		return Array.prototype.slice.call( list || [] );
 	}
 
+	function clamp01( value ) {
+		return value < 0 ? 0 : value > 1 ? 1 : value;
+	}
+
+	function viewportHeight() {
+		return window.innerHeight || document.documentElement.clientHeight || 0;
+	}
+
 	/**
 	 * Build the clip path for a notched panel.
 	 *
@@ -28,31 +43,40 @@
 	 * and bottom, stepping inwards by `depth` across a band, with rounded
 	 * corners and a diagonal run between them.
 	 *
-	 * The proportions are taken from the reference, measured off its own clip
-	 * path at a 30px depth, then expressed as ratios of the depth so any depth
-	 * keeps the same shape:
+	 * The proportions are read off the reference's own clip path at a 30px
+	 * depth and expressed as ratios of the depth, so any depth keeps the same
+	 * shape:
 	 *
-	 *   arc radius    21.5 / 30 = 0.717
-	 *   arc rise      14.05 / 30 = 0.468   arc run  5.23 / 30 = 0.174
-	 *   diagonal rise 22.64 / 30 = 0.755   run     19.54 / 30 = 0.651
+	 *   arc radius    28.17 / 30 = 0.939
+	 *   arc rise      14.80 / 30 = 0.4933  arc run   4.21 / 30 = 0.1405
+	 *   diagonal rise 34.90 / 30 = 1.1633  diag run 21.58 / 30 = 0.7190
 	 *
-	 * One transition is therefore 1.692 x depth tall. Generated in script
-	 * rather than written as CSS because a curve in a clip path is in user
-	 * units: it has to be rebuilt whenever the panel is resized.
+	 * The two arc runs and the diagonal run add up to exactly the depth, and
+	 * the rises add up to 2.15 x depth, which is one transition.
 	 *
-	 * @param {number} w      Panel width.
-	 * @param {number} h      Panel height.
-	 * @param {number} depth  How far the notch cuts in.
-	 * @param {number} run    Straight length of the inset section.
-	 * @param {number} centre Where the notch sits, 0 to 1 down the panel.
+	 * The band does not sweep the whole edge. On the reference it travels 40%
+	 * of the panel's height and is centred in what is left over, so the notch
+	 * always stops well short of both corners -- 66px short at each end on a
+	 * 985px panel. Letting it run to the corners is what made ours look like a
+	 * bite out of the edge rather than a detail travelling along it.
+	 *
+	 * Generated in script rather than written as CSS because a curve in a clip
+	 * path is in user units: it has to be rebuilt whenever the panel resizes.
+	 *
+	 * @param {number} w        Panel width.
+	 * @param {number} h        Panel height.
+	 * @param {number} depth    How far the notch cuts in.
+	 * @param {number} run      Straight length of the inset section.
+	 * @param {number} progress How far through the section, 0 to 1.
+	 * @param {number} span     Share of the panel height the band travels.
 	 * @return {string} An SVG path.
 	 */
-	function notchPath( w, h, depth, run, centre ) {
-		var r = 0.717 * depth;
-		var arcRise = 0.468 * depth;
-		var arcRun = 0.174 * depth;
-		var diagRise = 0.755 * depth;
-		var transition = 1.692 * depth;
+	function notchPath( w, h, depth, run, progress, span ) {
+		var r = 0.939 * depth;
+		var arcRise = 0.4933 * depth;
+		var arcRun = 0.1405 * depth;
+		var diagRise = 1.1633 * depth;
+		var transition = 2.15 * depth;
 
 		// Keep the whole notch on the panel, however short the panel is.
 		var needed = run + transition * 2;
@@ -62,7 +86,9 @@
 			needed = run + transition * 2;
 		}
 
-		var top = ( h - needed ) * Math.min( Math.max( centre, 0 ), 1 );
+		var free = Math.max( 0, h - needed );
+		var travel = Math.min( span * h, free );
+		var top = ( free - travel ) / 2 + clamp01( progress ) * travel;
 		var bottom = top + needed;
 
 		// Down the left edge, into the notch, along it, and back out.
@@ -105,6 +131,20 @@
 		return isNaN( value ) ? fallback : value;
 	}
 
+	/**
+	 * Read a number off a data attribute.
+	 *
+	 * @param {Element} el       Element to read from.
+	 * @param {string}  name     Attribute name.
+	 * @param {number}  fallback Value when absent or unparseable.
+	 * @return {number}
+	 */
+	function readData( el, name, fallback ) {
+		var value = parseFloat( el.getAttribute( name ) );
+
+		return isNaN( value ) ? fallback : value;
+	}
+
 	function prefersReducedMotion() {
 		return (
 			typeof window.matchMedia === 'function' &&
@@ -120,13 +160,17 @@
 	 * link inside the copy survives. Whitespace goes back as plain text so
 	 * words still wrap.
 	 *
-	 * @param {Element} el    Element to split.
-	 * @param {Object}  state Carries the running index.
+	 * No per-character delay is written here. Under a scrubbed sweep the
+	 * stagger between one character and the next is how fast you are
+	 * scrolling; a fixed delay on top of that would fight it.
+	 *
+	 * @param {Element}   el    Element to split.
+	 * @param {Element[]} sink  Collects the character spans, in reading order.
 	 */
-	function split( el, state ) {
+	function split( el, sink ) {
 		toArray( el.childNodes ).forEach( function ( node ) {
 			if ( 1 === node.nodeType && ! /^(BR|IMG|SVG)$/.test( node.tagName ) ) {
-				split( node, state );
+				split( node, sink );
 				return;
 			}
 
@@ -155,10 +199,9 @@
 				( typeof Array.from === 'function' ? Array.from( part ) : part.split( '' ) ).forEach( function ( character ) {
 					var span = document.createElement( 'span' );
 					span.className = 'estry-c';
-					span.style.setProperty( '--estry-d', ( state.index * state.step ).toFixed( 3 ) + 's' );
 					span.appendChild( document.createTextNode( character ) );
 					word.appendChild( span );
-					state.index += 1;
+					sink.push( span );
 				} );
 
 				fragment.appendChild( word );
@@ -169,31 +212,59 @@
 	}
 
 	/**
-	 * Which item is closest to the middle of the screen?
+	 * How far an item has travelled through the reading band, 0 to 1.
 	 *
-	 * The middle is the natural reading line, and it is also where the panel
-	 * should already be showing that item's picture.
+	 * The band is two lines across the viewport. The sweep starts when the
+	 * item's top edge crosses the lower line and finishes when its bottom edge
+	 * crosses the upper one, so a tall item takes proportionally longer to
+	 * light than a short one and both finish while fully on screen.
 	 *
-	 * @param {Element[]} items Items.
-	 * @return {number} Index, or -1 when none is near.
+	 * @param {Element} item Item.
+	 * @param {number}  lead Lower line, as a fraction of the viewport.
+	 * @param {number}  tail Upper line, as a fraction of the viewport.
+	 * @return {number}
 	 */
-	function activeIndex( items ) {
-		var middle = ( window.innerHeight || document.documentElement.clientHeight ) / 2;
-		var best = -1;
-		var bestDistance = Infinity;
+	function progressOf( item, lead, tail ) {
+		var height = viewportHeight();
+		var rect = item.getBoundingClientRect();
+		var travel = rect.height + height * ( lead - tail );
 
-		for ( var i = 0; i < items.length; i++ ) {
-			var rect = items[ i ].getBoundingClientRect();
-			var centre = rect.top + rect.height / 2;
-			var distance = Math.abs( centre - middle );
+		if ( travel <= 0 ) {
+			return rect.top <= height * lead ? 1 : 0;
+		}
 
-			if ( distance < bestDistance ) {
-				bestDistance = distance;
-				best = i;
+		return clamp01( ( height * lead - rect.top ) / travel );
+	}
+
+	/**
+	 * Light or extinguish characters so that exactly `count` of them are lit.
+	 *
+	 * Only the characters between the old count and the new one are touched,
+	 * so a scroll of a few pixels costs a few class changes rather than one
+	 * per character in the section.
+	 *
+	 * @param {Object} entry Item record.
+	 * @param {number} count How many should be lit.
+	 */
+	function setLit( entry, count ) {
+		var chars = entry.chars;
+		var i;
+
+		if ( count === entry.lit ) {
+			return;
+		}
+
+		if ( count > entry.lit ) {
+			for ( i = entry.lit; i < count; i++ ) {
+				chars[ i ].classList.add( 'is-on' );
+			}
+		} else {
+			for ( i = count; i < entry.lit; i++ ) {
+				chars[ i ].classList.remove( 'is-on' );
 			}
 		}
 
-		return best;
+		entry.lit = count;
 	}
 
 	/**
@@ -209,12 +280,31 @@
 		root.eanmStoryReady = true;
 
 		var items = toArray( root.querySelectorAll( '.estry__item' ) );
-		var images = toArray( root.querySelectorAll( '.estry__img' ) );
+
+		if ( ! items.length ) {
+			return;
+		}
+
+		var slides = toArray( root.querySelectorAll( '.estry__slide' ) );
 		var frame = root.querySelector( '.estry__frame' );
 		var notched = frame && frame.hasAttribute( 'data-estry-notch' );
-		var clipPath = null;
+		var reduced = prefersReducedMotion();
 
-		if ( notched ) {
+		var lead = readData( root, 'data-estry-lead', 0.85 );
+		var tail = readData( root, 'data-estry-tail', 0.45 );
+		var switchAt = readData( root, 'data-estry-switch', 0.15 );
+
+		// A band with no height would divide by zero further down, and a tail
+		// below the lead would run the sweep backwards.
+		if ( ! ( lead > tail ) ) {
+			lead = 0.85;
+			tail = 0.45;
+		}
+
+		var clipPath = null;
+		var outline = null;
+
+		if ( notched && frame ) {
 			uid += 1;
 
 			var id = 'estry-notch-' + uid;
@@ -226,38 +316,48 @@
 			svg.style.position = 'absolute';
 
 			var defs = document.createElementNS( 'http://www.w3.org/2000/svg', 'defs' );
-			clipPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'clipPath' );
-			clipPath.setAttribute( 'id', id );
-			clipPath.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
+			var clip = document.createElementNS( 'http://www.w3.org/2000/svg', 'clipPath' );
 
-			var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
-			clipPath.appendChild( path );
-			defs.appendChild( clipPath );
+			clip.setAttribute( 'id', id );
+			clip.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
+
+			clipPath = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+			clip.appendChild( clipPath );
+			defs.appendChild( clip );
 			svg.appendChild( defs );
 			frame.parentNode.insertBefore( svg, frame );
 
 			frame.style.clipPath = 'url(#' + id + ')';
 			frame.style.webkitClipPath = 'url(#' + id + ')';
-			clipPath = path;
+
+			// A border cannot be drawn on a clipped box -- it would be cut
+			// away with everything else outside the path -- so the panel is
+			// outlined by a stroked copy of the same path. It is stroked at
+			// twice the asked-for width and clipped by that path too, leaving
+			// exactly the asked-for width on the inside of the edge.
+			var overlay = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+
+			overlay.setAttribute( 'class', 'estry__outline' );
+			overlay.setAttribute( 'aria-hidden', 'true' );
+			overlay.setAttribute( 'preserveAspectRatio', 'none' );
+
+			outline = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+			outline.setAttribute( 'fill', 'none' );
+			overlay.appendChild( outline );
+			frame.appendChild( overlay );
 		}
 
-		if ( ! items.length ) {
-			return;
-		}
+		var entries = items.map( function ( item ) {
+			var chars = [];
 
-		if ( ! prefersReducedMotion() ) {
-			var step = parseFloat( root.getAttribute( 'data-estry-step' ) );
-
-			items.forEach( function ( item ) {
-				// Each item's sweep starts from zero, so a later item does not
-				// inherit a delay from everything above it.
-				var state = { index: 0, step: isNaN( step ) ? 0.014 : step };
-
+			if ( ! reduced ) {
 				toArray( item.querySelectorAll( '.estry__title, .estry__body' ) ).forEach( function ( el ) {
-					split( el, state );
+					split( el, chars );
 				} );
-			} );
-		}
+			}
+
+			return { item: item, chars: chars, lit: 0 };
+		} );
 
 		root.setAttribute( READY, '' );
 
@@ -265,45 +365,155 @@
 			frame.setAttribute( READY, '' );
 		}
 
+		var videos = toArray( root.querySelectorAll( '.estry__vid' ) );
+
+		/*
+		 * Items and slides are not one to one: an item with no media of its
+		 * own has no slide, and keeps showing whatever the item above it put
+		 * up. Each slide says which item it belongs to, so an item maps to
+		 * the last slide at or above it.
+		 */
+		var owners = slides.map( function ( slide, i ) {
+			var owner = parseInt( slide.getAttribute( 'data-estry-for' ), 10 );
+
+			return isNaN( owner ) ? i : owner;
+		} );
+
+		var slideFor = items.map( function ( ignored, i ) {
+			var found = -1;
+
+			owners.forEach( function ( owner, j ) {
+				if ( owner <= i ) {
+					found = j;
+				}
+			} );
+
+			return found;
+		} );
+
 		var current = -1;
+		var shown = -1;
+		var zTop = 0;
 
-		function update() {
-			var index = activeIndex( items );
+		/**
+		 * Bring a slide to the top of the stack.
+		 *
+		 * Nothing ever fades *out*: the outgoing slide keeps its picture and
+		 * its place, and the incoming one arrives over the top of it. That is
+		 * what stops the panel's background showing through the middle of a
+		 * change.
+		 *
+		 * @param {number} index Slide to show.
+		 * @param {string} dir   'down' or 'up'.
+		 * @param {bool}   arm   Play the entrance, rather than just appearing.
+		 */
+		function show( index, dir, arm ) {
+			var slide = slides[ index ];
 
-			if ( index !== current && index > -1 ) {
-				current = index;
+			if ( ! slide ) {
+				return;
+			}
 
-				items.forEach( function ( item, i ) {
-					if ( i === index ) {
-						item.setAttribute( ON, '' );
-					} else {
-						item.removeAttribute( ON );
-					}
-				} );
+			zTop += 1;
+			slide.style.zIndex = String( zTop );
 
-				images.forEach( function ( image, i ) {
-					if ( i === index ) {
-						image.setAttribute( ON, '' );
-					} else {
-						image.removeAttribute( ON );
-					}
+			slides.forEach( function ( other, i ) {
+				if ( i === index ) {
+					other.setAttribute( ON, '' );
+				} else {
+					other.removeAttribute( ON );
+				}
+			} );
+
+			if ( frame ) {
+				frame.setAttribute( 'data-estry-dir', dir );
+			}
+
+			if ( arm && ! reduced ) {
+				// Putting the slide into its entrance state must not itself
+				// animate, so transitions are switched off for exactly as
+				// long as it takes the browser to record that state.
+				slide.classList.add( 'is-instant', 'is-entering' );
+				void slide.offsetWidth;
+				slide.classList.remove( 'is-instant' );
+
+				window.requestAnimationFrame( function () {
+					slide.classList.remove( 'is-entering' );
 				} );
 			}
 
-			// The notch travels with how far you are through the section.
-			if ( clipPath ) {
-				var rect = root.getBoundingClientRect();
-				var viewport = window.innerHeight || document.documentElement.clientHeight;
-				var span = rect.height - viewport;
-				var progress = span > 0 ? Math.min( Math.max( -rect.top / span, 0 ), 1 ) : 0;
-				var box = frame.getBoundingClientRect();
-				var depth = parseFloat( readNumber( frame, '--estry-notch', 30 ) );
-				var run = parseFloat( readNumber( frame, '--estry-band-size', 280 ) );
+			videos.forEach( function ( video ) {
+				var mine = slide.contains( video );
 
-				clipPath.setAttribute(
-					'd',
-					notchPath( Math.round( box.width ), Math.round( box.height ), depth, run, progress )
-				);
+				try {
+					if ( mine && ! reduced ) {
+						var playing = video.play();
+
+						if ( playing && typeof playing.catch === 'function' ) {
+							playing.catch( function () {} );
+						}
+					} else {
+						video.pause();
+					}
+				} catch ( e ) {
+					// An unplayable video is not a reason to stop scrolling.
+				}
+			} );
+		}
+
+		function update() {
+			var reached = 0;
+
+			entries.forEach( function ( entry, i ) {
+				var progress = progressOf( entry.item, lead, tail );
+
+				if ( ! reduced && entry.chars.length ) {
+					setLit( entry, Math.round( progress * entry.chars.length ) );
+				}
+
+				if ( progress > switchAt ) {
+					reached = i;
+				}
+			} );
+
+			if ( reached !== current ) {
+				var target = slideFor[ reached ];
+
+				// An item without its own media leaves the panel alone.
+				if ( target > -1 && target !== shown ) {
+					show( target, reached > current ? 'down' : 'up', -1 !== shown );
+					shown = target;
+				}
+
+				current = reached;
+			}
+
+			// The notch travels with how far you are through the section.
+			if ( clipPath && frame ) {
+				var rect = root.getBoundingClientRect();
+				var span = rect.height - viewportHeight();
+				var through = span > 0 ? clamp01( -rect.top / span ) : 0;
+				var box = frame.getBoundingClientRect();
+				var w = Math.round( box.width );
+				var h = Math.round( box.height );
+				var depth = readNumber( frame, '--estry-notch', 30 );
+				var run = readNumber( frame, '--estry-band-size', 280 );
+				var span = readNumber( frame, '--estry-notch-travel', 40 ) / 100;
+				var d = notchPath( w, h, depth, run, through, span );
+
+				clipPath.setAttribute( 'd', d );
+
+				if ( outline ) {
+					var width = readNumber( frame, '--estry-media-bw', 0 );
+
+					outline.setAttribute( 'd', d );
+					outline.setAttribute( 'stroke-width', String( width * 2 ) );
+					outline.setAttribute(
+						'stroke',
+						( window.getComputedStyle( frame ).getPropertyValue( '--estry-media-border' ) || '' ).trim() || 'transparent'
+					);
+					outline.parentNode.setAttribute( 'viewBox', '0 0 ' + w + ' ' + h );
+				}
 			}
 		}
 

@@ -221,33 +221,85 @@ mechanics. These are the things only a real site shows.
 
 ## Scroll Story
 
-`tests/browser/story.html` covers the tracking, the cross-fade and the notch.
-These need a real site.
+`node tests/browser/story-probe.js` measures the scrub, the notch travel, the
+centring and the entrance in headless Chrome, against
+`tests/browser/story.html`. Run it before touching any of them. The rest needs
+a real site.
 
 - [ ] **Scroll Story is actually in the panel.** Search the widget panel for
       "Scroll Story" and add it. 2.6.0 shipped without it being addable at all
-- [ ] Dropping the widget in gives three items and a pinned panel
-- [ ] Scrolling lights each item in turn, and the panel cross-fades to that
-      item's image
-- [ ] Each letter passes through the flash colour on its way from waiting to
-      read, rather than fading straight across
-- [ ] An item with no image leaves the previous image showing rather than
+- [ ] Dropping the widget in gives three items and a centred panel
+
+### The scrubbed highlight
+
+- [ ] Stopping mid-item leaves the sweep stopped mid-sentence. It must not
+      carry on to the end of the line on its own — that is the 2.6 behaviour
+      this replaced
+- [ ] Scrolling back up puts the letters out again, in reverse order
+- [ ] Letters passing through the flash colour do so only on the way *in*.
+      Going out is a plain fade with no flash
+- [ ] Scrolling faster makes the sweep faster. There is no fixed per-letter
+      delay any more
+- [ ] Returning to the same scroll position gives the same half-lit sentence,
+      whichever direction you arrived from
+- [ ] "Highlight starts at" and "finishes at" move where on screen the sweep
+      runs. Setting finish above start is refused and falls back to 85/45
+
+### The panel
+
+- [ ] The panel is vertically centred on the screen while pinned, with equal
+      space above and below
+- [ ] Changing the panel height, the column gap or the space between items
+      leaves it centred
+- [ ] "Vertical nudge" shifts it off centre for a sticky site header
+- [ ] Nothing flashes black in the middle of a change. The outgoing picture
+      stays put and the incoming one arrives over it
+- [ ] Each of the four transitions plays, and each is mirrored when you scroll
+      back up rather than repeating the downward version
+- [ ] An image of any shape fills the panel with no bars. Try a very tall one
+      and a very wide one
+- [ ] "Focal point" changes which part of a cropped image survives
+- [ ] A video item plays muted and looped while it is the one being read, and
+      pauses when it is not
+- [ ] An item with no media leaves the previous media showing rather than
       going blank
 - [ ] The panel stays pinned for the whole section and releases at the end
-- [ ] "Pin below" clears a sticky site header
+
+### The notch
+
 - [ ] The notch cuts *into* the panel rather than sticking out of it, and its
       corners are curved rather than square
 - [ ] The notch travels down the panel's left edge as you scroll the section
+- [ ] **It stops well short of both corners** and never merges into one. At the
+      top of the section it is already some way down; at the bottom it is
+      still some way up
+- [ ] "Notch travel" widens and narrows that range, and the clearance stays
+      even at both ends
 - [ ] Resizing the browser rebuilds the notch to the new panel width instead of
       leaving it stretched or clipped
-- [ ] The panel is inset from the top and bottom of the screen, not full height
-- [ ] Turning the notch off restores the corner radius control, and the radius
-      works
+- [ ] With a border width set, the border follows the notch instead of being
+      clipped away, and it is the width asked for
+- [ ] Turning the notch off restores the corner radius control, the radius
+      works, and the border becomes an ordinary CSS border
+
+### Labels and type
+
+- [ ] The eyebrow renders as a pill: dot, then uppercase text, hairline border
+- [ ] An item with an empty eyebrow has no pill at all, and the ones around it
+      are unaffected
+- [ ] Turning the dot off leaves the text centred in the pill
+- [ ] Heading and description take their colours and type independently. Set
+      them to different waiting colours and confirm both are honoured
+- [ ] Switching the label to Number restores the old numbering
+- [ ] The heading tag control changes the tag without changing the styling
+
+### Everything else
+
 - [ ] Below 1024px the panel stops being pinned, sits above the text, and the
       text reads as an ordinary column
 - [ ] With JavaScript disabled: every item's text is readable in its read
-      colour, and the first image is visible
-- [ ] With Reduce Motion on: no letter sweep, no cross-fade scaling; the
-      section still tracks and is still readable
+      colour, and the first picture is visible
+- [ ] With Reduce Motion on: no letter sweep at all, no entrance, no drift;
+      the panel still changes and the section is still readable
 - [ ] Editing an item in the editor re-renders it and the tracking still works
 - [ ] Two Scroll Story widgets on one page track independently

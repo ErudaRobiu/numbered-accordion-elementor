@@ -12,8 +12,22 @@ this class of bug. Measuring can.
 ```sh
 npm install puppeteer-core          # once, anywhere; not a plugin dependency
 python3 -m http.server 8732         # from the repository root
-node tests/browser/probe.js
+node tests/browser/probe.js         # text animation presets
+node tests/browser/story-probe.js   # Scroll Story
 ```
+
+Both run headless on purpose. A scrubbed animation is driven by
+`requestAnimationFrame`, and Chrome does not run rAF in a tab that is not
+visible — drive a real window and every measurement freezes the moment the
+window loses focus, which reads exactly like a broken build. That cost an hour
+once already.
+
+`story-probe.js` asserts rather than prints: it checks that the sweep advances
+with scroll and retreats on the way back, that the same scroll position gives
+the same half-lit sentence either way, that the notch travels and keeps an even
+clearance from both corners, that the panel stays centred, that media of any
+shape fills the panel, and that the entrance animates rather than snapping. It
+exits non-zero on any failure.
 
 `tests/` is excluded from the release zip, so none of this ships.
 

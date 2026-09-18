@@ -315,45 +315,67 @@ both places.
 
 ### Scroll Story
 
-A column of numbered text items on the left, a pinned panel on the right that
-cross-fades to whichever item you are reading. Each item carries its own
-heading, description and image.
+A column of text items on the left, a pinned panel on the right that follows
+whichever item you are reading. Each item carries its own eyebrow, heading,
+description and media — an image or a video.
 
 Modelled on the "Why Terminal" section of terminal-industries.com, rebuilt with
-no libraries. Three things were worth copying and one was not.
+no libraries, and measured against it rather than eyeballed.
 
-**The three-stop colour sweep.** Their text is split per character, and each
-character runs a 0.5s keyframe animation staggered 14ms apart:
+**The highlight is scrubbed, not triggered.** How far an item has travelled up
+the screen decides how many of its characters are lit. Scroll down and the
+sweep runs forward; scroll back up and it retreats. On the reference this is a
+class added and removed per character by scroll position, and the asymmetry is
+the point:
 
 ```css
-0%   { color: <waiting>; }   /* light grey */
-30%  { color: <flash>;   }   /* the accent, for a fraction of a second */
-100% { color: <read>;    }   /* near-black */
+.estry-c        { transition: color 400ms ease; }          /* going out: plain */
+.estry-c.is-on  { animation: estry-sweep 500ms ease forwards; }  /* coming in */
+
+@keyframes estry-sweep {
+  0%   { color: <waiting>; }   /* light grey */
+  30%  { color: <flash>;   }   /* the accent, for a fraction of a second */
+  100% { color: <read>;    }   /* near-black */
+}
 ```
 
-That flash at 30% is the whole trick. A two-stop fade looks ordinary; the
-leading edge glowing the brand colour is what reads as expensive. All three
-colours and both timings are controls.
+The flash at 30% is the whole trick, and it belongs to arriving only. A
+character going out simply transitions back, so reversing reads as an undo
+rather than as a second animation. There is no fixed stagger between one
+character and the next any more — your scroll speed *is* the stagger.
 
-**Triggered, not scrubbed.** The script adds an attribute when an item becomes
-active and CSS does the rest, so there is no per-frame JavaScript touching
-hundreds of character spans. Compare the `scroll-highlight` preset in the
-motion module, which *is* scrubbed and so must recompute every word every
-frame. Both are right for different jobs.
+The band is two lines across the viewport: the sweep starts when an item's top
+crosses the lower line and finishes when its bottom crosses the upper one, so a
+tall item takes proportionally longer and both ends land on screen. Both lines
+are controls.
+
+Only the characters between the old lit count and the new one are touched, so a
+scroll of a few pixels costs a handful of class changes rather than one per
+character in the section.
 
 **The travelling notch.** The panel's left edge is flush top and bottom and
 cuts *inwards* across a band, with rounded corners and a diagonal run between
 them. The band travels down as you scroll the section.
 
-The proportions come from measuring the reference's own clip path at a 30px
+The proportions come from reading the reference's own clip path at a 30px
 depth, then expressing them as ratios of the depth so any depth keeps the
 shape:
 
 ```
-arc radius    21.5 / 30  = 0.717
-arc rise      14.05 / 30 = 0.468     arc run  5.23 / 30 = 0.174
-diagonal rise 22.64 / 30 = 0.755     run     19.54 / 30 = 0.651
+arc radius    28.17 / 30 = 0.939
+arc rise      14.80 / 30 = 0.4933    arc run   4.21 / 30 = 0.1405
+diagonal rise 34.90 / 30 = 1.1633    diag run 21.58 / 30 = 0.7190
 ```
+
+The two arc runs and the diagonal run add to exactly the depth; the rises add
+to 2.15 x depth, which is one transition.
+
+**The band does not sweep the whole edge.** On the reference it travels 40% of
+the panel's height and is centred in what is left over — 66px of clearance at
+each end of a 985px panel, measured at both extremes of its scroll. Letting it
+run into the corners, which is what the first version did, turns a detail
+travelling along an edge into a bite taken out of one. The travel is a control;
+the clearance follows from it.
 
 The path is generated in JavaScript rather than written as CSS, because a curve
 in a clip path is in user units: `clip-path: path()` and an SVG `clipPath` with
@@ -362,18 +384,51 @@ percentages would scale on its own but cannot hold a fixed-radius curve.
 
 Because `clip-path` and `border-radius` clip the same box, a notched panel has
 square corners by design; the radius control appears only when the notch is
-off.
+off. A CSS border is clipped away for the same reason, so the panel's border is
+a stroked copy of the same path, drawn at twice the asked-for width and clipped
+by that path — which leaves exactly the asked-for width on the inside of the
+edge, notch included.
 
-**The panel is not full height.** The reference's is 830px in a 900px viewport,
-inset top and bottom. The default here is 88% of the screen, pinned 40px down.
+**The panel is centred on the screen, always.** Its sticky offset is derived
+from its own height rather than set directly, so changing the panel height, the
+column gap or the spacing between items cannot push it off centre. The old
+"pin below" control is now a nudge on top of that, for a tall sticky header.
+
+**Nothing ever fades out.** Slides stack, and a change raises the incoming one
+above the rest with a rising z-index, so you are always looking at something
+arriving over a solid picture. The first version cross-faded both ways at once,
+which meant the panel's own background showed through the middle of every
+change as a black flash. The outgoing slide keeps its picture and its place.
+
+Four entrances, all direction-aware, so scrolling back up is the mirror of
+scrolling down rather than a repeat of it:
+
+| | |
+|---|---|
+| Wipe | a hard edge travels with the scroll, over a picture already oversized and relaxing into place |
+| Zoom | arrives oversized and out of focus, resolves as it lands |
+| Push | slides in over the one below |
+| Dissolve | a plain cross-fade |
+
+Three layers do this, because one element cannot hold two transforms or two
+clip paths: `.estry__slide` owns the entrance edge, `.estry__inner` owns the
+parallax and the blur, and the media itself owns the slow drift. Putting the
+drift on the same element as the parallax does not merely look wrong — a
+running keyframe animation wins outright over a transitioned transform on the
+same element, and swallows the parallax whole.
+
+Media always fills the panel: `object-fit: cover`, with the focal point as a
+control. There is no shape of image that can leave the panel's background
+showing.
 
 **What was not copied:** their panel is a `<canvas>` playing a scroll-scrubbed
 image sequence, which needs hundreds of exported frames and a decode pipeline.
-This cross-fades between one image per item instead — the same effect at
-reading pace, from images a client can actually swap in the media library.
+This changes between one image or video per item instead — the same effect at
+reading pace, from media a client can actually swap in the media library. Their
+own change between media is a plain 0.5s cross-fade; ours is not.
 
 Safe without the script, like everything else here: the text is its read colour
-and the first image is simply the picture. Dimming only happens under
+and the first slide is simply the picture. Dimming only happens under
 `[data-estry-ready]`, which only the script sets. A stylesheet that dimmed on
 its own would leave light grey text on white for anyone whose JavaScript
 failed.
