@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.28.0
+Stable tag: 2.29.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,17 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.29.0 =
+* **You no longer watch the header fold.** It leaves at full width and folds
+  once it is off the screen, with transitions frozen for the frame it takes, so
+  the morph between the two shapes is never something you see. Letting it back
+  out at the top still eases, because there the bar is in front of you and the
+  expansion is the point.
+* **The bar keeps its shape when a panel opens.** It used to snap back to full
+  width, so the panel faded in at the same moment the bar resized underneath
+  it and two animations fought over the same corner of the screen. The panel
+  takes its width from the bar, so leaving the bar alone costs nothing.
 
 = 2.28.0 =
 * **The header now gets out of the way.** It slides up and off the screen

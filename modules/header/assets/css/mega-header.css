@@ -276,15 +276,18 @@
  * It comes after the stuck rule so it wins at equal specificity, which is the
  * whole reason the two are written in this order.
  */
+/*
+ * The bar keeps its shape while a panel is open.
+ *
+ * It used to snap back to full width, which is what the reference does and
+ * which reads badly here: the panel fades in at the same moment the bar
+ * resizes underneath it, so two animations fight over the same corner of the
+ * screen and the whole thing judders. The panel is positioned against the bar
+ * and takes its width from it, so leaving the bar alone costs nothing and the
+ * panel simply belongs to it.
+ */
 .ehdr[data-ehdr-open] .ehdr__bar,
 .ehdr[data-ehdr-preview="open"] .ehdr__bar {
-	width: 100%;
-	max-width: none;
-	margin: 0 auto;
-	transform: translateY(0);
-	padding-left: var(--ehdr-pad-x, 64px);
-	padding-right: var(--ehdr-pad-x, 64px);
-	border-radius: 0;
 	background: var(--ehdr-sheet, #ffffff);
 	border-color: var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
 	-webkit-backdrop-filter: blur(0px);
@@ -309,6 +312,19 @@
  */
 .ehdr[data-ehdr-hidden] .ehdr__bar {
 	transform: translateY(-100%);
+}
+
+/*
+ * Held still for one frame, so a change made off screen is not animated.
+ *
+ * The bar slides away at whatever width it had and only then folds, with the
+ * transitions switched off for the frame it takes -- so the fold is never
+ * something you watch happen. You see the full-width bar leave, and the folded
+ * one arrive. !important because it has to beat the shorthand on .ehdr__bar
+ * whatever else is going on.
+ */
+.ehdr.is-instant .ehdr__bar {
+	transition: none !important;
 }
 
 /*

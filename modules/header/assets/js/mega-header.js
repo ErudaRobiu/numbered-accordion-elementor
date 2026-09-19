@@ -438,6 +438,70 @@
 		var travel = 0;
 		var compactWidth = 0;
 		var hidden = false;
+		var foldTimer = null;
+
+		// How long the slide takes, so the fold can be timed to land after it.
+		var slideMs = 520;
+
+		function setFold( on ) {
+			if ( on ) {
+				root.setAttribute( STUCK, '' );
+			} else {
+				root.removeAttribute( STUCK );
+			}
+		}
+
+		/**
+		 * Fold the bar, and do it where it cannot be seen.
+		 *
+		 * While the bar is on its way out there is nothing to watch, so the
+		 * change waits for it to be gone and is then made with the transitions
+		 * switched off for a frame. You see the full-width bar leave and the
+		 * folded one arrive, and never the morph between them -- which is the
+		 * part that looked wrong however well it was eased.
+		 *
+		 * Unfolding at the top of the page is left alone: the bar is on screen
+		 * and in front of you there, and an expansion you can see is the point
+		 * rather than the problem.
+		 *
+		 * @param {boolean} on Fold it, or let it out.
+		 */
+		function applyFold( on ) {
+			if ( foldTimer ) {
+				window.clearTimeout( foldTimer );
+				foldTimer = null;
+			}
+
+			if ( ! hidden ) {
+				setFold( on );
+
+				return;
+			}
+
+			foldTimer = window.setTimeout( function () {
+				foldTimer = null;
+
+				// It may have come back in the meantime, in which case there
+				// is something to watch again and the change should be eased.
+				if ( ! hidden ) {
+					setFold( on );
+
+					return;
+				}
+
+				root.classList.add( 'is-instant' );
+				setFold( on );
+
+				// Read something geometric to force the style through before
+				// the class comes off, or the freeze never applies to the very
+				// change it was added for.
+				void root.offsetWidth;
+
+				window.requestAnimationFrame( function () {
+					root.classList.remove( 'is-instant' );
+				} );
+			}, slideMs );
+		}
 
 		function onScroll() {
 			var y = window.pageYOffset || document.documentElement.scrollTop || 0;
@@ -531,12 +595,7 @@
 			}
 
 			stuck = now;
-
-			if ( now ) {
-				root.setAttribute( STUCK, '' );
-			} else {
-				root.removeAttribute( STUCK );
-			}
+			applyFold( now );
 
 			/*
 			 * Crossing the threshold moves the bar -- it gains a gap at the
@@ -589,6 +648,16 @@
 		}
 
 		function measure() {
+			var ms = parseFloat(
+				window.getComputedStyle( root ).getPropertyValue( '--ehdr-ms' )
+			);
+
+			if ( ! isNaN( ms ) && ms > 0 ) {
+				// A value in seconds is still a number; anything under 20 is
+				// not a plausible millisecond count for this.
+				slideMs = ms < 20 ? ms * 1000 : ms;
+			}
+
 			var compact = measureCompact();
 
 			compactWidth = compact;

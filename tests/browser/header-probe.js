@@ -219,36 +219,63 @@ function check(name, ok, detail) {
     backAtTop + 'px of ' + direction.full);
 
   /*
-   * The change has to ease, not snap.
+   * The fold is never something you watch happen.
    *
-   * `width` cannot interpolate from a percentage to `fit-content`, so the
-   * first version of this jumped 296px on the opening frame and eased the
-   * remaining 89 -- which is what made it feel junky. The script measures the
-   * content width and the transition runs length to length.
+   * The bar leaves at whatever width it had and folds once it is gone, with
+   * transitions frozen for the frame it takes. However well a width change is
+   * eased it still reads as the header rearranging itself in front of you,
+   * which is the thing that looked wrong. So this samples the width only while
+   * some part of the bar is on screen, and expects to see one value.
    */
   await page.evaluate(() => window.scrollTo(0, 0));
   await sleep(900);
-  const eased2 = await page.evaluate(async () => {
+  const leaving = await page.evaluate(async () => {
+    const bar = document.querySelector('.ehdr__bar');
+    const seen = [];
+    let stop = false;
+    const tick = () => {
+      const r = bar.getBoundingClientRect();
+      if (r.bottom > 0) seen.push(Math.round(r.width));
+      if (!stop) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    for (let y = 0; y <= 1200; y += 150) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 90)); }
+    await new Promise(r => setTimeout(r, 1400));
+    stop = true;
+    const u = [];
+    seen.forEach(v => { if (!u.length || u[u.length - 1] !== v) u.push(v); });
+    return u;
+  });
+  check('the fold happens off screen, never in front of you',
+    leaving.length === 1,
+    leaving.length === 1 ? 'it left at ' + leaving[0] + 'px and folded once gone'
+      : 'widths seen while leaving: ' + leaving.join(' '));
+
+  /*
+   * Letting it out again is the opposite case. At the top the bar is on screen
+   * and in front of you, so the expansion is the point rather than the
+   * problem, and it still has to ease.
+   */
+  const letOut = await page.evaluate(async () => {
+    for (let y = 1050; y >= 700; y -= 150) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 90)); }
+    await new Promise(r => setTimeout(r, 900));
     const bar = document.querySelector('.ehdr__bar');
     const rows = [];
     let stop = false;
     const tick = () => { rows.push(bar.getBoundingClientRect().width); if (!stop) requestAnimationFrame(tick); };
     requestAnimationFrame(tick);
-    window.scrollTo(0, 1400);
-    await new Promise(r => setTimeout(r, 700));
-    window.scrollTo(0, 700);
+    window.scrollTo(0, 0);
     await new Promise(r => setTimeout(r, 1300));
     stop = true;
     const u = [];
     rows.forEach(v => { if (!u.length || Math.abs(u[u.length - 1] - v) > 0.5) u.push(v); });
     const steps = u.slice(1).map((v, i) => Math.abs(v - u[i]));
-    return { count: u.length, biggest: Math.max.apply(null, steps),
-      span: Math.abs(u[0] - u[u.length - 1]) };
+    return { count: u.length, biggest: Math.max.apply(null, steps), span: Math.abs(u[0] - u[u.length - 1]) };
   });
-  check('the width eases rather than snapping',
-    eased2.count > 10 && eased2.biggest < eased2.span * 0.25,
-    eased2.count + ' distinct widths over ' + Math.round(eased2.span) +
-      'px, biggest single frame ' + Math.round(eased2.biggest) + 'px');
+  check('but letting it out at the top still eases',
+    letOut.count > 8 && letOut.biggest < letOut.span * 0.3,
+    letOut.count + ' widths over ' + Math.round(letOut.span) +
+      'px, biggest single frame ' + Math.round(letOut.biggest) + 'px');
 
   await page.evaluate(() => window.scrollTo(0, 0));
   await sleep(700);
@@ -305,6 +332,32 @@ function check(name, ok, detail) {
 
   check('hovering an item opens its panel', open.openAttr && open.shown === 1,
     open.shown + ' of ' + open.withPanel + ' panels showing');
+
+  /*
+   * And the bar keeps its shape while it does. It used to snap back to full
+   * width, so the panel faded in at the same moment the bar resized underneath
+   * it and two animations fought over the same corner of the screen.
+   */
+  const steady = await page.evaluate(async () => {
+    for (let y = 0; y <= 1200; y += 150) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 80)); }
+    await new Promise(r => setTimeout(r, 900));
+    for (let y = 1050; y >= 700; y -= 150) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 80)); }
+    await new Promise(r => setTimeout(r, 900));
+    const w = () => Math.round(document.querySelector('.ehdr__bar').getBoundingClientRect().width);
+    const before = w();
+    document.querySelectorAll('.ehdr__item')[2].dispatchEvent(new MouseEvent('mouseenter'));
+    await new Promise(r => setTimeout(r, 800));
+    const after = w();
+    document.querySelectorAll('.ehdr__item')[2].dispatchEvent(new MouseEvent('mouseleave'));
+    await new Promise(r => setTimeout(r, 400));
+    return { before, after };
+  });
+  check('the folded bar keeps its shape when a panel opens',
+    steady.before === steady.after && steady.before < 1440,
+    steady.before + 'px -> ' + steady.after + 'px');
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await sleep(900);
 
   check('the panel spans the whole bar, not just the word that opened it',
     open.panelWidth === open.barWidth && open.panelLeft === open.barLeft,

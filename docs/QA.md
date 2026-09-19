@@ -480,6 +480,11 @@ script-blocked fallback, against `tests/browser/header.html`.
 - [ ] **Scrolling down takes the header off the screen entirely**, and turning
       round brings it straight back, already folded. It should slide, not blink
 - [ ] Open a panel, then scroll: the header must not slide away underneath it
+- [ ] **Watch the bar as it leaves.** It should go at full width. Seeing it
+      shrink on its way out means the fold is no longer waiting until it is
+      off screen
+- [ ] Hover a dropdown on the folded bar: the bar must not resize under the
+      panel. The two moving at once is what judders
 - [ ] "Goes back to full width" set to **Only at the top** keeps it compact
       while you scroll up mid-page, and restores it when you reach the top.
       Set to **Whenever you scroll up** it comes back on any upward scroll
