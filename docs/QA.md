@@ -537,6 +537,12 @@ script-blocked fallback, against `tests/browser/header.html`.
 - [ ] The button keeps its gradient and both shadows, and its letter spacing
       actually renders. If tracking looks like it is doing nothing, check the
       unit is em rather than per cent
+- [ ] **Sliders take the unit you pick.** Switch a padding to em or a width to
+      %, and the bar should actually change. Nothing happening means the
+      selector is still pinned to px
+- [ ] Each unit has a sensible range -- switching to em should not leave you
+      dragging a slider that goes to 160
+- [ ] Settings saved before this still read the same: 40px stays 40px
 - [ ] Something on the page drawing over the header means raising "Stacking
       order"
 - [ ] Two headers on one page is not a supported arrangement, but neither

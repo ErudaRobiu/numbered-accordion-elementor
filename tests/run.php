@@ -782,6 +782,89 @@ check( 'a fourth field is ignored', 'note', $links( 'One | /one | note | extra' 
 
 check( 'surrounding spaces are trimmed', 'One', $links( '   One   |   /one   ' )[0]['label'] );
 
+/*
+ * Every slider offers its units, and writes whichever one was picked.
+ *
+ * A control with several `size_units` but a selector that hardcodes `px` looks
+ * like it works -- the unit buttons appear, you click one, and nothing happens,
+ * because the value still reaches the page as pixels. The two have to be kept
+ * in step, and this is the check that keeps them there.
+ *
+ * Four controls are deliberately single-unit: their value is also read in PHP
+ * into a data attribute that the script parses as a bare number, so "0.3"
+ * meaning seconds would be treated as 0.3 milliseconds.
+ */
+$header_src = (string) file_get_contents( dirname( __DIR__ ) . '/modules/header/widgets/class-mega-header-widget.php' );
+$frozen     = array( 'stick_at', 'grab', 'intent', 'scramble_step' );
+
+preg_match_all(
+	"/\t\t\t'([a-z_]+)',\n\t\t\tarray\(\n(.*?)\n\t\t\t\)\n\t\t\);/s",
+	$header_src,
+	$controls,
+	PREG_SET_ORDER
+);
+
+check( 'the header widget has controls to read', true, count( $controls ) > 30 );
+
+$multi = 0;
+
+foreach ( $controls as $control ) {
+	list( , $id, $body ) = $control;
+
+	if ( false === strpos( $body, 'size_units' ) || false === strpos( $body, 'selectors' ) ) {
+		continue;
+	}
+
+	preg_match( "/'size_units'\s*=> array\(([^)]*)\)/", $body, $um );
+	$units = isset( $um[1] ) ? preg_split( '/\s*,\s*/', trim( $um[1] ), -1, PREG_SPLIT_NO_EMPTY ) : array();
+
+	if ( count( $units ) < 2 ) {
+		continue;
+	}
+
+	$multi++;
+
+	// The selector must not pin a unit of its own.
+	$pinned = (bool) preg_match( '/\{\{SIZE\}\}(px|%|ms|em|rem|vw|vh)/', $body );
+
+	check( "{$id} writes the unit that was picked", false, $pinned );
+
+	// And every unit offered needs a range, or the slider falls back to 0-100
+	// and a pixel width becomes unreachable.
+	preg_match( "/'range'\s*=> array\((.*?)\),\n/s", $body, $rm );
+	$ranged = isset( $rm[1] ) ? $rm[1] : '';
+
+	foreach ( $units as $unit ) {
+		$bare = trim( $unit, "' " );
+
+		check(
+			"{$id} gives {$bare} a range of its own",
+			true,
+			false !== strpos( $ranged, "'{$bare}'" )
+		);
+	}
+}
+
+check( 'most of the header\'s sliders take more than one unit', true, $multi >= 30 );
+
+foreach ( $frozen as $id ) {
+	$found = '';
+
+	foreach ( $controls as $control ) {
+		if ( $control[1] === $id ) {
+			$found = $control[2];
+		}
+	}
+
+	check( "{$id} is still declared", true, '' !== $found );
+
+	preg_match( "/'size_units'\s*=> array\(([^)]*)\)/", $found, $um );
+	$units = isset( $um[1] ) ? preg_split( '/\s*,\s*/', trim( $um[1] ), -1, PREG_SPLIT_NO_EMPTY ) : array();
+
+	// Single-unit on purpose. See the note above.
+	check( "{$id} stays on one unit, because the script reads it as a number", 1, count( $units ) );
+}
+
 /* ------------------------------------------------- SmoothScroll_Module --- */
 
 // Needs no Elementor: a classic theme gets the same benefit.

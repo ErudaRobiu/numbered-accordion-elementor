@@ -358,10 +358,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'How fast it rolls', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'ms' ),
-				'range'      => array( 'ms' => array( 'min' => 80, 'max' => 900 ) ),
+				'size_units' => array( 'ms', 's' ),
+				'range'      => array( 'ms' => array( 'min' => 80, 'max' => 900 ), 's' => array( 'min' => 0, 'max' => 3, 'step' => 0.05 ) ),
 				'default'    => array( 'unit' => 'ms', 'size' => 340 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-roll-ms: {{SIZE}}ms;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-roll-ms: {{SIZE}}{{UNIT}};' ),
 				'condition'  => array( 'menu_anim' => array( 'roll', 'letters' ) ),
 			)
 		);
@@ -384,10 +384,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Delay between letters', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'ms' ),
-				'range'      => array( 'ms' => array( 'min' => 0, 'max' => 120 ) ),
+				'size_units' => array( 'ms', 's' ),
+				'range'      => array( 'ms' => array( 'min' => 0, 'max' => 120 ), 's' => array( 'min' => 0, 'max' => 3, 'step' => 0.05 ) ),
 				'default'    => array( 'unit' => 'ms', 'size' => 24 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-roll-step: {{SIZE}}ms;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-roll-step: {{SIZE}}{{UNIT}};' ),
 				'condition'  => array( 'menu_anim' => 'letters' ),
 			)
 		);
@@ -457,10 +457,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'How much', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 30 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 30 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 10 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-scrim-blur: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-scrim-blur: {{SIZE}}{{UNIT}};' ),
 				'condition'  => array( 'scrim_show' => 'yes' ),
 			)
 		);
@@ -496,10 +496,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Height', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 48 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 48 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 14 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-pad-y: {{SIZE}}px; --ehdr-pad-y-mobile: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-pad-y: {{SIZE}}{{UNIT}}; --ehdr-pad-y-mobile: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -509,10 +509,10 @@ class Mega_Header_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Content width', 'numbered-accordion' ),
 				'description' => esc_html__( 'The bar always runs the full width of the window, because the frost has to. This caps what sits inside it, so the logo lines up with the words underneath rather than drifting out to the bezel.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => array( 'px' ),
-				'range'       => array( 'px' => array( 'min' => 600, 'max' => 2200 ) ),
+				'size_units'  => array( 'px', '%', 'vw' ),
+				'range'       => array( 'px' => array( 'min' => 600, 'max' => 2200 ), '%' => array( 'min' => 0, 'max' => 100 ), 'vw' => array( 'min' => 0, 'max' => 100 ) ),
 				'default'     => array( 'unit' => 'px', 'size' => 1440 ),
-				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-max: {{SIZE}}px;' ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-max: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -522,10 +522,10 @@ class Mega_Header_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Side padding', 'numbered-accordion' ),
 				'description' => esc_html__( 'Line this up with your sections\' own padding, or the logo will not sit above the words under it.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => array( 'px' ),
-				'range'       => array( 'px' => array( 'min' => 0, 'max' => 160 ) ),
+				'size_units'  => array( 'px', '%', 'em', 'rem', 'vw' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 160 ), '%' => array( 'min' => 0, 'max' => 100 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'vw' => array( 'min' => 0, 'max' => 100 ) ),
 				'default'     => array( 'unit' => 'px', 'size' => 64 ),
-				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-pad-x: {{SIZE}}px; --ehdr-pad-x-mobile: {{SIZE}}px;' ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-pad-x: {{SIZE}}{{UNIT}}; --ehdr-pad-x-mobile: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -544,10 +544,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Gap from the top', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 16 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-stuck-gap: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-stuck-gap: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -570,10 +570,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'How much of the window', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( '%' ),
-				'range'      => array( '%' => array( 'min' => 40, 'max' => 100 ) ),
+				'size_units' => array( 'px', '%', 'vw' ),
+				'range'      => array( '%' => array( 'min' => 40, 'max' => 100 ), 'px' => array( 'min' => 320, 'max' => 2400 ), 'vw' => array( 'min' => 0, 'max' => 100 ) ),
 				'default'    => array( 'unit' => '%', 'size' => 80 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-stuck-width: {{SIZE}}%;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-stuck-width: {{SIZE}}{{UNIT}};' ),
 				'condition'  => array( 'stuck_width_mode' => 'share' ),
 			)
 		);
@@ -584,10 +584,10 @@ class Mega_Header_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Keep clear of the edges', 'numbered-accordion' ),
 				'description' => esc_html__( 'The least space left either side when the bar is sized to its contents, so a wide menu on a narrow window still has air around it.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => array( 'px' ),
-				'range'       => array( 'px' => array( 'min' => 0, 'max' => 120 ) ),
+				'size_units'  => array( 'px', '%', 'em', 'rem', 'vw' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 120 ), '%' => array( 'min' => 0, 'max' => 100 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'vw' => array( 'min' => 0, 'max' => 100 ) ),
 				'default'     => array( 'unit' => 'px', 'size' => 32 ),
-				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-stuck-inset: {{SIZE}}px;' ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-stuck-inset: {{SIZE}}{{UNIT}};' ),
 				'condition'   => array( 'stuck_width_mode' => 'fit' ),
 			)
 		);
@@ -597,10 +597,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Side padding once frosted', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 120 ) ),
+				'size_units' => array( 'px', '%', 'em', 'rem', 'vw' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 120 ), '%' => array( 'min' => 0, 'max' => 100 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'vw' => array( 'min' => 0, 'max' => 100 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 16 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-pad-x-stuck: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-pad-x-stuck: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -619,10 +619,10 @@ class Mega_Header_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Width', 'numbered-accordion' ),
 				'description' => esc_html__( 'On all four sides. The width is always reserved and only its colour arrives with the frost, so nothing shifts by a pixel on the frame it appears.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => array( 'px' ),
-				'range'       => array( 'px' => array( 'min' => 0, 'max' => 8 ) ),
+				'size_units'  => array( 'px', 'em', 'rem' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 8 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'     => array( 'unit' => 'px', 'size' => 0 ),
-				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-bw: {{SIZE}}px;' ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-bw: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -632,10 +632,10 @@ class Mega_Header_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Bottom only', 'numbered-accordion' ),
 				'description' => esc_html__( 'The hairline under a full-width bar. Set the width above for a floating one.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => array( 'px' ),
-				'range'       => array( 'px' => array( 'min' => 0, 'max' => 8 ) ),
+				'size_units'  => array( 'px', 'em', 'rem' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 8 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'     => array( 'unit' => 'px', 'size' => 1 ),
-				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-bw-bottom: {{SIZE}}px;' ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-bw-bottom: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -644,10 +644,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Corner radius once frosted', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60 ) ),
+				'size_units' => array( 'px', '%', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60 ), '%' => array( 'min' => 0, 'max' => 100 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 0 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-radius-stuck: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-radius-stuck: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -656,10 +656,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Logo height', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 16, 'max' => 120 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 16, 'max' => 120 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 44 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-logo: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-logo: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -669,10 +669,10 @@ class Mega_Header_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Logo height once frosted', 'numbered-accordion' ),
 				'description' => esc_html__( 'Set this smaller than the one above and the bar tightens as you scroll.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => array( 'px' ),
-				'range'       => array( 'px' => array( 'min' => 16, 'max' => 120 ) ),
+				'size_units'  => array( 'px', 'em', 'rem' ),
+				'range'       => array( 'px' => array( 'min' => 16, 'max' => 120 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'     => array( 'unit' => 'px', 'size' => 44 ),
-				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-logo-stuck: {{SIZE}}px;' ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-logo-stuck: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -703,10 +703,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Blur', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 16 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-blur: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-blur: {{SIZE}}{{UNIT}};' ),
 				'condition'  => array( 'fill_mode' => 'frost' ),
 			)
 		);
@@ -806,10 +806,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Space between items', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 80 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 80 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 28 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-item-gap: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-item-gap: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -837,10 +837,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Thickness', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 8 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 8 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 2 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-rule: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-rule: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -849,10 +849,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Hover speed', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'ms' ),
-				'range'      => array( 'ms' => array( 'min' => 60, 'max' => 600 ) ),
+				'size_units' => array( 'ms', 's' ),
+				'range'      => array( 'ms' => array( 'min' => 60, 'max' => 600 ), 's' => array( 'min' => 0, 'max' => 3, 'step' => 0.05 ) ),
 				'default'    => array( 'unit' => 'ms', 'size' => 200 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-link-ms: {{SIZE}}ms;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-link-ms: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -887,10 +887,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Padding', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 120 ) ),
+				'size_units' => array( 'px', '%', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 120 ), '%' => array( 'min' => 0, 'max' => 100 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 40 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-pad: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-pad: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -899,10 +899,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Space between columns', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 120 ) ),
+				'size_units' => array( 'px', '%', 'em', 'rem', 'vw' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 120 ), '%' => array( 'min' => 0, 'max' => 100 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'vw' => array( 'min' => 0, 'max' => 100 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 48 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-gap: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-gap: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -912,10 +912,10 @@ class Mega_Header_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Content width', 'numbered-accordion' ),
 				'description' => esc_html__( 'The panel is full width; this keeps what is inside it lined up with the rest of the page.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => array( 'px' ),
-				'range'       => array( 'px' => array( 'min' => 600, 'max' => 2000 ) ),
+				'size_units'  => array( 'px', '%', 'vw' ),
+				'range'       => array( 'px' => array( 'min' => 600, 'max' => 2000 ), '%' => array( 'min' => 0, 'max' => 100 ), 'vw' => array( 'min' => 0, 'max' => 100 ) ),
 				'default'     => array( 'unit' => 'px', 'size' => 1400 ),
-				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-max: {{SIZE}}px;' ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-max: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -944,10 +944,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Opening speed', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'ms' ),
-				'range'      => array( 'ms' => array( 'min' => 80, 'max' => 800 ) ),
+				'size_units' => array( 'ms', 's' ),
+				'range'      => array( 'ms' => array( 'min' => 80, 'max' => 800 ), 's' => array( 'min' => 0, 'max' => 3, 'step' => 0.05 ) ),
 				'default'    => array( 'unit' => 'ms', 'size' => 280 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-ms: {{SIZE}}ms;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-ms: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -1090,10 +1090,10 @@ class Mega_Header_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Letter spacing', 'numbered-accordion' ),
 				'description' => esc_html__( 'In em, not per cent. A percentage is not a valid letter-spacing anywhere and browsers drop it without a word, which is why tracking set in per cent never appears to do anything.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => array( 'em' ),
-				'range'       => array( 'em' => array( 'min' => -0.05, 'max' => 0.3, 'step' => 0.005 ) ),
+				'size_units'  => array( 'em', 'px', 'rem' ),
+				'range'       => array( 'em' => array( 'min' => -0.05, 'max' => 0.3, 'step' => 0.005 ), 'px' => array( 'min' => -2, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => -0.05, 'max' => 0.3, 'step' => 0.005 ) ),
 				'default'     => array( 'unit' => 'em', 'size' => 0.05 ),
-				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-track: {{SIZE}}em;' ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-track: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -1102,10 +1102,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Border width', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 8 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 8 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 0 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-bw: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-bw: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -1132,10 +1132,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Corner radius', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 100 ) ),
+				'size_units' => array( 'px', '%', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 100 ), '%' => array( 'min' => 0, 'max' => 100 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 100 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-radius: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-radius: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -1144,10 +1144,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Padding, top and bottom', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 4, 'max' => 40 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 4, 'max' => 40 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 15 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-pad-y: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-pad-y: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -1156,10 +1156,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Padding, left and right', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 8, 'max' => 80 ) ),
+				'size_units' => array( 'px', '%', 'em', 'rem', 'vw' ),
+				'range'      => array( 'px' => array( 'min' => 8, 'max' => 80 ), '%' => array( 'min' => 0, 'max' => 100 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'vw' => array( 'min' => 0, 'max' => 100 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 30 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-pad-x: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-pad-x: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -1186,10 +1186,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Across', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => -20, 'max' => 20 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => -20, 'max' => 20 ), 'em' => array( 'min' => -4, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => -4, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 2 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-inner-x: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-inner-x: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -1198,10 +1198,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Down', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => -20, 'max' => 20 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => -20, 'max' => 20 ), 'em' => array( 'min' => -4, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => -4, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => -4 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-inner-y: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-inner-y: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -1210,10 +1210,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Blur', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 4 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-inner-blur: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-inner-blur: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -1241,10 +1241,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Down', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => -20, 'max' => 40 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => -20, 'max' => 40 ), 'em' => array( 'min' => -4, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => -4, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 4 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-lift-y: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-lift-y: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -1253,10 +1253,10 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'label'      => esc_html__( 'Blur', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60 ) ),
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 10 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-lift-blur: {{SIZE}}px;' ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-lift-blur: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 

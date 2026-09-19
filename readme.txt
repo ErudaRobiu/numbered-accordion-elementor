@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.24.0
+Stable tag: 2.25.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,17 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.25.0 =
+* Mega Header's sliders now take the unit you want. Lengths accept px, em and
+  rem, side spacing and widths add % and vw, radii add %, durations accept ms
+  or s, and letter spacing takes em, px or rem. Each unit has a range of its
+  own, so switching to em does not leave you dragging a slider that goes to 160.
+* Four settings stay in one unit on purpose -- "Stays full width for the first",
+  "Reacts after scrolling", "Pause before a panel opens" and "Time per letter".
+  Their values are read by the script as plain numbers, where "0.3" meaning
+  seconds would be taken as 0.3 milliseconds.
+* Existing settings are untouched: a value already saved as 40px is still 40px.
 
 = 2.24.0 =
 * Mega Header answers to scroll **direction** now, the way the reference does.
