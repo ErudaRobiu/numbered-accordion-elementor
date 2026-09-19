@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.17.0
+Stable tag: 2.18.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,22 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.18.0 =
+* Scroll Rail is properly built for a phone. The row now runs edge to edge
+  while the first card still lines up with the heading above it, so the next
+  card peeks off the screen instead of being cut off at the section's padding,
+  and cards snap to that same gutter rather than to the middle of the screen.
+* The progress bar is no longer hidden on a phone, where it was the only thing
+  telling anyone the row scrolls at all, and a "1 / 6" count sits beside it.
+  Both follow your finger.
+* New Scroll Rail settings: edge to edge on a phone, the gutter to measure
+  from, card width on a phone, and the counter's colours.
+* Fix: the Scroll Rail could give the page a sideways scroll on a theme that
+  does not set box-sizing. It now sets its own.
+* Removed: the "Spin Badge" widget added in 2.16.0. The "Eruda Spin" section
+  added in 2.17.0 does the same thing to a picture you already have, which is
+  what was wanted.
 
 = 2.17.0 =
 * New "Eruda Spin" section on the Image, Icon, Button, Image Box and Site Logo

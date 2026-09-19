@@ -14,15 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Registers assets and the Spin Badge widget.
+ * Registers the Eruda Spin controls and their assets.
  */
 final class Badge_Module implements Module {
 
-	const STYLE_HANDLE  = 'ebdg-spin-badge';
-	const SCRIPT_HANDLE = 'ebdg-spin-badge';
-
-	// The extension that turns an existing widget. Separate handles, because a
-	// page may use one, the other, or both.
 	const SPIN_STYLE_HANDLE  = 'espin-spin';
 	const SPIN_SCRIPT_HANDLE = 'espin-spin';
 
@@ -57,14 +52,16 @@ final class Badge_Module implements Module {
 	 * @return string
 	 */
 	public static function description() {
-		return esc_html__( 'Adds an "Eruda Spin" section to image, icon and button widgets, which turns what they hold and slows it to a stop under the pointer. Also adds a "Spin Badge" widget that draws its own round text.', 'numbered-accordion' );
+		return esc_html__( 'Adds an "Eruda Spin" section to image, icon and button widgets, which turns what they hold and slows it to a stop under the pointer.', 'numbered-accordion' );
 	}
 
 	/**
 	 * Is Elementor present and recent enough?
 	 *
 	 * As with the accordion module, do NOT test for \Elementor\Widget_Base
-	 * here -- it does not exist at plugins_loaded. See register_widgets().
+	 * here -- it does not exist at plugins_loaded. This module registers no
+	 * widget, but the rule is the same for the controls it injects: they are
+	 * added from an Elementor hook, never at plugins_loaded.
 	 *
 	 * @return bool
 	 */
@@ -119,8 +116,6 @@ final class Badge_Module implements Module {
 	public function boot() {
 		add_action( 'elementor/frontend/after_register_styles', array( $this, 'register_styles' ) );
 		add_action( 'elementor/frontend/after_register_scripts', array( $this, 'register_scripts' ) );
-		add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
-
 		require_once ERUDA_PATH . 'modules/badge/class-spin-controls.php';
 
 		$controls = new Spin_Controls();
@@ -175,13 +170,6 @@ final class Badge_Module implements Module {
 	 */
 	public function register_styles() {
 		wp_register_style(
-			self::STYLE_HANDLE,
-			ERUDA_URL . 'modules/badge/assets/css/spin-badge.css',
-			array(),
-			ERUDA_VERSION
-		);
-
-		wp_register_style(
 			self::SPIN_STYLE_HANDLE,
 			ERUDA_URL . 'modules/badge/assets/css/spin.css',
 			array(),
@@ -194,14 +182,6 @@ final class Badge_Module implements Module {
 	 */
 	public function register_scripts() {
 		wp_register_script(
-			self::SCRIPT_HANDLE,
-			ERUDA_URL . 'modules/badge/assets/js/spin-badge.js',
-			array(),
-			ERUDA_VERSION,
-			true
-		);
-
-		wp_register_script(
 			self::SPIN_SCRIPT_HANDLE,
 			ERUDA_URL . 'modules/badge/assets/js/spin.js',
 			array(),
@@ -210,32 +190,4 @@ final class Badge_Module implements Module {
 		);
 	}
 
-	/**
-	 * Register the widget with Elementor.
-	 *
-	 * Wrapped in a try/catch so a malformed widget can never take the editor
-	 * or the front end down with it.
-	 *
-	 * @param \Elementor\Widgets_Manager $widgets_manager Elementor widget manager.
-	 */
-	public function register_widgets( $widgets_manager ) {
-		try {
-			// Widget_Base only exists from this hook onwards. See the note on
-			// is_available().
-			if ( ! class_exists( '\Elementor\Widget_Base' ) ) {
-				return;
-			}
-
-			require_once ERUDA_PATH . 'modules/badge/widgets/class-spin-badge-widget.php';
-
-			if ( class_exists( '\ErudaToolkit\Modules\Badge\Widgets\Spin_Badge_Widget' ) ) {
-				$widgets_manager->register( new Widgets\Spin_Badge_Widget() );
-			}
-		} catch ( \Throwable $e ) {
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-				error_log( 'Eruda Toolkit: failed to register the spin badge widget - ' . $e->getMessage() );
-			}
-		}
-	}
 }

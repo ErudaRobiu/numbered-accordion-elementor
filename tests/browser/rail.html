@@ -8,11 +8,17 @@
     all of it inside the element the rail is asked to hold still. */
  .demo{padding:64px 0}
  .demo__head{display:grid;grid-template-columns:1fr 1fr;gap:64px;padding:0 40px 56px}
+ /* One gutter for the whole section, the way a real one is built: the cards,
+    the words and the footer all measure from it. */
+ @media (max-width:1024px){
+   .demo{padding-inline:20px}
+   .demo__head{grid-template-columns:1fr;gap:24px;padding:0 0 32px}
+   .demo__h{font-size:30px}}
  .demo__eyebrow{display:inline-block;border:1px solid #2f7d4f;border-radius:999px;padding:8px 16px;
    font:700 13px/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:#4ade80;margin-bottom:24px}
  .demo__h{font:800 44px/1.05 system-ui;margin:0;text-transform:uppercase}
  .demo__p{color:#9fb0bf;margin:0}
- .erail{--erail-card:420px;--erail-gap:28px;--erail-lead:64px}
+ .erail{--erail-card:420px;--erail-gap:28px;--erail-lead:64px;--erail-gutter:20px}
  .erail__title{font-size:2rem}
 
  /*
@@ -37,7 +43,7 @@
  </div>
 <div class="erail" data-erail-mode="pinned" data-erail-pace="1"
      data-erail-pause-in="0.3" data-erail-pause-out="0.3"
-     data-erail-pin="section"
+     data-erail-pin="section" data-erail-bleed
      data-erail-centre="auto"
      data-erail-start="0.8" data-erail-finish="0.8" data-erail-extra="0">
  <div class="erail__stage">
@@ -88,7 +94,10 @@
 
    </div>
   </div>
-  <div class="erail__progress" aria-hidden="true"><span></span></div>
+  <div class="erail__foot">
+   <div class="erail__progress" aria-hidden="true"><span></span></div>
+   <p class="erail__count" aria-hidden="true"><b>1</b> / 6</p>
+  </div>
  </div>
 </div>
 </section>

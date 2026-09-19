@@ -58,9 +58,10 @@ const x = t => {
       const track = document.querySelector('.erail__track');
       const pad = parseFloat(getComputedStyle(track).paddingTop) +
                   parseFloat(getComputedStyle(track).paddingBottom);
-      const barBox = document.querySelector('.erail__progress');
-      const barCost = barBox
-        ? barBox.offsetHeight + parseFloat(getComputedStyle(barBox).marginTop)
+      // The bar and the count share a row, and the row is what takes up space.
+      const footBox = document.querySelector('.erail__foot');
+      const barCost = footBox
+        ? footBox.offsetHeight + parseFloat(getComputedStyle(footBox).marginTop)
         : 0;
       const spacerEl = document.querySelector('.erail__spacer');
       return {
@@ -85,7 +86,7 @@ const x = t => {
   check('the section is as tall as its cards make it, not a share of the screen',
     Math.abs(flowCost.stageH - flowCost.wants) <= 1 && flowCost.stageH < 900,
     'stage ' + flowCost.stageH + 'px for a ' + flowCost.cardH +
-      'px card plus its padding and bar (' + flowCost.wants + 'px), in a 900px window');
+      'px card plus its padding and footer (' + flowCost.wants + 'px), in a 900px window');
 
   check('flow adds no height to the page at all',
     flowCost.rootH === flowCost.stageH && flowCost.inline === '(none)',
@@ -523,6 +524,90 @@ const x = t => {
     (narrow.tx === 'none' || Math.round(x(narrow.tx)) === 0),
     'ready=' + narrow.ready + ' overflow-x=' + narrow.overflowX +
       ' snap=' + narrow.snap + ' transform=' + narrow.tx);
+
+  // --- and it is a good one -------------------------------------------------
+  await page.goto('http://127.0.0.1:8732/tests/browser/rail.html', { waitUntil: 'load' });
+  await page.evaluate(() => new Promise(r => setTimeout(r, 300)));
+
+  const phone = await page.evaluate(() => {
+    const vp = document.querySelector('.erail__viewport');
+    const first = document.querySelector('.erail__card');
+    const second = document.querySelectorAll('.erail__card')[1];
+    const heading = document.getElementById('heading');
+    const foot = document.querySelector('.erail__foot');
+    return {
+      // The scroller runs the full width of the screen...
+      bleeds: Math.round(vp.getBoundingClientRect().width) >= window.innerWidth - 1,
+      // ...while the first card still lines up with the words above it.
+      cardLeft: Math.round(first.getBoundingClientRect().left),
+      headingLeft: Math.round(heading.getBoundingClientRect().left),
+      // The next card is visible but not fully, which is the whole hint.
+      peek: Math.round(window.innerWidth - second.getBoundingClientRect().left),
+      cardWidth: Math.round(first.getBoundingClientRect().width),
+      snapAlign: getComputedStyle(first).scrollSnapAlign,
+      foot: foot ? getComputedStyle(foot).display : 'missing',
+      footLeft: Math.round(foot.getBoundingClientRect().left),
+      footRight: Math.round(window.innerWidth - foot.getBoundingClientRect().right),
+      count: document.querySelector('.erail__count b').textContent,
+      bar: getComputedStyle(document.querySelector('.erail__progress')).display,
+      overflows: document.documentElement.scrollWidth > window.innerWidth + 1,
+    };
+  });
+
+  check('the scroller runs the full width of the screen',
+    phone.bleeds,
+    'scroller is ' + (phone.bleeds ? 'full width' : 'boxed in the section padding'));
+
+  check('while the first card still lines up with the heading above it',
+    Math.abs(phone.cardLeft - phone.headingLeft) <= 1,
+    'card at ' + phone.cardLeft + 'px, heading at ' + phone.headingLeft + 'px');
+
+  check('and the next card peeks rather than being cut off at the padding',
+    phone.peek > 20 && phone.peek < phone.cardWidth,
+    phone.peek + 'px of the next card showing, of a ' + phone.cardWidth + 'px card');
+
+  check('a card snaps to the gutter, not to the middle of the screen',
+    phone.snapAlign === 'start',
+    'snap align ' + phone.snapAlign);
+
+  check('the progress bar and the count are both there on a phone',
+    phone.bar !== 'none' && phone.foot === 'flex' && phone.count === '1',
+    'bar ' + phone.bar + ', showing card ' + phone.count);
+
+  check('the footer measures from the same gutter as the cards',
+    Math.abs(phone.footLeft - phone.cardLeft) <= 1 && phone.footRight >= phone.cardLeft - 1,
+    'footer at ' + phone.footLeft + 'px with ' + phone.footRight + 'px clear on the right, cards at ' +
+      phone.cardLeft + 'px');
+
+  check('and nothing runs off the side of the page',
+    !phone.overflows,
+    phone.overflows ? 'the page scrolls sideways' : 'no sideways scroll');
+
+  // Swiping has to move both of them, since nothing else can on a phone.
+  const swiped = await page.evaluate(async () => {
+    const vp = document.querySelector('.erail__viewport');
+    const card = document.querySelector('.erail__card');
+    const step = card.getBoundingClientRect().width + 28;
+    const seen = [];
+    for (let i = 1; i <= 4; i++) {
+      vp.scrollLeft = step * i;
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      await new Promise(r => setTimeout(r, 40));
+      seen.push({
+        count: document.querySelector('.erail__count b').textContent,
+        bar: getComputedStyle(document.querySelector('.erail__progress span')).transform,
+      });
+    }
+    return seen;
+  });
+
+  check('swiping moves the count along with it',
+    swiped.map(s => s.count).join(',') === '2,3,4,5',
+    'counted ' + swiped.map(s => s.count).join(' -> '));
+
+  check('and fills the bar as it goes',
+    new Set(swiped.map(s => s.bar)).size === swiped.length,
+    swiped.length + ' distinct bar widths over 4 swipes');
 
   // --- report --------------------------------------------------------------
   console.log('\nPASS');

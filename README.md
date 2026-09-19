@@ -36,7 +36,7 @@ modules/impact/                    the impact grid widget and its assets
 modules/motion/                    the text animation controls and assets
 modules/story/                     the Scroll Story widget and its assets
 modules/rail/                      the Scroll Rail widget and its assets
-modules/badge/                     the Eruda Spin extension, the Spin Badge widget and their assets
+modules/badge/                     the Eruda Spin extension and its assets
 modules/smoothscroll/              eases the whole page's scrolling
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
@@ -642,10 +642,42 @@ to a card scrolls the *page* to the position that brings it into view.
 **Nothing pins on a phone.** A pinned rail takes a gesture people already know
 — swipe the row — and replaces it with one they have to discover, on the axis
 their thumb is worst at. Below 1024px, and under reduced motion, the row is a
-plain horizontally scrollable strip with snap points. That is also exactly what
-it is before the script runs, which is the no-JavaScript state: the markup is a
-real scroller and the stylesheet only stops being one once the script has set
+horizontally scrollable strip with snap points. That is also exactly what it is
+before the script runs, which is the no-JavaScript state: the markup is a real
+scroller and the stylesheet only stops being one once the script has set
 `data-erail-ready`.
+
+Being the right gesture is not the same as being built. A strip that only hints
+at itself with a clipped card is a carousel most people never swipe, so on a
+phone it gets three things:
+
+**It runs edge to edge while the first card still lines up with the heading.**
+A scroller boxed inside the section's padding clips the next card *at* that
+padding, so the peek that says "there is more" looks like a card that has been
+cut off. The scroller is pulled out to the full width and the gutter put back
+as its own padding, which gives both: the row starts where the words start, and
+the card after it runs off the screen rather than off a container.
+
+Two details that are easy to get wrong there. `width: 100%` has to become
+`width: auto`, because a declared width is not changed by a margin — with one,
+the negative margins only slide the scroller sideways and it stays boxed while
+drifting left. And the cards snap to `start` with a matching
+`scroll-padding-left`, not to `center`: a centred card sits with half a card
+showing on either side, which reads as two things half-finished rather than one
+thing and a hint of the next.
+
+**The progress bar stays, and a count joins it.** The bar was hidden below
+1024px, which removed the only indicator exactly where it was least
+discoverable. A bar says *some* of the way through; a count says how much is
+left, which is what decides whether anyone keeps swiping. Both are driven by
+the scroller's own `scrollLeft` on a phone and by the page's progress on
+desktop — one `paint()` either way.
+
+**The widget sets its own `box-sizing`.** Every theme worth the name sets it,
+and a widget cannot be built on the assumption that this one did: without it
+the gutter that pulls the scroller to the screen edges is added to its width
+instead of taken out of it, and the page gains a sideways scroll of exactly two
+gutters.
 
 **The card says it is clickable before you touch it.** A hover-only affordance
 arrives after you have already guessed, so the cue — an arrow out of the
@@ -663,11 +695,11 @@ probe proves it.
 
 ### Spin
 
-Two things, one of them the point: a section added to widgets that already
-exist, and a widget that draws its own.
+A section added to widgets that already exist, rather than a widget of its own.
+The picture is already on the page; what was wanted was a way to turn it.
 
-**Eruda Spin** appears on the Style tab of the Image, Icon, Button, Image Box
-and Site Logo widgets. It turns whatever that widget holds — the picture inside
+It appears on the Style tab of the Image, Icon, Button, Image Box and Site
+Logo widgets. It turns whatever that widget holds — the picture inside
 it, or the whole widget — slows it to a stop under the pointer, and lifts it.
 Nothing is added to the page: every value reaches the DOM through Elementor's
 own `prefix_class` and selectors, so it applies live in the editor as well as
@@ -678,64 +710,6 @@ The lift is on the widget and the rotation on the thing inside it, always. One
 element cannot hold two transforms, so sharing would mean the lift wiping out
 the rotation at exactly the moment a pointer arrives — which is when it
 matters.
-
-### Spin Badge
-
-A round link whose text turns around its edge, slows to a stop under the
-pointer, and lifts. Use it when there is no picture to turn; use Eruda Spin
-when there already is one.
-
-**The ring is SVG text on a circular path, not a picture of a circle of
-text.** A bitmap badge is soft the moment it is scaled or rotated, and this one
-is always rotating; a glyph on a path is re-rasterised every frame at whatever
-size it happens to be, so it is sharp at 96px, sharp at 400px and sharp on a
-retina screen, from no image request at all. Nothing in the widget uses a
-filter, a backdrop-filter or a scaled raster, and the probe walks every element
-in it to confirm that.
-
-**Slowing down is the whole reason it has a script.** A CSS animation can only
-be paused, and `animation-play-state: paused` stops it on the frame it is told
-to — which on something turning steadily reads as a jam, not a stop. The Web
-Animations API lets an animation's `playbackRate` be changed while it runs,
-keeping its position, so easing that rate from one to nought is a real
-spin-down: constant angular deceleration, the way a wheel actually stops. The
-stylesheet keeps a plain CSS rotation for any browser without
-`element.animate`, and the script only removes it once its own animation
-exists, so the ring is never stopped in between the two.
-
-Measured under a pointer: 2.48 degrees per frame at first, nothing by the end,
-still turning twelve frames in.
-
-**The ring is fitted to the circle rather than trusted to fit it.** The phrase
-is repeated a whole number of times, so on its own it either falls short or
-laps itself and collides — which is the single most obvious way a badge like
-this looks wrong. Setting `textLength` to the circle's own circumference with
-`lengthAdjust="spacing"` hands the browser the job of distributing the
-difference between the letters, so it meets itself exactly at any size, in any
-font, and it is re-fitted once a webfont has swapped in. This text is 410 units
-against a 490 circle, so unstretched it would end 59 degrees short; it ends
-0.8 degrees from where it started.
-
-The lift lives on the link and the rotation on the ring inside it, so the two
-transforms never have to share an element — the same lesson as the Scroll
-Story's three layers.
-
-Touch gets its own handling, because a finger is not a pointer: there is no
-hovering out of it, so without `touchend` the badge would stay stopped for good
-after one tap.
-
-The disc is three layers: a picture, a wash of colour over it, and everything
-else. The wash is a pseudo-element rather than another background layer,
-because CSS gives a background layer no opacity of its own — only the whole box
-gets one, which would take the picture and the ring text down with it. The
-inner shadow is composed in PHP and slotted into the front of the stylesheet's
-own `box-shadow` list, because Elementor's box-shadow group writes the whole
-property and this disc already carries two shadows: the ring and the one it
-casts.
-
-Under reduced motion neither turns at all. Both are still links and both still
-answer the pointer, with the lift alone — a state change rather than continuous
-motion.
 
 ### Smooth scrolling
 

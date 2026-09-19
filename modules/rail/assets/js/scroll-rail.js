@@ -77,6 +77,7 @@
 		var viewport = root.querySelector( '.erail__viewport' );
 		var track = root.querySelector( '.erail__track' );
 		var bar = root.querySelector( '.erail__progress span' );
+		var count = root.querySelector( '.erail__count b' );
 		var cards = toArray( root.querySelectorAll( '.erail__card' ) );
 
 		if ( ! stage || ! viewport || ! track || ! cards.length ) {
@@ -432,12 +433,57 @@
 
 		}
 
+		/**
+		 * Which card is the one being looked at, for a given offset.
+		 *
+		 * The nearest one to the left edge of the row rather than the one
+		 * mathematically in view, because that is the card a snap point lands
+		 * on and the card a reader would say they are on.
+		 *
+		 * @param {number} offset How far the row has travelled, in pixels.
+		 * @return {number} Zero-based.
+		 */
+		function cardAt( offset ) {
+			var pad = parseFloat( window.getComputedStyle( track ).paddingLeft ) || 0;
+			var best = 0;
+			var nearest = Infinity;
+
+			cards.forEach( function ( card, i ) {
+				var gap = Math.abs( card.offsetLeft - pad - offset );
+
+				if ( gap < nearest ) {
+					nearest = gap;
+					best = i;
+				}
+			} );
+
+			return best;
+		}
+
+		/**
+		 * Show how far through the row we are.
+		 *
+		 * Called with whatever is moving the row: the page's scroll when the
+		 * rail is driving it, and the scroller's own when a finger is.
+		 *
+		 * @param {number} offset Pixels travelled.
+		 * @param {number} span   Pixels there are to travel.
+		 */
+		function paint( offset, span ) {
+			if ( bar ) {
+				bar.style.transform = 'scaleX(' + ( span > 0 ? clamp01( offset / span ) : 0 ).toFixed( 4 ) + ')';
+			}
+
+			if ( count ) {
+				count.textContent = String( cardAt( offset ) + 1 );
+			}
+		}
+
 		function update() {
 			if ( ! driving ) {
-				if ( bar ) {
-					bar.style.transform = 'scaleX(0)';
-				}
-
+				// A phone moves the row itself, so the scroller's own position
+				// is the thing to report rather than the page's.
+				paint( viewport.scrollLeft, viewport.scrollWidth - viewport.clientWidth );
 				return;
 			}
 
@@ -445,10 +491,7 @@
 
 			lock();
 			track.style.transform = 'translate3d(' + ( -p * distance ).toFixed( 2 ) + 'px, 0, 0)';
-
-			if ( bar ) {
-				bar.style.transform = 'scaleX(' + p.toFixed( 4 ) + ')';
-			}
+			paint( p * distance, distance );
 		}
 
 		/*
@@ -566,10 +609,27 @@
 		measure();
 		update();
 
+		var painting = false;
+
+		function onSwipe() {
+			lock();
+
+			if ( driving || painting ) {
+				return;
+			}
+
+			painting = true;
+
+			window.requestAnimationFrame( function () {
+				paint( viewport.scrollLeft, viewport.scrollWidth - viewport.clientWidth );
+				painting = false;
+			} );
+		}
+
 		window.addEventListener( 'scroll', onScroll, { passive: true } );
 		window.addEventListener( 'resize', onResize, { passive: true } );
 		root.addEventListener( 'focusin', onFocus );
-		viewport.addEventListener( 'scroll', lock, { passive: true } );
+		viewport.addEventListener( 'scroll', onSwipe, { passive: true } );
 
 		if ( typeof window.matchMedia === 'function' ) {
 			var motion = window.matchMedia( '(prefers-reduced-motion: reduce)' );

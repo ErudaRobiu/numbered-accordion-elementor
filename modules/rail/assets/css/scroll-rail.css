@@ -11,6 +11,19 @@
  * rail is worse than a swipe on a phone.
  */
 
+/*
+ * Every theme worth the name sets this, and the widget cannot be built on the
+ * assumption that this one did. Without it the gutter that pulls the scroller
+ * to the screen edges is added to its width instead of taken out of it, and
+ * the page gains a sideways scroll of exactly two gutters.
+ */
+.erail,
+.erail *,
+.erail *::before,
+.erail *::after {
+	box-sizing: border-box;
+}
+
 .erail {
 	position: relative;
 }
@@ -319,10 +332,17 @@
 
 /* --------------------------------------------------------- progress --- */
 
+.erail__foot {
+	display: flex;
+	align-items: center;
+	gap: var(--erail-bar-gap, 28px);
+	margin-top: var(--erail-bar-gap, 28px);
+}
+
 .erail__progress {
 	position: relative;
+	flex: 1 1 auto;
 	height: var(--erail-bar-h, 2px);
-	margin-top: var(--erail-bar-gap, 28px);
 	background: var(--erail-bar-track, rgba(255, 255, 255, 0.12));
 	border-radius: 999px;
 	overflow: hidden;
@@ -336,6 +356,26 @@
 	background: var(--erail-bar-fill, rgba(255, 255, 255, 0.75));
 	transform: scaleX(0);
 	transform-origin: 0 50%;
+}
+
+/*
+ * How far through the row you are, in words. A bar says "some of the way";
+ * a count says how much is left, which is what decides whether anyone keeps
+ * swiping.
+ */
+.erail__count {
+	flex: 0 0 auto;
+	color: var(--erail-count, rgba(255, 255, 255, 0.6));
+	font-size: var(--erail-count-size, 0.8125rem);
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: "tnum" 1;
+	white-space: nowrap;
+}
+
+.erail__count b {
+	font-weight: inherit;
+	color: var(--erail-count-now, #ffffff);
 }
 
 /* ----------------------------------------------------------- narrow --- */
@@ -361,18 +401,47 @@
 		scroll-snap-type: x mandatory;
 	}
 
+	/*
+	 * Edge to edge, with the first card on the same line as the heading.
+	 *
+	 * A scroller boxed inside the section's padding clips the next card at
+	 * that padding, so the peek that tells a reader there is more looks like a
+	 * card that has been cut off. Pulling the scroller out to the full width
+	 * and putting the gutter back as its own padding gives both: the row
+	 * starts where the words start, and the card after it runs off the screen
+	 * rather than off a container.
+	 */
+	.erail[data-erail-bleed] .erail__viewport {
+		/* Not 100%. A declared width is not changed by a margin, so with one
+		   the negative margins below only slide the scroller sideways instead
+		   of widening it, and it stays boxed while drifting left. */
+		width: auto;
+		margin-left: calc(50% - 50vw);
+		margin-right: calc(50% - 50vw);
+		padding-left: var(--erail-gutter, 20px);
+		padding-right: var(--erail-gutter, 20px);
+		/* Snapping without this puts a card's edge against the screen edge,
+		   underneath the gutter it was lined up with. */
+		scroll-padding-left: var(--erail-gutter, 20px);
+	}
+
 	.erail__track {
 		transform: none !important;
-		padding-left: var(--erail-lead-mobile, 16px);
-		padding-right: var(--erail-lead-mobile, 16px);
+		padding-left: 0;
+		padding-right: 0;
 	}
 
 	.erail__card {
 		width: var(--erail-card-mobile, 78vw);
+		/* Start, not centre: a centred card sits with half a card showing on
+		   both sides, which reads as two things half-finished rather than one
+		   thing and a hint of the next. */
+		scroll-snap-align: start;
 	}
 
-	.erail__progress {
-		display: none;
+	.erail__foot {
+		margin-top: var(--erail-bar-gap-mobile, 20px);
+		gap: var(--erail-bar-gap-mobile, 20px);
 	}
 }
 

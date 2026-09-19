@@ -15,7 +15,6 @@ python3 -m http.server 8732         # from the repository root
 node tests/browser/probe.js         # text animation presets
 node tests/browser/story-probe.js   # Scroll Story
 node tests/browser/rail-probe.js    # Scroll Rail
-node tests/browser/badge-probe.js   # Spin Badge
 node tests/browser/spin-probe.js    # Eruda Spin on an existing widget
 ```
 
@@ -24,12 +23,6 @@ Both run headless on purpose. A scrubbed animation is driven by
 visible — drive a real window and every measurement freezes the moment the
 window loses focus, which reads exactly like a broken build. That cost an hour
 once already.
-
-`badge-probe.js` samples the ring's angle every 60ms across a hover and checks
-it keeps moving, by less each time, before settling -- a badge that jammed
-would go from a full step to nothing between two samples. It also checks the
-ring closes (the text ends within 16 degrees of where it starts, against 59
-unstretched) and that no element in the badge carries a filter or is a bitmap.
 
 `rail-probe.js` asserts too: that the section is given exactly the runway its
 row needs, that the row travels sideways and back and lands with the row used

@@ -811,6 +811,79 @@ class Scroll_Rail_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'counter',
+			array(
+				'label'        => esc_html__( 'Show how many', 'numbered-accordion' ),
+				'description'  => esc_html__( 'A bar says some of the way through; a count says how much is left, which is what decides whether anyone keeps swiping.', 'numbered-accordion' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'return_value' => 'yes',
+			)
+		);
+
+		$this->add_control(
+			'bleed',
+			array(
+				'label'        => esc_html__( 'Edge to edge on a phone', 'numbered-accordion' ),
+				'description'  => esc_html__( 'Lets the row run off both sides of the screen while the first card still lines up with your heading. Without it the next card is clipped at the section\'s padding, which reads as a card cut in half rather than a hint that there is more.', 'numbered-accordion' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'return_value' => 'yes',
+				'separator'    => 'before',
+			)
+		);
+
+		$this->add_control(
+			'gutter_mobile',
+			array(
+				'label'       => esc_html__( 'Gutter on a phone', 'numbered-accordion' ),
+				'description' => esc_html__( 'Set this to the same padding your section has, so the first card starts where the words do.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 80 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 20 ),
+				'selectors'   => array( '{{WRAPPER}} .erail' => '--erail-gutter: {{SIZE}}px;' ),
+				'condition'   => array( 'bleed' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'card_mobile',
+			array(
+				'label'       => esc_html__( 'Card width on a phone', 'numbered-accordion' ),
+				'description' => esc_html__( 'A share of the screen. Below a hundred, what is left over is the peek of the next card.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'vw' ),
+				'range'       => array( 'vw' => array( 'min' => 50, 'max' => 100 ) ),
+				'default'     => array( 'unit' => 'vw', 'size' => 78 ),
+				'selectors'   => array( '{{WRAPPER}} .erail' => '--erail-card-mobile: {{SIZE}}vw;' ),
+			)
+		);
+
+		$this->add_control(
+			'count_colour',
+			array(
+				'label'     => esc_html__( 'Counter colour', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => 'rgba(255,255,255,0.6)',
+				'selectors' => array( '{{WRAPPER}} .erail' => '--erail-count: {{VALUE}};' ),
+				'condition' => array( 'counter' => 'yes' ),
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_control(
+			'count_now_colour',
+			array(
+				'label'     => esc_html__( 'Which card you are on', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => '#FFFFFF',
+				'selectors' => array( '{{WRAPPER}} .erail' => '--erail-count-now: {{VALUE}};' ),
+				'condition' => array( 'counter' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
 			'bar_track',
 			array(
 				'label'     => esc_html__( 'Bar track', 'numbered-accordion' ),
@@ -873,6 +946,8 @@ class Scroll_Rail_Widget extends Widget_Base {
 		$icon  = isset( $settings['cue_icon'] ) && isset( $icons[ $settings['cue_icon'] ] ) ? $settings['cue_icon'] : 'diagonal';
 		$side  = isset( $settings['cue_side'] ) && 'left' === $settings['cue_side'] ? 'left' : 'right';
 		$bar   = ! isset( $settings['progress'] ) || 'yes' === $settings['progress'];
+		$tally = ! isset( $settings['counter'] ) || 'yes' === $settings['counter'];
+		$bleed = ! isset( $settings['bleed'] ) || 'yes' === $settings['bleed'];
 
 		$tag = isset( $settings['title_tag'] ) ? $settings['title_tag'] : 'h3';
 		$tag = in_array( $tag, array( 'h2', 'h3', 'h4', 'h5', 'div', 'span' ), true ) ? $tag : 'h3';
@@ -906,6 +981,7 @@ class Scroll_Rail_Widget extends Widget_Base {
 			data-erail-pause-in="<?php echo esc_attr( (string) $pauseIn ); ?>"
 			data-erail-pause-out="<?php echo esc_attr( (string) $pauseOut ); ?>"
 			data-erail-pin="<?php echo esc_attr( $pin ); ?>"
+			<?php echo $bleed ? ' data-erail-bleed' : ''; ?>
 			data-erail-centre="<?php echo esc_attr( $centre ); ?>"
 			data-erail-start="<?php echo esc_attr( (string) $start ); ?>"
 			data-erail-finish="<?php echo esc_attr( (string) $finish ); ?>"
@@ -967,8 +1043,24 @@ class Scroll_Rail_Widget extends Widget_Base {
 					</div>
 				</div>
 
-				<?php if ( $bar ) : ?>
-					<div class="erail__progress" aria-hidden="true"><span></span></div>
+				<?php if ( $bar || $tally ) : ?>
+					<div class="erail__foot">
+						<?php if ( $bar ) : ?>
+							<div class="erail__progress" aria-hidden="true"><span></span></div>
+						<?php endif; ?>
+
+						<?php if ( $tally ) : ?>
+							<?php
+							/*
+							 * aria-hidden because it changes as you swipe, and a
+							 * screen reader announcing a new number on every
+							 * frame of a flick is noise. The cards themselves
+							 * are the content.
+							 */
+							?>
+							<p class="erail__count" aria-hidden="true"><b>1</b> / <?php echo esc_html( (string) count( $cards ) ); ?></p>
+						<?php endif; ?>
+					</div>
 				<?php endif; ?>
 			</div>
 		</div>

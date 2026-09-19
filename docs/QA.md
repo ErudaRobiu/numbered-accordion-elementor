@@ -410,8 +410,20 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
 
 ### Everything else
 
-- [ ] Below 1024px nothing pins: the row is a plain swipeable strip with snap
-      points and no progress bar
+- [ ] Below 1024px nothing pins: the row is a swipeable strip with snap points
+- [ ] **On a phone the row runs edge to edge and the first card lines up with
+      the heading above it.** Set "Gutter on a phone" to match your section's
+      padding
+- [ ] The next card peeks off the screen edge rather than being cut off at the
+      section padding
+- [ ] Swiping snaps each card to that gutter, not to the middle of the screen
+- [ ] The progress bar and the count are both visible on a phone, both start
+      from the same gutter as the cards, and both move as you swipe
+- [ ] The count reads the card you are actually looking at
+- [ ] **Nothing makes the page scroll sideways.** Check on a real phone, not
+      just a narrow window
+- [ ] Turning "Edge to edge on a phone" off boxes the row back inside the
+      section padding, and still does not overflow
 - [ ] With Reduce Motion on, the same. No pinning, no hover transitions, and
       the cue is simply always visible
 - [ ] With JavaScript disabled the row is still a usable horizontal scroller
@@ -419,36 +431,6 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
       no leftover height or transform
 - [ ] Editing a card in the editor re-renders it and the rail still works
 - [ ] Two Scroll Rails on one page travel independently
-
-## Spin Badge
-
-`node tests/browser/badge-probe.js` measures the turning, the spin-down, the
-ring fit and the reduced-motion case, against `tests/browser/badge.html`.
-
-- [ ] **Spin Badge is in the panel.** Search for it and add it
-- [ ] It turns on its own, slowly, without being scrolled to
-- [ ] **Hovering slows it to a stop rather than stopping it dead**, and the
-      badge lifts. Taking the pointer away starts it again
-- [ ] "Takes this long to stop" lengthens and shortens that
-- [ ] The ring text meets itself exactly once around, with no overlap and no
-      gap. Try one, two and three times round, and a very long phrase
-- [ ] Change the badge size from small to large: the text stays sharp and
-      keeps its proportions. **Nothing should ever look soft** — if it does,
-      something is scaling a bitmap
-- [ ] Pick a webfont in the typography control: the ring re-fits once it loads
-- [ ] "Distance from the middle" and "Starts at" move the ring in and around
-- [ ] With no icon chosen the drawn arrow is used; choosing one from the
-      library replaces it and the line-weight control disappears
-- [ ] On a touch screen, tapping slows it and it starts again on release
-      rather than staying stopped
-- [ ] Tab to it: it takes focus, shows a ring, slows and lifts the same way
-- [ ] A screen reader reads the spoken label once, not the ring text several
-      times over
-- [ ] Two badges on one page turn independently and neither takes the other's
-      text (they must not share a path id)
-- [ ] With Reduce Motion on it does not turn at all, and is still a link
-- [ ] With JavaScript disabled it still turns, from the stylesheet, and simply
-      does not slow down
 
 ## Eruda Spin (on an existing widget)
 
