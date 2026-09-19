@@ -501,6 +501,37 @@ shoulders is more than a 310px edge has, so the desktop numbers leave the band
 clamped flat against both corners with nowhere to go. Depth and length have
 their own controls for a phone, defaulting to 18px and 90px.
 
+**And its own clock.** The stacked notch was scrubbed by the reading band along
+with the text, and the reading band is deliberately *finished* while an item is
+still well on screen — words that light as they leave are words nobody reads.
+Right for a sentence, wrong for a detail travelling along an edge: the notch
+arrived at the far end halfway up the screen and then sat there for the rest of
+the picture's crossing, which reads as broken rather than as finished.
+
+It is driven by the picture's own pass now — nought the moment its top edge
+appears at the bottom of the window, one the moment its bottom edge leaves at
+the top — so it is moving for every pixel of scroll in which any of it can be
+seen and for none in which it cannot. Both readings come from one rect, taken
+in the scroll pass and handed to each, so this costs no more layout reads than
+scrubbing it by the band did.
+
+How far it actually travels is geometry, not a setting, and it is worth knowing
+which way the settings push it. The band keeps a shoulder's worth of straight
+edge clear of each corner, so what is left over after the run, the two
+transitions and that reserve is the whole of the travel. Measured on a 390px
+screen:
+
+| Corner radius | Notch length | Picture | Travel |
+| --- | --- | --- | --- |
+| 16px | 90px | 390px | 139px |
+| 16px | 60px | 310px | 97px |
+| 16px | 90px | 310px | 68px |
+| 44px | 90px | 310px | 31px |
+
+A generous corner radius costs travel twice over, and a long band costs it
+directly. If the movement looks slight, those two are the levers — not "Notch
+travel", which is a ceiling on the distance rather than a floor.
+
 **And the panel's edge comes with them too.** Wide, the border belongs to the
 frame; stacked, the frame is empty and hidden, so without this a phone quietly
 loses the outline the section has everywhere else. Which of the two ways a

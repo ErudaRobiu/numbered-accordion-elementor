@@ -279,12 +279,14 @@
 	 * crosses the upper one, so a tall item takes proportionally longer to
 	 * light than a short one and both finish while fully on screen.
 	 *
-	 * @param {Element} item Item.
-	 * @param {number}  lead Lower line, as a fraction of the viewport.
-	 * @param {number}  tail Upper line, as a fraction of the viewport.
+	 * @param {Element} item      Item.
+	 * @param {number}  lead      Lower line, as a fraction of the viewport.
+	 * @param {number}  tail      Upper line, as a fraction of the viewport.
+	 * @param {?Object} slideRect The picture's rect when one sits inside the
+	 *                            item, already measured by the caller.
 	 * @return {number}
 	 */
-	function progressOf( item, lead, tail, slide ) {
+	function progressOf( item, lead, tail, slideRect ) {
 		var height = viewportHeight();
 		var rect = item.getBoundingClientRect();
 
@@ -298,7 +300,7 @@
 		 * before, and the sweep would simply be late. The picture is the
 		 * bottom of the item, so the text ends where it begins.
 		 */
-		var words = slide ? slide.getBoundingClientRect().top - rect.top : rect.height;
+		var words = slideRect ? slideRect.top - rect.top : rect.height;
 		var travel = words + height * ( lead - tail );
 
 		if ( travel <= 0 ) {
@@ -306,6 +308,35 @@
 		}
 
 		return clamp01( ( height * lead - rect.top ) / travel );
+	}
+
+	/**
+	 * How far a picture has crossed the screen, 0 to 1.
+	 *
+	 * Nought the moment its top edge appears at the bottom of the window, one
+	 * the moment its bottom edge leaves at the top, so it is moving for every
+	 * pixel of scroll in which any of it can be seen and for none in which it
+	 * cannot.
+	 *
+	 * This is not the reading band above, and the difference is the point. The
+	 * band is deliberately finished while an item is still well on screen --
+	 * words that light as they leave are words nobody reads -- so anything
+	 * scrubbed by it stops dead partway up and sits there. That is right for a
+	 * sentence and wrong for a detail travelling along an edge, which has
+	 * nothing to say and only has to still be going while you can see it.
+	 *
+	 * @param {Object} rect   The picture's rect.
+	 * @param {number} height Viewport height.
+	 * @return {number}
+	 */
+	function passProgress( rect, height ) {
+		var travel = height + rect.height;
+
+		if ( travel <= 0 ) {
+			return 0;
+		}
+
+		return clamp01( ( height - rect.top ) / travel );
 	}
 
 	/**
@@ -698,7 +729,20 @@
 				if ( notched ) {
 					// After the attribute, so the pictures are laid out as the
 					// stacked rules leave them before anything is measured.
-					window.requestAnimationFrame( buildAcross );
+					window.requestAnimationFrame( function () {
+						buildAcross();
+
+						/*
+						 * And draw them, before anything else gets a frame.
+						 *
+						 * A clip path whose path has no `d` yet clips its
+						 * picture away completely, and the pass that would
+						 * give it one only runs on scroll -- so landing on a
+						 * phone and not scrolling left every stacked picture
+						 * blank until the reader moved.
+						 */
+						update();
+					} );
 				}
 
 				return;
@@ -813,11 +857,17 @@
 
 		function update() {
 			var reached = 0;
+			var height = viewportHeight();
 
 			entries.forEach( function ( entry, i ) {
 				// Only a stacked item has a picture of its own inside it, and
-				// only then does the sweep have to stop short of one.
-				var progress = progressOf( entry.item, lead, tail, stacked ? entry.slide : null );
+				// only then does the sweep have to stop short of one. Measured
+				// once here and handed to both readings below, because a rect
+				// is a layout read and this one is wanted twice.
+				var slideRect = stacked && entry.slide
+					? entry.slide.getBoundingClientRect()
+					: null;
+				var progress = progressOf( entry.item, lead, tail, slideRect );
 
 				if ( ! reduced && entry.chars.length ) {
 					setLit( entry, Math.round( progress * entry.chars.length ) );
@@ -827,13 +877,18 @@
 					reached = i;
 				}
 
-				// The phone's notch travels with the item it belongs to, and
-				// the numbers it needs were all taken when the layout changed.
-				if ( stacked && acrossPaths[ i ] ) {
+				/*
+				 * The phone's notch travels with its own picture's crossing of
+				 * the screen rather than with the reading band, so it is still
+				 * moving when the picture leaves rather than having arrived
+				 * halfway up and stopped. The rest of the numbers it needs
+				 * were all taken when the layout changed.
+				 */
+				if ( stacked && acrossPaths[ i ] && slideRect ) {
 					var one = acrossPaths[ i ];
 					var across = notchPath(
 						one.w, one.h, notch.depthAcross, notch.runAcross,
-						progress, notch.span, notch.radius, true
+						passProgress( slideRect, height ), notch.span, notch.radius, true
 					);
 
 					if ( across !== one.d ) {

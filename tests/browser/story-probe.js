@@ -517,6 +517,85 @@ function check(name, ok, detail) {
     acrossNotch.moved + ' distinct shapes over the section');
 
   /*
+   * And it is still going when the picture leaves.
+   *
+   * The notch used to be scrubbed by the reading band, which is deliberately
+   * finished while an item is still well on screen -- words that light as they
+   * leave are words nobody reads. Right for a sentence, wrong for a detail
+   * travelling along an edge: the notch arrived halfway up the screen and sat
+   * there for the rest of the picture's crossing. It is driven by the
+   * picture's own pass now, so what is measured here is movement in the first
+   * quarter of that pass and in the last.
+   */
+  const wholePass = await page.evaluate(async () => {
+    const slide = document.querySelector('.estry__item .estry__slide');
+    const path = slide.parentNode.querySelector('clipPath path');
+    const max = document.body.scrollHeight - innerHeight;
+
+    // Where the band sits along the edge, from the points that are off the
+    // corners but on one -- read a command at a time, so an arc's radius pair
+    // is not taken for a point.
+    const centre = (d) => {
+      const pts = [];
+      for (const c of (d.trim().match(/[MLAZ][^MLAZ]*/g) || [])) {
+        const n = (c.match(/-?[\d.]+/g) || []).map(Number);
+        if (n.length >= 2) pts.push([n[n.length - 2], n[n.length - 1]]);
+      }
+      const w = Math.max(...pts.map(p => p[0]));
+      const h = Math.max(...pts.map(p => p[1]));
+      const inner = pts.filter(p => p[1] > 0.5 && p[1] < h - 0.5 && p[0] > 0.5 && p[0] < w - 0.5);
+      return inner.reduce((a, p) => a + p[0], 0) / inner.length;
+    };
+
+    /*
+     * Every frame in which any part of the picture can be seen.
+     *
+     * Two frames of wait, not one. The widget throttles its own pass into a
+     * requestAnimationFrame of its own, so a single frame after a scroll reads
+     * the shape from before it -- which put a stale sample at the head of this
+     * list, left over from wherever the previous test finished, and made a
+     * clean 30px climb measure as a 0.2px one.
+     */
+    const seen = [];
+    for (let y = 0; y <= max; y += 20) {
+      window.scrollTo(0, y);
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const r = slide.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < innerHeight) seen.push(centre(path.getAttribute('d')));
+    }
+
+    const q = Math.max(1, Math.floor(seen.length / 4));
+    return {
+      frames: seen.length,
+      first: seen[0],
+      last: seen[seen.length - 1],
+      early: Math.abs(seen[q] - seen[0]),
+      late: Math.abs(seen[seen.length - 1] - seen[seen.length - 1 - q]),
+      still: seen.filter((v, i) => i > 0 && Math.abs(v - seen[i - 1]) < 0.01).length,
+      backwards: seen.filter((v, i) => i > 0 && v < seen[i - 1] - 0.01).length,
+    };
+  });
+
+  check('the notch is still travelling as the picture arrives',
+    wholePass.early > 3,
+    'the band moved ' + wholePass.early.toFixed(1) + 'px across the first quarter of the pass');
+
+  check('and still travelling as it leaves, rather than having stopped midway',
+    wholePass.late > 3,
+    'the band moved ' + wholePass.late.toFixed(1) + 'px across the last quarter of the pass');
+
+  check('it never sits still while the picture is on screen',
+    wholePass.still <= wholePass.frames * 0.1,
+    wholePass.still + ' of ' + wholePass.frames + ' frames unchanged, over a travel of ' +
+      Math.abs(wholePass.last - wholePass.first).toFixed(1) + 'px');
+
+  // One direction, the whole way. A band that went out and came back would
+  // pass all three checks above.
+  check('and it travels one way rather than doubling back',
+    wholePass.backwards <= 1,
+    wholePass.backwards + ' of ' + wholePass.frames + ' frames moved against the travel');
+
+  /*
    * And the edge the panel had comes with it.
    *
    * Wide, the border belongs to the frame; stacked, the frame is empty and

@@ -326,6 +326,13 @@ a real site.
 - [ ] "Notch depth on a phone" and "Notch length on a phone" change it. If the
       notch looks flat against both corners, its length is longer than the
       picture's edge can hold
+- [ ] **It is still moving as the picture leaves the top of the screen**, not
+      parked at the far end. It is driven by the picture's own crossing, so it
+      starts as the picture appears and finishes as it goes
+- [ ] If the travel looks slight, check the corner radius and the notch length
+      before anything else -- both eat the room it has to move in, and a 44px
+      radius on a 310px picture leaves about 31px of travel where a 16px one
+      leaves 68px
 - [ ] Widen the browser again: every picture goes back into the panel, in the
       right order, and the pinning works as before
 - [ ] "Picture shape", "Space above the picture" and the phone item spacing

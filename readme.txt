@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.20.0
+Stable tag: 2.21.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,20 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.21.0 =
+* Scroll Story: on a phone the notch now travels for the whole time its picture
+  is on screen -- starting as the picture appears at the bottom and finishing
+  as it leaves at the top -- instead of arriving at the far end halfway up and
+  sitting there. It was scrubbed by the same reading band as the text, and that
+  band is meant to finish early, because words that light as they leave are
+  words nobody reads.
+* Scroll Story: fixed stacked pictures being clipped away entirely on a phone
+  until the reader scrolled. The notch's shape was only drawn on scroll, and a
+  clip path with no shape yet hides everything inside it.
+* If the phone notch's travel looks slight, the corner radius and "Notch length
+  on a phone" are the two settings that eat it. A 44px radius on a 310px
+  picture leaves about 31px of travel where a 16px one leaves 68px.
 
 = 2.20.0 =
 * Scroll Rail: the two ends of the row now fade instead of stopping at a hard
