@@ -71,16 +71,17 @@
 		var grab = readNumber( root, 'data-ehdr-grab', 60 );
 
 		/*
-		 * When the full-width bar is allowed back.
+		 * Which direction folds the bar.
 		 *
-		 *   'top' -- only at the top of the page. Once it has compacted it
-		 *            stays compact until you are back where you started, which
-		 *            is the steadier of the two: the bar is one thing while you
-		 *            are reading and another when you are not.
-		 *   'up'  -- the moment you scroll up, wherever you are. What the
-		 *            reference does.
+		 *   'up'   -- the folded bar appears when you scroll back towards the
+		 *             top, and the full-width one is what you see on the way
+		 *             down. Reading gets the plain header; going back for the
+		 *             menu is what summons the compact one.
+		 *   'down' -- the other way round, which is what the reference does.
+		 *
+		 * Either way the very top of the page is always the full-width state.
 		 */
-		var returnAt = root.getAttribute( 'data-ehdr-return' ) === 'up' ? 'up' : 'top';
+		var foldWhen = root.getAttribute( 'data-ehdr-fold' ) === 'down' ? 'down' : 'up';
 		var reduced = prefersReducedMotion();
 
 		// A panel that opens on a delay must not open after the pointer has
@@ -343,10 +344,18 @@
 
 		/* -------------------------------------------------------- drawer --- */
 
+		/*
+		 * 1199 and not 1024.
+		 *
+		 * A six-item menu, a logo and a button do not fit across a 1025px
+		 * window whatever the padding does -- the row overflowed its own bar
+		 * and the button hung off the end. The drawer is the right layout for
+		 * that band, so the breakpoint sits above it.
+		 */
 		function isNarrow() {
 			return (
 				typeof window.matchMedia === 'function' &&
-				window.matchMedia( '(max-width: 1024px)' ).matches
+				window.matchMedia( '(max-width: 1199px)' ).matches
 			);
 		}
 
@@ -420,6 +429,7 @@
 		var stuck = null;
 		var lastY = window.pageYOffset || document.documentElement.scrollTop || 0;
 		var travel = 0;
+		var compactWidth = 0;
 
 		function onScroll() {
 			var y = window.pageYOffset || document.documentElement.scrollTop || 0;
@@ -435,14 +445,37 @@
 			travel += delta;
 
 			var now = stuck;
+			var goingDown = travel > grab;
+			var goingUp = travel < -grab;
 
 			if ( y <= stickAt ) {
 				// The top of the page is always the full-width state, whatever
 				// the last gesture was.
 				now = false;
-			} else if ( travel > grab ) {
+			} else if ( 'up' === foldWhen ) {
+				if ( goingUp ) {
+					now = true;
+				} else if ( goingDown ) {
+					now = false;
+				}
+			} else if ( goingDown ) {
 				now = true;
-			} else if ( travel < -grab && 'up' === returnAt ) {
+			} else if ( goingUp ) {
+				now = false;
+			}
+
+			/*
+			 * And never fold into something that does not fit.
+			 *
+			 * The folded bar is as wide as its own contents plus the clearance
+			 * it keeps either side, and on a narrow window that is wider than
+			 * the window. Folding anyway clamped the bar and left the row at
+			 * its full size, so the button hung out past the rounded edge --
+			 * which is exactly what it looked like between about 1025 and
+			 * 1150px. Staying full width is the honest answer: the menu still
+			 * fits there, it just cannot be a floating bar as well.
+			 */
+			if ( now && compactWidth > 0 && compactWidth > window.innerWidth ) {
 				now = false;
 			}
 
@@ -497,16 +530,32 @@
 			// the last letter of the last menu item.
 			var width = Math.ceil( bar.getBoundingClientRect().width );
 
+			// The clearance it is asked to keep either side, which is part of
+			// what the folded bar needs rather than something it can eat into.
+			var inset = parseFloat(
+				window.getComputedStyle( root ).getPropertyValue( '--ehdr-stuck-inset' )
+			);
+
 			root.classList.remove( 'is-measuring' );
 
-			return width;
+			return width + ( isNaN( inset ) ? 32 : inset ) * 2;
 		}
 
 		function measure() {
 			var compact = measureCompact();
 
+			compactWidth = compact;
+
 			if ( compact > 0 ) {
-				root.style.setProperty( '--ehdr-stuck-width-px', compact + 'px' );
+				// The property is the bar's own width, so the clearance that
+				// measureCompact() added for the fit test comes back off.
+				var inset = parseFloat(
+					window.getComputedStyle( root ).getPropertyValue( '--ehdr-stuck-inset' )
+				);
+
+				inset = isNaN( inset ) ? 32 : inset;
+
+				root.style.setProperty( '--ehdr-stuck-width-px', ( compact - inset * 2 ) + 'px' );
 			}
 
 			var box = bar.getBoundingClientRect();
@@ -545,6 +594,13 @@
 
 		function onResize() {
 			measure();
+
+			// The folded bar may no longer fit, or may fit again.
+			if ( null !== stuck ) {
+				stuck = null;
+				travel = 0;
+				onScroll();
+			}
 
 			// A drawer left open across a resize to desktop is a menu stuck
 			// half way between two layouts.

@@ -58,8 +58,12 @@ function check(name, ok, detail) {
     clear(rest.border) && rest.shadow === 'none',
     'border ' + rest.border + ', shadow ' + rest.shadow);
 
-  await page.evaluate(() => window.scrollTo(0, 900));
+  // Folding happens on the way back up now, so get down the page first and
+  // then come up: a single jump down is the full-width state by design.
+  await page.evaluate(() => window.scrollTo(0, 1800));
   await sleep(700);
+  await page.evaluate(() => window.scrollTo(0, 1200));
+  await sleep(800);
   const stuck = await bar();
 
   check('scrolling away from the top frosts it',
@@ -112,7 +116,7 @@ function check(name, ok, detail) {
   const direction = await page.evaluate(async () => {
     const bar = document.querySelector('.ehdr__bar');
     const w = () => Math.round(bar.getBoundingClientRect().width);
-    const settle = () => new Promise(r => setTimeout(r, 700));
+    const settle = () => new Promise(r => setTimeout(r, 800));
 
     for (let y = 900; y <= 1800; y += 150) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 90)); }
     await settle();
@@ -129,17 +133,25 @@ function check(name, ok, detail) {
    * settings: once compacted the bar stays compact until you are back where
    * you started, rather than changing every time the wheel is nudged.
    */
-  check('scrolling up mid-page leaves it compact when it is set to return at the top',
-    direction.down < direction.full - 40 && direction.up === direction.down,
-    'at y=' + direction.at + ': ' + direction.down + 'px going down, ' +
-      direction.up + 'px going up');
+  /*
+   * The folded bar belongs to the way back up. Reading down the page gets the
+   * plain full-width header; turning round to go back -- which is what you do
+   * when you want the menu -- is what summons the folded one.
+   */
+  check('scrolling down keeps the plain full-width header',
+    direction.down === direction.full,
+    direction.down + 'px of ' + direction.full + ' at y=' + 1800);
+
+  check('and scrolling back up folds it',
+    direction.up < direction.full - 40,
+    direction.up + 'px at y=' + direction.at);
 
   const backAtTop = await page.evaluate(async () => {
     window.scrollTo(0, 0);
     await new Promise(r => setTimeout(r, 900));
     return Math.round(document.querySelector('.ehdr__bar').getBoundingClientRect().width);
   });
-  check('and returns to full width once you are back at the top',
+  check('the very top is always full width',
     backAtTop === direction.full,
     backAtTop + 'px of ' + direction.full);
 
@@ -159,9 +171,10 @@ function check(name, ok, detail) {
     let stop = false;
     const tick = () => { rows.push(bar.getBoundingClientRect().width); if (!stop) requestAnimationFrame(tick); };
     requestAnimationFrame(tick);
-    await new Promise(r => setTimeout(r, 80));
+    window.scrollTo(0, 1400);
+    await new Promise(r => setTimeout(r, 700));
     window.scrollTo(0, 700);
-    await new Promise(r => setTimeout(r, 1200));
+    await new Promise(r => setTimeout(r, 1300));
     stop = true;
     const u = [];
     rows.forEach(v => { if (!u.length || Math.abs(u[u.length - 1] - v) > 0.5) u.push(v); });
@@ -176,8 +189,10 @@ function check(name, ok, detail) {
 
   await page.evaluate(() => window.scrollTo(0, 0));
   await sleep(700);
-  await page.evaluate(() => window.scrollTo(0, 900));
-  await sleep(700);
+  await page.evaluate(() => window.scrollTo(0, 1800));
+  await sleep(500);
+  await page.evaluate(() => window.scrollTo(0, 1200));
+  await sleep(800);
 
   check('the frost is transitioned rather than snapping',
     /background-color/.test(eased.props) && /backdrop-filter/.test(eased.props) &&

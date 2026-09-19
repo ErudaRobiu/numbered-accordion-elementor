@@ -406,15 +406,15 @@ class Mega_Header_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
-			'return_at',
+			'fold_when',
 			array(
-				'label'       => esc_html__( 'Goes back to full width', 'numbered-accordion' ),
-				'description' => esc_html__( 'Once it has compacted, when is the full-width bar allowed back. Only at the top is the steadier of the two: the bar is one thing while you are reading and another when you are not, rather than changing every time you nudge the wheel.', 'numbered-accordion' ),
+				'label'       => esc_html__( 'The folded bar appears', 'numbered-accordion' ),
+				'description' => esc_html__( 'Scrolling up is the one to have: reading down the page gets the plain full-width header, and going back up -- which is what you do when you want the menu -- is what summons the folded one. The top of the page is always full width either way.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SELECT,
-				'default'     => 'top',
+				'default'     => 'up',
 				'options'     => array(
-					'top' => esc_html__( 'Only at the top of the page', 'numbered-accordion' ),
-					'up'  => esc_html__( 'Whenever you scroll up', 'numbered-accordion' ),
+					'up'   => esc_html__( 'When scrolling back up', 'numbered-accordion' ),
+					'down' => esc_html__( 'When scrolling down', 'numbered-accordion' ),
 				),
 				'condition'   => array( 'fill_mode!' => 'none' ),
 			)
@@ -555,7 +555,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'stuck_gap',
 			array(
 				'label'      => esc_html__( 'Gap from the top', 'numbered-accordion' ),
@@ -581,7 +581,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'stuck_width',
 			array(
 				'label'      => esc_html__( 'How much of the window', 'numbered-accordion' ),
@@ -594,7 +594,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'stuck_inset',
 			array(
 				'label'       => esc_html__( 'Keep clear of the edges', 'numbered-accordion' ),
@@ -608,7 +608,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'pad_x_stuck',
 			array(
 				'label'      => esc_html__( 'Side padding once frosted', 'numbered-accordion' ),
@@ -629,7 +629,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'border_width',
 			array(
 				'label'       => esc_html__( 'Width', 'numbered-accordion' ),
@@ -642,7 +642,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'border_bottom_width',
 			array(
 				'label'       => esc_html__( 'Bottom only', 'numbered-accordion' ),
@@ -655,7 +655,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'bar_radius',
 			array(
 				'label'      => esc_html__( 'Corner radius once frosted', 'numbered-accordion' ),
@@ -667,7 +667,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'logo_height',
 			array(
 				'label'      => esc_html__( 'Logo height', 'numbered-accordion' ),
@@ -679,7 +679,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'logo_height_stuck',
 			array(
 				'label'       => esc_html__( 'Logo height once frosted', 'numbered-accordion' ),
@@ -898,7 +898,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'panel_pad',
 			array(
 				'label'      => esc_html__( 'Padding', 'numbered-accordion' ),
@@ -910,7 +910,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'panel_gap',
 			array(
 				'label'      => esc_html__( 'Space between columns', 'numbered-accordion' ),
@@ -1143,7 +1143,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'cta_radius',
 			array(
 				'label'      => esc_html__( 'Corner radius', 'numbered-accordion' ),
@@ -1155,7 +1155,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'cta_pad_y',
 			array(
 				'label'      => esc_html__( 'Padding, top and bottom', 'numbered-accordion' ),
@@ -1167,7 +1167,7 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'cta_pad_x',
 			array(
 				'label'      => esc_html__( 'Padding, left and right', 'numbered-accordion' ),
@@ -1495,7 +1495,7 @@ class Mega_Header_Widget extends Widget_Base {
 
 		$grab = $this->slider( $settings, 'grab', 60, 10, 400 );
 
-		$returnAt = isset( $settings['return_at'] ) && 'up' === $settings['return_at'] ? 'up' : 'top';
+		$foldWhen = isset( $settings['fold_when'] ) && 'down' === $settings['fold_when'] ? 'down' : 'up';
 		$step = $this->slider( $settings, 'scramble_step', 45, 15, 140 );
 
 		$ctaFill = isset( $settings['cta_fill'] ) && 'solid' === $settings['cta_fill'] ? 'solid' : 'gradient';
@@ -1514,7 +1514,7 @@ class Mega_Header_Widget extends Widget_Base {
 			data-ehdr-intent="<?php echo esc_attr( (string) $intent ); ?>"
 			data-ehdr-stick-at="<?php echo esc_attr( (string) $stickAt ); ?>"
 			data-ehdr-grab="<?php echo esc_attr( (string) $grab ); ?>"
-			data-ehdr-return="<?php echo esc_attr( $returnAt ); ?>"
+			data-ehdr-fold="<?php echo esc_attr( $foldWhen ); ?>"
 			data-ehdr-scramble-step="<?php echo esc_attr( (string) $step ); ?>"
 			<?php echo '' !== $preview ? ' data-ehdr-preview="' . esc_attr( $preview ) . '"' : ''; ?>
 		>

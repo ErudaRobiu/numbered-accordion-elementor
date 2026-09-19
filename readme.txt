@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.26.0
+Stable tag: 2.27.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,31 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.27.0 =
+* The menu colour now actually applies. Two attempts at winning on specificity
+  were not enough -- plenty of themes write their link colour with !important,
+  which nothing but !important beats. The colour declarations carry it now, on
+  `var(--ehdr-ink)` rather than on a fixed colour, so the value is still
+  entirely yours; it only stops the theme overriding it.
+* **The folded bar now appears when you scroll back up**, and reading down the
+  page gets the plain full-width header. That is the way round it was wanted:
+  going back up is what you do when you want the menu. "When scrolling down"
+  is still there as a setting.
+* Fixed the button hanging out past the rounded edge between roughly 1025 and
+  1150px. The folded bar is as wide as its contents plus the clearance it
+  keeps, and it no longer folds into a space that cannot hold it.
+* The drawer's breakpoint moves from 1024 to 1199. A six-item menu, a logo and
+  a button do not fit across a 1025px window whatever the padding does, so
+  that band gets the drawer, which is the right layout for it.
+* Side padding and both gaps now give way on a narrow window instead of
+  pushing the row wider than the screen. On a roomy one they are exactly the
+  numbers you set.
+* Fifteen settings are now per-device, so Tablet and Mobile can differ: the
+  gap from the top, how wide it folds to, edge clearance, both paddings,
+  corner radius, both border widths, logo heights, item spacing, and the
+  button's radius and padding. The phone rules were rewritten to read the same
+  properties, so a value set on Tablet or Mobile is no longer ignored.
 
 = 2.26.0 =
 * Fixed the menu text ignoring the colour you picked. Themes and Elementor kits
