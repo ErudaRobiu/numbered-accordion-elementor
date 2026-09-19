@@ -332,7 +332,11 @@
  * panel hangs off it: the panel is a separate box and the two would meet at a
  * rounded edge with a straight one under it.
  */
-.ehdr[data-ehdr-open] .ehdr__bar {
+/*
+ * Flattened only where the two actually meet. With a gap under the bar they
+ * are two separate cards and both keep their corners.
+ */
+.ehdr[data-ehdr-open]:not([data-ehdr-detached]) .ehdr__bar {
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
 }
@@ -768,12 +772,25 @@
 .ehdr__panel {
 	position: absolute;
 	top: 100%;
-	left: 0;
-	right: 0;
+	left: var(--ehdr-panel-inset, 0px);
+	right: var(--ehdr-panel-inset, 0px);
 	z-index: 2;
 	overflow: hidden;
 	padding: 0;
+	/*
+	 * The gap under the bar is a transparent top border, not an offset.
+	 *
+	 * Moving the panel down with `top` opens a dead strip between the bar and
+	 * the panel: the pointer crosses it on the way down, the item stops being
+	 * hovered, and the panel you were reaching for closes under your hand. A
+	 * transparent border keeps the panel's box touching the bar -- so hover
+	 * never breaks -- while `background-clip: padding-box` keeps the fill, and
+	 * with it the visible edge, below the gap.
+	 */
+	border-top: var(--ehdr-panel-gap-top, 0px) solid transparent;
+	border-radius: var(--ehdr-panel-radius, 0px);
 	background: var(--ehdr-sheet, #ffffff);
+	background-clip: padding-box;
 	border-bottom: 1px solid var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
 	box-shadow: var(--ehdr-panel-shadow, 0 24px 48px -24px rgba(15, 56, 96, 0.45));
 	opacity: 0;
@@ -1113,7 +1130,21 @@
 			visibility 0s linear var(--ehdr-panel-ms, 280ms);
 	}
 
+	.ehdr .ehdr__nav {
+		border-radius: var(--ehdr-panel-radius, 0px);
+		background-clip: padding-box;
+		left: var(--ehdr-panel-inset, 0px);
+		right: var(--ehdr-panel-inset, 0px);
+	}
+
+	/*
+	 * The gap belongs to the open drawer only. Carried on the closed one it is
+	 * a transparent border with nothing behind it, and a shut drawer that is
+	 * eleven pixels tall leaves a sliver hanging under the bar at all times --
+	 * the same trap the padding sprang earlier.
+	 */
 	.ehdr[data-ehdr-drawer] .ehdr__nav {
+		border-top: var(--ehdr-panel-gap-top, 0px) solid transparent;
 		grid-template-rows: 1fr;
 		border-bottom-color: var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
 		visibility: visible;

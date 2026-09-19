@@ -364,8 +364,36 @@ function check(name, ok, detail) {
     'panel ' + open.panelLeft + '..' + (open.panelLeft + open.panelWidth) +
       ' against a bar of ' + open.barLeft + '..' + (open.barLeft + open.barWidth));
 
-  check('and it hangs directly off the bottom of the bar',
-    Math.abs(open.panelTop - open.barBottom) <= 1,
+  /*
+   * Detached, but never disconnected.
+   *
+   * The gap is a transparent top border rather than an offset, so the panel's
+   * box still touches the bar: move the pointer down into the panel and the
+   * item never stops being hovered. Offsetting it with `top` opens a dead
+   * strip and the panel closes under your hand on the way to it.
+   */
+  const detached = await page.evaluate(() => {
+    const bar = document.querySelector('.ehdr__bar').getBoundingClientRect();
+    const panel = [...document.querySelectorAll('.ehdr__panel')]
+      .find(x => getComputedStyle(x).visibility === 'visible');
+    const cs = getComputedStyle(panel);
+    const r = panel.getBoundingClientRect();
+    return { barBottom: Math.round(bar.bottom), boxTop: Math.round(r.top),
+      fillTop: Math.round(r.top + parseFloat(cs.borderTopWidth)),
+      radius: parseFloat(cs.borderRadius), clip: cs.backgroundClip };
+  });
+  check('the panel sits off the bar with a gap, and keeps its corners',
+    detached.fillTop - detached.barBottom >= 8 && detached.radius > 0 &&
+      detached.clip === 'padding-box',
+    (detached.fillTop - detached.barBottom) + 'px gap, ' + detached.radius +
+      'px radius, clipped to the ' + detached.clip);
+
+  check('but its box still touches the bar, so the hover never breaks',
+    Math.abs(detached.boxTop - detached.barBottom) <= 2,
+    'panel box starts at ' + detached.boxTop + ', bar ends at ' + detached.barBottom);
+
+  check('and it hangs off the bottom of the bar rather than floating loose',
+    Math.abs(open.panelTop - open.barBottom) <= 2,
     'panel top ' + open.panelTop + ', bar bottom ' + open.barBottom);
 
   check('the trigger says it is expanded, and only that one does',

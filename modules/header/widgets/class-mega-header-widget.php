@@ -900,6 +900,44 @@ class Mega_Header_Widget extends Widget_Base {
 		);
 
 		$this->add_responsive_control(
+			'panel_gap_top',
+			array(
+				'label'       => esc_html__( 'Gap below the bar', 'numbered-accordion' ),
+				'description' => esc_html__( 'Detaches the panel from the bar so the two read as separate cards. The gap stays hoverable, so nothing closes under your hand on the way down to it. On a phone this spaces the drawer the same way.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px', 'em', 'rem' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 48 ), 'em' => array( 'min' => 0, 'max' => 4, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 4, 'step' => 0.1 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 10 ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-gap-top: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'panel_radius',
+			array(
+				'label'      => esc_html__( 'Corner radius', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 48 ), 'em' => array( 'min' => 0, 'max' => 4, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 4, 'step' => 0.1 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 16 ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'panel_inset',
+			array(
+				'label'       => esc_html__( 'Inset from the sides', 'numbered-accordion' ),
+				'description' => esc_html__( 'Nought makes the panel as wide as the bar. Anything more pulls it in from both edges.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px', '%', 'em', 'rem' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 200 ), '%' => array( 'min' => 0, 'max' => 40 ), 'em' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ), 'rem' => array( 'min' => 0, 'max' => 10, 'step' => 0.1 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 0 ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-inset: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
 			'panel_pad',
 			array(
 				'label'      => esc_html__( 'Padding', 'numbered-accordion' ),
@@ -1507,6 +1545,10 @@ class Mega_Header_Widget extends Widget_Base {
 		// in the panel. The control says to put it back.
 		$preview = isset( $settings['preview_state'] ) ? $settings['preview_state'] : '';
 		$preview = in_array( $preview, array( 'stuck', 'open' ), true ) ? $preview : '';
+
+		// A gap under the panel makes the two separate cards, and the bar
+		// keeps its own bottom corners.
+		$detached = $this->slider( $settings, 'panel_gap_top', 10, 0, 400 ) > 0;
 		?>
 		<div
 			class="ehdr"
@@ -1517,6 +1559,7 @@ class Mega_Header_Widget extends Widget_Base {
 			data-ehdr-stick-at="<?php echo esc_attr( (string) $stickAt ); ?>"
 			data-ehdr-grab="<?php echo esc_attr( (string) $grab ); ?>"
 			data-ehdr-scroll="<?php echo esc_attr( $scrollMode ); ?>"
+			<?php echo $detached ? ' data-ehdr-detached' : ''; ?>
 			data-ehdr-scramble-step="<?php echo esc_attr( (string) $step ); ?>"
 			<?php echo '' !== $preview ? ' data-ehdr-preview="' . esc_attr( $preview ) . '"' : ''; ?>
 		>

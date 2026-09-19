@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.29.0
+Stable tag: 2.30.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,18 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.30.0 =
+* The dropdown now sits off the bar as a card of its own, with three new
+  per-device settings: **Gap below the bar**, **Corner radius** and **Inset
+  from the sides**. Set them differently on Desktop, Tablet and Mobile.
+* The gap is a transparent border rather than an offset, so the panel's box
+  still touches the bar -- move the pointer down into it and nothing closes
+  under your hand on the way.
+* The phone drawer takes the same three settings, so it can be spaced and
+  rounded to match.
+* With a gap set, the bar keeps its own bottom corners instead of squaring
+  them off against a panel that is no longer touching it.
 
 = 2.29.0 =
 * **You no longer watch the header fold.** It leaves at full width and folds

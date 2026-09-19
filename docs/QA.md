@@ -485,6 +485,13 @@ script-blocked fallback, against `tests/browser/header.html`.
       off screen
 - [ ] Hover a dropdown on the folded bar: the bar must not resize under the
       panel. The two moving at once is what judders
+- [ ] **The panel sits off the bar with a gap and keeps its corners rounded.**
+      Move the pointer slowly from the menu item down into the panel -- it must
+      not close on the way across the gap
+- [ ] "Gap below the bar", "Corner radius" and "Inset from the sides" all work,
+      and can be set differently on Tablet and Mobile
+- [ ] The phone drawer is spaced and rounded the same way, and is completely
+      flat when shut
 - [ ] "Goes back to full width" set to **Only at the top** keeps it compact
       while you scroll up mid-page, and restores it when you reach the top.
       Set to **Whenever you scroll up** it comes back on any upward scroll
