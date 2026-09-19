@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.22.0
+Stable tag: 2.23.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,32 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.23.0 =
+* Mega Header now follows the reference's geometry exactly, measured at three
+  window widths: full bleed at the top of the page, 80% of the window and 16px
+  down once you scroll, and **back to full bleed the moment a panel opens**, so
+  the bar and the panel become one sheet. That last move was missing.
+* Content width setting, defaulting to 1440px. The bar still runs the full
+  width of the window -- the frost has to -- but what sits inside it is capped
+  and centred.
+* Fixed the button ignoring its colour. Elementor's background group control
+  writes the colour and the gradient as two separate declarations, so a flat
+  colour was being written underneath a gradient that was still on top of it.
+  Fill is now Gradient or Solid, and Solid genuinely clears the gradient.
+* Fixed the button's text taking the theme's link colour instead of white.
+* The button is properly customisable: fill, gradient ends and angle, text
+  colour, both hover colours, border width and colour, radius, padding,
+  typography, letter spacing, and both shadows.
+* A border on the bar: width all round, bottom-only width, and a corner radius
+  for when it floats. The width is always reserved and only its colour arrives
+  with the frost, so nothing shifts by a pixel.
+* Menu items animate. The label rolls over itself on hover -- whole word, or
+  letter by letter with a stagger -- with a scramble as a third option and
+  plain colour as a fourth.
+* "Preview a state" holds the header frosted, or holds a panel open, so it can
+  be looked at in the editor where you cannot scroll or hover.
+* Fixed the bar showing its button twice on a desktop.
 
 = 2.22.0 =
 * New widget: **Mega Header**. A navigation bar that sits over your hero

@@ -8,7 +8,6 @@
 namespace ErudaToolkit\Modules\Header\Widgets;
 
 use Elementor\Controls_Manager;
-use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Typography;
 use Elementor\Repeater;
 use Elementor\Widget_Base;
@@ -324,6 +323,63 @@ class Mega_Header_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'preview_state',
+			array(
+				'label'       => esc_html__( 'Preview a state', 'numbered-accordion' ),
+				'description' => esc_html__( 'Holds the header in one state so you can see it without scrolling or hovering. It applies on the live page too, so put it back to Normal when you have finished looking.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => '',
+				'options'     => array(
+					''      => esc_html__( 'Normal — reacts to scrolling', 'numbered-accordion' ),
+					'stuck' => esc_html__( 'Hold it frosted', 'numbered-accordion' ),
+					'open'  => esc_html__( 'Hold a panel open', 'numbered-accordion' ),
+				),
+			)
+		);
+
+		$this->add_control(
+			'menu_anim',
+			array(
+				'label'       => esc_html__( 'Menu item animation', 'numbered-accordion' ),
+				'description' => esc_html__( 'The roll is two copies of the word stacked in a box that clips: one slides out as the other arrives.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'roll',
+				'options'     => array(
+					'roll'     => esc_html__( 'Roll the whole word', 'numbered-accordion' ),
+					'letters'  => esc_html__( 'Roll letter by letter', 'numbered-accordion' ),
+					'scramble' => esc_html__( 'Scramble the letters', 'numbered-accordion' ),
+					'none'     => esc_html__( 'Just change colour', 'numbered-accordion' ),
+				),
+			)
+		);
+
+		$this->add_control(
+			'roll_ms',
+			array(
+				'label'      => esc_html__( 'How fast it rolls', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'ms' ),
+				'range'      => array( 'ms' => array( 'min' => 80, 'max' => 900 ) ),
+				'default'    => array( 'unit' => 'ms', 'size' => 340 ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-roll-ms: {{SIZE}}ms;' ),
+				'condition'  => array( 'menu_anim!' => array( 'none' ) ),
+			)
+		);
+
+		$this->add_control(
+			'roll_step',
+			array(
+				'label'      => esc_html__( 'Delay between letters', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'ms' ),
+				'range'      => array( 'ms' => array( 'min' => 0, 'max' => 120 ) ),
+				'default'    => array( 'unit' => 'ms', 'size' => 24 ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-roll-step: {{SIZE}}ms;' ),
+				'condition'  => array( 'menu_anim' => 'letters' ),
+			)
+		);
+
+		$this->add_control(
 			'stick_at',
 			array(
 				'label'       => esc_html__( 'Frosts after', 'numbered-accordion' ),
@@ -422,6 +478,19 @@ class Mega_Header_Widget extends Widget_Base {
 		);
 
 		$this->add_responsive_control(
+			'max_width',
+			array(
+				'label'       => esc_html__( 'Content width', 'numbered-accordion' ),
+				'description' => esc_html__( 'The bar always runs the full width of the window, because the frost has to. This caps what sits inside it, so the logo lines up with the words underneath rather than drifting out to the bezel.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 600, 'max' => 2200 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 1440 ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-max: {{SIZE}}px;' ),
+			)
+		);
+
+		$this->add_responsive_control(
 			'pad_x',
 			array(
 				'label'       => esc_html__( 'Side padding', 'numbered-accordion' ),
@@ -429,8 +498,102 @@ class Mega_Header_Widget extends Widget_Base {
 				'type'        => Controls_Manager::SLIDER,
 				'size_units'  => array( 'px' ),
 				'range'       => array( 'px' => array( 'min' => 0, 'max' => 160 ) ),
-				'default'     => array( 'unit' => 'px', 'size' => 40 ),
+				'default'     => array( 'unit' => 'px', 'size' => 64 ),
 				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-pad-x: {{SIZE}}px; --ehdr-pad-x-mobile: {{SIZE}}px;' ),
+			)
+		);
+
+		$this->add_control(
+			'float_heading',
+			array(
+				'label'       => esc_html__( 'Once it frosts', 'numbered-accordion' ),
+				'description' => esc_html__( 'The bar comes away from the top edge and narrows into a floating bar, then snaps back to full width the moment a panel opens.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::HEADING,
+				'separator'   => 'before',
+			)
+		);
+
+		$this->add_control(
+			'stuck_gap',
+			array(
+				'label'      => esc_html__( 'Gap from the top', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 16 ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-stuck-gap: {{SIZE}}px;' ),
+			)
+		);
+
+		$this->add_control(
+			'stuck_width',
+			array(
+				'label'       => esc_html__( 'How wide it becomes', 'numbered-accordion' ),
+				'description' => esc_html__( 'A share of the window. 100 leaves it full width and only the gap at the top moves.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( '%' ),
+				'range'       => array( '%' => array( 'min' => 40, 'max' => 100 ) ),
+				'default'     => array( 'unit' => '%', 'size' => 80 ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-stuck-width: {{SIZE}}%;' ),
+			)
+		);
+
+		$this->add_control(
+			'pad_x_stuck',
+			array(
+				'label'      => esc_html__( 'Side padding once frosted', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 120 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 16 ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-pad-x-stuck: {{SIZE}}px;' ),
+			)
+		);
+
+		$this->add_control(
+			'border_heading',
+			array(
+				'label'     => esc_html__( 'Border', 'numbered-accordion' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_control(
+			'border_width',
+			array(
+				'label'       => esc_html__( 'Width', 'numbered-accordion' ),
+				'description' => esc_html__( 'On all four sides. The width is always reserved and only its colour arrives with the frost, so nothing shifts by a pixel on the frame it appears.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 8 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 0 ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-bw: {{SIZE}}px;' ),
+			)
+		);
+
+		$this->add_control(
+			'border_bottom_width',
+			array(
+				'label'       => esc_html__( 'Bottom only', 'numbered-accordion' ),
+				'description' => esc_html__( 'The hairline under a full-width bar. Set the width above for a floating one.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 8 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 1 ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-bw-bottom: {{SIZE}}px;' ),
+			)
+		);
+
+		$this->add_control(
+			'bar_radius',
+			array(
+				'label'      => esc_html__( 'Corner radius once frosted', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 0 ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-radius-stuck: {{SIZE}}px;' ),
 			)
 		);
 
@@ -761,19 +924,82 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_group_control(
-			Group_Control_Background::get_type(),
+		/*
+		 * The fill, in parts rather than through a background group control.
+		 *
+		 * The group control was the bug behind "the button colour isn't
+		 * applying": it writes background-color and background-image as two
+		 * separate declarations, so choosing a flat colour wrote a colour
+		 * underneath a gradient that was still sitting on top of it and
+		 * nothing appeared to change. Picking Solid here empties the gradient
+		 * outright.
+		 */
+		$this->add_control(
+			'cta_fill',
 			array(
-				'name'      => 'cta_bg',
-				'types'     => array( 'classic', 'gradient' ),
-				'selector'  => '{{WRAPPER}} .ehdr__cta',
-				'exclude'   => array( 'image' ),
-				'fields_options' => array(
-					'background' => array( 'default' => 'gradient' ),
-					'color'      => array( 'default' => '#00A55D' ),
-					'color_b'    => array( 'default' => '#005465' ),
-					'gradient_angle' => array( 'default' => array( 'unit' => 'deg', 'size' => 90 ) ),
+				'label'   => esc_html__( 'Fill', 'numbered-accordion' ),
+				'type'    => Controls_Manager::SELECT,
+				'default' => 'gradient',
+				'options' => array(
+					'gradient' => esc_html__( 'Gradient', 'numbered-accordion' ),
+					'solid'    => esc_html__( 'Solid colour', 'numbered-accordion' ),
 				),
+			)
+		);
+
+		$this->add_control(
+			'cta_from',
+			array(
+				'label'     => esc_html__( 'From', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => '#00A55D',
+				'selectors' => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-from: {{VALUE}};' ),
+				'condition' => array( 'cta_fill' => 'gradient' ),
+			)
+		);
+
+		$this->add_control(
+			'cta_to',
+			array(
+				'label'     => esc_html__( 'To', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => '#005465',
+				'selectors' => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-to: {{VALUE}};' ),
+				'condition' => array( 'cta_fill' => 'gradient' ),
+			)
+		);
+
+		$this->add_control(
+			'cta_angle',
+			array(
+				'label'      => esc_html__( 'Angle', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'deg' ),
+				'range'      => array( 'deg' => array( 'min' => 0, 'max' => 360 ) ),
+				'default'    => array( 'unit' => 'deg', 'size' => 90 ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-angle: {{SIZE}}deg;' ),
+				'condition'  => array( 'cta_fill' => 'gradient' ),
+			)
+		);
+
+		$this->add_control(
+			'cta_colour',
+			array(
+				'label'     => esc_html__( 'Colour', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => '#00A55D',
+				'selectors' => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-colour: {{VALUE}};' ),
+				'condition' => array( 'cta_fill' => 'solid' ),
+			)
+		);
+
+		$this->add_control(
+			'cta_colour_hover',
+			array(
+				'label'     => esc_html__( 'Colour on hover', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-colour-hover: {{VALUE}};' ),
+				'condition' => array( 'cta_fill' => 'solid' ),
 			)
 		);
 
@@ -796,6 +1022,15 @@ class Mega_Header_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'cta_ink_hover',
+			array(
+				'label'     => esc_html__( 'Text colour on hover', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-ink-hover: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_control(
 			'cta_track',
 			array(
 				'label'       => esc_html__( 'Letter spacing', 'numbered-accordion' ),
@@ -805,6 +1040,36 @@ class Mega_Header_Widget extends Widget_Base {
 				'range'       => array( 'em' => array( 'min' => -0.05, 'max' => 0.3, 'step' => 0.005 ) ),
 				'default'     => array( 'unit' => 'em', 'size' => 0.05 ),
 				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-track: {{SIZE}}em;' ),
+			)
+		);
+
+		$this->add_control(
+			'cta_border_width',
+			array(
+				'label'      => esc_html__( 'Border width', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 8 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 0 ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-bw: {{SIZE}}px;' ),
+			)
+		);
+
+		$this->add_control(
+			'cta_border',
+			array(
+				'label'     => esc_html__( 'Border colour', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-border: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_control(
+			'cta_border_hover',
+			array(
+				'label'     => esc_html__( 'Border colour on hover', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .ehdr' => '--ehdr-cta-border-hover: {{VALUE}};' ),
 			)
 		);
 
@@ -1046,6 +1311,67 @@ class Mega_Header_Widget extends Widget_Base {
 	}
 
 	/**
+	 * Print a menu label, in whichever animation was chosen.
+	 *
+	 * The roll is two copies of the word stacked inside a box that clips: the
+	 * visible one slides up and out, the one underneath arrives in its place.
+	 * The second copy is aria-hidden so the label is not announced twice.
+	 *
+	 * Per letter, the copies are per character and each carries its index as
+	 * `--i`, which the stylesheet turns into a transition delay so the roll
+	 * travels the way the word is read. There the real label is carried once
+	 * in a visually-hidden span and every character is hidden from assistive
+	 * technology, because a word spelt out one letter per element is read out
+	 * one letter at a time.
+	 *
+	 * @param string $label Label text.
+	 * @param string $anim  none | roll | letters | scramble.
+	 */
+	private function label( $label, $anim ) {
+		if ( 'roll' === $anim ) {
+			printf(
+				'<span class="ehdr__roll"><span>%1$s</span><span aria-hidden="true">%1$s</span></span>',
+				esc_html( $label )
+			);
+
+			return;
+		}
+
+		if ( 'letters' === $anim ) {
+			echo '<span class="ehdr__roll"><span class="ehdr__sr">' . esc_html( $label ) . '</span>';
+
+			// preg_split on an empty pattern with UTF-8: a label is not
+			// guaranteed to be ASCII and str_split would cut a multi-byte
+			// character in half.
+			$chars = preg_split( '//u', $label, -1, PREG_SPLIT_NO_EMPTY );
+			$chars = is_array( $chars ) ? $chars : array();
+
+			foreach ( $chars as $i => $char ) {
+				printf(
+					'<span class="ehdr__roll-c" aria-hidden="true" style="--i:%1$d"><span>%2$s</span><span>%2$s</span></span>',
+					(int) $i,
+					esc_html( $char )
+				);
+			}
+
+			echo '</span>';
+
+			return;
+		}
+
+		if ( 'scramble' === $anim ) {
+			printf(
+				'<span class="ehdr__scramble" data-ehdr-text="%1$s">%1$s</span>',
+				esc_attr( $label )
+			);
+
+			return;
+		}
+
+		echo esc_html( $label );
+	}
+
+	/**
 	 * The caret and the arrow, as inline SVG.
 	 *
 	 * Inline because between them they appear once per menu item and once per
@@ -1093,18 +1419,33 @@ class Mega_Header_Widget extends Widget_Base {
 
 		$ctaText = isset( $settings['cta_text'] ) ? $settings['cta_text'] : '';
 		$ctaLink = isset( $settings['cta_link'] ) ? $settings['cta_link'] : array();
+
+		$anim = isset( $settings['menu_anim'] ) ? $settings['menu_anim'] : 'roll';
+		$anim = in_array( $anim, array( 'none', 'roll', 'letters', 'scramble' ), true ) ? $anim : 'roll';
+
+		$ctaFill = isset( $settings['cta_fill'] ) && 'solid' === $settings['cta_fill'] ? 'solid' : 'gradient';
+
+		// The preview override. Deliberately a real attribute rather than an
+		// editor-only one: it is there to be looked at on the page, not just
+		// in the panel. The control says to put it back.
+		$preview = isset( $settings['preview_state'] ) ? $settings['preview_state'] : '';
+		$preview = in_array( $preview, array( 'stuck', 'open' ), true ) ? $preview : '';
 		?>
 		<div
 			class="ehdr"
 			data-ehdr-fill="<?php echo esc_attr( $mode ); ?>"
+			data-ehdr-anim="<?php echo esc_attr( $anim ); ?>"
+			data-ehdr-cta-fill="<?php echo esc_attr( $ctaFill ); ?>"
 			data-ehdr-intent="<?php echo esc_attr( (string) $intent ); ?>"
 			data-ehdr-stick-at="<?php echo esc_attr( (string) $stickAt ); ?>"
+			<?php echo '' !== $preview ? ' data-ehdr-preview="' . esc_attr( $preview ) . '"' : ''; ?>
 		>
 			<?php if ( $scrim ) : ?>
 				<div class="ehdr__scrim" aria-hidden="true"></div>
 			<?php endif; ?>
 
 			<div class="ehdr__bar">
+			<div class="ehdr__inner">
 				<?php
 				$brand     = isset( $settings['brand_link'] ) ? $settings['brand_link'] : array();
 				$logoUrl   = isset( $settings['logo']['url'] ) ? $settings['logo']['url'] : '';
@@ -1163,7 +1504,7 @@ class Mega_Header_Widget extends Widget_Base {
 						?>
 						<li class="ehdr__item">
 							<a class="ehdr__link"<?php $this->link_attrs( isset( $item['link'] ) ? $item['link'] : array() ); ?>>
-								<?php echo esc_html( $label ); ?>
+								<?php $this->label( $label, $anim ); ?>
 								<?php
 								if ( $hasPanel ) {
 									$this->icon( 'caret' );
@@ -1223,6 +1564,7 @@ class Mega_Header_Widget extends Widget_Base {
 				<?php if ( $cta && '' !== $ctaText ) : ?>
 					<a class="ehdr__cta"<?php $this->link_attrs( $ctaLink ); ?>><?php echo esc_html( $ctaText ); ?></a>
 				<?php endif; ?>
+			</div>
 			</div>
 		</div>
 		<?php if ( $hold ) : ?>

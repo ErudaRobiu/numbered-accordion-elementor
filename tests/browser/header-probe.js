@@ -80,6 +80,16 @@ function check(name, ok, detail) {
     const cs = getComputedStyle(document.querySelector('.ehdr__bar'));
     return { props: cs.transitionProperty, ms: cs.transitionDuration };
   });
+  const geom = await page.evaluate(() => {
+    const b = document.querySelector('.ehdr__bar').getBoundingClientRect();
+    return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), vw: window.innerWidth };
+  });
+  check('once frosted it narrows and comes away from the top',
+    Math.abs(geom.w / geom.vw - 0.8) < 0.01 && geom.y === 16 &&
+      Math.abs(geom.x - (geom.vw - geom.w) / 2) <= 1,
+    geom.w + 'px of ' + geom.vw + ' (' + (geom.w / geom.vw * 100).toFixed(0) +
+      '%) at x=' + geom.x + ', y=' + geom.y);
+
   check('the frost is transitioned rather than snapping',
     /background-color/.test(eased.props) && /backdrop-filter/.test(eased.props) &&
       !/^0s/.test(eased.ms),
@@ -200,7 +210,7 @@ function check(name, ok, detail) {
   /* --------------------------------------------------------- the button --- */
 
   const cta = await page.evaluate(() => {
-    const el = document.querySelector('.ehdr__bar > .ehdr__cta');
+    const el = document.querySelector('.ehdr__inner > .ehdr__cta');
     const cs = getComputedStyle(el);
     return { bg: cs.backgroundImage, shadow: cs.boxShadow, track: cs.letterSpacing, radius: cs.borderRadius };
   });
@@ -226,6 +236,90 @@ function check(name, ok, detail) {
     /px$/.test(cta.track) && parseFloat(cta.track) > 0,
     cta.track);
 
+  /*
+   * Exactly one button on a desktop bar.
+   *
+   * The drawer carries a second copy for a phone, and `.ehdr .ehdr__cta` had
+   * to be two classes to beat the theme's link colour -- which meant the
+   * one-class rule hiding that copy lost to it and the bar showed the button
+   * twice, side by side.
+   */
+  const buttons = await page.evaluate(() => [...document.querySelectorAll('.ehdr__cta')]
+    .filter(el => getComputedStyle(el).display !== 'none').length);
+  check('the bar carries the button once, not twice',
+    buttons === 1, buttons + ' visible');
+
+  /*
+   * The roll. Two copies of the label stacked in a box that clips: the
+   * visible one goes up and out, the one below arrives in its place.
+   */
+  const roll = await page.evaluate(() => {
+    const link = document.querySelectorAll('.ehdr__item')[0].querySelector('.ehdr__link');
+    const wrap = link.querySelector('.ehdr__roll');
+    if (!wrap) return null;
+    const [a, b] = wrap.querySelectorAll('span');
+    return {
+      clips: getComputedStyle(wrap).overflow,
+      copies: wrap.querySelectorAll('span').length,
+      hidden: b.getAttribute('aria-hidden'),
+      restA: getComputedStyle(a).transform,
+      restB: getComputedStyle(b).transform,
+      text: link.textContent.replace(/\s+/g, ' ').trim(),
+    };
+  });
+  check('a menu label is two copies in a box that clips',
+    roll && roll.copies === 2 && roll.clips === 'hidden' && roll.hidden === 'true',
+    roll ? roll.copies + ' copies, overflow ' + roll.clips + ', second aria-hidden=' + roll.hidden : 'no roll markup');
+
+  const home = await page.$('.ehdr__item:nth-of-type(1) .ehdr__link');
+  await home.hover();
+  await sleep(600);
+  const rolled = await page.evaluate(() => {
+    const wrap = document.querySelectorAll('.ehdr__item')[0].querySelector('.ehdr__roll');
+    const [a, b] = wrap.querySelectorAll('span');
+    return { a: getComputedStyle(a).transform, b: getComputedStyle(b).transform };
+  });
+  check('and hovering rolls one out as the other arrives',
+    rolled.a !== roll.restA && rolled.b !== roll.restB && /matrix/.test(rolled.a),
+    'top copy ' + roll.restA + ' -> ' + rolled.a);
+
+  /* ------------------------------------------------------- held states --- */
+
+  /*
+   * The preview holds, which exist so the thing can be looked at without
+   * scrolling or hovering -- in the editor, where you cannot do either.
+   */
+  for (const [state, expect] of [['stuck', 'frosted at the top of the page'], ['open', 'a panel open']]) {
+    const held = await browser.newPage();
+    await held.setViewport({ width: 1440, height: 900 });
+    await held.goto(URL, { waitUntil: 'load' });
+    await held.evaluate(s => {
+      const root = document.querySelector('.ehdr');
+      root.setAttribute('data-ehdr-preview', s);
+      root.eanmHeaderReady = false;
+      root.removeAttribute('data-ehdr-ready');
+    }, state);
+    // Re-init against the attribute, as a fresh render would.
+    await held.evaluate(() => {
+      const ev = new Event('DOMContentLoaded');
+      document.dispatchEvent(ev);
+    });
+    await sleep(600);
+    const got = await held.evaluate(() => {
+      const root = document.querySelector('.ehdr');
+      const cs = getComputedStyle(document.querySelector('.ehdr__bar'));
+      return { scrollY: window.scrollY, bg: cs.backgroundColor,
+        open: root.hasAttribute('data-ehdr-open'),
+        on: document.querySelectorAll('.ehdr__item[data-ehdr-on]').length };
+    });
+    const ok = state === 'stuck'
+      ? got.scrollY === 0 && !/rgba\(0, 0, 0, 0\)/.test(got.bg)
+      : got.open && got.on === 1;
+    check('"' + expect + '" can be held for a look',
+      ok, JSON.stringify(got));
+    await held.close();
+  }
+
   /* -------------------------------------------------------------- phone --- */
 
   const phone = await browser.newPage();
@@ -238,7 +332,7 @@ function check(name, ok, detail) {
     const nav = document.querySelector('.ehdr__nav');
     return {
       burger: getComputedStyle(document.querySelector('.ehdr__burger')).display,
-      barCta: getComputedStyle(document.querySelector('.ehdr__bar > .ehdr__cta')).display,
+      barCta: getComputedStyle(document.querySelector('.ehdr__inner > .ehdr__cta')).display,
       navHeight: Math.round(nav.getBoundingClientRect().height),
       expanded: document.querySelector('.ehdr__burger').getAttribute('aria-expanded'),
     };

@@ -787,6 +787,25 @@ uninterrupted, and frosts only once the page has moved. That is the difference
 between a header on a dark site and one on a light one, and it is the whole
 reason this was not a copy.
 
+**The geometry is theirs, measured rather than guessed at.** Identical at 1280,
+1440 and 1920, so none of it is a breakpoint:
+
+| | At rest | Scrolled | Panel open |
+| --- | --- | --- | --- |
+| Width | 100% | **80% of the window**, centred | back to 100% |
+| Top | 0 | **16px** | back to 0 |
+| Side padding | 64px | **16px** | back to 64px |
+| Corners | square | square | square |
+
+All of it on `all 300ms cubic-bezier(0.4, 0, 0.2, 1)`.
+
+The third column is the best thing about the reference and the part that is
+easy to miss: opening a panel **puts the bar back where it started**. Scrolled,
+their bar sits at `[144, 16, 1152]`; with a panel open it is `[0, 0, 1440]`
+again, blur gone and fill solid, so the bar and the panel become one sheet
+across the window. Every one of those numbers is reproduced here, and the probe
+asserts them.
+
 **Fixed, not sticky.** Sticky would be tidier and it does not survive contact
 with Elementor: a sticky element is positioned against its scrolling ancestor,
 which here is whatever container the widget was dropped into. One `overflow:
@@ -868,6 +887,25 @@ panel is one paste rather than twelve clicks of "add item". `parse_links()` is
 covered by fifteen assertions in `tests/run.php`, because it is the one place
 in the widget where someone's typing becomes markup.
 
+**The labels roll.** Two copies of the word stacked inside a box that clips:
+the visible one slides up and out while the one underneath arrives in its
+place. One transform on one wrapper, composited, and the second copy is
+`aria-hidden` so the label is not announced twice. Letter by letter is the same
+move staggered — each character carries its index as `--i` and takes its
+transition delay from it, so the roll travels the way the word is read; there
+the real label is carried once in a visually-hidden span and every character is
+hidden from assistive technology, because a word spelt across twelve elements
+is read out one letter at a time. The scrambler is the third option, and it
+pins its own width before it starts: a proportional font changes width with
+every swap, and the items beside it would be shoved about for the length of the
+effect.
+
+**A preview hold, because the editor cannot scroll or hover.** "Hold it
+frosted" and "Hold a panel open" freeze the header in one state so it can be
+looked at. Nothing is wired up while one is set — a frozen thing that still
+reacts to the pointer is not frozen — and it applies on the live page too,
+which the control says out loud.
+
 **The button is carried over from the live site exactly**, down to both of its
 shadows: an inset one pulled down from above the top edge, which is what gives
 the pill its thickness, and an outer one for the lift off the page. They cannot
@@ -875,6 +913,20 @@ be one declaration — `inset` is per-shadow — and they must not be on differe
 elements, or a hover that moves one leaves the other behind. Each is composed
 from four custom properties so offset, blur and colour can be separate controls
 without four of them fighting over a single `box-shadow`.
+
+The fill is built the same way and for a harder reason. Elementor's background
+group control writes `background-color` and `background-image` as two separate
+declarations, so choosing a flat colour wrote a colour *underneath* a gradient
+that was still sitting on top of it — the button appeared to ignore the
+setting entirely. The two are set separately here and picking Solid empties the
+gradient outright.
+
+The button's own rules are scoped `.ehdr .ehdr__cta`, two classes, and that is
+not tidiness: nearly every theme and Elementor kit ships something like
+`.elementor a { color: ... }`, which beats a bare `.ehdr__cta` and took the
+white label with it. The same fix then caused its own bug — the one-class rule
+hiding the drawer's copy of the button on a desktop lost to it, and the bar
+carried the button twice. Both are asserted now.
 
 One thing was fixed rather than copied. The live button carries
 `letter-spacing: 5%`, and a percentage is not a valid letter-spacing anywhere:

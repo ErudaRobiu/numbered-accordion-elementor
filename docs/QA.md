@@ -471,6 +471,21 @@ script-blocked fallback, against `tests/browser/header.html`.
       no line under it. The hero should look untouched
 - [ ] Scroll a little: it frosts, and the fill, the blur, the hairline and the
       shadow all arrive together rather than one after another
+- [ ] **It also comes away from the top and narrows to 80% of the window**, as
+      one movement. "Gap from the top", "How wide it becomes" and "Side padding
+      once frosted" are the three settings involved
+- [ ] **Open a panel while it is floating: the bar snaps back to full width and
+      back up to the top**, and bar and panel become one sheet. Close it and it
+      returns to the floating bar
+- [ ] The bar carries the button **once**. Two side by side means the drawer's
+      copy is not being hidden
+- [ ] Menu labels roll on hover — one copy out, one in. Try all four settings,
+      including letter by letter and scramble
+- [ ] "Preview a state" holds it frosted or holds a panel open so you can look
+      at it in the editor. **Put it back to Normal before you publish**
+- [ ] Set the button to a solid colour: it genuinely goes solid. A gradient
+      still showing means the fill is layering rather than replacing
+- [ ] The button's text is white over the gradient, and stays white on hover
 - [ ] Scroll back up: it goes fully transparent again
 - [ ] "What it does on scroll" set to Fill gives a flat colour with no blur,
       and None leaves it transparent the whole way down

@@ -112,21 +112,59 @@
 	 * panel opens correctly and is then blurred by its own scrim.
 	 */
 	z-index: 2;
-	display: flex;
-	align-items: center;
-	gap: var(--ehdr-gap, 40px);
-	padding: var(--ehdr-pad-y, 14px) var(--ehdr-pad-x, 40px);
+	display: block;
+	/*
+	 * The geometry is the reference's, measured at three widths and identical
+	 * at all of them: full bleed at the top of the page, 80% of the window and
+	 * 16px down once you scroll, and back to full bleed the moment a panel
+	 * opens. Width is in the transition because it is the thing that moves.
+	 */
+	width: 100%;
+	margin: 0 auto;
+	padding: var(--ehdr-pad-y, 14px) var(--ehdr-pad-x, 64px);
 	background: transparent;
-	border-bottom: 1px solid transparent;
+	/*
+	 * The border is always here and only its colour moves.
+	 *
+	 * A border that appears on scroll changes the bar's height on the frame it
+	 * appears, which shunts the whole row a pixel. Reserving the width from the
+	 * start and transitioning the colour from transparent costs nothing and
+	 * moves nothing. The bottom hairline is the default; a width set in the
+	 * panel puts one on all four sides, which is what a floating bar wants.
+	 */
+	border: var(--ehdr-bw, 0px) solid transparent;
+	border-bottom-width: var(--ehdr-bw-bottom, 1px);
+	border-radius: var(--ehdr-radius, 0px);
 	-webkit-backdrop-filter: blur(0px);
 	backdrop-filter: blur(0px);
 	transition:
-		background-color var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		border-color var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		box-shadow var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		-webkit-backdrop-filter var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		backdrop-filter var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		padding var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+		width var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		background-color var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		border-color var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		border-radius var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		box-shadow var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		margin var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		-webkit-backdrop-filter var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		backdrop-filter var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		padding var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+/*
+ * The row itself, capped and centred.
+ *
+ * The bar runs the full width of the window because the frost has to -- a
+ * frosted strip that stops short of the screen edge is a floating bar, which
+ * is a different thing. What sits *in* it is capped at the site's own content
+ * width and centred, so the logo lines up with the words underneath it on a
+ * wide monitor instead of drifting out to the bezel.
+ */
+.ehdr__inner {
+	display: flex;
+	align-items: center;
+	gap: var(--ehdr-gap, 40px);
+	width: 100%;
+	max-width: var(--ehdr-max, 1440px);
+	margin: 0 auto;
 }
 
 /*
@@ -137,19 +175,62 @@
  * is an opaque sheet and the bar is the top of it, so anything showing through
  * the bar would show the page sliding under the panel's own header.
  */
-.ehdr[data-ehdr-stuck] .ehdr__bar {
+.ehdr[data-ehdr-stuck] .ehdr__bar,
+.ehdr[data-ehdr-preview="stuck"] .ehdr__bar {
 	background: var(--ehdr-fill, rgba(255, 255, 255, 0.72));
-	border-bottom-color: var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
+	border-color: var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
 	box-shadow: var(--ehdr-shadow, 0 1px 24px -12px rgba(15, 56, 96, 0.5));
 	-webkit-backdrop-filter: blur(var(--ehdr-blur, 16px)) saturate(var(--ehdr-sat, 1.4));
 	backdrop-filter: blur(var(--ehdr-blur, 16px)) saturate(var(--ehdr-sat, 1.4));
+	/*
+	 * The gap that lets it come away from the top edge.
+	 *
+	 * Nought by default, so the bar stays flush unless someone asks for it.
+	 * With a gap and a radius it detaches into a floating bar, which is what
+	 * the reference does -- but that has to be a decision rather than the
+	 * starting point, because a floating bar over a hero that runs to the
+	 * screen edge leaves a strip of hero above it.
+	 */
+	width: var(--ehdr-stuck-width, 80%);
+	margin: var(--ehdr-stuck-gap, 16px) auto 0;
+	padding-left: var(--ehdr-pad-x-stuck, 16px);
+	padding-right: var(--ehdr-pad-x-stuck, 16px);
+	border-radius: var(--ehdr-radius-stuck, var(--ehdr-radius, 0px));
 }
 
-.ehdr[data-ehdr-open] .ehdr__bar {
+/*
+ * A panel opening puts the bar back where it started.
+ *
+ * This is the reference's own move and the best thing about it: the floating
+ * bar snaps out to full width and back up to the top edge at the moment a
+ * panel opens, turning bar and panel into one opaque sheet across the window.
+ * Measured on their site -- scrolled, the bar sits at [144, 16, 1152]; open,
+ * it is [0, 0, 1440] again, with the blur gone and the fill solid.
+ *
+ * It comes after the stuck rule so it wins at equal specificity, which is the
+ * whole reason the two are written in this order.
+ */
+.ehdr[data-ehdr-open] .ehdr__bar,
+.ehdr[data-ehdr-preview="open"] .ehdr__bar {
+	width: 100%;
+	margin: 0 auto;
+	padding-left: var(--ehdr-pad-x, 64px);
+	padding-right: var(--ehdr-pad-x, 64px);
+	border-radius: 0;
 	background: var(--ehdr-sheet, #ffffff);
-	border-bottom-color: var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
+	border-color: var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
 	-webkit-backdrop-filter: blur(0px);
 	backdrop-filter: blur(0px);
+}
+
+/*
+ * A bar that has come away from the top cannot keep a square bottom while a
+ * panel hangs off it: the panel is a separate box and the two would meet at a
+ * rounded edge with a straight one under it.
+ */
+.ehdr[data-ehdr-open] .ehdr__bar {
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
 }
 
 /*
@@ -286,6 +367,114 @@
 	border-radius: 2px;
 }
 
+/* ------------------------------------------------------- the text roll --- */
+
+/*
+ * The label rolls over itself on hover.
+ *
+ * Two copies of the word stacked vertically inside a box that clips: the one
+ * you can see slides up and out, the one underneath arrives in its place. One
+ * transform on one wrapper, composited, and the second copy is aria-hidden so
+ * a screen reader is not read the label twice.
+ *
+ * The height is fixed to one line so the clip has something to clip to.
+ * Without it the wrapper is as tall as both copies and nothing is hidden.
+ */
+.ehdr__roll {
+	position: relative;
+	display: inline-block;
+	overflow: hidden;
+	height: 1.2em;
+	line-height: 1.2;
+	vertical-align: bottom;
+}
+
+.ehdr__roll span {
+	display: block;
+	transition: transform var(--ehdr-roll-ms, 340ms) var(--ehdr-roll-ease, cubic-bezier(0.34, 1.2, 0.44, 1));
+}
+
+/* The understudy waits exactly one line below. */
+.ehdr__roll span + span {
+	position: absolute;
+	inset: 0 0 auto 0;
+	transform: translateY(100%);
+}
+
+.ehdr__link:hover .ehdr__roll span,
+.ehdr__link:focus-visible .ehdr__roll span,
+.ehdr__item[data-ehdr-on] > .ehdr__link .ehdr__roll span {
+	transform: translateY(-100%);
+}
+
+.ehdr__link:hover .ehdr__roll span + span,
+.ehdr__link:focus-visible .ehdr__roll span + span,
+.ehdr__item[data-ehdr-on] > .ehdr__link .ehdr__roll span + span {
+	transform: translateY(0);
+}
+
+/*
+ * Per letter, which is the same move staggered across the word.
+ *
+ * Each character carries its index as --i and takes its delay from it, so the
+ * roll travels left to right the way the word is read rather than the whole
+ * label flipping at once. The delay is on the way in only -- a staggered exit
+ * reads as the menu being slow rather than as a flourish.
+ */
+.ehdr[data-ehdr-anim="letters"] .ehdr__roll {
+	display: inline-flex;
+}
+
+.ehdr[data-ehdr-anim="letters"] .ehdr__roll-c {
+	position: relative;
+	display: inline-block;
+	overflow: hidden;
+	height: 1.2em;
+	white-space: pre;
+}
+
+.ehdr[data-ehdr-anim="letters"] .ehdr__roll-c span {
+	transition-delay: 0s;
+}
+
+.ehdr__link:hover .ehdr__roll-c span,
+.ehdr__link:focus-visible .ehdr__roll-c span,
+.ehdr__item[data-ehdr-on] > .ehdr__link .ehdr__roll-c span {
+	transition-delay: calc(var(--i, 0) * var(--ehdr-roll-step, 24ms));
+}
+
+/*
+ * The scrambler needs no styles of its own beyond holding its width.
+ *
+ * It swaps characters in place, and a proportional font changes width with
+ * every swap, so the label would jitter and shove the items beside it around.
+ * Fixing the width to what the real word measures stops that dead.
+ */
+.ehdr__scramble {
+	display: inline-block;
+	white-space: pre;
+}
+
+/*
+ * The real label, for a screen reader only.
+ *
+ * Used by the letter-by-letter roll, where the word is one element per
+ * character and every one of them is hidden from assistive technology --
+ * a word spelt across twelve elements is announced one letter at a time.
+ */
+.ehdr__sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
 /*
  * The caret on an item that opens a panel. It turns over rather than swapping
  * for a second glyph, which is one element and one transform instead of two
@@ -315,16 +504,40 @@
  * -- `inset` is per-shadow -- and they must not be on different elements
  * either, or a hover that moves one leaves the other behind.
  */
-.ehdr__cta {
+/*
+ * Scoped with .ehdr in front of it, and that is not tidiness.
+ *
+ * Nearly every theme and every Elementor kit ships something like
+ * `.elementor a { color: ... }`, which is two classes and beats a bare
+ * `.ehdr__cta`. The button's own white text lost to it and the label came out
+ * in the theme's link colour. Two classes here wins, without reaching for
+ * !important and taking the panel's own controls down with it.
+ */
+.ehdr .ehdr__cta {
 	flex: 0 0 auto;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: 10px;
 	padding: var(--ehdr-cta-pad-y, 15px) var(--ehdr-cta-pad-x, 30px);
-	border: 0;
+	border: var(--ehdr-cta-bw, 0px) solid var(--ehdr-cta-border, transparent);
 	border-radius: var(--ehdr-cta-radius, 100px);
-	background: var(--ehdr-cta-bg, linear-gradient(90deg, #00a55d 0%, #005465 100%));
+	/*
+	 * background-image, not the `background` shorthand.
+	 *
+	 * The shorthand was the bug behind "the button colour isn't applying": it
+	 * sets background-image as well as the colour, so choosing a flat colour
+	 * in the panel wrote background-color underneath a gradient that was still
+	 * sitting on top of it, and nothing appeared to change. The two are set
+	 * separately now, and picking a solid fill genuinely clears the gradient
+	 * because --ehdr-cta-image is what the solid mode empties.
+	 */
+	background-color: var(--ehdr-cta-colour, #00a55d);
+	background-image: var(--ehdr-cta-image, linear-gradient(
+		var(--ehdr-cta-angle, 90deg),
+		var(--ehdr-cta-from, #00a55d) 0%,
+		var(--ehdr-cta-to, #005465) 100%
+	));
 	box-shadow:
 		var(--ehdr-cta-inner, 2px -4px 4px 0 rgba(0, 0, 0, 0.15) inset),
 		var(--ehdr-cta-lift, 0 4px 10px 0 rgba(0, 0, 0, 0.15));
@@ -350,13 +563,18 @@
 		filter var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
+/* Solid fill: no image at all, so the colour is the whole of it. */
+.ehdr[data-ehdr-cta-fill="solid"] .ehdr__cta {
+	background-image: none;
+}
+
 /*
  * Hover brightens the gradient rather than replacing it. A second gradient
  * would have to be authored to match, and would not survive someone changing
  * the first one in the panel; `filter` lifts whatever is actually there.
  */
-.ehdr__cta:hover,
-.ehdr__cta:focus-visible {
+.ehdr .ehdr__cta:hover,
+.ehdr .ehdr__cta:focus-visible {
 	transform: translateY(-2px);
 	filter: brightness(1.07);
 	box-shadow:
@@ -364,7 +582,14 @@
 		var(--ehdr-cta-lift-hover, 0 10px 22px -6px rgba(0, 0, 0, 0.3));
 }
 
-.ehdr__cta:active {
+.ehdr .ehdr__cta:hover,
+.ehdr .ehdr__cta:focus-visible {
+	background-color: var(--ehdr-cta-colour-hover, var(--ehdr-cta-colour, #00a55d));
+	border-color: var(--ehdr-cta-border-hover, var(--ehdr-cta-border, transparent));
+	color: var(--ehdr-cta-ink-hover, var(--ehdr-cta-ink, #ffffff));
+}
+
+.ehdr .ehdr__cta:active {
 	transform: translateY(0);
 }
 
@@ -676,7 +901,7 @@
 	/* The CTA stays in the bar only if it fits; below this it belongs in the
 	   drawer, where it has room to be a full-width button instead of a pill
 	   squeezed against the burger. */
-	.ehdr__bar > .ehdr__cta {
+	.ehdr .ehdr__inner > .ehdr__cta {
 		display: none;
 	}
 
@@ -850,7 +1075,15 @@
 		display: contents;
 	}
 
-	.ehdr__drawer-cta {
+	/*
+	 * Two classes, to match the button's own rule.
+	 *
+	 * `.ehdr .ehdr__cta` sets `display: inline-flex` and had to be two classes
+	 * to beat the theme's link colour -- which meant a one-class rule hiding
+	 * the drawer's copy lost to it, and the desktop bar carried the button
+	 * twice.
+	 */
+	.ehdr .ehdr__drawer-cta {
 		display: none;
 	}
 }
@@ -883,6 +1116,24 @@
 	.ehdr__cta:hover,
 	.ehdr__cta:focus-visible {
 		transform: none;
+	}
+
+	/* No roll, no scramble. The label is simply the label, and the colour
+	   change is what says it is under the pointer. */
+	.ehdr__roll {
+		overflow: visible;
+		height: auto;
+	}
+
+	.ehdr__roll span + span {
+		display: none;
+	}
+
+	.ehdr__roll span,
+	.ehdr__link:hover .ehdr__roll span,
+	.ehdr__item[data-ehdr-on] > .ehdr__link .ehdr__roll span {
+		transform: none !important;
+		transition: none;
 	}
 
 	.ehdr__panel-link:hover,

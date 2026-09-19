@@ -409,6 +409,14 @@
 			} else {
 				root.removeAttribute( STUCK );
 			}
+
+			/*
+			 * Crossing the threshold moves the bar -- it gains a gap at the
+			 * top and narrows -- so the scrim's starting line moves with it.
+			 * Measured after the transition rather than during it, because
+			 * during it the number is whatever frame we happened to catch.
+			 */
+			window.setTimeout( measure, 340 );
 		}
 
 		/*
@@ -417,12 +425,22 @@
 		 * and once at startup -- rather than on every scroll.
 		 */
 		function measure() {
-			var h = Math.round( bar.getBoundingClientRect().height );
+			var box = bar.getBoundingClientRect();
 
-			root.style.setProperty( '--ehdr-scrim-top', h + 'px' );
+			/*
+			 * The bottom edge, not the height.
+			 *
+			 * Once it frosts the bar comes away from the top by a gap, so its
+			 * height and its bottom edge are no longer the same number. The
+			 * scrim has to start at the bottom edge or it creeps up over the
+			 * bar and blurs it.
+			 */
+			root.style.setProperty( '--ehdr-scrim-top', Math.round( box.bottom ) + 'px' );
 
 			if ( spacer ) {
-				spacer.style.height = spacer.hasAttribute( 'data-ehdr-hold' ) ? h + 'px' : '';
+				spacer.style.height = spacer.hasAttribute( 'data-ehdr-hold' )
+					? Math.round( box.height ) + 'px'
+					: '';
 			}
 		}
 
@@ -452,14 +470,115 @@
 		}
 
 		root.setAttribute( READY, '' );
+
+		/*
+		 * A held state, for looking at it.
+		 *
+		 * Nothing is wired up when one is set: the point is to freeze the
+		 * header so it can be studied in the editor or on the page, and a
+		 * frozen thing that still reacts to the pointer is not frozen. The
+		 * scroll listener is skipped too, so "hold it frosted" stays frosted
+		 * at the top of the page.
+		 */
+		var preview = root.getAttribute( 'data-ehdr-preview' ) || '';
+
+		if ( 'open' === preview || 'stuck' === preview ) {
+			if ( 'open' === preview && owners.length ) {
+				show( owners[0] );
+			}
+
+			measure();
+
+			return;
+		}
+
 		measure();
 		onScroll();
 		window.addEventListener( 'scroll', onScrollFrame, { passive: true } );
 		window.addEventListener( 'resize', onResize, { passive: true } );
 	}
 
+	/*
+	 * The scramble.
+	 *
+	 * Characters are replaced with noise and settle left to right, one more
+	 * locking into place every few frames, so the word resolves rather than
+	 * flickering as a whole. Spaces are never scrambled -- a word boundary
+	 * that moves turns the label into a different shape on every frame.
+	 *
+	 * Driven by a timer rather than by requestAnimationFrame on purpose: it
+	 * wants to be slow. At 60fps a six-letter word would resolve in a tenth of
+	 * a second and read as a glitch instead of a decode.
+	 */
+	var NOISE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&$@/\\';
+
+	function scramble( el ) {
+		var text = el.getAttribute( 'data-ehdr-text' ) || el.textContent;
+		var done = 0;
+		var ticks = 0;
+
+		if ( el.eanmScramble ) {
+			window.clearInterval( el.eanmScramble );
+		}
+
+		// The width is pinned before anything moves: a proportional font
+		// changes width with every swap, and the items beside it would be
+		// shoved back and forth for the length of the effect.
+		if ( ! el.style.minWidth ) {
+			el.style.minWidth = el.getBoundingClientRect().width + 'px';
+		}
+
+		el.eanmScramble = window.setInterval( function () {
+			ticks += 1;
+
+			if ( ticks % 2 === 0 ) {
+				done += 1;
+			}
+
+			var out = '';
+
+			for ( var i = 0; i < text.length; i++ ) {
+				if ( i < done || ' ' === text.charAt( i ) ) {
+					out += text.charAt( i );
+				} else {
+					out += NOISE.charAt( Math.floor( Math.random() * NOISE.length ) );
+				}
+			}
+
+			el.textContent = out;
+
+			if ( done >= text.length ) {
+				window.clearInterval( el.eanmScramble );
+				el.eanmScramble = null;
+				el.textContent = text;
+			}
+		}, 40 );
+	}
+
+	function wireScramble( root ) {
+		if ( prefersReducedMotion() ) {
+			return;
+		}
+
+		toArray( root.querySelectorAll( '.ehdr__scramble' ) ).forEach( function ( el ) {
+			var link = el.closest ? el.closest( '.ehdr__link' ) : null;
+			var target = link || el;
+
+			target.addEventListener( 'mouseenter', function () {
+				scramble( el );
+			} );
+
+			target.addEventListener( 'focus', function () {
+				scramble( el );
+			} );
+		} );
+	}
+
 	function initAll( scope ) {
-		toArray( ( scope || document ).querySelectorAll( ROOT ) ).forEach( init );
+		toArray( ( scope || document ).querySelectorAll( ROOT ) ).forEach( function ( root ) {
+			init( root );
+			wireScramble( root );
+		} );
 	}
 
 	if ( 'loading' === document.readyState ) {
