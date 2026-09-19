@@ -341,13 +341,13 @@ class Mega_Header_Widget extends Widget_Base {
 			'menu_anim',
 			array(
 				'label'       => esc_html__( 'Menu item animation', 'numbered-accordion' ),
-				'description' => esc_html__( 'The roll is two copies of the word stacked in a box that clips: one slides out as the other arrives.', 'numbered-accordion' ),
+				'description' => esc_html__( 'The shuffle is the reference\'s own: every frame is an anagram of the label, locking in one letter at a time from the left, so the word sorts itself out rather than flickering as static. The roll is two copies stacked in a box that clips, one sliding out as the other arrives.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SELECT,
-				'default'     => 'roll',
+				'default'     => 'scramble',
 				'options'     => array(
+					'scramble' => esc_html__( 'Shuffle the letters', 'numbered-accordion' ),
 					'roll'     => esc_html__( 'Roll the whole word', 'numbered-accordion' ),
 					'letters'  => esc_html__( 'Roll letter by letter', 'numbered-accordion' ),
-					'scramble' => esc_html__( 'Scramble the letters', 'numbered-accordion' ),
 					'none'     => esc_html__( 'Just change colour', 'numbered-accordion' ),
 				),
 			)
@@ -362,7 +362,20 @@ class Mega_Header_Widget extends Widget_Base {
 				'range'      => array( 'ms' => array( 'min' => 80, 'max' => 900 ) ),
 				'default'    => array( 'unit' => 'ms', 'size' => 340 ),
 				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-roll-ms: {{SIZE}}ms;' ),
-				'condition'  => array( 'menu_anim!' => array( 'none' ) ),
+				'condition'  => array( 'menu_anim' => array( 'roll', 'letters' ) ),
+			)
+		);
+
+		$this->add_control(
+			'scramble_step',
+			array(
+				'label'       => esc_html__( 'Time per letter', 'numbered-accordion' ),
+				'description' => esc_html__( 'How long each letter takes to lock into place. A whole label settles in this many milliseconds times its length.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'ms' ),
+				'range'       => array( 'ms' => array( 'min' => 15, 'max' => 140 ) ),
+				'default'     => array( 'unit' => 'ms', 'size' => 45 ),
+				'condition'   => array( 'menu_anim' => 'scramble' ),
 			)
 		);
 
@@ -382,12 +395,25 @@ class Mega_Header_Widget extends Widget_Base {
 		$this->add_control(
 			'stick_at',
 			array(
-				'label'       => esc_html__( 'Frosts after', 'numbered-accordion' ),
-				'description' => esc_html__( 'How far down the page before it changes.', 'numbered-accordion' ),
+				'label'       => esc_html__( 'Stays full width for the first', 'numbered-accordion' ),
+				'description' => esc_html__( 'The top of the page is always the full-width state, whichever way you were last going.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
 				'size_units'  => array( 'px' ),
 				'range'       => array( 'px' => array( 'min' => 0, 'max' => 400 ) ),
 				'default'     => array( 'unit' => 'px', 'size' => 10 ),
+				'condition'   => array( 'fill_mode!' => 'none' ),
+			)
+		);
+
+		$this->add_control(
+			'grab',
+			array(
+				'label'       => esc_html__( 'Reacts after scrolling', 'numbered-accordion' ),
+				'description' => esc_html__( 'Scrolling down compacts the bar; scrolling back up gives it back, wherever you are on the page. This is how far you have to keep going one way before it agrees you meant it -- too low and a trackpad makes it flicker between the two.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 10, 'max' => 400 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 60 ),
 				'condition'   => array( 'fill_mode!' => 'none' ),
 			)
 		);
@@ -526,15 +552,43 @@ class Mega_Header_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
-			'stuck_width',
+			'stuck_width_mode',
 			array(
 				'label'       => esc_html__( 'How wide it becomes', 'numbered-accordion' ),
-				'description' => esc_html__( 'A share of the window. 100 leaves it full width and only the gap at the top moves.', 'numbered-accordion' ),
+				'description' => esc_html__( 'Fitting the contents sizes the bar to the logo, the menu and the button -- the thing itself, rather than a box it sits in. A share of the window is the other way, and is the one that goes wrong on a very wide monitor.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'fit',
+				'options'     => array(
+					'fit'   => esc_html__( 'Fit the contents', 'numbered-accordion' ),
+					'share' => esc_html__( 'A share of the window', 'numbered-accordion' ),
+				),
+			)
+		);
+
+		$this->add_control(
+			'stuck_width',
+			array(
+				'label'      => esc_html__( 'How much of the window', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( '%' ),
+				'range'      => array( '%' => array( 'min' => 40, 'max' => 100 ) ),
+				'default'    => array( 'unit' => '%', 'size' => 80 ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-stuck-width: {{SIZE}}%;' ),
+				'condition'  => array( 'stuck_width_mode' => 'share' ),
+			)
+		);
+
+		$this->add_control(
+			'stuck_inset',
+			array(
+				'label'       => esc_html__( 'Keep clear of the edges', 'numbered-accordion' ),
+				'description' => esc_html__( 'The least space left either side when the bar is sized to its contents, so a wide menu on a narrow window still has air around it.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => array( '%' ),
-				'range'       => array( '%' => array( 'min' => 40, 'max' => 100 ) ),
-				'default'     => array( 'unit' => '%', 'size' => 80 ),
-				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-stuck-width: {{SIZE}}%;' ),
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 120 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 32 ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-stuck-inset: {{SIZE}}px;' ),
+				'condition'   => array( 'stuck_width_mode' => 'fit' ),
 			)
 		);
 
@@ -1420,8 +1474,11 @@ class Mega_Header_Widget extends Widget_Base {
 		$ctaText = isset( $settings['cta_text'] ) ? $settings['cta_text'] : '';
 		$ctaLink = isset( $settings['cta_link'] ) ? $settings['cta_link'] : array();
 
-		$anim = isset( $settings['menu_anim'] ) ? $settings['menu_anim'] : 'roll';
-		$anim = in_array( $anim, array( 'none', 'roll', 'letters', 'scramble' ), true ) ? $anim : 'roll';
+		$anim = isset( $settings['menu_anim'] ) ? $settings['menu_anim'] : 'scramble';
+		$anim = in_array( $anim, array( 'none', 'roll', 'letters', 'scramble' ), true ) ? $anim : 'scramble';
+
+		$grab = $this->slider( $settings, 'grab', 60, 10, 400 );
+		$step = $this->slider( $settings, 'scramble_step', 45, 15, 140 );
 
 		$ctaFill = isset( $settings['cta_fill'] ) && 'solid' === $settings['cta_fill'] ? 'solid' : 'gradient';
 
@@ -1438,6 +1495,8 @@ class Mega_Header_Widget extends Widget_Base {
 			data-ehdr-cta-fill="<?php echo esc_attr( $ctaFill ); ?>"
 			data-ehdr-intent="<?php echo esc_attr( (string) $intent ); ?>"
 			data-ehdr-stick-at="<?php echo esc_attr( (string) $stickAt ); ?>"
+			data-ehdr-grab="<?php echo esc_attr( (string) $grab ); ?>"
+			data-ehdr-scramble-step="<?php echo esc_attr( (string) $step ); ?>"
 			<?php echo '' !== $preview ? ' data-ehdr-preview="' . esc_attr( $preview ) . '"' : ''; ?>
 		>
 			<?php if ( $scrim ) : ?>
@@ -1521,7 +1580,7 @@ class Mega_Header_Widget extends Widget_Base {
 													<li>
 														<a class="ehdr__panel-link"<?php echo '' !== $row['url'] ? ' href="' . esc_url( $row['url'] ) . '"' : ''; ?>>
 															<span>
-																<?php echo esc_html( $row['label'] ); ?>
+																<?php $this->label( $row['label'], 'scramble' === $anim ? 'scramble' : 'none' ); ?>
 																<?php if ( '' !== $row['note'] ) : ?>
 																	<small><?php echo esc_html( $row['note'] ); ?></small>
 																<?php endif; ?>

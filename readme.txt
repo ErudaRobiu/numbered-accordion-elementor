@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.23.0
+Stable tag: 2.24.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,27 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.24.0 =
+* Mega Header answers to scroll **direction** now, the way the reference does.
+  Scrolling down compacts the bar; scrolling back up gives it back, wherever
+  you are on the page. The old version flipped at a fixed distance down the
+  page, which fought you on the way back up and felt abrupt.
+* The compact bar is **sized to its own contents** rather than to a share of
+  the window, so it hugs the logo, the menu and the button however wide those
+  happen to be. A share of the window is still there as a setting.
+* Menu labels now shuffle their own letters on hover and settle back on the
+  word -- every frame an anagram of the label, locking in one character at a
+  time from the left, which is the reference's own effect. Labels pin their
+  width first so they cannot jitter their neighbours. The roll, the letter-by-
+  letter roll and plain colour are the other three settings.
+* Panel links shuffle too.
+* Fixed the compact bar shrinking to a small tab on a phone, where the menu is
+  in the drawer and there is nothing in the row to fit to.
+* Smoother movement: the geometry eases on its own curve over 420ms rather than
+  sharing the fill's, and the whole change reads as one movement.
+* New settings: how far you have to scroll before it reacts, how much clearance
+  the floating bar keeps from the screen edges, and the time per letter.
 
 = 2.23.0 =
 * Mega Header now follows the reference's geometry exactly, measured at three

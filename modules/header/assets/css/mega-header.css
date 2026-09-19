@@ -138,15 +138,16 @@
 	-webkit-backdrop-filter: blur(0px);
 	backdrop-filter: blur(0px);
 	transition:
-		width var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		background-color var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		border-color var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		border-radius var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		box-shadow var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		margin var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		-webkit-backdrop-filter var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		backdrop-filter var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		padding var(--ehdr-ms, 300ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+		width var(--ehdr-ms, 420ms) var(--ehdr-geom-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+		max-width var(--ehdr-ms, 420ms) var(--ehdr-geom-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+		margin var(--ehdr-ms, 420ms) var(--ehdr-geom-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+		padding var(--ehdr-ms, 420ms) var(--ehdr-geom-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+		background-color var(--ehdr-ms, 420ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		border-color var(--ehdr-ms, 420ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		border-radius var(--ehdr-ms, 420ms) var(--ehdr-geom-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+		box-shadow var(--ehdr-ms, 420ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		-webkit-backdrop-filter var(--ehdr-ms, 420ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		backdrop-filter var(--ehdr-ms, 420ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 /*
@@ -165,6 +166,23 @@
 	width: 100%;
 	max-width: var(--ehdr-max, 1440px);
 	margin: 0 auto;
+}
+
+/*
+ * Once the bar is sized to its contents the row must stop pushing.
+ *
+ * Full width, the menu is a flex item with room to spare and `flex: 1` is what
+ * keeps the logo left and the button right. Sized to fit, that same `flex: 1`
+ * asks for space that does not exist and the bar can never reach its own
+ * content width -- it settles at the max instead and the whole effect is lost.
+ */
+.ehdr[data-ehdr-stuck]:not([data-ehdr-open]) .ehdr__inner {
+	width: auto;
+	max-width: none;
+}
+
+.ehdr[data-ehdr-stuck]:not([data-ehdr-open]) .ehdr__nav {
+	flex: 0 0 auto;
 }
 
 /*
@@ -191,7 +209,18 @@
 	 * starting point, because a floating bar over a hero that runs to the
 	 * screen edge leaves a strip of hero above it.
 	 */
-	width: var(--ehdr-stuck-width, 80%);
+	/*
+	 * Fits what is in it.
+	 *
+	 * A share of the window is arbitrary -- it is wrong on a wide monitor and
+	 * wrong again on a site whose header is wider than the cap you picked.
+	 * `fit-content` sizes the bar to the logo, the menu and the button, which
+	 * is what a floating bar is: the thing, not a box the thing sits in. The
+	 * max stops it running to the bezel on a very wide screen; the min stops
+	 * it collapsing to nothing on a very narrow one.
+	 */
+	width: var(--ehdr-stuck-width, fit-content);
+	max-width: calc(100% - var(--ehdr-stuck-inset, 32px) * 2);
 	margin: var(--ehdr-stuck-gap, 16px) auto 0;
 	padding-left: var(--ehdr-pad-x-stuck, 16px);
 	padding-right: var(--ehdr-pad-x-stuck, 16px);
@@ -213,6 +242,7 @@
 .ehdr[data-ehdr-open] .ehdr__bar,
 .ehdr[data-ehdr-preview="open"] .ehdr__bar {
 	width: 100%;
+	max-width: none;
 	margin: 0 auto;
 	padding-left: var(--ehdr-pad-x, 64px);
 	padding-right: var(--ehdr-pad-x, 64px);
@@ -891,6 +921,25 @@
 	.ehdr__bar {
 		padding: var(--ehdr-pad-y-mobile, 10px) var(--ehdr-pad-x-mobile, 20px);
 		gap: 12px;
+	}
+
+	/*
+	 * No floating bar on a phone.
+	 *
+	 * Sized to its contents, the bar here is a logo and a burger and nothing
+	 * else -- the menu is in the drawer, not in the row -- so "fit the
+	 * contents" collapsed it to 276px: a little tab marooned in the middle of
+	 * the screen. Below the drawer's breakpoint the compact state is the frost
+	 * and nothing more.
+	 */
+	.ehdr[data-ehdr-stuck] .ehdr__bar,
+	.ehdr[data-ehdr-preview="stuck"] .ehdr__bar {
+		width: 100%;
+		max-width: none;
+		margin: 0;
+		padding-left: var(--ehdr-pad-x-mobile, 20px);
+		padding-right: var(--ehdr-pad-x-mobile, 20px);
+		border-radius: 0;
 	}
 
 	.ehdr__burger {

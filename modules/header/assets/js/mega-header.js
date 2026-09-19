@@ -65,6 +65,10 @@
 
 		var intent = readNumber( root, 'data-ehdr-intent', 90 );
 		var stickAt = readNumber( root, 'data-ehdr-stick-at', 10 );
+
+		// How far you have to keep going in one direction before the bar
+		// agrees you meant it.
+		var grab = readNumber( root, 'data-ehdr-grab', 60 );
 		var reduced = prefersReducedMotion();
 
 		// A panel that opens on a delay must not open after the pointer has
@@ -384,19 +388,51 @@
 		/* --------------------------------------------------------- frost --- */
 
 		/*
-		 * One attribute, flipped at a threshold.
+		 * Which way you are going, not how far down you are.
 		 *
-		 * Nothing is measured per frame and nothing is written unless the
-		 * state has actually changed: the frost is a CSS transition, so the
-		 * scroll handler's whole job is to say which side of the line the page
-		 * is on. A header that recalculated styles on every frame of every
-		 * scroll would be the most expensive thing on the page, and it is on
-		 * every page.
+		 * This is the reference's behaviour and it took tracing the inline
+		 * style through a scroll to see it. At 600px down, scrolling *down*,
+		 * their bar is 80% wide and 16px from the top; at the same 600px,
+		 * scrolling *up*, it is back to full width and flush. It is not a
+		 * threshold on scroll position at all -- the position only decides
+		 * whether the compact state is allowed yet.
+		 *
+		 * Scrolling down compacts it; scrolling up gives it back. That is why
+		 * a threshold flip felt wrong: it fights you on the way back up, where
+		 * the reference gets out of the way.
+		 *
+		 * The travel is accumulated rather than acted on per event, because a
+		 * trackpad emits a stream of one and two pixel deltas and flipping the
+		 * state on any of them is a bar that flickers between two layouts.
 		 */
 		var stuck = null;
+		var lastY = window.pageYOffset || document.documentElement.scrollTop || 0;
+		var travel = 0;
 
 		function onScroll() {
-			var now = ( window.pageYOffset || document.documentElement.scrollTop || 0 ) > stickAt;
+			var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+			var delta = y - lastY;
+
+			lastY = y;
+
+			// Direction changed: start counting this way from nothing.
+			if ( ( delta > 0 ) !== ( travel > 0 ) ) {
+				travel = 0;
+			}
+
+			travel += delta;
+
+			var now = stuck;
+
+			if ( y <= stickAt ) {
+				// The top of the page is always the full-width state, whatever
+				// the last gesture was.
+				now = false;
+			} else if ( travel > grab ) {
+				now = true;
+			} else if ( travel < -grab ) {
+				now = false;
+			}
 
 			if ( now === stuck ) {
 				return;
@@ -499,60 +535,77 @@
 	}
 
 	/*
-	 * The scramble.
+	 * The scramble, which shuffles the word's own letters.
 	 *
-	 * Characters are replaced with noise and settle left to right, one more
-	 * locking into place every few frames, so the word resolves rather than
-	 * flickering as a whole. Spaces are never scrambled -- a word boundary
-	 * that moves turns the label into a different shape on every frame.
+	 * Traced off the reference a character at a time. Hovering "About Us"
+	 * there gives, in order:
 	 *
-	 * Driven by a timer rather than by requestAnimationFrame on purpose: it
-	 * wants to be slow. At 60fps a six-letter word would resolve in a tenth of
-	 * a second and read as a glitch instead of a decode.
+	 *   About Us -> UosuAtb  -> AbsUAt o -> AbAot us -> About U  -> About Us
+	 *
+	 * Not random glyphs. Every frame is an anagram of the label: the front of
+	 * the word locks in one character at a time, left to right, and whatever
+	 * has not locked yet is the remaining real characters in a shuffled order.
+	 * It reads as the word sorting itself out rather than as static, which is
+	 * the whole difference between this and every other scramble effect.
+	 *
+	 * It is also why their markup pins every label's width in three places at
+	 * once -- the same letters in a different order measure differently in a
+	 * proportional font, and an unpinned label would jitter its neighbours
+	 * about for the length of the effect.
 	 */
-	var NOISE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#%&$@/\\';
+	function shuffle( list ) {
+		for ( var i = list.length - 1; i > 0; i-- ) {
+			var j = Math.floor( Math.random() * ( i + 1 ) );
+			var t = list[ i ];
 
-	function scramble( el ) {
+			list[ i ] = list[ j ];
+			list[ j ] = t;
+		}
+
+		return list;
+	}
+
+	function scramble( el, step ) {
 		var text = el.getAttribute( 'data-ehdr-text' ) || el.textContent;
+		var chars = text.split( '' );
 		var done = 0;
-		var ticks = 0;
 
 		if ( el.eanmScramble ) {
 			window.clearInterval( el.eanmScramble );
 		}
 
-		// The width is pinned before anything moves: a proportional font
-		// changes width with every swap, and the items beside it would be
-		// shoved back and forth for the length of the effect.
-		if ( ! el.style.minWidth ) {
-			el.style.minWidth = el.getBoundingClientRect().width + 'px';
+		/*
+		 * The width is pinned before anything moves, in all three properties.
+		 * min-width alone is not enough inside a flex row, where the item can
+		 * still be grown by its siblings' shrinking.
+		 */
+		if ( ! el.style.width ) {
+			var w = el.getBoundingClientRect().width;
+
+			el.style.width = w + 'px';
+			el.style.minWidth = w + 'px';
+			el.style.maxWidth = w + 'px';
+			el.style.display = 'inline-block';
+			el.style.whiteSpace = 'nowrap';
 		}
 
 		el.eanmScramble = window.setInterval( function () {
-			ticks += 1;
+			done += 1;
 
-			if ( ticks % 2 === 0 ) {
-				done += 1;
-			}
-
-			var out = '';
-
-			for ( var i = 0; i < text.length; i++ ) {
-				if ( i < done || ' ' === text.charAt( i ) ) {
-					out += text.charAt( i );
-				} else {
-					out += NOISE.charAt( Math.floor( Math.random() * NOISE.length ) );
-				}
-			}
-
-			el.textContent = out;
-
-			if ( done >= text.length ) {
+			if ( done >= chars.length ) {
 				window.clearInterval( el.eanmScramble );
 				el.eanmScramble = null;
 				el.textContent = text;
+
+				return;
 			}
-		}, 40 );
+
+			// The settled head, then the rest of the real characters in some
+			// other order.
+			var rest = shuffle( chars.slice( done ) );
+
+			el.textContent = chars.slice( 0, done ).join( '' ) + rest.join( '' );
+		}, step || 45 );
 	}
 
 	function wireScramble( root ) {
@@ -560,16 +613,18 @@
 			return;
 		}
 
+		var step = readNumber( root, 'data-ehdr-scramble-step', 45 );
+
 		toArray( root.querySelectorAll( '.ehdr__scramble' ) ).forEach( function ( el ) {
-			var link = el.closest ? el.closest( '.ehdr__link' ) : null;
+			var link = el.closest ? el.closest( '.ehdr__link, .ehdr__panel-link' ) : null;
 			var target = link || el;
 
 			target.addEventListener( 'mouseenter', function () {
-				scramble( el );
+				scramble( el, step );
 			} );
 
 			target.addEventListener( 'focus', function () {
-				scramble( el );
+				scramble( el, step );
 			} );
 		} );
 	}

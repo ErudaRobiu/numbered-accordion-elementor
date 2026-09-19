@@ -471,16 +471,28 @@ script-blocked fallback, against `tests/browser/header.html`.
       no line under it. The hero should look untouched
 - [ ] Scroll a little: it frosts, and the fill, the blur, the hairline and the
       shadow all arrive together rather than one after another
-- [ ] **It also comes away from the top and narrows to 80% of the window**, as
-      one movement. "Gap from the top", "How wide it becomes" and "Side padding
-      once frosted" are the three settings involved
+- [ ] **It also comes away from the top and shrinks to fit its own contents**,
+      as one movement -- the bar should hug the logo, the menu and the button
+      with nothing to spare
+- [ ] **Scroll back up and it returns to full width**, wherever you are on the
+      page. It answers to direction, not to how far down you are
+- [ ] On a trackpad, scroll gently up and down around the changeover: it must
+      not flicker between the two. "Reacts after scrolling" is the setting
+- [ ] Below 1025px the compact bar stays full width. A little tab floating in
+      the middle of a phone screen means the fit-to-contents rule has leaked
+      past the breakpoint
 - [ ] **Open a panel while it is floating: the bar snaps back to full width and
       back up to the top**, and bar and panel become one sheet. Close it and it
       returns to the floating bar
 - [ ] The bar carries the button **once**. Two side by side means the drawer's
       copy is not being hidden
-- [ ] Menu labels roll on hover — one copy out, one in. Try all four settings,
-      including letter by letter and scramble
+- [ ] **Menu labels shuffle their own letters on hover** and settle back on the
+      word. Every frame should be an anagram of the label -- random symbols
+      mean the wrong effect is running
+- [ ] Labels do not jitter their neighbours while shuffling. If they do, the
+      width is not being pinned
+- [ ] The other three settings work too: whole-word roll, letter by letter, and
+      plain colour
 - [ ] "Preview a state" holds it frosted or holds a panel open so you can look
       at it in the editor. **Put it back to Normal before you publish**
 - [ ] Set the button to a solid colour: it genuinely goes solid. A gradient

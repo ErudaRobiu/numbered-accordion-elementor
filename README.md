@@ -787,24 +787,40 @@ uninterrupted, and frosts only once the page has moved. That is the difference
 between a header on a dark site and one on a light one, and it is the whole
 reason this was not a copy.
 
-**The geometry is theirs, measured rather than guessed at.** Identical at 1280,
-1440 and 1920, so none of it is a breakpoint:
+**It answers to direction, not to position**, and that took tracing their
+inline style through a scroll rather than reading computed values at two
+stops. Theirs animates `width` and `top` as inline styles — 100% / 0 at the
+top, 80% / 16px once compact — and the intermediate frames are a spring in
+flight, not a mapping from scroll position. The proof is that at 600px down
+while scrolling *down* their bar is compact, and at the same 600px while
+scrolling *up* it is full width again.
 
-| | At rest | Scrolled | Panel open |
-| --- | --- | --- | --- |
-| Width | 100% | **80% of the window**, centred | back to 100% |
-| Top | 0 | **16px** | back to 0 |
-| Side padding | 64px | **16px** | back to 64px |
-| Corners | square | square | square |
+So: scrolling down compacts it, scrolling up gives it back, wherever you are on
+the page. A threshold on scroll position cannot do that, and it is what made
+the first version of this feel wrong — it fought you on the way back up, where
+the reference gets out of the way. The travel is accumulated rather than acted
+on per event, because a trackpad emits a stream of one and two pixel deltas and
+flipping the state on any of them is a bar that flickers between two layouts.
 
-All of it on `all 300ms cubic-bezier(0.4, 0, 0.2, 1)`.
+**The compact bar is sized to its contents**, not to a share of the window.
+Their markup says `lg:w-auto` and means it. A percentage is arbitrary — wrong
+on a wide monitor, and wrong again on a site whose header is wider than the cap
+you picked — where `fit-content` measures the logo, the menu and the button and
+stops there, which is what a floating bar *is*: the thing, rather than a box
+the thing sits in. A share of the window is still available as a setting for
+anyone who wants it.
 
-The third column is the best thing about the reference and the part that is
-easy to miss: opening a panel **puts the bar back where it started**. Scrolled,
-their bar sits at `[144, 16, 1152]`; with a panel open it is `[0, 0, 1440]`
-again, blur gone and fill solid, so the bar and the panel become one sheet
-across the window. Every one of those numbers is reproduced here, and the probe
-asserts them.
+Two things fall out of that. The row has to stop stretching once the bar is
+content-sized: full width, `flex: 1` on the menu is what holds the logo left and
+the button right, but content-sized that same rule asks for space which does not
+exist and the bar can never reach its own width. And below the drawer's
+breakpoint the compact bar is the frost and nothing else — sized to its contents
+there it would be a logo and a burger, a 276px tab marooned mid-screen.
+
+**Opening a panel puts the bar back where it started.** Scrolled, their bar sits
+at `[144, 16, 1152]`; with a panel open it is `[0, 0, 1440]` again, blur gone
+and fill solid, so bar and panel become one sheet across the window. The probe
+asserts all of it.
 
 **Fixed, not sticky.** Sticky would be tidier and it does not survive contact
 with Elementor: a sticky element is positioned against its scrolling ancestor,
@@ -887,7 +903,28 @@ panel is one paste rather than twelve clicks of "add item". `parse_links()` is
 covered by fifteen assertions in `tests/run.php`, because it is the one place
 in the widget where someone's typing becomes markup.
 
-**The labels roll.** Two copies of the word stacked inside a box that clips:
+**The labels shuffle their own letters.** This is the hover effect on the
+reference and it is not a generic scramble. Traced a character at a time,
+hovering "About Us" there gives:
+
+```
+About Us -> UosuAtb  -> AbsUAt o -> AbAot us -> About U  -> About Us
+```
+
+Every frame is an *anagram* of the label. The front locks in one character at a
+time from the left, and whatever has not locked yet is the remaining real
+characters in a shuffled order — never random glyphs. It reads as the word
+sorting itself out rather than as static, and that is the whole difference.
+
+It also explains the one detail in their markup that gave the effect away
+before I had seen it run: every label carries an inline `width`, `min-width`
+*and* `max-width`. The same letters in a different order measure differently in
+a proportional font, and an unpinned label shoves its neighbours about for the
+length of the effect. All three are pinned here too — `min-width` alone is not
+enough inside a flex row, where the item can still be grown by its siblings
+shrinking.
+
+**The roll is the alternative.** Two copies of the word stacked inside a box that clips:
 the visible one slides up and out while the one underneath arrives in its
 place. One transform on one wrapper, composited, and the second copy is
 `aria-hidden` so the label is not announced twice. Letter by letter is the same

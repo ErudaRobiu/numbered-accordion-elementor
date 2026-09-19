@@ -80,15 +80,59 @@ function check(name, ok, detail) {
     const cs = getComputedStyle(document.querySelector('.ehdr__bar'));
     return { props: cs.transitionProperty, ms: cs.transitionDuration };
   });
+  /*
+   * Sized to what is in it, not to a share of the window.
+   *
+   * A percentage is arbitrary: wrong on a wide monitor, wrong again on a site
+   * whose header is wider than the cap. The compact bar should measure the
+   * logo, the menu and the button and stop there.
+   */
   const geom = await page.evaluate(() => {
     const b = document.querySelector('.ehdr__bar').getBoundingClientRect();
-    return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), vw: window.innerWidth };
+    const inner = document.querySelector('.ehdr__inner').getBoundingClientRect();
+    const cs = getComputedStyle(document.querySelector('.ehdr__bar'));
+    return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width),
+      content: Math.round(inner.width), padX: parseFloat(cs.paddingLeft), vw: window.innerWidth };
   });
-  check('once frosted it narrows and comes away from the top',
-    Math.abs(geom.w / geom.vw - 0.8) < 0.01 && geom.y === 16 &&
-      Math.abs(geom.x - (geom.vw - geom.w) / 2) <= 1,
-    geom.w + 'px of ' + geom.vw + ' (' + (geom.w / geom.vw * 100).toFixed(0) +
-      '%) at x=' + geom.x + ', y=' + geom.y);
+  check('once frosted it shrinks to fit its own contents',
+    geom.w < geom.vw - 40 && Math.abs(geom.w - (geom.content + geom.padX * 2)) <= 2,
+    geom.w + 'px of a ' + geom.vw + 'px window, holding ' + geom.content +
+      'px of content plus ' + geom.padX * 2 + 'px of padding');
+
+  check('and centres itself, away from the top edge',
+    geom.y === 16 && Math.abs(geom.x - (geom.vw - geom.w) / 2) <= 1,
+    'x=' + geom.x + ' (window ' + geom.vw + '), y=' + geom.y);
+
+  /*
+   * Direction, not position. Traced off the reference: at 600px down while
+   * scrolling down their bar is compact; at the same 600px while scrolling up
+   * it is full width again. A threshold on scroll position cannot do that, and
+   * it is what made the old one fight you on the way back up.
+   */
+  const direction = await page.evaluate(async () => {
+    const bar = document.querySelector('.ehdr__bar');
+    const w = () => Math.round(bar.getBoundingClientRect().width);
+    const settle = () => new Promise(r => setTimeout(r, 700));
+
+    for (let y = 900; y <= 1800; y += 150) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 90)); }
+    await settle();
+    const down = w();
+
+    for (let y = 1650; y >= 900; y -= 150) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 90)); }
+    await settle();
+    const up = w();
+
+    return { down, up, at: 900, full: window.innerWidth };
+  });
+  check('scrolling back up gives the full-width bar back, at the same place on the page',
+    direction.down < direction.full - 40 && direction.up === direction.full,
+    'at y=' + direction.at + ': ' + direction.down + 'px going down, ' +
+      direction.up + 'px going up');
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await sleep(700);
+  await page.evaluate(() => window.scrollTo(0, 900));
+  await sleep(700);
 
   check('the frost is transitioned rather than snapping',
     /background-color/.test(eased.props) && /backdrop-filter/.test(eased.props) &&
@@ -282,6 +326,46 @@ function check(name, ok, detail) {
   check('and hovering rolls one out as the other arrives',
     rolled.a !== roll.restA && rolled.b !== roll.restB && /matrix/.test(rolled.a),
     'top copy ' + roll.restA + ' -> ' + rolled.a);
+
+  /*
+   * The shuffle, and what makes it the reference's rather than a generic one:
+   * every frame is an anagram of the label. The front locks in one character
+   * at a time from the left and the tail is the remaining real characters in
+   * some other order -- never random glyphs, which is why it reads as the word
+   * sorting itself out instead of as static.
+   */
+  const sorted = str => str.split('').sort().join('');
+  const shuffled = await page.evaluate(async () => {
+    const el = document.querySelector('.ehdr__scramble');
+    if (!el) return null;
+    const link = el.closest('.ehdr__link');
+    const frames = [];
+    const timer = setInterval(() => frames.push(el.textContent), 20);
+    link.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
+    await new Promise(r => setTimeout(r, 900));
+    clearInterval(timer);
+    const seen = [];
+    frames.forEach(f => { if (!seen.length || seen[seen.length - 1] !== f) seen.push(f); });
+    const cs = getComputedStyle(el);
+    return { label: el.getAttribute('data-ehdr-text'), seen,
+      pinned: cs.width === cs.minWidth && cs.width === cs.maxWidth && cs.width !== 'auto' };
+  });
+
+  check('hovering shuffles the label and settles back on it',
+    shuffled && shuffled.seen.length > 3 &&
+      shuffled.seen[shuffled.seen.length - 1] === shuffled.label,
+    shuffled ? shuffled.seen.length + ' frames, ending on "' +
+      shuffled.seen[shuffled.seen.length - 1] + '"' : 'no scramble markup');
+
+  check('and every frame is an anagram of it, never random glyphs',
+    shuffled && shuffled.seen.every(f => sorted(f) === sorted(shuffled.label)),
+    shuffled ? shuffled.seen.slice(0, 5).map(f => JSON.stringify(f)).join(' ') : 'n/a');
+
+  // Same letters in a different order measure differently in a proportional
+  // font; without this the label jitters its neighbours about.
+  check('the label pins its own width first',
+    shuffled && shuffled.pinned,
+    shuffled ? ( shuffled.pinned ? 'width, min-width and max-width all locked' : 'not pinned' ) : 'n/a');
 
   /* ------------------------------------------------------- held states --- */
 
