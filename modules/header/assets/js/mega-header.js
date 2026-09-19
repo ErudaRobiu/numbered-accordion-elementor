@@ -69,6 +69,18 @@
 		// How far you have to keep going in one direction before the bar
 		// agrees you meant it.
 		var grab = readNumber( root, 'data-ehdr-grab', 60 );
+
+		/*
+		 * When the full-width bar is allowed back.
+		 *
+		 *   'top' -- only at the top of the page. Once it has compacted it
+		 *            stays compact until you are back where you started, which
+		 *            is the steadier of the two: the bar is one thing while you
+		 *            are reading and another when you are not.
+		 *   'up'  -- the moment you scroll up, wherever you are. What the
+		 *            reference does.
+		 */
+		var returnAt = root.getAttribute( 'data-ehdr-return' ) === 'up' ? 'up' : 'top';
 		var reduced = prefersReducedMotion();
 
 		// A panel that opens on a delay must not open after the pointer has
@@ -430,7 +442,7 @@
 				now = false;
 			} else if ( travel > grab ) {
 				now = true;
-			} else if ( travel < -grab ) {
+			} else if ( travel < -grab && 'up' === returnAt ) {
 				now = false;
 			}
 
@@ -460,7 +472,43 @@
 		 * The bar's height is only read when it can have changed -- on resize,
 		 * and once at startup -- rather than on every scroll.
 		 */
+		/**
+		 * What the row needs when it is sized to its contents.
+		 *
+		 * Read by holding the compact layout for one synchronous measurement
+		 * and dropping it again before the frame is painted, so nothing
+		 * flashes. It costs a forced layout, which is why it happens on
+		 * startup and on resize rather than on scroll.
+		 *
+		 * Without it the compact width is `fit-content`, and `width` cannot
+		 * interpolate from a percentage to an intrinsic keyword -- the change
+		 * snaps most of the way on the first frame and eases the rest.
+		 */
+		function measureCompact() {
+			var inner = root.querySelector( '.ehdr__inner' );
+
+			if ( ! inner ) {
+				return 0;
+			}
+
+			root.classList.add( 'is-measuring' );
+
+			// Rounded up: a fractional content width that rounds down clips
+			// the last letter of the last menu item.
+			var width = Math.ceil( bar.getBoundingClientRect().width );
+
+			root.classList.remove( 'is-measuring' );
+
+			return width;
+		}
+
 		function measure() {
+			var compact = measureCompact();
+
+			if ( compact > 0 ) {
+				root.style.setProperty( '--ehdr-stuck-width-px', compact + 'px' );
+			}
+
 			var box = bar.getBoundingClientRect();
 
 			/*
@@ -530,6 +578,21 @@
 
 		measure();
 		onScroll();
+
+		/*
+		 * Webfonts change the answer.
+		 *
+		 * The row is measured in whatever font is available at startup, and a
+		 * webfont arriving afterwards makes every label a different width. One
+		 * more measurement once the fonts have settled costs a single layout
+		 * and saves a compact bar that is the wrong size all session.
+		 */
+		if ( document.fonts && document.fonts.ready && document.fonts.ready.then ) {
+			document.fonts.ready.then( function () {
+				measure();
+			} ).catch( function () {} );
+		}
+
 		window.addEventListener( 'scroll', onScrollFrame, { passive: true } );
 		window.addEventListener( 'resize', onResize, { passive: true } );
 	}

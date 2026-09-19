@@ -124,10 +124,55 @@ function check(name, ok, detail) {
 
     return { down, up, at: 900, full: window.innerWidth };
   });
-  check('scrolling back up gives the full-width bar back, at the same place on the page',
-    direction.down < direction.full - 40 && direction.up === direction.full,
+  /*
+   * The fixture asks for "only at the top", which is the steadier of the two
+   * settings: once compacted the bar stays compact until you are back where
+   * you started, rather than changing every time the wheel is nudged.
+   */
+  check('scrolling up mid-page leaves it compact when it is set to return at the top',
+    direction.down < direction.full - 40 && direction.up === direction.down,
     'at y=' + direction.at + ': ' + direction.down + 'px going down, ' +
       direction.up + 'px going up');
+
+  const backAtTop = await page.evaluate(async () => {
+    window.scrollTo(0, 0);
+    await new Promise(r => setTimeout(r, 900));
+    return Math.round(document.querySelector('.ehdr__bar').getBoundingClientRect().width);
+  });
+  check('and returns to full width once you are back at the top',
+    backAtTop === direction.full,
+    backAtTop + 'px of ' + direction.full);
+
+  /*
+   * The change has to ease, not snap.
+   *
+   * `width` cannot interpolate from a percentage to `fit-content`, so the
+   * first version of this jumped 296px on the opening frame and eased the
+   * remaining 89 -- which is what made it feel junky. The script measures the
+   * content width and the transition runs length to length.
+   */
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await sleep(900);
+  const eased2 = await page.evaluate(async () => {
+    const bar = document.querySelector('.ehdr__bar');
+    const rows = [];
+    let stop = false;
+    const tick = () => { rows.push(bar.getBoundingClientRect().width); if (!stop) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+    await new Promise(r => setTimeout(r, 80));
+    window.scrollTo(0, 700);
+    await new Promise(r => setTimeout(r, 1200));
+    stop = true;
+    const u = [];
+    rows.forEach(v => { if (!u.length || Math.abs(u[u.length - 1] - v) > 0.5) u.push(v); });
+    const steps = u.slice(1).map((v, i) => Math.abs(v - u[i]));
+    return { count: u.length, biggest: Math.max.apply(null, steps),
+      span: Math.abs(u[0] - u[u.length - 1]) };
+  });
+  check('the width eases rather than snapping',
+    eased2.count > 10 && eased2.biggest < eased2.span * 0.25,
+    eased2.count + ' distinct widths over ' + Math.round(eased2.span) +
+      'px, biggest single frame ' + Math.round(eased2.biggest) + 'px');
 
   await page.evaluate(() => window.scrollTo(0, 0));
   await sleep(700);
@@ -195,6 +240,43 @@ function check(name, ok, detail) {
   check('the trigger says it is expanded, and only that one does',
     open.expanded.filter(v => v === 'true').length === 1 && open.expanded.length === open.withPanel,
     open.expanded.join(' '));
+
+  /*
+   * The colour controls have to beat the theme.
+   *
+   * The fixture carries `.elementor a { color: #8a8a8a }`, which is two
+   * classes -- the shape every Elementor kit ships. A bare `.ehdr__link` loses
+   * to it, and the menu's colour settings appear to do nothing at all while
+   * the custom property they write is overridden downstream.
+   */
+  const ink = await page.evaluate(() => {
+    const root = document.querySelector('.ehdr');
+    root.style.setProperty('--ehdr-ink', 'rgb(15, 56, 96)');
+    root.style.setProperty('--ehdr-ink-hover', 'rgb(0, 165, 93)');
+    const link = document.querySelectorAll('.ehdr__item')[1].querySelector('.ehdr__link');
+    return {
+      link: getComputedStyle(link).color,
+      panel: getComputedStyle(document.querySelector('.ehdr__panel-link')).color,
+      theme: getComputedStyle(document.querySelector('.band a') || document.body).color,
+    };
+  });
+  check('the menu takes the colour it was given, over the theme\'s own',
+    ink.link === 'rgb(15, 56, 96)' && ink.panel === 'rgb(15, 56, 96)',
+    'menu ' + ink.link + ', panel ' + ink.panel + ' (theme sets rgb(138, 138, 138))');
+
+  const hovered = await page.evaluate(async () => {
+    const link = document.querySelectorAll('.ehdr__item')[1].querySelector('.ehdr__link');
+    link.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+    return null;
+  });
+  const about = await page.$('.ehdr__item:nth-of-type(2) .ehdr__link');
+  await about.hover();
+  await sleep(400);
+  const inkHover = await page.evaluate(() =>
+    getComputedStyle(document.querySelectorAll('.ehdr__item')[1].querySelector('.ehdr__link')).color);
+  check('and the hover colour too',
+    inkHover === 'rgb(0, 165, 93)',
+    inkHover + ' (theme sets rgb(138, 138, 138) on hover as well)');
 
   /* -------------------------------------------------------------- scrim --- */
 

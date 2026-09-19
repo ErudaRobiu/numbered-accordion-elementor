@@ -817,6 +817,32 @@ exist and the bar can never reach its own width. And below the drawer's
 breakpoint the compact bar is the frost and nothing else — sized to its contents
 there it would be a logo and a burger, a 276px tab marooned mid-screen.
 
+**When the full-width bar is allowed back is a setting**, and the default is
+the steadier of the two: only at the top of the page. Once it has compacted it
+stays compact until you are back where you started, so the bar is one thing
+while you are reading and another when you are not, rather than changing every
+time the wheel is nudged. "Whenever you scroll up" is the reference's own
+behaviour and is one option away.
+
+**The change has to ease, and getting there needed a measurement.** `width`
+cannot interpolate from a percentage to `fit-content` — an intrinsic keyword
+has no value to animate towards, and Chrome resolves it by snapping most of the
+way on the first frame and easing the remainder. Sampled per frame, the change
+opened with a **296px jump** and then eased the last 89px. That is precisely
+what "junky" looks like and it is invisible in a screenshot.
+
+So the script measures what the row actually needs, writes it as
+`--ehdr-stuck-width-px`, and the transition runs length to length. The same
+sampling now shows 21 distinct widths across 385px with a largest single frame
+of 64px, which is just the easing curve at 60fps. The measurement holds the
+compact layout for one synchronous read and drops it before anything is
+painted, so nothing flashes, and it repeats once `document.fonts.ready`
+resolves — a webfont arriving late makes every label a different width and
+would leave the compact bar the wrong size all session.
+
+The gap from the top is a `transform` rather than a `margin` for the same
+reason: a margin is laid out, a transform is composited.
+
 **Opening a panel puts the bar back where it started.** Scrolled, their bar sits
 at `[144, 16, 1152]`; with a panel open it is `[0, 0, 1440]` again, blur gone
 and fill solid, so bar and panel become one sheet across the window. The probe
@@ -958,10 +984,14 @@ that was still sitting on top of it — the button appeared to ignore the
 setting entirely. The two are set separately here and picking Solid empties the
 gradient outright.
 
-The button's own rules are scoped `.ehdr .ehdr__cta`, two classes, and that is
-not tidiness: nearly every theme and Elementor kit ships something like
-`.elementor a { color: ... }`, which beats a bare `.ehdr__cta` and took the
-white label with it. The same fix then caused its own bug — the one-class rule
+**Every colour rule is scoped with two classes**, and that is not tidiness: nearly every theme and Elementor kit ships something like
+`.elementor a { color: ... }`, which beats a bare `.ehdr__link` or `.ehdr__cta`
+and takes the colour settings with it — whatever you pick is written to a
+custom property that the theme's rule then overrides, so the control appears to
+do nothing at all. The menu links, the panel links, the brand text, the blurb
+and the burger are all scoped this way now, along with their `:hover` states,
+and the fixture carries a hostile `.elementor a { color: #8a8a8a }` so the
+probe proves it. The same fix then caused its own bug — the one-class rule
 hiding the drawer's copy of the button on a desktop lost to it, and the bar
 carried the button twice. Both are asserted now.
 

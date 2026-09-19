@@ -474,8 +474,15 @@ script-blocked fallback, against `tests/browser/header.html`.
 - [ ] **It also comes away from the top and shrinks to fit its own contents**,
       as one movement -- the bar should hug the logo, the menu and the button
       with nothing to spare
-- [ ] **Scroll back up and it returns to full width**, wherever you are on the
-      page. It answers to direction, not to how far down you are
+- [ ] **The change eases the whole way.** Watch the first moment especially: a
+      jump followed by a smooth glide means the width is snapping to an
+      intrinsic size before it animates
+- [ ] "Goes back to full width" set to **Only at the top** keeps it compact
+      while you scroll up mid-page, and restores it when you reach the top.
+      Set to **Whenever you scroll up** it comes back on any upward scroll
+- [ ] **The menu text takes the colour you picked**, and the hover colour too.
+      Grey or black text that ignores the setting means the theme's own link
+      colour is winning
 - [ ] On a trackpad, scroll gently up and down around the changeover: it must
       not flicker between the two. "Reacts after scrolling" is the setting
 - [ ] Below 1025px the compact bar stays full width. A little tab floating in

@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.25.0
+Stable tag: 2.26.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,27 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.26.0 =
+* Fixed the menu text ignoring the colour you picked. Themes and Elementor kits
+  ship `.elementor a { color: ... }`, which is two classes and beat the menu's
+  own one-class rule, so whatever you chose was written and then overridden --
+  the setting looked broken because the text stayed the theme's grey. The menu
+  links, panel links, brand text, blurb and burger are all scoped to win now,
+  hover colours included.
+* Fixed the compacting animation jumping. It ran from a percentage width to
+  `fit-content`, and an intrinsic keyword has nothing to interpolate towards --
+  measured frame by frame, it snapped 296px on the first frame and eased the
+  remaining 89. The width the row actually needs is measured up front, so the
+  change runs length to length: 21 steps across 385px now, largest single frame
+  64px. It re-measures once webfonts have loaded.
+* The gap from the top is a transform rather than a margin -- composited
+  instead of laid out.
+* New setting, "Goes back to full width": **Only at the top of the page**, the
+  new default, keeps the compact bar while you scroll up mid-page and restores
+  the full one when you reach the top. **Whenever you scroll up** is the old
+  behaviour.
+* The change is a little longer and on a softer curve.
 
 = 2.25.0 =
 * Mega Header's sliders now take the unit you want. Lengths accept px, em and

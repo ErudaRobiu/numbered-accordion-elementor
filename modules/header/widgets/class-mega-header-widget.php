@@ -406,6 +406,21 @@ class Mega_Header_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'return_at',
+			array(
+				'label'       => esc_html__( 'Goes back to full width', 'numbered-accordion' ),
+				'description' => esc_html__( 'Once it has compacted, when is the full-width bar allowed back. Only at the top is the steadier of the two: the bar is one thing while you are reading and another when you are not, rather than changing every time you nudge the wheel.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'top',
+				'options'     => array(
+					'top' => esc_html__( 'Only at the top of the page', 'numbered-accordion' ),
+					'up'  => esc_html__( 'Whenever you scroll up', 'numbered-accordion' ),
+				),
+				'condition'   => array( 'fill_mode!' => 'none' ),
+			)
+		);
+
+		$this->add_control(
 			'grab',
 			array(
 				'label'       => esc_html__( 'Reacts after scrolling', 'numbered-accordion' ),
@@ -415,6 +430,7 @@ class Mega_Header_Widget extends Widget_Base {
 				'range'       => array( 'px' => array( 'min' => 10, 'max' => 400 ) ),
 				'default'     => array( 'unit' => 'px', 'size' => 60 ),
 				'condition'   => array( 'fill_mode!' => 'none' ),
+				'separator'   => 'after',
 			)
 		);
 
@@ -1478,6 +1494,8 @@ class Mega_Header_Widget extends Widget_Base {
 		$anim = in_array( $anim, array( 'none', 'roll', 'letters', 'scramble' ), true ) ? $anim : 'scramble';
 
 		$grab = $this->slider( $settings, 'grab', 60, 10, 400 );
+
+		$returnAt = isset( $settings['return_at'] ) && 'up' === $settings['return_at'] ? 'up' : 'top';
 		$step = $this->slider( $settings, 'scramble_step', 45, 15, 140 );
 
 		$ctaFill = isset( $settings['cta_fill'] ) && 'solid' === $settings['cta_fill'] ? 'solid' : 'gradient';
@@ -1496,6 +1514,7 @@ class Mega_Header_Widget extends Widget_Base {
 			data-ehdr-intent="<?php echo esc_attr( (string) $intent ); ?>"
 			data-ehdr-stick-at="<?php echo esc_attr( (string) $stickAt ); ?>"
 			data-ehdr-grab="<?php echo esc_attr( (string) $grab ); ?>"
+			data-ehdr-return="<?php echo esc_attr( $returnAt ); ?>"
 			data-ehdr-scramble-step="<?php echo esc_attr( (string) $step ); ?>"
 			<?php echo '' !== $preview ? ' data-ehdr-preview="' . esc_attr( $preview ) . '"' : ''; ?>
 		>

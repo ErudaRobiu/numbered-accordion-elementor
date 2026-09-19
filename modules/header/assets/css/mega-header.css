@@ -121,6 +121,15 @@
 	 */
 	width: 100%;
 	margin: 0 auto;
+	/*
+	 * The gap from the top is a transform, not a margin.
+	 *
+	 * A margin is laid out; a transform is composited. Animating the margin
+	 * made the browser re-lay the bar and everything in it on every frame of
+	 * the change, on top of the width it is already re-laying, and that is
+	 * what the movement felt like. translateY costs nothing per frame.
+	 */
+	transform: translateY(0);
 	padding: var(--ehdr-pad-y, 14px) var(--ehdr-pad-x, 64px);
 	background: transparent;
 	/*
@@ -138,16 +147,16 @@
 	-webkit-backdrop-filter: blur(0px);
 	backdrop-filter: blur(0px);
 	transition:
-		width var(--ehdr-ms, 420ms) var(--ehdr-geom-ease, cubic-bezier(0.22, 1, 0.36, 1)),
-		max-width var(--ehdr-ms, 420ms) var(--ehdr-geom-ease, cubic-bezier(0.22, 1, 0.36, 1)),
-		margin var(--ehdr-ms, 420ms) var(--ehdr-geom-ease, cubic-bezier(0.22, 1, 0.36, 1)),
-		padding var(--ehdr-ms, 420ms) var(--ehdr-geom-ease, cubic-bezier(0.22, 1, 0.36, 1)),
-		background-color var(--ehdr-ms, 420ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		border-color var(--ehdr-ms, 420ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		border-radius var(--ehdr-ms, 420ms) var(--ehdr-geom-ease, cubic-bezier(0.22, 1, 0.36, 1)),
-		box-shadow var(--ehdr-ms, 420ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		-webkit-backdrop-filter var(--ehdr-ms, 420ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-		backdrop-filter var(--ehdr-ms, 420ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+		width var(--ehdr-ms, 520ms) var(--ehdr-geom-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+		max-width var(--ehdr-ms, 520ms) var(--ehdr-geom-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+		transform var(--ehdr-ms, 520ms) var(--ehdr-geom-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+		padding var(--ehdr-ms, 520ms) var(--ehdr-geom-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+		background-color var(--ehdr-ms, 520ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		border-color var(--ehdr-ms, 520ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		border-radius var(--ehdr-ms, 520ms) var(--ehdr-geom-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+		box-shadow var(--ehdr-ms, 520ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		-webkit-backdrop-filter var(--ehdr-ms, 520ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		backdrop-filter var(--ehdr-ms, 520ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 /*
@@ -219,9 +228,24 @@
 	 * max stops it running to the bezel on a very wide screen; the min stops
 	 * it collapsing to nothing on a very narrow one.
 	 */
-	width: var(--ehdr-stuck-width, fit-content);
+	/*
+	 * A measured pixel width, with the keyword only as a last resort.
+	 *
+	 * `width` cannot interpolate from `100%` to `fit-content`: an intrinsic
+	 * keyword has no value to animate towards, and Chrome resolves it by
+	 * snapping most of the way on the first frame and easing the remainder.
+	 * Measured here that was a 296px jump followed by a smooth 89px -- which
+	 * is exactly what "junky" looks like.
+	 *
+	 * So the script measures what the row actually needs and writes it as
+	 * --ehdr-stuck-width-px, and the transition is a length to a length. The
+	 * keyword survives as the no-script fallback, where there is no transition
+	 * to spoil anyway.
+	 */
+	width: var(--ehdr-stuck-width, var(--ehdr-stuck-width-px, fit-content));
 	max-width: calc(100% - var(--ehdr-stuck-inset, 32px) * 2);
-	margin: var(--ehdr-stuck-gap, 16px) auto 0;
+	margin: 0 auto;
+	transform: translateY(var(--ehdr-stuck-gap, 16px));
 	padding-left: var(--ehdr-pad-x-stuck, 16px);
 	padding-right: var(--ehdr-pad-x-stuck, 16px);
 	border-radius: var(--ehdr-radius-stuck, var(--ehdr-radius, 0px));
@@ -244,6 +268,7 @@
 	width: 100%;
 	max-width: none;
 	margin: 0 auto;
+	transform: translateY(0);
 	padding-left: var(--ehdr-pad-x, 64px);
 	padding-right: var(--ehdr-pad-x, 64px);
 	border-radius: 0;
@@ -275,6 +300,31 @@
 	}
 }
 
+/*
+ * The measuring pass.
+ *
+ * Held for a single synchronous read and taken off again before anything is
+ * painted, so nothing flashes. Transitions are off inside it: measuring must
+ * not itself start an animation, and an animation in flight must not be
+ * measured.
+ */
+.ehdr.is-measuring .ehdr__bar {
+	width: max-content;
+	max-width: none;
+	transition: none;
+	padding-left: var(--ehdr-pad-x-stuck, 16px);
+	padding-right: var(--ehdr-pad-x-stuck, 16px);
+}
+
+.ehdr.is-measuring .ehdr__inner {
+	width: auto;
+	max-width: none;
+}
+
+.ehdr.is-measuring .ehdr__nav {
+	flex: 0 0 auto;
+}
+
 /* ------------------------------------------------------------ the brand --- */
 
 .ehdr__brand {
@@ -301,7 +351,7 @@
 	height: var(--ehdr-logo-stuck, var(--ehdr-logo, 44px)) !important;
 }
 
-.ehdr__brand-text {
+.ehdr .ehdr__brand-text {
 	font-size: var(--ehdr-brand-size, 1.4rem);
 	font-weight: 800;
 	letter-spacing: -0.01em;
@@ -345,7 +395,17 @@
  * It is carried on the item, not the link, so an item with a panel keeps its
  * underline while the panel is open and the pointer has moved down into it.
  */
-.ehdr__link {
+/*
+ * Two classes, and not for tidiness -- the same fight the button had.
+ *
+ * Themes and Elementor kits ship `.elementor a { color: ... }` and
+ * `.elementor a:hover { ... }`, which are two classes each and beat a bare
+ * `.ehdr__link`. The menu's colour controls appeared to do nothing because of
+ * it: whatever you picked was written to a custom property the theme's rule
+ * then overrode. Anything here that sets a colour a theme also sets is scoped
+ * this way.
+ */
+.ehdr .ehdr__link {
 	position: relative;
 	display: inline-flex;
 	align-items: center;
@@ -379,9 +439,9 @@
 	transition: transform var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
-.ehdr__link:hover,
-.ehdr__link:focus-visible,
-.ehdr__item[data-ehdr-on] > .ehdr__link {
+.ehdr .ehdr__link:hover,
+.ehdr .ehdr__link:focus-visible,
+.ehdr .ehdr__item[data-ehdr-on] > .ehdr__link {
 	color: var(--ehdr-ink-hover, #00a55d);
 }
 
@@ -723,7 +783,7 @@
  * the thing that reacts to the pointer are the same shape -- text that shifts
  * inside a still box reads as the box being broken.
  */
-.ehdr__panel-link {
+.ehdr .ehdr__panel-link {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -741,8 +801,8 @@
 		transform var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
-.ehdr__panel-link:hover,
-.ehdr__panel-link:focus-visible {
+.ehdr .ehdr__panel-link:hover,
+.ehdr .ehdr__panel-link:focus-visible {
 	background: var(--ehdr-panel-link-bg, rgba(0, 165, 93, 0.08));
 	color: var(--ehdr-ink-hover, #00a55d);
 	transform: translateX(var(--ehdr-panel-link-slide, 4px));
@@ -781,7 +841,7 @@
 	transform: translateX(0);
 }
 
-.ehdr__blurb {
+.ehdr .ehdr__blurb {
 	margin: 0;
 	color: var(--ehdr-muted, #5b7794);
 	font-size: var(--ehdr-blurb-size, 1rem);
@@ -865,7 +925,7 @@
 
 /* ------------------------------------------------------------ the burger --- */
 
-.ehdr__burger {
+.ehdr .ehdr__burger {
 	display: none;
 	flex: 0 0 auto;
 	width: 44px;
@@ -937,12 +997,13 @@
 		width: 100%;
 		max-width: none;
 		margin: 0;
+		transform: translateY(0);
 		padding-left: var(--ehdr-pad-x-mobile, 20px);
 		padding-right: var(--ehdr-pad-x-mobile, 20px);
 		border-radius: 0;
 	}
 
-	.ehdr__burger {
+	.ehdr .ehdr__burger {
 		display: block;
 		margin-left: auto;
 	}
@@ -1028,7 +1089,7 @@
 		border-bottom: 0;
 	}
 
-	.ehdr__link {
+	.ehdr .ehdr__link {
 		width: 100%;
 		justify-content: space-between;
 		padding: 16px 0;
@@ -1090,11 +1151,11 @@
 	   a list of links and nothing else, because everything else pushes the
 	   links people came for off the bottom of the screen. */
 	.ehdr__figure,
-	.ehdr__blurb {
+	.ehdr .ehdr__blurb {
 		display: none;
 	}
 
-	.ehdr__panel-link {
+	.ehdr .ehdr__panel-link {
 		padding: 11px 12px;
 	}
 
@@ -1185,8 +1246,8 @@
 		transition: none;
 	}
 
-	.ehdr__panel-link:hover,
-	.ehdr__panel-link:focus-visible {
+	.ehdr .ehdr__panel-link:hover,
+	.ehdr .ehdr__panel-link:focus-visible {
 		transform: none;
 	}
 }
