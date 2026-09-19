@@ -118,13 +118,17 @@ function check(name, ok, detail) {
     const w = () => Math.round(bar.getBoundingClientRect().width);
     const settle = () => new Promise(r => setTimeout(r, 800));
 
+    const box = () => bar.getBoundingClientRect();
+
     for (let y = 900; y <= 1800; y += 150) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 90)); }
     await settle();
-    const down = w();
+    const b1 = box();
+    const down = { w: w(), offScreen: b1.bottom <= 0 };
 
     for (let y = 1650; y >= 900; y -= 150) { window.scrollTo(0, y); await new Promise(r => setTimeout(r, 90)); }
     await settle();
-    const up = w();
+    const b2 = box();
+    const up = { w: w(), top: Math.round(b2.top), onScreen: b2.top >= 0 };
 
     return { down, up, at: 900, full: window.innerWidth };
   });
@@ -138,19 +142,78 @@ function check(name, ok, detail) {
    * plain full-width header; turning round to go back -- which is what you do
    * when you want the menu -- is what summons the folded one.
    */
-  check('scrolling down keeps the plain full-width header',
-    direction.down === direction.full,
-    direction.down + 'px of ' + direction.full + ' at y=' + 1800);
+  check('scrolling down takes the header off the screen entirely',
+    direction.down.offScreen,
+    direction.down.offScreen ? 'gone at y=1800' : 'still showing');
 
-  check('and scrolling back up folds it',
-    direction.up < direction.full - 40,
-    direction.up + 'px at y=' + direction.at);
+  check('and scrolling back up brings it in, already folded',
+    direction.up.onScreen && direction.up.w < direction.full - 40,
+    direction.up.w + 'px at top=' + direction.up.top + ', y=' + direction.at);
 
   const backAtTop = await page.evaluate(async () => {
     window.scrollTo(0, 0);
     await new Promise(r => setTimeout(r, 900));
     return Math.round(document.querySelector('.ehdr__bar').getBoundingClientRect().width);
   });
+  /*
+   * It slides, it does not jump. The hide is a transform, so this is the one
+   * part of the movement that is free -- but it still has to be eased rather
+   * than snapped, and a missing transition looks identical in a screenshot.
+   */
+  const reveal = await page.evaluate(async () => {
+    window.scrollTo(0, 1400);
+    await new Promise(r => setTimeout(r, 900));
+    const bar = document.querySelector('.ehdr__bar');
+    const rows = [];
+    let stop = false;
+    const tick = () => { rows.push(bar.getBoundingClientRect().top); if (!stop) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+    await new Promise(r => setTimeout(r, 60));
+    window.scrollTo(0, 900);
+    await new Promise(r => setTimeout(r, 1200));
+    stop = true;
+    const u = [];
+    rows.forEach(v => { if (!u.length || Math.abs(u[u.length - 1] - v) > 0.4) u.push(v); });
+    const steps = u.slice(1).map((v, i) => Math.abs(v - u[i]));
+    return { count: u.length, biggest: Math.max.apply(null, steps),
+      span: Math.abs(u[0] - u[u.length - 1]) };
+  });
+  check('and it slides in rather than appearing',
+    reveal.count > 8 && reveal.biggest < reveal.span * 0.3,
+    reveal.count + ' positions over ' + Math.round(reveal.span) +
+      'px, biggest single frame ' + Math.round(reveal.biggest) + 'px');
+
+  /*
+   * Opening a panel has to bring a hidden header back with it.
+   *
+   * Driven at the state level rather than by scrolling a panel out of view:
+   * scrolling moves elements under a stationary cursor, which fires real
+   * mouseleave events and closes the panel before the assertion is reached --
+   * and a hidden header cannot be hovered at all, which is rather the point.
+   */
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await sleep(800);
+  const held = await page.evaluate(async () => {
+    const root = document.querySelector('.ehdr');
+    const item = document.querySelectorAll('.ehdr__item')[2];
+
+    root.setAttribute('data-ehdr-hidden', '');
+    item.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
+    await new Promise(r => setTimeout(r, 500));
+
+    const out = { open: root.hasAttribute('data-ehdr-open'),
+      hidden: root.hasAttribute('data-ehdr-hidden'),
+      top: Math.round(root.querySelector('.ehdr__bar').getBoundingClientRect().top) };
+
+    item.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
+    await new Promise(r => setTimeout(r, 400));
+
+    return out;
+  });
+  check('opening a panel brings a hidden header back with it',
+    held.open && !held.hidden && held.top >= 0,
+    'open=' + held.open + ', hidden=' + held.hidden + ', top=' + held.top);
+
   check('the very top is always full width',
     backAtTop === direction.full,
     backAtTop + 'px of ' + direction.full);

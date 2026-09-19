@@ -406,15 +406,16 @@ class Mega_Header_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
-			'fold_when',
+			'scroll_mode',
 			array(
-				'label'       => esc_html__( 'The folded bar appears', 'numbered-accordion' ),
-				'description' => esc_html__( 'Scrolling up is the one to have: reading down the page gets the plain full-width header, and going back up -- which is what you do when you want the menu -- is what summons the folded one. The top of the page is always full width either way.', 'numbered-accordion' ),
+				'label'       => esc_html__( 'What it does as you scroll', 'numbered-accordion' ),
+				'description' => esc_html__( 'Getting out of the way is the one to have. The header slides up and off while you read down the page, and slides back in -- already folded -- the moment you turn round, because coming back up is when you want the menu. The top of the page is always the full-width bar, on show.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SELECT,
-				'default'     => 'up',
+				'default'     => 'hide',
 				'options'     => array(
-					'up'   => esc_html__( 'When scrolling back up', 'numbered-accordion' ),
-					'down' => esc_html__( 'When scrolling down', 'numbered-accordion' ),
+					'hide' => esc_html__( 'Get out of the way, and come back folded', 'numbered-accordion' ),
+					'up'   => esc_html__( 'Stay put, fold when scrolling up', 'numbered-accordion' ),
+					'down' => esc_html__( 'Stay put, fold when scrolling down', 'numbered-accordion' ),
 				),
 				'condition'   => array( 'fill_mode!' => 'none' ),
 			)
@@ -1495,7 +1496,8 @@ class Mega_Header_Widget extends Widget_Base {
 
 		$grab = $this->slider( $settings, 'grab', 60, 10, 400 );
 
-		$foldWhen = isset( $settings['fold_when'] ) && 'down' === $settings['fold_when'] ? 'down' : 'up';
+		$scrollMode = isset( $settings['scroll_mode'] ) ? $settings['scroll_mode'] : 'hide';
+		$scrollMode = in_array( $scrollMode, array( 'hide', 'up', 'down' ), true ) ? $scrollMode : 'hide';
 		$step = $this->slider( $settings, 'scramble_step', 45, 15, 140 );
 
 		$ctaFill = isset( $settings['cta_fill'] ) && 'solid' === $settings['cta_fill'] ? 'solid' : 'gradient';
@@ -1514,7 +1516,7 @@ class Mega_Header_Widget extends Widget_Base {
 			data-ehdr-intent="<?php echo esc_attr( (string) $intent ); ?>"
 			data-ehdr-stick-at="<?php echo esc_attr( (string) $stickAt ); ?>"
 			data-ehdr-grab="<?php echo esc_attr( (string) $grab ); ?>"
-			data-ehdr-fold="<?php echo esc_attr( $foldWhen ); ?>"
+			data-ehdr-scroll="<?php echo esc_attr( $scrollMode ); ?>"
 			data-ehdr-scramble-step="<?php echo esc_attr( (string) $step ); ?>"
 			<?php echo '' !== $preview ? ' data-ehdr-preview="' . esc_attr( $preview ) . '"' : ''; ?>
 		>

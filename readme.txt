@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.27.0
+Stable tag: 2.28.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,18 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.28.0 =
+* **The header now gets out of the way.** It slides up and off the screen
+  while you read down the page, and slides back in -- already folded -- the
+  moment you turn round, because coming back up is when you want the menu. The
+  top of the page is always the full-width bar, on show.
+* The slide is a transform, so it is composited and free: measured frame by
+  frame it moves in 24 steps with a largest single frame of 12px.
+* Opening a panel brings a hidden header back with it, and it never hides while
+  one is open.
+* "What it does as you scroll" has the two previous behaviours as options:
+  stay put and fold on the way up, or stay put and fold on the way down.
 
 = 2.27.0 =
 * The menu colour now actually applies. Two attempts at winning on specificity

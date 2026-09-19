@@ -23,6 +23,7 @@
 	var OPEN = 'data-ehdr-open';
 	var STUCK = 'data-ehdr-stuck';
 	var DRAWER = 'data-ehdr-drawer';
+	var HIDDEN = 'data-ehdr-hidden';
 
 	function toArray( list ) {
 		return Array.prototype.slice.call( list || [] );
@@ -81,7 +82,11 @@
 		 *
 		 * Either way the very top of the page is always the full-width state.
 		 */
-		var foldWhen = root.getAttribute( 'data-ehdr-fold' ) === 'down' ? 'down' : 'up';
+		var scrollMode = root.getAttribute( 'data-ehdr-scroll' ) || 'hide';
+
+		if ( 'hide' !== scrollMode && 'up' !== scrollMode && 'down' !== scrollMode ) {
+			scrollMode = 'hide';
+		}
 		var reduced = prefersReducedMotion();
 
 		// A panel that opens on a delay must not open after the pointer has
@@ -166,6 +171,8 @@
 
 			if ( item ) {
 				root.setAttribute( OPEN, '' );
+				root.removeAttribute( HIDDEN );
+				hidden = false;
 			} else {
 				root.removeAttribute( OPEN );
 			}
@@ -430,6 +437,7 @@
 		var lastY = window.pageYOffset || document.documentElement.scrollTop || 0;
 		var travel = 0;
 		var compactWidth = 0;
+		var hidden = false;
 
 		function onScroll() {
 			var y = window.pageYOffset || document.documentElement.scrollTop || 0;
@@ -445,23 +453,52 @@
 			travel += delta;
 
 			var now = stuck;
+			var away = hidden;
 			var goingDown = travel > grab;
 			var goingUp = travel < -grab;
 
 			if ( y <= stickAt ) {
-				// The top of the page is always the full-width state, whatever
-				// the last gesture was.
+				// The top of the page is always the full-width state, on show,
+				// whatever the last gesture was.
 				now = false;
-			} else if ( 'up' === foldWhen ) {
+				away = false;
+			} else if ( 'hide' === scrollMode ) {
+				/*
+				 * Out of the way on the way down, back on the way up.
+				 *
+				 * It comes back already folded rather than full width: coming
+				 * back up the page is when you want the menu, and the folded
+				 * bar is the one that says so.
+				 */
+				if ( goingDown ) {
+					away = true;
+					now = true;
+				} else if ( goingUp ) {
+					away = false;
+					now = true;
+				}
+			} else if ( 'up' === scrollMode ) {
+				away = false;
+
 				if ( goingUp ) {
 					now = true;
 				} else if ( goingDown ) {
 					now = false;
 				}
-			} else if ( goingDown ) {
-				now = true;
-			} else if ( goingUp ) {
-				now = false;
+			} else {
+				away = false;
+
+				if ( goingDown ) {
+					now = true;
+				} else if ( goingUp ) {
+					now = false;
+				}
+			}
+
+			// Never hidden with a panel open -- that would take the panel with
+			// it, and something you just opened must not leave on its own.
+			if ( current ) {
+				away = false;
 			}
 
 			/*
@@ -477,6 +514,16 @@
 			 */
 			if ( now && compactWidth > 0 && compactWidth > window.innerWidth ) {
 				now = false;
+			}
+
+			if ( away !== hidden ) {
+				hidden = away;
+
+				if ( away ) {
+					root.setAttribute( HIDDEN, '' );
+				} else {
+					root.removeAttribute( HIDDEN );
+				}
 			}
 
 			if ( now === stuck ) {

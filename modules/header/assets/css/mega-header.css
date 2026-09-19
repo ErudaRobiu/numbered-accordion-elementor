@@ -292,6 +292,26 @@
 }
 
 /*
+ * Gone, on the way down.
+ *
+ * The bar slides up out of the way while you are reading down the page and
+ * comes back the moment you turn round -- already folded, because coming back
+ * up is when you want the menu.
+ *
+ * The transform is on the bar, not on .ehdr. Transforming .ehdr would make it
+ * the containing block for the scrim inside it, and a `position: fixed` scrim
+ * anchored to the header is the size of the header rather than the size of the
+ * window. The bar is the scrim's sibling, so moving it is free.
+ *
+ * -100% clears the bar's own height; the gap it would otherwise be holding is
+ * part of the same transform, so the two interpolate as one movement instead
+ * of fighting over the property.
+ */
+.ehdr[data-ehdr-hidden] .ehdr__bar {
+	transform: translateY(-100%);
+}
+
+/*
  * A bar that has come away from the top cannot keep a square bottom while a
  * panel hangs off it: the panel is a separate box and the two would meet at a
  * rounded edge with a straight one under it.

@@ -477,6 +477,9 @@ script-blocked fallback, against `tests/browser/header.html`.
 - [ ] **The change eases the whole way.** Watch the first moment especially: a
       jump followed by a smooth glide means the width is snapping to an
       intrinsic size before it animates
+- [ ] **Scrolling down takes the header off the screen entirely**, and turning
+      round brings it straight back, already folded. It should slide, not blink
+- [ ] Open a panel, then scroll: the header must not slide away underneath it
 - [ ] "Goes back to full width" set to **Only at the top** keeps it compact
       while you scroll up mid-page, and restores it when you reach the top.
       Set to **Whenever you scroll up** it comes back on any upward scroll
