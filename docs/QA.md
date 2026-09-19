@@ -313,6 +313,11 @@ a real site.
       and the panel is gone. Nothing scrolls sideways
 - [ ] The highlight still runs on a phone, and an item's words finish while
       its picture is still on the way up rather than long after
+- [ ] **Each stacked picture has the notch along its top edge**, and it
+      travels as you scroll that item past. Down the side is the desktop one
+- [ ] "Notch depth on a phone" and "Notch length on a phone" change it. If the
+      notch looks flat against both corners, its length is longer than the
+      picture's edge can hold
 - [ ] Widen the browser again: every picture goes back into the panel, in the
       right order, and the pinning works as before
 - [ ] "Picture shape", "Space above the picture" and the phone item spacing
@@ -454,3 +459,18 @@ two targets, against `tests/browser/spin.html`.
 - [ ] With Reduce Motion on nothing turns, and the lift still works
 - [ ] With JavaScript disabled it still turns, from the stylesheet, and simply
       does not slow down
+
+## Performance
+
+`node tests/browser/bench.js` puts every widget on one page and reports what
+they cost. Run it after touching anything that happens on scroll.
+
+- [ ] `getComputedStyle calls` stays at zero per frame. One of those in a
+      scroll loop is a style recalculation the browser did not need to do
+- [ ] `layouts` stays in the tens, not the hundreds. Hundreds means something
+      is reading a geometric property after writing a style
+- [ ] `total work` does not climb. It was 331ms before 2.19.0 and is 111ms now
+- [ ] On a real mid-range phone, scroll the whole page: no stutter through the
+      story, the rail, or past a spinning image
+- [ ] Two or three of these widgets on one page still scroll smoothly. One on
+      its own proves nothing

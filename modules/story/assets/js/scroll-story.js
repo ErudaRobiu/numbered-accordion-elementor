@@ -78,13 +78,41 @@
 	 * @param {number} radius   Corner radius.
 	 * @return {string} An SVG path.
 	 */
-	function notchPath( w, h, depth, run, progress, span, radius ) {
+	function notchPath( w, h, depth, run, progress, span, radius, across ) {
+		/*
+		 * Along the top instead of down the side.
+		 *
+		 * The shape is the same shape; only the axis differs. Rather than
+		 * write it twice, the whole path is built for a vertical edge on a box
+		 * with its sides swapped, and every point is reflected across the
+		 * diagonal on the way out. A reflection turns an arc inside out, so
+		 * the sweep flag is flipped with it.
+		 *
+		 * This is what lets a phone have the notch at all: stacked, a picture
+		 * is wide and short, and a notch down its left edge would have nowhere
+		 * to travel.
+		 */
+		if ( across ) {
+			var swapped = w;
+			w = h;
+			h = swapped;
+		}
+
 		var r = 0.939 * depth;
 		var arcRise = 0.4933 * depth;
 		var arcRun = 0.1405 * depth;
 		var diagRise = 1.1633 * depth;
 		var transition = 2.15 * depth;
 		var c = Math.max( 0, Math.min( radius, w / 2, h / 2 ) );
+
+		function at( x, y ) {
+			return across ? y.toFixed( 2 ) + ',' + x.toFixed( 2 ) : x.toFixed( 2 ) + ',' + y.toFixed( 2 );
+		}
+
+		function arc( radius2, sweep, x, y ) {
+			return 'A ' + radius2.toFixed( 2 ) + ',' + radius2.toFixed( 2 ) + ' 0 0 ' +
+				( across ? 1 - sweep : sweep ) + ' ' + at( x, y );
+		}
 
 		// The band lives between the corner arcs, not between the corners.
 		var usable = Math.max( 0, h - c * 2 );
@@ -112,23 +140,23 @@
 		// Round the top, down the right, round the bottom, then up the left
 		// edge, into the notch, along it, and back out.
 		return [
-			'M ' + c.toFixed( 2 ) + ',0',
-			'L ' + ( w - c ).toFixed( 2 ) + ',0',
-			'A ' + c.toFixed( 2 ) + ',' + c.toFixed( 2 ) + ' 0 0 1 ' + w + ',' + c.toFixed( 2 ),
-			'L ' + w + ',' + ( h - c ).toFixed( 2 ),
-			'A ' + c.toFixed( 2 ) + ',' + c.toFixed( 2 ) + ' 0 0 1 ' + ( w - c ).toFixed( 2 ) + ',' + h,
-			'L ' + c.toFixed( 2 ) + ',' + h,
-			'A ' + c.toFixed( 2 ) + ',' + c.toFixed( 2 ) + ' 0 0 1 0,' + ( h - c ).toFixed( 2 ),
-			'L 0,' + bottom.toFixed( 2 ),
-			'A ' + r.toFixed( 2 ) + ',' + r.toFixed( 2 ) + ' 0 0 1 ' + arcRun.toFixed( 2 ) + ',' + ( bottom - arcRise ).toFixed( 2 ),
-			'L ' + ( depth - arcRun ).toFixed( 2 ) + ',' + ( bottom - arcRise - diagRise ).toFixed( 2 ),
-			'A ' + r.toFixed( 2 ) + ',' + r.toFixed( 2 ) + ' 0 0 0 ' + depth.toFixed( 2 ) + ',' + ( bottom - transition ).toFixed( 2 ),
-			'L ' + depth.toFixed( 2 ) + ',' + ( top + transition ).toFixed( 2 ),
-			'A ' + r.toFixed( 2 ) + ',' + r.toFixed( 2 ) + ' 0 0 0 ' + ( depth - arcRun ).toFixed( 2 ) + ',' + ( top + arcRise + diagRise ).toFixed( 2 ),
-			'L ' + arcRun.toFixed( 2 ) + ',' + ( top + arcRise ).toFixed( 2 ),
-			'A ' + r.toFixed( 2 ) + ',' + r.toFixed( 2 ) + ' 0 0 1 0,' + top.toFixed( 2 ),
-			'L 0,' + c.toFixed( 2 ),
-			'A ' + c.toFixed( 2 ) + ',' + c.toFixed( 2 ) + ' 0 0 1 ' + c.toFixed( 2 ) + ',0',
+			'M ' + at( c, 0 ),
+			'L ' + at( w - c, 0 ),
+			arc( c, 1, w, c ),
+			'L ' + at( w, h - c ),
+			arc( c, 1, w - c, h ),
+			'L ' + at( c, h ),
+			arc( c, 1, 0, h - c ),
+			'L ' + at( 0, bottom ),
+			arc( r, 1, arcRun, bottom - arcRise ),
+			'L ' + at( depth - arcRun, bottom - arcRise - diagRise ),
+			arc( r, 0, depth, bottom - transition ),
+			'L ' + at( depth, top + transition ),
+			arc( r, 0, depth - arcRun, top + arcRise + diagRise ),
+			'L ' + at( arcRun, top + arcRise ),
+			arc( r, 1, 0, top ),
+			'L ' + at( 0, c ),
+			arc( c, 1, c, 0 ),
 			'Z',
 		].join( ' ' );
 	}
@@ -248,7 +276,7 @@
 	 * @param {number}  tail Upper line, as a fraction of the viewport.
 	 * @return {number}
 	 */
-	function progressOf( item, lead, tail ) {
+	function progressOf( item, lead, tail, slide ) {
 		var height = viewportHeight();
 		var rect = item.getBoundingClientRect();
 
@@ -262,7 +290,6 @@
 		 * before, and the sweep would simply be late. The picture is the
 		 * bottom of the item, so the text ends where it begins.
 		 */
-		var slide = item.querySelector( '.estry__slide' );
 		var words = slide ? slide.getBoundingClientRect().top - rect.top : rect.height;
 		var travel = words + height * ( lead - tail );
 
@@ -393,7 +420,7 @@
 				} );
 			}
 
-			return { item: item, chars: chars, lit: 0 };
+			return { item: item, chars: chars, lit: 0, slide: null };
 		} );
 
 		root.setAttribute( READY, '' );
@@ -428,11 +455,132 @@
 			return found;
 		} );
 
+		/**
+		 * Give every stacked picture a notch of its own, along its top edge.
+		 */
+		function buildAcross() {
+			clearAcross();
+
+			entries.forEach( function ( entry ) {
+				if ( ! entry.slide ) {
+					return;
+				}
+
+				uid += 1;
+
+				var id = 'estry-across-' + uid;
+				var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+
+				svg.setAttribute( 'width', '0' );
+				svg.setAttribute( 'height', '0' );
+				svg.setAttribute( 'aria-hidden', 'true' );
+				svg.style.position = 'absolute';
+
+				var defs = document.createElementNS( 'http://www.w3.org/2000/svg', 'defs' );
+				var clip = document.createElementNS( 'http://www.w3.org/2000/svg', 'clipPath' );
+
+				clip.setAttribute( 'id', id );
+				clip.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
+
+				var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+
+				clip.appendChild( path );
+				defs.appendChild( clip );
+				svg.appendChild( defs );
+				entry.slide.parentNode.insertBefore( svg, entry.slide );
+
+				entry.slide.style.clipPath = 'url(#' + id + ')';
+				entry.slide.style.webkitClipPath = 'url(#' + id + ')';
+
+				acrossPaths.push( {
+					path: path,
+					svg: svg,
+					slide: entry.slide,
+					w: entry.slide.offsetWidth,
+					h: entry.slide.offsetHeight,
+					d: '',
+				} );
+			} );
+		}
+
+		function clearAcross() {
+			acrossPaths.forEach( function ( one ) {
+				one.slide.style.clipPath = '';
+				one.slide.style.webkitClipPath = '';
+
+				if ( one.svg.parentNode ) {
+					one.svg.parentNode.removeChild( one.svg );
+				}
+			} );
+
+			acrossPaths = [];
+		}
+
 		var current = -1;
 		var shown = -1;
 		var zTop = 0;
 		var leaveTimer = null;
 		var stacked = null;
+
+		/*
+		 * The notch on a phone.
+		 *
+		 * Stacked, a picture is wide and short: a notch down its left edge
+		 * would have almost nowhere to travel, so it runs along the top
+		 * instead, and travels with that item's own reading rather than with
+		 * the section's. Each picture needs a clip path of its own -- they are
+		 * separate boxes now, not one frame -- so one is built per slide when
+		 * the layout changes and thrown away when it changes back.
+		 *
+		 * Width and height are taken then too. Nothing about them changes
+		 * while scrolling, and reading them per frame per picture is exactly
+		 * the cost this pass was spent removing.
+		 */
+		var acrossPaths = [];
+
+		/*
+		 * Everything the notch needs, read once.
+		 *
+		 * These were being read with getComputedStyle inside the scroll loop:
+		 * six calls a frame, each one a style recalculation the browser did
+		 * not need to do. None of them can change without a resize or an
+		 * editor re-render, both of which come back through here anyway.
+		 */
+		var notch = {
+			depth: 30,
+			run: 280,
+			/*
+			 * A phone's picture is wide and short, and the desktop numbers do
+			 * not fit it: a 280px straight run plus two 65px shoulders is more
+			 * than a 310px edge has, so the band is clamped flat against both
+			 * corners and has nowhere left to travel. Its own, smaller, pair.
+			 */
+			depthAcross: 18,
+			runAcross: 90,
+			span: 0.4,
+			radius: 16,
+			width: 0,
+			stroke: 'transparent',
+			d: '',
+			w: 0,
+			h: 0,
+		};
+
+		function readNotch() {
+			if ( ! frame ) {
+				return;
+			}
+
+			notch.depth = readNumber( frame, '--estry-notch', 30 );
+			notch.run = readNumber( frame, '--estry-band-size', 280 );
+			notch.depthAcross = readNumber( root, '--estry-notch-mobile', 18 );
+			notch.runAcross = readNumber( root, '--estry-band-mobile', 90 );
+			notch.span = readNumber( frame, '--estry-notch-travel', 40 ) / 100;
+			notch.radius = readNumber( frame, '--estry-radius', 16 );
+			notch.width = readNumber( frame, '--estry-media-bw', 0 );
+			notch.stroke = ( window.getComputedStyle( frame ).getPropertyValue( '--estry-media-border' ) || '' ).trim() || 'transparent';
+			notch.d = '';
+		}
 
 		function isNarrow() {
 			return (
@@ -468,6 +616,7 @@
 
 					if ( item ) {
 						item.appendChild( slide );
+						entries[ owners[ i ] ].slide = slide;
 					}
 
 					slide.classList.remove( 'is-entering', 'is-instant', 'is-leaving' );
@@ -476,14 +625,27 @@
 				} );
 
 				root.setAttribute( 'data-estry-stacked', '' );
+
+				if ( notched ) {
+					// After the attribute, so the pictures are laid out as the
+					// stacked rules leave them before anything is measured.
+					window.requestAnimationFrame( buildAcross );
+				}
+
 				return;
 			}
+
+			clearAcross();
 
 			// Appended in their own order, so the stack is rebuilt as it was.
 			slides.forEach( function ( slide ) {
 				if ( frame ) {
 					frame.appendChild( slide );
 				}
+			} );
+
+			entries.forEach( function ( entry ) {
+				entry.slide = null;
 			} );
 
 			root.removeAttribute( 'data-estry-stacked' );
@@ -584,7 +746,9 @@
 			var reached = 0;
 
 			entries.forEach( function ( entry, i ) {
-				var progress = progressOf( entry.item, lead, tail );
+				// Only a stacked item has a picture of its own inside it, and
+				// only then does the sweep have to stop short of one.
+				var progress = progressOf( entry.item, lead, tail, stacked ? entry.slide : null );
 
 				if ( ! reduced && entry.chars.length ) {
 					setLit( entry, Math.round( progress * entry.chars.length ) );
@@ -592,6 +756,21 @@
 
 				if ( progress > switchAt ) {
 					reached = i;
+				}
+
+				// The phone's notch travels with the item it belongs to, and
+				// the numbers it needs were all taken when the layout changed.
+				if ( stacked && acrossPaths[ i ] ) {
+					var one = acrossPaths[ i ];
+					var across = notchPath(
+						one.w, one.h, notch.depthAcross, notch.runAcross,
+						progress, notch.span, notch.radius, true
+					);
+
+					if ( across !== one.d ) {
+						one.d = across;
+						one.path.setAttribute( 'd', across );
+					}
 				}
 			} );
 
@@ -616,29 +795,34 @@
 			// The notch travels with how far you are through the section.
 			if ( clipPath && frame ) {
 				var rect = root.getBoundingClientRect();
-				var span = rect.height - viewportHeight();
-				var through = span > 0 ? clamp01( -rect.top / span ) : 0;
+				var runway = rect.height - viewportHeight();
+				var through = runway > 0 ? clamp01( -rect.top / runway ) : 0;
 				var box = frame.getBoundingClientRect();
 				var w = Math.round( box.width );
 				var h = Math.round( box.height );
-				var depth = readNumber( frame, '--estry-notch', 30 );
-				var run = readNumber( frame, '--estry-band-size', 280 );
-				var span = readNumber( frame, '--estry-notch-travel', 40 ) / 100;
-				var corner = readNumber( frame, '--estry-radius', 16 );
-				var d = notchPath( w, h, depth, run, through, span, corner );
+				var d = notchPath( w, h, notch.depth, notch.run, through, notch.span, notch.radius, false );
 
-				clipPath.setAttribute( 'd', d );
+				/*
+				 * Only write when it has actually moved. A path rounded to
+				 * hundredths does not change on most frames of a slow scroll,
+				 * and every setAttribute on a clip path costs a style
+				 * recalculation whether the value differs or not.
+				 */
+				if ( d !== notch.d ) {
+					notch.d = d;
+					clipPath.setAttribute( 'd', d );
 
-				if ( outline ) {
-					var width = readNumber( frame, '--estry-media-bw', 0 );
+					if ( outline ) {
+						outline.setAttribute( 'd', d );
 
-					outline.setAttribute( 'd', d );
-					outline.setAttribute( 'stroke-width', String( width * 2 ) );
-					outline.setAttribute(
-						'stroke',
-						( window.getComputedStyle( frame ).getPropertyValue( '--estry-media-border' ) || '' ).trim() || 'transparent'
-					);
-					outline.parentNode.setAttribute( 'viewBox', '0 0 ' + w + ' ' + h );
+						if ( w !== notch.w || h !== notch.h ) {
+							notch.w = w;
+							notch.h = h;
+							outline.setAttribute( 'stroke-width', String( notch.width * 2 ) );
+							outline.setAttribute( 'stroke', notch.stroke );
+							outline.parentNode.setAttribute( 'viewBox', '0 0 ' + w + ' ' + h );
+						}
+					}
 				}
 			}
 		}
@@ -659,10 +843,18 @@
 		}
 
 		function onResize() {
+			readNotch();
 			restack();
+
+			// A picture that changed width has a notch built for the old one.
+			if ( stacked && notched ) {
+				buildAcross();
+			}
+
 			onScroll();
 		}
 
+		readNotch();
 		restack();
 		update();
 		window.addEventListener( 'scroll', onScroll, { passive: true } );

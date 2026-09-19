@@ -1,0 +1,176 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eruda Toolkit bench</title>
+<link rel="stylesheet" href="../../modules/story/assets/css/scroll-story.css">
+<link rel="stylesheet" href="../../modules/rail/assets/css/scroll-rail.css">
+<link rel="stylesheet" href="../../modules/badge/assets/css/spin.css">
+<style>
+/* Everything on one page at once, which is the case that actually matters:
+   a section that animates is cheap on its own and expensive in company. */
+
+ body{font:16px/1.6 system-ui;margin:0 auto;padding:0 40px;max-width:1280px}
+ .estry{--estry-media-bw:3px;--estry-media-border:#052424;--estry-h-lit:#052424;--estry-b-lit:#3a4a4a;--estry-radius:44px}
+ .estry__title{font-size:2.4rem;line-height:1.1}
+ .estry__body{font-size:1.25rem}
+ .pad{height:60vh}
+
+ /*
+  * A hostile theme, on purpose. Nearly every WordPress theme ships the first
+  * of these and plenty of Elementor themes ship something like the second;
+  * either one used to be enough to shrink the media off the panel and leave
+  * the panel's background showing as a band. If the media still fills under
+  * this, it fills anywhere.
+  */
+ img,video{max-width:100%;height:auto}
+ .estry img,.estry video{width:auto;height:auto;object-fit:contain;max-height:60%}
+
+
+ body{font:16px/1.6 system-ui;margin:0;background:#080d12;color:#fff}
+ .pad{height:120vh}
+ /* A section shaped like a real one: eyebrow, heading and copy above the row,
+    all of it inside the element the rail is asked to hold still. */
+ .demo{padding:64px 0}
+ .demo__head{display:grid;grid-template-columns:1fr 1fr;gap:64px;padding:0 40px 56px}
+ /* One gutter for the whole section, the way a real one is built: the cards,
+    the words and the footer all measure from it. */
+ @media (max-width:1024px){
+   .demo{padding-inline:20px}
+   .demo__head{grid-template-columns:1fr;gap:24px;padding:0 0 32px}
+   .demo__h{font-size:30px}}
+ .demo__eyebrow{display:inline-block;border:1px solid #2f7d4f;border-radius:999px;padding:8px 16px;
+   font:700 13px/1 system-ui;letter-spacing:.08em;text-transform:uppercase;color:#4ade80;margin-bottom:24px}
+ .demo__h{font:800 44px/1.05 system-ui;margin:0;text-transform:uppercase}
+ .demo__p{color:#9fb0bf;margin:0}
+ .erail{--erail-card:420px;--erail-gap:28px;--erail-lead:64px;--erail-gutter:20px}
+ .erail__title{font-size:2rem}
+
+ /*
+  * A hostile theme, on purpose -- the same block the Scroll Story harness
+  * carries. Either of these used to be enough to shrink a picture off its
+  * card and leave the card's background showing through.
+  */
+ img{max-width:100%;height:auto}
+ .erail img{width:auto;height:auto;object-fit:contain;max-height:50%}
+
+ .elementor-widget-container{display:block}
+ .elementor-widget img{display:block;width:180px;height:180px}
+ .spin-row{display:flex;gap:48px;justify-content:center;padding:80px 20px}
+</style></head><body>
+
+<div class="pad"></div>
+<div class="estry"
+     data-estry-lead="0.85" data-estry-tail="0.45" data-estry-switch="0.15"
+     data-estry-transition="reveal" style="--estry-drift-to:1.06">
+ <div class="estry__items">
+  <div class="estry__item">
+   <span class="estry__eyebrow"><span class="estry__dot" aria-hidden="true"></span><span class="estry__eyebrow-text">Yard execution</span></span>
+   <h3 class="estry__title">Orchestrate Yard Execution</h3>
+   <p class="estry__body">Computer vision automates check-in, location and validation gate to dock.</p>
+  </div>
+  <div class="estry__item">
+   <span class="estry__eyebrow"><span class="estry__dot" aria-hidden="true"></span><span class="estry__eyebrow-text">Modular by design</span></span>
+   <h3 class="estry__title">Build the System You Need</h3>
+   <p class="estry__body">Start with the applications you need most, then expand as your operations grow.</p>
+  </div>
+  <div class="estry__item">
+   <span class="estry__eyebrow"><span class="estry__dot" aria-hidden="true"></span><span class="estry__eyebrow-text">Measurable return</span></span>
+   <h3 class="estry__title">Fast Payback</h3>
+   <p class="estry__body">All-inclusive, priced as a service. Measurable payback in months.</p>
+  </div>
+ </div>
+ <div class="estry__media">
+  <div class="estry__frame" data-estry-notch>
+   <!-- Deliberately awkward shapes and sizes: very tall, very wide, and one
+        far smaller than the panel it has to fill. -->
+   <div class="estry__slide" data-estry-for="0"><div class="estry__inner"><img class="estry__img" id="im0" alt="one" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='1400'%3E%3Crect width='400' height='1400' fill='%238a5a3b'/%3E%3C/svg%3E"></div></div>
+   <div class="estry__slide" data-estry-for="1"><div class="estry__inner"><img class="estry__img" id="im1" alt="two" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='400'%3E%3Crect width='1600' height='400' fill='%23244d4d'/%3E%3C/svg%3E"></div></div>
+   <div class="estry__slide" data-estry-for="2"><div class="estry__inner"><img class="estry__img" id="im2" alt="three" width="60" height="40" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='40'%3E%3Crect width='60' height='40' fill='%23101010'/%3E%3C/svg%3E"></div></div>
+  </div>
+ </div>
+</div>
+<div class="pad"></div>
+
+<div class="spin-row">
+<div class="elementor-widget elementor-widget-image espin-yes espin-target-image espin-dir-forward espin-hover-stop" style="--espin-speed:6s"><div class="elementor-widget-container"><img alt="badge 0" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Ccircle cx='90' cy='90' r='86' fill='%232b6b47' stroke='%23fff' stroke-width='6'/%3E%3C/svg%3E"></div></div>
+<div class="elementor-widget elementor-widget-image espin-yes espin-target-image espin-dir-forward espin-hover-stop" style="--espin-speed:7s"><div class="elementor-widget-container"><img alt="badge 1" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Ccircle cx='90' cy='90' r='86' fill='%232b6b47' stroke='%23fff' stroke-width='6'/%3E%3C/svg%3E"></div></div>
+<div class="elementor-widget elementor-widget-image espin-yes espin-target-image espin-dir-forward espin-hover-stop" style="--espin-speed:8s"><div class="elementor-widget-container"><img alt="badge 2" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Ccircle cx='90' cy='90' r='86' fill='%232b6b47' stroke='%23fff' stroke-width='6'/%3E%3C/svg%3E"></div></div>
+</div>
+
+<div class="pad"></div>
+<section class="demo">
+ <div class="demo__head">
+  <div>
+   <span class="demo__eyebrow">Industries served</span>
+   <h2 class="demo__h" id="heading">Solutions for demanding commercial and industrial applications</h2>
+  </div>
+  <div>
+   <p class="demo__p">ThermStar provides waste heat recovery solutions for industrial laundry, food
+   manufacturing, pet food production, foundries, manufacturing, restaurants and commercial kitchens.</p>
+  </div>
+ </div>
+<div class="erail" data-erail-mode="pinned" data-erail-pace="1"
+     data-erail-pause-in="0.3" data-erail-pause-out="0.3"
+     data-erail-pin="section" data-erail-bleed
+     data-erail-centre="auto"
+     data-erail-start="0.8" data-erail-finish="0.8" data-erail-extra="0">
+ <div class="erail__stage">
+  <div class="erail__viewport">
+   <div class="erail__track">
+
+    <a class="erail__card" href="https://example.com/one">
+     <div class="erail__media"><img class="erail__img" alt="one" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='60'%3E%3Crect width='90' height='60' fill='%236b7a88'/%3E%3C/svg%3E"></div>
+     <div class="erail__scrim" aria-hidden="true"></div>
+     <span class="erail__cue" data-erail-cue="right" data-erail-icon="diagonal" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
+     <div class="erail__text"><h3 class="erail__title">Industrial Laundry &amp; Linen</h3><p class="erail__copy">Tunnel washers and dryers running long shifts, venting lint-laden air continuously.</p></div>
+    </a>
+
+    <a class="erail__card" href="https://example.com/two">
+     <div class="erail__media"><img class="erail__img" alt="two" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='400'%3E%3Crect width='1600' height='400' fill='%23415663'/%3E%3C/svg%3E"></div>
+     <div class="erail__scrim" aria-hidden="true"></div>
+     <span class="erail__cue" data-erail-cue="right" data-erail-icon="diagonal" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
+     <div class="erail__text"><h3 class="erail__title">Food &amp; Beverage Processing</h3><p class="erail__copy">Wash-down areas and cook lines that load extraction hard, every shift.</p></div>
+    </a>
+
+    <a class="erail__card" href="https://example.com/three">
+     <div class="erail__media"><img class="erail__img" alt="three" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='1400'%3E%3Crect width='400' height='1400' fill='%232b3a45'/%3E%3C/svg%3E"></div>
+     <div class="erail__scrim" aria-hidden="true"></div>
+     <span class="erail__cue" data-erail-cue="right" data-erail-icon="diagonal" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
+     <div class="erail__text"><h3 class="erail__title">Coating &amp; Finishing</h3><p class="erail__copy">Solvent-laden exhaust that has to be moved, treated and accounted for.</p></div>
+    </a>
+
+    <a class="erail__card" href="https://example.com/four">
+     <div class="erail__media"><img class="erail__img" alt="four" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect width='800' height='1000' fill='%235a6a74'/%3E%3C/svg%3E"></div>
+     <div class="erail__scrim" aria-hidden="true"></div>
+     <span class="erail__cue" data-erail-cue="right" data-erail-icon="diagonal" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
+     <div class="erail__text"><h3 class="erail__title">Warehousing &amp; Logistics</h3><p class="erail__copy">Tall spaces, wide doors and a heat load that moves with the season.</p></div>
+    </a>
+
+    <a class="erail__card" href="https://example.com/five">
+     <div class="erail__media"><img class="erail__img" alt="five" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect width='800' height='1000' fill='%23394852'/%3E%3C/svg%3E"></div>
+     <div class="erail__scrim" aria-hidden="true"></div>
+     <span class="erail__cue" data-erail-cue="right" data-erail-icon="diagonal" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></span>
+     <div class="erail__text"><h3 class="erail__title">Paint &amp; Powder Lines</h3><p class="erail__copy">Booth extraction and cure ovens that never quite run at the same load twice.</p></div>
+    </a>
+
+    <!-- No link: no cue, not an anchor, still a card. -->
+    <div class="erail__card">
+     <div class="erail__media"><img class="erail__img" alt="six" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'%3E%3Crect width='800' height='1000' fill='%23202b33'/%3E%3C/svg%3E"></div>
+     <div class="erail__scrim" aria-hidden="true"></div>
+     <div class="erail__text"><h3 class="erail__title">More Sectors Soon</h3><p class="erail__copy">A card without a link, which must not pretend to open anything.</p></div>
+    </div>
+
+   </div>
+  </div>
+  <div class="erail__foot">
+   <div class="erail__progress" aria-hidden="true"><span></span></div>
+   <p class="erail__count" aria-hidden="true"><b>1</b> / 6</p>
+  </div>
+ </div>
+</div>
+</section>
+<div class="pad" id="after"></div>
+
+<script src="../../modules/story/assets/js/scroll-story.js"></script>
+<script src="../../modules/rail/assets/js/scroll-rail.js"></script>
+<script src="../../modules/badge/assets/js/spin.js"></script>
+</body></html>

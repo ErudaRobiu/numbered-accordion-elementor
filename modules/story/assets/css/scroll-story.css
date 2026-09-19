@@ -296,7 +296,6 @@
 	max-height: none;
 	object-fit: cover !important;
 	object-position: var(--estry-obj-pos, 50% 50%) !important;
-	will-change: transform;
 	transition: transform var(--estry-fade, 900ms) var(--estry-ease, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
@@ -305,9 +304,17 @@
  * It runs on the media, leaving the slide's own transform free for the
  * entrance.
  */
+/*
+ * will-change goes here rather than on every picture in the stack.
+ *
+ * It asks the browser for a compositing layer, and a layer costs memory
+ * whether anything is moving on it or not. One panel has as many slides as the
+ * story has items, and only ever one of them is drifting.
+ */
 .estry__slide[data-estry-on] .estry__img,
 .estry__slide[data-estry-on] .estry__vid {
 	animation: estry-drift var(--estry-drift, 14s) ease-out forwards;
+	will-change: transform;
 }
 
 /* ------------------------------------------------------ what moves where --- */
@@ -532,6 +539,10 @@
 		height: auto;
 		aspect-ratio: var(--estry-ratio-mobile, 1.33);
 		margin-top: var(--estry-media-space-mobile, 24px);
+		/* The corner radius is in the generated path when a notch is on, and
+		   this when it is not. The script's inline clip path wins over the
+		   `none` below, which is only here to clear an entrance shape the
+		   slide would otherwise still be carrying. */
 		border-radius: var(--estry-radius, 16px);
 		clip-path: none;
 		transform: none;

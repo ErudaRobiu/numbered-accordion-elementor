@@ -123,6 +123,12 @@
 	   order not to be clipped by the viewport's overflow. */
 	padding: var(--erail-pad-y, 24px) var(--erail-lead, 0px);
 	width: max-content;
+}
+
+/* Only while the script is moving it. A compositing layer costs memory
+   whether anything is moving on it or not, and on a phone the row is scrolled
+   rather than transformed. */
+.erail[data-erail-ready] .erail__track {
 	will-change: transform;
 }
 

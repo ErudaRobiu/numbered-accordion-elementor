@@ -776,6 +776,33 @@ class Scroll_Story_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'notch_depth_mobile',
+			array(
+				'label'       => esc_html__( 'Notch depth on a phone', 'numbered-accordion' ),
+				'description' => esc_html__( 'Stacked, the notch runs along the top of each picture instead of down its side, and travels with that item rather than with the section. A picture on a phone is wide and short, so it needs its own, smaller, pair of numbers: the desktop ones do not fit the edge and the notch ends up flat against both corners with nowhere to go.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 6, 'max' => 48 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 18 ),
+				'selectors'   => array( '{{WRAPPER}} .estry' => '--estry-notch-mobile: {{SIZE}}px;' ),
+				'condition'   => array( 'notch' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
+			'notch_size_mobile',
+			array(
+				'label'      => esc_html__( 'Notch length on a phone', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 20, 'max' => 240 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 90 ),
+				'selectors'  => array( '{{WRAPPER}} .estry' => '--estry-band-mobile: {{SIZE}}px;' ),
+				'condition'  => array( 'notch' => 'yes' ),
+			)
+		);
+
+		$this->add_control(
 			'radius',
 			array(
 				'label'       => esc_html__( 'Corner radius', 'numbered-accordion' ),

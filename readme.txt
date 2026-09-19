@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.18.0
+Stable tag: 2.19.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,23 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.19.0 =
+* Everything that animates on scroll is about three times cheaper. Values that
+  cannot change between frames -- the notch's measurements, where each card
+  sits in the row -- are now read once instead of on every frame, and nothing
+  is written unless it has actually changed. Measured with every widget on one
+  page: the work per scroll went from 331ms to 111ms, forced layouts from 478
+  to 37, and the page holds 60 frames a second where it had been dropping to
+  30. On a phone that is the difference between six milliseconds a frame and
+  two.
+* Compositing layers are now asked for only while something is moving on them,
+  rather than for every picture in a panel and for the carousel even on a
+  phone where it is scrolled rather than moved.
+* Scroll Story: the notch now appears on a phone too, running along the top of
+  each picture instead of down its side, and travelling with the item it
+  belongs to. New "Notch depth on a phone" and "Notch length on a phone"
+  settings, since a wide short picture cannot hold the desktop proportions.
 
 = 2.18.0 =
 * Scroll Rail is properly built for a phone. The row now runs edge to edge

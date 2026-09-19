@@ -16,6 +16,7 @@ node tests/browser/probe.js         # text animation presets
 node tests/browser/story-probe.js   # Scroll Story
 node tests/browser/rail-probe.js    # Scroll Rail
 node tests/browser/spin-probe.js    # Eruda Spin on an existing widget
+node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
 Both run headless on purpose. A scrubbed animation is driven by
@@ -81,3 +82,37 @@ Do not pass `--force-prefers-reduced-motion=false` to Chrome. It is a switch,
 not a boolean: any value turns reduced motion **on**, the module then correctly
 declines to animate anything, and it looks exactly like a total failure. That
 cost an hour.
+
+## bench.js
+
+Every widget on one page at once, because that is the case that matters: a
+section that animates is cheap on its own and expensive in company.
+
+It does **not** judge by frame duration. Headless paces `requestAnimationFrame`
+at 30Hz, so every frame reads as 33.3ms whether the work took one millisecond
+or fifteen. What it reads instead is Chrome's own counters, which nothing
+paces: how many style recalculations and layouts the code forced, and how long
+they took. Those go up exactly as often as the code makes them, which is the
+thing being optimised.
+
+It also counts `getComputedStyle` calls and geometric property reads by
+wrapping them, because a single one of those inside a scroll loop is worth more
+than any amount of guessing about which line is slow.
+
+The pass in 2.19.0 moved it from:
+
+```
+  getComputedStyle calls      1668  (7 per frame)
+  style recalculations        814  (124.0ms)
+  layouts                     478  (82.0ms)
+  total work                  331.0ms
+```
+
+to:
+
+```
+  getComputedStyle calls      2  (0 per frame)
+  style recalculations        366  (63.0ms)
+  layouts                     37  (3.0ms)
+  total work                  111.0ms
+```

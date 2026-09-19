@@ -484,6 +484,19 @@ Moved, not duplicated. Two copies of every picture is two chances for a browser
 to fetch it, and the whole point of a slide is that it is one element with one
 source. Widening puts them all back in the frame, in order.
 
+**The notch comes with them, turned on its side.** Down the left edge is no use
+on a phone: a stacked picture is wide and short, so a notch there has almost
+nowhere to travel. It runs along the top instead, and travels with the item it
+belongs to rather than with the section. The path is not written twice — it is
+built for a vertical edge on a box with its sides swapped and reflected across
+the diagonal on the way out, which turns each arc inside out, so the sweep flag
+is flipped with it.
+
+It needs its own proportions, though. A 280px straight run plus two 65px
+shoulders is more than a 310px edge has, so the desktop numbers leave the band
+clamped flat against both corners with nowhere to go. Depth and length have
+their own controls for a phone, defaulting to 18px and 90px.
+
 The highlight still scrubs — it is the part that works at any width — but it is
 measured against the **words**, not the item. Stacked, an item is its text and
 then its picture, and a picture is most of the item's height; measuring the
@@ -710,6 +723,53 @@ The lift is on the widget and the rotation on the thing inside it, always. One
 element cannot hold two transforms, so sharing would mean the lift wiping out
 the rotation at exactly the moment a pointer arrives — which is when it
 matters.
+
+### What the animations cost
+
+`tests/browser/bench.js` puts every widget on one page and measures it. Not by
+frame duration — headless paces `requestAnimationFrame` at 30Hz, so every frame
+reads as 33.3ms whatever the work was — but by Chrome's own counters, which
+nothing paces: style recalculations, forced layouts, and the time each took. It
+also wraps `getComputedStyle` and the geometric properties and counts the calls,
+because one of those inside a scroll loop outweighs any amount of reasoning
+about which line looks slow.
+
+The first run said this:
+
+```
+getComputedStyle calls      1668  (7 per frame)
+layouts                      478  (82.0ms)
+total work                  331.0ms
+```
+
+Reading a custom property means `getComputedStyle`, and `getComputedStyle`
+after a style write means the browser recalculates style on the spot. The
+Scroll Story was reading six of them every frame to build the notch —
+its depth, its run, its travel, the corner radius, the border width and the
+border colour — none of which can change without a resize. The Scroll Rail was
+reading every card's `offsetLeft` and the track's padding every frame to answer
+which card you were on, which is seven forced layouts to answer a question
+whose answer only changes when the row is laid out again.
+
+Both now read once, on load and on resize, and neither writes a value that has
+not changed: a clip path rounded to hundredths does not differ on most frames
+of a slow scroll, and `setAttribute` costs a style recalculation whether the
+value differs or not.
+
+```
+getComputedStyle calls         2  (0 per frame)
+layouts                       37  (3.0ms)
+total work                  111.0ms
+```
+
+A third of the work, and the page holds 60fps where it had been dropping to 30.
+On a phone, whose CPU is four to six times slower, that is the difference
+between six milliseconds a frame and two.
+
+`will-change` was also being asked for on every picture in a panel rather than
+the one that is drifting, and on the rail's track even on a phone, where the
+row is scrolled rather than transformed. It asks for a compositing layer, and a
+layer costs memory whether anything is moving on it or not.
 
 ### Smooth scrolling
 

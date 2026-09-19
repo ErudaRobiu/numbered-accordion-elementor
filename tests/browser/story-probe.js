@@ -393,9 +393,14 @@ function check(name, ok, detail) {
     phone.perItem.every(p => p.last && p.belowText),
     phone.perItem.every(p => p.last) ? 'last child of its item, below the heading' : 'out of order');
 
-  check('a rehoused picture is an ordinary block again, not a clipped slide',
-    phone.perItem.every(p => p.position === 'relative' && p.clip === 'none' && p.fills),
-    phone.perItem.map(p => p.position + '/' + p.clip).join(' '));
+  /*
+   * A slide that has been rehoused is an ordinary block again. It may carry a
+   * clip path -- that is the phone's own notch -- but it must not still be
+   * holding an inset() from an entrance it will never be released from.
+   */
+  check('a rehoused picture is an ordinary block, with no entrance shape left on it',
+    phone.perItem.every(p => p.position === 'relative' && p.fills && !/inset\(/.test(p.clip)),
+    phone.perItem.map(p => p.position + '/' + (/url\(/.test(p.clip) ? 'notched' : p.clip)).join(' '));
 
   check('and nothing runs off the side of the screen',
     !phone.overflows,
@@ -428,6 +433,61 @@ function check(name, ok, detail) {
     phoneSweep.done && phoneSweep.done.pictureTop > 0,
     phoneSweep.done ? 'picture was ' + Math.round(phoneSweep.done.pictureTop) +
       'px below the top of the window when the words finished' : 'n/a');
+
+  // --- the notch comes with it, along the top ------------------------------
+  /*
+   * Down the side is no use on a phone: a stacked picture is wide and short,
+   * so a notch on its left edge has almost nowhere to travel. It runs along
+   * the top instead, and travels with the item it belongs to rather than with
+   * the section.
+   */
+  const acrossNotch = await page.evaluate(async () => {
+    const slides = [...document.querySelectorAll('.estry__item .estry__slide')];
+    const clipped = slides.filter(s => /url\(/.test(getComputedStyle(s).clipPath));
+    const max = document.body.scrollHeight - innerHeight;
+
+    const edge = (d) => {
+      // Every point the path touches, and which edge each one sits on.
+      const pts = (d.match(/-?[\d.]+,-?[\d.]+/g) || []).map(p => p.split(',').map(Number));
+      const w = Math.max(...pts.map(p => p[0]));
+      const h = Math.max(...pts.map(p => p[1]));
+      // The notch is the run of points that are off the corners but on an
+      // edge. Along the top means they vary in x at near-constant y.
+      const inner = pts.filter(p => p[1] > 0.5 && p[1] < h - 0.5 && p[0] > 0.5 && p[0] < w - 0.5);
+      return { w, h, inner: inner.length, xs: inner.map(p => p[0]), ys: inner.map(p => p[1]) };
+    };
+
+    const seen = [];
+    for (let y = 0; y <= max; y += 40) {
+      window.scrollTo(0, y);
+      await new Promise(r => requestAnimationFrame(r));
+      const d = document.querySelector('clipPath path');
+      if (d) seen.push(d.getAttribute('d'));
+    }
+
+    const one = edge(seen[Math.floor(seen.length / 2)]);
+    return {
+      slides: slides.length,
+      clipped: clipped.length,
+      moved: new Set(seen).size,
+      wide: one.w > one.h,
+      spreadX: Math.max(...one.xs) - Math.min(...one.xs),
+      spreadY: Math.max(...one.ys) - Math.min(...one.ys),
+    };
+  });
+
+  check('every stacked picture gets a notch of its own',
+    acrossNotch.clipped === acrossNotch.slides && acrossNotch.slides === 3,
+    acrossNotch.clipped + ' of ' + acrossNotch.slides + ' clipped');
+
+  check('and it runs along the top rather than down the side',
+    acrossNotch.spreadX > acrossNotch.spreadY * 3,
+    'the notch spans ' + Math.round(acrossNotch.spreadX) + 'px across and ' +
+      Math.round(acrossNotch.spreadY) + 'px down');
+
+  check('it travels as you scroll, rather than sitting still',
+    acrossNotch.moved > 4,
+    acrossNotch.moved + ' distinct shapes over the section');
 
   // --- and it goes back ------------------------------------------------------
   await page.setViewport({ width: 1280, height: 900 });

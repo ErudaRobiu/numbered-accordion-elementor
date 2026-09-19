@@ -80,6 +80,27 @@
 		var count = root.querySelector( '.erail__count b' );
 		var cards = toArray( root.querySelectorAll( '.erail__card' ) );
 
+		/*
+		 * Where each card sits along the row, measured once.
+		 *
+		 * Working this out on the fly meant reading every card's offsetLeft and
+		 * the track's padding on every frame of every scroll -- seven forced
+		 * layouts a frame for six cards, to answer a question whose answer only
+		 * changes when the row is laid out again.
+		 */
+		var stops = [];
+		var lastPaint = -1;
+		var lastCard = -1;
+		var lastOffset = null;
+
+		function measureStops() {
+			var pad = parseFloat( window.getComputedStyle( track ).paddingLeft ) || 0;
+
+			stops = cards.map( function ( card ) {
+				return card.offsetLeft - pad;
+			} );
+		}
+
 		if ( ! stage || ! viewport || ! track || ! cards.length ) {
 			return;
 		}
@@ -267,6 +288,8 @@
 				root.removeAttribute( READY );
 				release();
 				host = null;
+				lastOffset = null;
+				measureStops();
 				return;
 			}
 
@@ -289,6 +312,7 @@
 					root.style.height = Math.round( stage.offsetHeight + extra * height ) + 'px';
 				}
 
+				measureStops();
 				return;
 			}
 
@@ -369,6 +393,8 @@
 				stage.style.top = stickyTop + 'px';
 				root.style.height = Math.round( stage.offsetHeight + runway ) + 'px';
 			}
+
+			measureStops();
 		}
 
 		/**
@@ -444,18 +470,17 @@
 		 * @return {number} Zero-based.
 		 */
 		function cardAt( offset ) {
-			var pad = parseFloat( window.getComputedStyle( track ).paddingLeft ) || 0;
 			var best = 0;
 			var nearest = Infinity;
 
-			cards.forEach( function ( card, i ) {
-				var gap = Math.abs( card.offsetLeft - pad - offset );
+			for ( var i = 0; i < stops.length; i++ ) {
+				var gap = Math.abs( stops[ i ] - offset );
 
 				if ( gap < nearest ) {
 					nearest = gap;
 					best = i;
 				}
-			} );
+			}
 
 			return best;
 		}
@@ -470,12 +495,24 @@
 		 * @param {number} span   Pixels there are to travel.
 		 */
 		function paint( offset, span ) {
+			// Both of these cost a style recalculation to set, and neither
+			// changes on most frames of a slow scroll.
 			if ( bar ) {
-				bar.style.transform = 'scaleX(' + ( span > 0 ? clamp01( offset / span ) : 0 ).toFixed( 4 ) + ')';
+				var filled = Math.round( ( span > 0 ? clamp01( offset / span ) : 0 ) * 1000 );
+
+				if ( filled !== lastPaint ) {
+					lastPaint = filled;
+					bar.style.transform = 'scaleX(' + ( filled / 1000 ) + ')';
+				}
 			}
 
 			if ( count ) {
-				count.textContent = String( cardAt( offset ) + 1 );
+				var index = cardAt( offset );
+
+				if ( index !== lastCard ) {
+					lastCard = index;
+					count.textContent = String( index + 1 );
+				}
 			}
 		}
 
@@ -489,8 +526,15 @@
 
 			var p = progress();
 
+			var moved = -p * distance;
+
 			lock();
-			track.style.transform = 'translate3d(' + ( -p * distance ).toFixed( 2 ) + 'px, 0, 0)';
+
+			if ( moved !== lastOffset ) {
+				lastOffset = moved;
+				track.style.transform = 'translate3d(' + moved.toFixed( 2 ) + 'px, 0, 0)';
+			}
+
 			paint( p * distance, distance );
 		}
 
