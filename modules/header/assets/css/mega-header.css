@@ -1,0 +1,892 @@
+/**
+ * Eruda Toolkit - Mega Header
+ *
+ * A navigation bar that sits over the hero as though it were not there, frosts
+ * as you scroll away from the top, and opens full-width panels underneath
+ * itself while everything behind them is blurred back.
+ *
+ * The same rule as everything else here: if the script never runs, the header
+ * must still be complete and usable. Without it this is an ordinary sticky bar
+ * whose panels open on hover and on keyboard focus -- both done in CSS, so a
+ * failed script costs the frost and the scrim, not the navigation. On a phone
+ * without the script the drawer is a details/summary that still opens.
+ *
+ * Nothing here assumes a theme has behaved. Box sizing is set, the list is
+ * stripped, and every colour is a custom property with a fallback, because a
+ * header is the one component guaranteed to be rendered inside someone else's
+ * stylesheet.
+ */
+
+.ehdr,
+.ehdr *,
+.ehdr *::before,
+.ehdr *::after {
+	box-sizing: border-box;
+}
+
+/*
+ * The two shadows, each built from its own four numbers.
+ *
+ * A box-shadow is one declaration, and Elementor writes one declaration per
+ * control, so offering offset, blur and colour separately means composing the
+ * shadow from custom properties here rather than letting four controls fight
+ * over a single `box-shadow`. The defaults are the live site's own values.
+ */
+.ehdr {
+	--ehdr-cta-inner:
+		var(--ehdr-cta-inner-x, 2px)
+		var(--ehdr-cta-inner-y, -4px)
+		var(--ehdr-cta-inner-blur, 4px)
+		var(--ehdr-cta-inner-colour, rgba(0, 0, 0, 0.15)) inset;
+	--ehdr-cta-lift:
+		var(--ehdr-cta-lift-x, 0px)
+		var(--ehdr-cta-lift-y, 4px)
+		var(--ehdr-cta-lift-blur, 10px)
+		var(--ehdr-cta-lift-colour, rgba(0, 0, 0, 0.15));
+	--ehdr-cta-lift-hover:
+		var(--ehdr-cta-lift-x, 0px)
+		calc(var(--ehdr-cta-lift-y, 4px) * 2.5)
+		calc(var(--ehdr-cta-lift-blur, 10px) * 2.2)
+		calc(var(--ehdr-cta-lift-blur, 10px) * -0.6)
+		var(--ehdr-cta-lift-colour, rgba(0, 0, 0, 0.15));
+}
+
+/*
+ * The bar is fixed, not sticky.
+ *
+ * Sticky would be tidier, but a sticky header is positioned against its
+ * scrolling ancestor, and in Elementor that is whatever container the widget
+ * was dropped into -- one with `overflow: hidden` anywhere above it, or a
+ * transform on it, and the header simply scrolls away. Fixed is the only
+ * position that behaves the same wherever someone puts the widget.
+ *
+ * The placeholder below is what keeps the page from jumping up under it.
+ */
+.ehdr {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: var(--ehdr-z, 999);
+	/* Its own stacking context, so a panel can never be drawn under a section
+	   further down the page that happens to carry a z-index of its own. */
+	isolation: isolate;
+}
+
+/*
+ * Space in the flow equal to the bar, for headers that are not meant to sit
+ * over the hero. Zero by default: the whole point of this header is that the
+ * picture starts at the top of the screen and the bar floats on it.
+ */
+.ehdr-spacer {
+	display: block;
+	height: var(--ehdr-spacer, 0px);
+}
+
+/* ------------------------------------------------------------- the bar --- */
+
+/*
+ * Two states in one element.
+ *
+ * At rest the bar is transparent: no fill, no blur, no border, so the hero
+ * behind it is uninterrupted and the header reads as part of the picture.
+ * Scrolled, it frosts. Every property that changes is transitioned together,
+ * which is what makes it arrive as one movement rather than as a fill, then a
+ * border, then a shadow.
+ *
+ * backdrop-filter is declared here and set to `none` rather than being added
+ * under the scrolled state. Adding it later promotes the bar to its own layer
+ * mid-scroll, and the promotion itself is a visible flicker on the frame it
+ * happens; declaring it up front means the layer exists from the start and
+ * only its value moves.
+ */
+.ehdr__bar {
+	position: relative;
+	/*
+	 * Above the scrim, which is the whole reason this is here.
+	 *
+	 * backdrop-filter makes an element a stacking context whether it is
+	 * positioned or not, so the bar cannot sit at `z-index: auto` and expect
+	 * the panel inside it to out-rank a scrim at 1 -- the whole bar, panel
+	 * included, is painted as one unit against the scrim. Without this the
+	 * panel opens correctly and is then blurred by its own scrim.
+	 */
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	gap: var(--ehdr-gap, 40px);
+	padding: var(--ehdr-pad-y, 14px) var(--ehdr-pad-x, 40px);
+	background: transparent;
+	border-bottom: 1px solid transparent;
+	-webkit-backdrop-filter: blur(0px);
+	backdrop-filter: blur(0px);
+	transition:
+		background-color var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		border-color var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		box-shadow var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		-webkit-backdrop-filter var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		backdrop-filter var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		padding var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+/*
+ * Frosted.
+ *
+ * The attribute is set by the script once the page has left the top. A panel
+ * being open frosts it too, at full strength and with no blur: an open panel
+ * is an opaque sheet and the bar is the top of it, so anything showing through
+ * the bar would show the page sliding under the panel's own header.
+ */
+.ehdr[data-ehdr-stuck] .ehdr__bar {
+	background: var(--ehdr-fill, rgba(255, 255, 255, 0.72));
+	border-bottom-color: var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
+	box-shadow: var(--ehdr-shadow, 0 1px 24px -12px rgba(15, 56, 96, 0.5));
+	-webkit-backdrop-filter: blur(var(--ehdr-blur, 16px)) saturate(var(--ehdr-sat, 1.4));
+	backdrop-filter: blur(var(--ehdr-blur, 16px)) saturate(var(--ehdr-sat, 1.4));
+}
+
+.ehdr[data-ehdr-open] .ehdr__bar {
+	background: var(--ehdr-sheet, #ffffff);
+	border-bottom-color: var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
+	-webkit-backdrop-filter: blur(0px);
+	backdrop-filter: blur(0px);
+}
+
+/*
+ * Where backdrop-filter is not supported the frost has to become a fill, or
+ * the bar stays transparent over the page with text running under text.
+ * Firefox shipped it long ago now, but a fallback that costs one rule is
+ * cheaper than finding out.
+ */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+	.ehdr[data-ehdr-stuck] .ehdr__bar {
+		background: var(--ehdr-fill-solid, rgba(255, 255, 255, 0.96));
+	}
+}
+
+/* ------------------------------------------------------------ the brand --- */
+
+.ehdr__brand {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	text-decoration: none;
+	color: inherit;
+}
+
+.ehdr .ehdr__logo {
+	display: block;
+	width: auto !important;
+	height: var(--ehdr-logo, 44px) !important;
+	max-width: none;
+	/* A logo is the one image in a header that must never be cropped, so this
+	   is the one place `contain` is right rather than `cover`. */
+	object-fit: contain;
+	transition: height var(--ehdr-ms, 320ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.ehdr[data-ehdr-stuck] .ehdr__logo {
+	height: var(--ehdr-logo-stuck, var(--ehdr-logo, 44px)) !important;
+}
+
+.ehdr__brand-text {
+	font-size: var(--ehdr-brand-size, 1.4rem);
+	font-weight: 800;
+	letter-spacing: -0.01em;
+	color: var(--ehdr-ink, #0f3860);
+}
+
+/* --------------------------------------------------------------- menu --- */
+
+.ehdr__menu {
+	flex: 1 1 auto;
+	display: flex;
+	align-items: center;
+	gap: var(--ehdr-item-gap, 28px);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/*
+ * Static, deliberately.
+ *
+ * The panel is absolutely positioned and spans the whole bar, so the nearest
+ * positioned ancestor above it has to be the bar. Give the item
+ * `position: relative` -- the reflex -- and each panel is instead the width of
+ * the word that opens it, which is a dropdown, not a mega menu.
+ */
+.ehdr__item {
+	position: static;
+	display: flex;
+	align-items: center;
+}
+
+/*
+ * A link and its underline.
+ *
+ * The underline is a pseudo-element scaled from nought rather than a border
+ * being shown and hidden: a transform animates on the compositor and a border
+ * does not, and scaling from the left edge means it draws *in* the direction
+ * you read rather than appearing all at once.
+ *
+ * It is carried on the item, not the link, so an item with a panel keeps its
+ * underline while the panel is open and the pointer has moved down into it.
+ */
+.ehdr__link {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	padding: var(--ehdr-link-pad-y, 10px) 0;
+	font-family: var(--ehdr-link-font, inherit);
+	font-size: var(--ehdr-link-size, 1.125rem);
+	font-weight: var(--ehdr-link-weight, 600);
+	line-height: 1.2;
+	letter-spacing: var(--ehdr-link-track, 0em);
+	color: var(--ehdr-ink, #0f3860);
+	text-decoration: none;
+	white-space: nowrap;
+	background: none;
+	border: 0;
+	cursor: pointer;
+	transition: color var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.ehdr__link::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: var(--ehdr-rule-drop, 2px);
+	height: var(--ehdr-rule, 2px);
+	border-radius: 999px;
+	background: var(--ehdr-accent, #00a55d);
+	transform: scaleX(0);
+	transform-origin: 0 50%;
+	transition: transform var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.ehdr__link:hover,
+.ehdr__link:focus-visible,
+.ehdr__item[data-ehdr-on] > .ehdr__link {
+	color: var(--ehdr-ink-hover, #00a55d);
+}
+
+.ehdr__link:hover::after,
+.ehdr__link:focus-visible::after,
+.ehdr__item[data-ehdr-on] > .ehdr__link::after {
+	transform: scaleX(1);
+}
+
+.ehdr__link:focus-visible {
+	outline: 2px solid var(--ehdr-accent, #00a55d);
+	outline-offset: 4px;
+	border-radius: 2px;
+}
+
+/*
+ * The caret on an item that opens a panel. It turns over rather than swapping
+ * for a second glyph, which is one element and one transform instead of two
+ * elements and a crossfade.
+ */
+.ehdr__caret {
+	display: block;
+	width: 10px;
+	height: 10px;
+	flex: 0 0 auto;
+	transition: transform var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.ehdr__item[data-ehdr-on] .ehdr__caret,
+.ehdr__item:hover .ehdr__caret {
+	transform: rotate(180deg);
+}
+
+/* --------------------------------------------------------------- the CTA --- */
+
+/*
+ * Two shadows and a gradient, in that arrangement for a reason.
+ *
+ * The inset shadow is what gives the pill its thickness: a dark wash pulled
+ * down from above so the top edge reads as curved away from the light. The
+ * outer shadow is the lift off the page. They cannot be the same declaration
+ * -- `inset` is per-shadow -- and they must not be on different elements
+ * either, or a hover that moves one leaves the other behind.
+ */
+.ehdr__cta {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: var(--ehdr-cta-pad-y, 15px) var(--ehdr-cta-pad-x, 30px);
+	border: 0;
+	border-radius: var(--ehdr-cta-radius, 100px);
+	background: var(--ehdr-cta-bg, linear-gradient(90deg, #00a55d 0%, #005465 100%));
+	box-shadow:
+		var(--ehdr-cta-inner, 2px -4px 4px 0 rgba(0, 0, 0, 0.15) inset),
+		var(--ehdr-cta-lift, 0 4px 10px 0 rgba(0, 0, 0, 0.15));
+	color: var(--ehdr-cta-ink, #ffffff);
+	font-family: var(--ehdr-cta-font, inherit);
+	font-size: var(--ehdr-cta-size, 1rem);
+	font-weight: var(--ehdr-cta-weight, 600);
+	/*
+	 * In em, and deliberately so. Elementor writes letter-spacing in whatever
+	 * unit the control was left on, and a percentage is not a valid
+	 * letter-spacing anywhere -- browsers drop the declaration and the
+	 * tracking silently does nothing. The live site this was measured from has
+	 * `letter-spacing: 5%` on its button doing exactly that.
+	 */
+	letter-spacing: var(--ehdr-cta-track, 0.05em);
+	line-height: 1.2;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+	transition:
+		transform var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		box-shadow var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		filter var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+/*
+ * Hover brightens the gradient rather than replacing it. A second gradient
+ * would have to be authored to match, and would not survive someone changing
+ * the first one in the panel; `filter` lifts whatever is actually there.
+ */
+.ehdr__cta:hover,
+.ehdr__cta:focus-visible {
+	transform: translateY(-2px);
+	filter: brightness(1.07);
+	box-shadow:
+		var(--ehdr-cta-inner, 2px -4px 4px 0 rgba(0, 0, 0, 0.15) inset),
+		var(--ehdr-cta-lift-hover, 0 10px 22px -6px rgba(0, 0, 0, 0.3));
+}
+
+.ehdr__cta:active {
+	transform: translateY(0);
+}
+
+.ehdr__cta:focus-visible {
+	outline: 2px solid var(--ehdr-accent, #00a55d);
+	outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------- the panel --- */
+
+/*
+ * Full width of the bar, anchored under it.
+ *
+ * Opened by hover and by focus-within, both in CSS, so the panels work with
+ * the script removed entirely. The script adds the parts CSS cannot do:
+ * a delay before opening so sweeping the pointer across the bar does not flash
+ * every panel in turn, the scrim, Escape, and the aria state.
+ *
+ * `visibility` is in the transition on purpose. Opacity alone leaves an
+ * invisible panel covering the page and swallowing clicks; visibility alone
+ * cannot be eased. Together, the panel fades out and is then taken away.
+ */
+.ehdr__panel {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	z-index: 2;
+	overflow: hidden;
+	padding: 0;
+	background: var(--ehdr-sheet, #ffffff);
+	border-bottom: 1px solid var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
+	box-shadow: var(--ehdr-panel-shadow, 0 24px 48px -24px rgba(15, 56, 96, 0.45));
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(-8px);
+	transition:
+		opacity var(--ehdr-panel-ms, 280ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		transform var(--ehdr-panel-ms, 280ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		visibility 0s linear var(--ehdr-panel-ms, 280ms);
+}
+
+/*
+ * Hover opens it, with a beat of delay first.
+ *
+ * The delay is on the closed state's transition, so it applies on the way in
+ * and not on the way out: crossing the bar to reach the last item should not
+ * leave three panels opening behind you, but leaving one should close it at
+ * once.
+ */
+.ehdr__item:hover > .ehdr__panel,
+.ehdr__item:focus-within > .ehdr__panel,
+.ehdr__item[data-ehdr-on] > .ehdr__panel {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0);
+	transition:
+		opacity var(--ehdr-panel-ms, 280ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)) var(--ehdr-intent, 90ms),
+		transform var(--ehdr-panel-ms, 280ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)) var(--ehdr-intent, 90ms),
+		visibility 0s linear var(--ehdr-intent, 90ms);
+}
+
+/* Once the script is driving, it owns the state and hover must not fight it:
+   two sources of truth is how a panel ends up open with nothing under the
+   pointer. */
+.ehdr[data-ehdr-ready] .ehdr__item:hover > .ehdr__panel,
+.ehdr[data-ehdr-ready] .ehdr__item:focus-within > .ehdr__panel {
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(-8px);
+}
+
+.ehdr[data-ehdr-ready] .ehdr__item[data-ehdr-on] > .ehdr__panel {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0);
+}
+
+.ehdr__panel-inner {
+	display: grid;
+	grid-template-columns: var(--ehdr-panel-cols, 1.1fr 1fr 0.9fr);
+	gap: var(--ehdr-panel-gap, 48px);
+	max-width: var(--ehdr-panel-max, 1400px);
+	margin: 0 auto;
+	padding: var(--ehdr-panel-pad, 40px) var(--ehdr-pad-x, 40px);
+}
+
+.ehdr__links {
+	display: flex;
+	flex-direction: column;
+	gap: var(--ehdr-panel-link-gap, 4px);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/*
+ * A panel link is a row that slides.
+ *
+ * The whole row moves on hover rather than the text alone, so the hit area and
+ * the thing that reacts to the pointer are the same shape -- text that shifts
+ * inside a still box reads as the box being broken.
+ */
+.ehdr__panel-link {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: var(--ehdr-panel-link-pad, 12px 14px);
+	border-radius: var(--ehdr-panel-link-radius, 10px);
+	color: var(--ehdr-ink, #0f3860);
+	font-size: var(--ehdr-panel-link-size, 1.0625rem);
+	font-weight: 600;
+	line-height: 1.3;
+	text-decoration: none;
+	transition:
+		background-color var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		color var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		transform var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.ehdr__panel-link:hover,
+.ehdr__panel-link:focus-visible {
+	background: var(--ehdr-panel-link-bg, rgba(0, 165, 93, 0.08));
+	color: var(--ehdr-ink-hover, #00a55d);
+	transform: translateX(var(--ehdr-panel-link-slide, 4px));
+}
+
+.ehdr__panel-link:focus-visible {
+	outline: 2px solid var(--ehdr-accent, #00a55d);
+	outline-offset: 2px;
+}
+
+.ehdr__panel-link small {
+	display: block;
+	margin-top: 3px;
+	color: var(--ehdr-muted, #5b7794);
+	font-size: 0.8125rem;
+	font-weight: 500;
+	line-height: 1.4;
+}
+
+/* The arrow only travels once the row is under the pointer; sitting there
+   moving would be noise on a list of eight. */
+.ehdr__panel-link svg {
+	flex: 0 0 auto;
+	width: 16px;
+	height: 16px;
+	opacity: 0;
+	transform: translateX(-6px);
+	transition:
+		opacity var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		transform var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.ehdr__panel-link:hover svg,
+.ehdr__panel-link:focus-visible svg {
+	opacity: 1;
+	transform: translateX(0);
+}
+
+.ehdr__blurb {
+	margin: 0;
+	color: var(--ehdr-muted, #5b7794);
+	font-size: var(--ehdr-blurb-size, 1rem);
+	line-height: 1.6;
+}
+
+.ehdr__blurb strong {
+	display: block;
+	margin-bottom: 10px;
+	color: var(--ehdr-ink, #0f3860);
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.ehdr__figure {
+	position: relative;
+	margin: 0;
+	border-radius: var(--ehdr-figure-radius, 14px);
+	overflow: hidden;
+	aspect-ratio: var(--ehdr-figure-ratio, 1.5);
+}
+
+/* Cover, and forced, for the reason every other picture in this plugin is:
+   nearly every theme ships `img { height: auto }` at a specificity a plugin
+   stylesheet cannot beat, and the panel's background shows as a band. */
+.ehdr .ehdr__figure img {
+	display: block;
+	position: absolute;
+	inset: 0;
+	width: 100% !important;
+	height: 100% !important;
+	max-width: none;
+	max-height: none;
+	object-fit: cover !important;
+	object-position: var(--ehdr-figure-pos, 50% 50%) !important;
+}
+
+/* ------------------------------------------------------------- the scrim --- */
+
+/*
+ * Everything behind the panel, pushed back.
+ *
+ * A backdrop-filter on a fixed sheet, not a `filter` on the page.
+ *
+ * Filtering the page content would be the obvious way and it is a trap: an
+ * element with a filter becomes the containing block for every `position:
+ * fixed` descendant, so a filtered page drags its own fixed elements -- this
+ * header included -- into the scroll, and it forces a repaint of the entire
+ * document on a property that cannot be composited. The scrim costs one layer
+ * and touches nothing it covers.
+ *
+ * It starts below the bar rather than at the top of the screen so the bar
+ * itself is never blurred by it.
+ */
+.ehdr__scrim {
+	position: fixed;
+	top: var(--ehdr-scrim-top, 0px);
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1;
+	background: var(--ehdr-scrim-bg, rgba(8, 26, 43, 0.25));
+	-webkit-backdrop-filter: blur(var(--ehdr-scrim-blur, 10px));
+	backdrop-filter: blur(var(--ehdr-scrim-blur, 10px));
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity var(--ehdr-panel-ms, 280ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		visibility 0s linear var(--ehdr-panel-ms, 280ms);
+}
+
+.ehdr[data-ehdr-open] .ehdr__scrim {
+	opacity: 1;
+	visibility: visible;
+	transition:
+		opacity var(--ehdr-panel-ms, 280ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		visibility 0s linear 0s;
+}
+
+/* ------------------------------------------------------------ the burger --- */
+
+.ehdr__burger {
+	display: none;
+	flex: 0 0 auto;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 0;
+	border-radius: 10px;
+	background: none;
+	color: var(--ehdr-ink, #0f3860);
+	cursor: pointer;
+}
+
+.ehdr__burger:focus-visible {
+	outline: 2px solid var(--ehdr-accent, #00a55d);
+	outline-offset: 2px;
+}
+
+/*
+ * Three lines that become a cross.
+ *
+ * Done with transforms on the same three elements rather than by swapping in
+ * an X: the middle line fades where it stands and the outer two rotate into
+ * place through the middle, which is the movement that reads as the menu
+ * folding rather than as one icon replacing another.
+ */
+.ehdr__burger span {
+	display: block;
+	width: 22px;
+	height: 2px;
+	margin: 5px auto;
+	border-radius: 2px;
+	background: currentColor;
+	transition:
+		transform var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+		opacity var(--ehdr-link-ms, 200ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.ehdr[data-ehdr-drawer] .ehdr__burger span:nth-child(1) {
+	transform: translateY(7px) rotate(45deg);
+}
+
+.ehdr[data-ehdr-drawer] .ehdr__burger span:nth-child(2) {
+	opacity: 0;
+}
+
+.ehdr[data-ehdr-drawer] .ehdr__burger span:nth-child(3) {
+	transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ------------------------------------------------------------- the phone --- */
+
+@media (max-width: 1024px) {
+	.ehdr__bar {
+		padding: var(--ehdr-pad-y-mobile, 10px) var(--ehdr-pad-x-mobile, 20px);
+		gap: 12px;
+	}
+
+	.ehdr__burger {
+		display: block;
+		margin-left: auto;
+	}
+
+	/* The CTA stays in the bar only if it fits; below this it belongs in the
+	   drawer, where it has room to be a full-width button instead of a pill
+	   squeezed against the burger. */
+	.ehdr__bar > .ehdr__cta {
+		display: none;
+	}
+
+	/*
+	 * The drawer.
+	 *
+	 * A panel under the bar rather than a full-screen takeover: a takeover
+	 * hides the page and has to be got out of, and on a phone the header is
+	 * something you open, use and dismiss in two seconds.
+	 *
+	 * It is height-animated through a grid row rather than max-height. A
+	 * max-height guess large enough for the longest menu makes every shorter
+	 * one open at the wrong speed -- the transition runs over a height that is
+	 * mostly empty -- while `grid-template-rows: 0fr -> 1fr` animates to the
+	 * content's real height, whatever it turns out to be.
+	 */
+	.ehdr__nav {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		display: grid;
+		grid-template-rows: 0fr;
+		background: var(--ehdr-sheet, #ffffff);
+		border-bottom: 1px solid transparent;
+		box-shadow: var(--ehdr-panel-shadow, 0 24px 48px -24px rgba(15, 56, 96, 0.45));
+		visibility: hidden;
+		transition:
+			grid-template-rows var(--ehdr-panel-ms, 280ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+			visibility 0s linear var(--ehdr-panel-ms, 280ms);
+	}
+
+	.ehdr[data-ehdr-drawer] .ehdr__nav {
+		grid-template-rows: 1fr;
+		border-bottom-color: var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
+		visibility: visible;
+		transition:
+			grid-template-rows var(--ehdr-panel-ms, 280ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
+			visibility 0s linear 0s;
+	}
+
+	/*
+	 * The row that is actually being resized, and it carries no padding of
+	 * its own -- that is not a style choice.
+	 *
+	 * A grid item's automatic minimum size includes its padding, so `0fr` on
+	 * the track cannot take an item with padding below the height of that
+	 * padding: the drawer collapsed to 29px rather than nought and left a
+	 * sliver of sheet hanging under the bar at all times. `min-height: 0`
+	 * frees the content, not the box. The spacing therefore lives on what is
+	 * inside it.
+	 */
+	.ehdr__nav-inner {
+		min-height: 0;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		padding: 0;
+	}
+
+	.ehdr__menu {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0;
+		padding: 8px var(--ehdr-pad-x-mobile, 20px) 0;
+	}
+
+	.ehdr__item {
+		display: block;
+		border-bottom: 1px solid var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
+	}
+
+	.ehdr__item:last-of-type {
+		border-bottom: 0;
+	}
+
+	.ehdr__link {
+		width: 100%;
+		justify-content: space-between;
+		padding: 16px 0;
+		font-size: var(--ehdr-link-size-mobile, 1.125rem);
+	}
+
+	/* No underline on a phone: a row that is already full width has nothing to
+	   underline, and the caret carries the state instead. */
+	.ehdr__link::after {
+		content: none;
+	}
+
+	/*
+	 * A panel on a phone is an accordion inside the drawer -- the same grid
+	 * row trick, because a nested panel has no idea how tall its own list is
+	 * either.
+	 */
+	.ehdr__panel {
+		position: static;
+		display: grid;
+		grid-template-rows: 0fr;
+		opacity: 1;
+		visibility: visible;
+		transform: none;
+		background: none;
+		border: 0;
+		box-shadow: none;
+		transition: grid-template-rows var(--ehdr-panel-ms, 280ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+	}
+
+	.ehdr__item:hover > .ehdr__panel,
+	.ehdr__item:focus-within > .ehdr__panel,
+	.ehdr[data-ehdr-ready] .ehdr__item:hover > .ehdr__panel,
+	.ehdr[data-ehdr-ready] .ehdr__item:focus-within > .ehdr__panel {
+		grid-template-rows: 0fr;
+		opacity: 1;
+		visibility: visible;
+		transform: none;
+	}
+
+	.ehdr__item[data-ehdr-on] > .ehdr__panel,
+	.ehdr[data-ehdr-ready] .ehdr__item[data-ehdr-on] > .ehdr__panel {
+		grid-template-rows: 1fr;
+		opacity: 1;
+		visibility: visible;
+		transform: none;
+	}
+
+	.ehdr__panel-inner {
+		display: block;
+		min-height: 0;
+		overflow: hidden;
+		max-width: none;
+		margin: 0;
+		padding: 0 0 12px;
+	}
+
+	/* The picture and the blurb are desktop luxuries. On a phone the panel is
+	   a list of links and nothing else, because everything else pushes the
+	   links people came for off the bottom of the screen. */
+	.ehdr__figure,
+	.ehdr__blurb {
+		display: none;
+	}
+
+	.ehdr__panel-link {
+		padding: 11px 12px;
+	}
+
+	.ehdr__drawer-cta {
+		display: flex;
+		width: auto;
+		margin: 18px var(--ehdr-pad-x-mobile, 20px) 20px;
+	}
+
+	.ehdr__scrim {
+		--ehdr-scrim-blur: 6px;
+	}
+}
+
+/*
+ * Wide, the drawer is not a box at all.
+ *
+ * `display: contents` takes the two wrappers out of the layout entirely and
+ * hands their children straight to the bar's flex row, so the desktop bar is
+ * laid out as though the drawer markup were not there. It has to be markup
+ * regardless: on a phone the menu and the button share one animated box, and a
+ * box cannot be conjured out of nothing at a breakpoint.
+ */
+@media (min-width: 1025px) {
+	.ehdr__nav,
+	.ehdr__nav-inner {
+		display: contents;
+	}
+
+	.ehdr__drawer-cta {
+		display: none;
+	}
+}
+
+/* ------------------------------------------------------ reduced motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+	/*
+	 * Everything still changes; nothing travels to get there. The panels and
+	 * the drawer still open and close, the frost still arrives -- they simply
+	 * do it at once, which is what someone asking for less motion is asking
+	 * for, rather than a header that has stopped responding.
+	 */
+	.ehdr__bar,
+	.ehdr__link,
+	.ehdr__link::after,
+	.ehdr__caret,
+	.ehdr__cta,
+	.ehdr__panel,
+	.ehdr__panel-link,
+	.ehdr__panel-link svg,
+	.ehdr__menu,
+	.ehdr__scrim,
+	.ehdr__burger span,
+	.ehdr__logo {
+		transition-duration: 1ms !important;
+		transition-delay: 0s !important;
+	}
+
+	.ehdr__cta:hover,
+	.ehdr__cta:focus-visible {
+		transform: none;
+	}
+
+	.ehdr__panel-link:hover,
+	.ehdr__panel-link:focus-visible {
+		transform: none;
+	}
+}

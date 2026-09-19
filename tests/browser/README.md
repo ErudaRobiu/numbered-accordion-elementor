@@ -16,6 +16,7 @@ node tests/browser/probe.js         # text animation presets
 node tests/browser/story-probe.js   # Scroll Story
 node tests/browser/rail-probe.js    # Scroll Rail
 node tests/browser/spin-probe.js    # Eruda Spin on an existing widget
+node tests/browser/header-probe.js  # Mega Header
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
@@ -39,6 +40,15 @@ the same half-lit sentence either way, that the notch travels and keeps an even
 clearance from both corners, that the panel stays centred, that media of any
 shape fills the panel, and that the entrance animates rather than snapping. It
 exits non-zero on any failure.
+
+`header-probe.js` asserts that the bar is completely transparent at the top and
+frosted once the page has moved, that a panel spans the bar rather than its own
+label, that the page behind is pushed back by a backdrop-filtered sheet and not
+by a `filter` on the content, that the panel is drawn above its own scrim, that
+Escape closes it and leaves it closed, that a tap on a phone opens a panel and
+does not immediately shut it again, that the drawer collapses completely, that
+the button keeps both of its shadows and a letter-spacing that is a real
+length, and -- with the script blocked outright -- that the panels still open.
 
 `tests/` is excluded from the release zip, so none of this ships.
 

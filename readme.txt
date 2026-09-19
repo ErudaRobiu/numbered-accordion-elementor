@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.21.0
+Stable tag: 2.22.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,26 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.22.0 =
+* New widget: **Mega Header**. A navigation bar that sits over your hero
+  completely invisibly -- no fill, no blur, no line -- and frosts as soon as the
+  page moves. What it does on scroll is a setting: frost, a flat fill, or
+  nothing at all.
+* Full-width mega menu panels with a link column, a description and a picture,
+  opened on hover with a pause first so sweeping across the bar does not flash
+  every panel in turn. The page behind them is blurred and darkened while one is
+  open.
+* A phone gets a drawer instead, with the panels as accordions inside it and the
+  button carried along full width. The picture and the description are dropped
+  there, where they would only push the links off the screen.
+* The navigation works with JavaScript disabled: the panels open on hover and on
+  keyboard focus in CSS alone. The script adds the frost, the blur behind the
+  panels, Escape and the screen-reader state.
+* The button carries a gradient and both an inner and an outer shadow, each
+  adjustable, and its letter spacing is in em -- a percentage is not a valid
+  letter-spacing and browsers drop it, which is why tracking set that way never
+  appears to do anything.
 
 = 2.21.0 =
 * Scroll Story: on a phone the notch now travels for the whole time its picture

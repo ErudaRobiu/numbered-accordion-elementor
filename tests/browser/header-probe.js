@@ -1,0 +1,369 @@
+/**
+ * Measures the Mega Header in real Chrome.
+ *
+ * See README.md in this directory. Needs puppeteer-core, which is NOT a
+ * plugin dependency -- tests/ is excluded from the release zip.
+ *
+ *   node tests/browser/header-probe.js
+ *
+ * Headless on purpose, like the rest: Chrome does not run requestAnimationFrame
+ * in a tab that is not visible, and this header's scroll state is driven by one.
+ */
+const puppeteer = require('puppeteer-core');
+
+const PASS = [];
+const FAIL = [];
+const URL = 'http://127.0.0.1:8732/tests/browser/header.html';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function check(name, ok, detail) {
+  (ok ? PASS : FAIL).push(name + (detail ? '  [' + detail + ']' : ''));
+}
+
+(async () => {
+  const browser = await puppeteer.launch({
+    executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    headless: 'new', args: ['--no-sandbox'],
+  });
+  const errs = [];
+
+  /* ------------------------------------------------------------ desktop --- */
+
+  const page = await browser.newPage();
+  page.on('pageerror', e => errs.push(String(e)));
+  await page.setViewport({ width: 1440, height: 900 });
+  await page.goto(URL, { waitUntil: 'load' });
+  await sleep(400);
+
+  const bar = () => page.evaluate(() => {
+    const el = document.querySelector('.ehdr__bar');
+    const cs = getComputedStyle(el);
+    return {
+      bg: cs.backgroundColor,
+      backdrop: cs.backdropFilter || cs.webkitBackdropFilter,
+      border: cs.borderBottomColor,
+      shadow: cs.boxShadow,
+      stuck: document.querySelector('.ehdr').hasAttribute('data-ehdr-stuck'),
+    };
+  });
+
+  const clear = c => /rgba\(\s*0,\s*0,\s*0,\s*0\s*\)|transparent/.test(c);
+
+  const rest = await bar();
+  check('at the top the bar is completely transparent',
+    clear(rest.bg) && !rest.stuck && /blur\(0px\)|none/.test(rest.backdrop),
+    'fill ' + rest.bg + ', backdrop ' + rest.backdrop);
+
+  check('and it carries no border or shadow there either',
+    clear(rest.border) && rest.shadow === 'none',
+    'border ' + rest.border + ', shadow ' + rest.shadow);
+
+  await page.evaluate(() => window.scrollTo(0, 900));
+  await sleep(700);
+  const stuck = await bar();
+
+  check('scrolling away from the top frosts it',
+    stuck.stuck && !clear(stuck.bg) && /blur\((?!0px)/.test(stuck.backdrop),
+    'fill ' + stuck.bg + ', backdrop ' + stuck.backdrop);
+
+  check('the frost saturates as well as blurring',
+    /saturate/.test(stuck.backdrop),
+    stuck.backdrop);
+
+  check('and the hairline arrives with it',
+    !clear(stuck.border),
+    stuck.border);
+
+  // It has to arrive over time. A frost that snaps is the thing this widget
+  // exists to avoid, and a missing transition looks identical in a screenshot.
+  const eased = await page.evaluate(() => {
+    const cs = getComputedStyle(document.querySelector('.ehdr__bar'));
+    return { props: cs.transitionProperty, ms: cs.transitionDuration };
+  });
+  check('the frost is transitioned rather than snapping',
+    /background-color/.test(eased.props) && /backdrop-filter/.test(eased.props) &&
+      !/^0s/.test(eased.ms),
+    eased.props.split(',').length + ' properties over ' + eased.ms.split(',')[0]);
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await sleep(500);
+
+  /* ------------------------------------------------------------- panels --- */
+
+  const svc = await page.$('.ehdr__item:nth-of-type(3) .ehdr__link');
+  await svc.hover();
+  await sleep(900);
+
+  const open = await page.evaluate(() => {
+    const root = document.querySelector('.ehdr');
+    const barBox = document.querySelector('.ehdr__bar').getBoundingClientRect();
+    const items = [...document.querySelectorAll('.ehdr__item')];
+    const shown = items.filter(it => {
+      const p = it.querySelector('.ehdr__panel');
+      return p && getComputedStyle(p).visibility === 'visible' && +getComputedStyle(p).opacity > 0.5;
+    });
+    const panel = shown[0] && shown[0].querySelector('.ehdr__panel');
+    const box = panel ? panel.getBoundingClientRect() : null;
+    const scrim = document.querySelector('.ehdr__scrim');
+    const scs = getComputedStyle(scrim);
+    return {
+      openAttr: root.hasAttribute('data-ehdr-open'),
+      shown: shown.length,
+      withPanel: items.filter(it => it.querySelector('.ehdr__panel')).length,
+      panelLeft: box ? Math.round(box.left) : null,
+      panelWidth: box ? Math.round(box.width) : null,
+      barLeft: Math.round(barBox.left),
+      barWidth: Math.round(barBox.width),
+      panelTop: box ? Math.round(box.top) : null,
+      barBottom: Math.round(barBox.bottom),
+      expanded: [...document.querySelectorAll('.ehdr__link[aria-expanded]')].map(a => a.getAttribute('aria-expanded')),
+      scrim: { backdrop: scs.backdropFilter || scs.webkitBackdropFilter, bg: scs.backgroundColor,
+        top: Math.round(scrim.getBoundingClientRect().top), vis: scs.visibility },
+      // A filter on page content would make every fixed element inside it
+      // scroll with the page -- this header included.
+      filtered: [...document.querySelectorAll('body > *')]
+        .filter(e => getComputedStyle(e).filter !== 'none').length,
+    };
+  });
+
+  check('hovering an item opens its panel', open.openAttr && open.shown === 1,
+    open.shown + ' of ' + open.withPanel + ' panels showing');
+
+  check('the panel spans the whole bar, not just the word that opened it',
+    open.panelWidth === open.barWidth && open.panelLeft === open.barLeft,
+    'panel ' + open.panelLeft + '..' + (open.panelLeft + open.panelWidth) +
+      ' against a bar of ' + open.barLeft + '..' + (open.barLeft + open.barWidth));
+
+  check('and it hangs directly off the bottom of the bar',
+    Math.abs(open.panelTop - open.barBottom) <= 1,
+    'panel top ' + open.panelTop + ', bar bottom ' + open.barBottom);
+
+  check('the trigger says it is expanded, and only that one does',
+    open.expanded.filter(v => v === 'true').length === 1 && open.expanded.length === open.withPanel,
+    open.expanded.join(' '));
+
+  /* -------------------------------------------------------------- scrim --- */
+
+  check('the page behind is blurred back',
+    open.scrim.vis === 'visible' && /blur\((?!0px)/.test(open.scrim.backdrop),
+    open.scrim.backdrop + ' over ' + open.scrim.bg);
+
+  check('and it starts below the bar, so the bar is not blurred by it',
+    open.scrim.top >= open.barBottom - 1,
+    'scrim starts at ' + open.scrim.top + ', bar ends at ' + open.barBottom);
+
+  /*
+   * The scrim must be a backdrop-filter on a sheet over the page, never a
+   * filter on the page itself. A filtered element becomes the containing block
+   * for every position:fixed descendant, so the obvious implementation drags
+   * the fixed header into the scroll and repaints the whole document.
+   */
+  check('the blur is a sheet over the page, not a filter on it',
+    open.filtered === 0,
+    open.filtered + ' filtered elements in the body');
+
+  // The panel must not be blurred by its own scrim. backdrop-filter makes the
+  // bar a stacking context, so this needs the bar raised above the scrim.
+  const sharp = await page.evaluate(() => {
+    const panel = [...document.querySelectorAll('.ehdr__panel')]
+      .find(p => getComputedStyle(p).visibility === 'visible');
+    const box = panel.getBoundingClientRect();
+    const mid = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+    return { inPanel: !!(mid && panel.contains(mid)), hit: mid ? mid.className.toString().slice(0, 40) : null };
+  });
+  check('the panel is drawn above the scrim rather than under it',
+    sharp.inPanel, 'the middle of the panel hits ' + sharp.hit);
+
+  /* ------------------------------------------------- one at a time, esc --- */
+
+  const sys = await page.$('.ehdr__item:nth-of-type(4) .ehdr__link');
+  await sys.hover();
+  await sleep(600);
+  const swapped = await page.evaluate(() => {
+    const on = [...document.querySelectorAll('.ehdr__item[data-ehdr-on]')];
+    return { count: on.length, label: on[0] ? on[0].querySelector('.ehdr__link').textContent.trim() : null };
+  });
+  check('moving to the next item swaps the panel rather than adding one',
+    swapped.count === 1 && /Our System/.test(swapped.label || ''),
+    swapped.count + ' open, showing ' + swapped.label);
+
+  await page.keyboard.press('Escape');
+  await sleep(400);
+  const escaped = await page.evaluate(() => ({
+    open: document.querySelector('.ehdr').hasAttribute('data-ehdr-open'),
+    focus: document.activeElement ? document.activeElement.textContent.trim().slice(0, 20) : null,
+  }));
+  check('Escape closes the panel and gives focus back to its trigger',
+    !escaped.open && /Our System/.test(escaped.focus || ''),
+    'open=' + escaped.open + ', focus on "' + escaped.focus + '"');
+
+  /* --------------------------------------------------------- the button --- */
+
+  const cta = await page.evaluate(() => {
+    const el = document.querySelector('.ehdr__bar > .ehdr__cta');
+    const cs = getComputedStyle(el);
+    return { bg: cs.backgroundImage, shadow: cs.boxShadow, track: cs.letterSpacing, radius: cs.borderRadius };
+  });
+
+  check('the button keeps its gradient',
+    /linear-gradient/.test(cta.bg), cta.bg.slice(0, 80));
+
+  // Two shadows, and exactly one of them inset: the inner one is what gives
+  // the pill its thickness and the outer one is the lift off the page.
+  const insets = (cta.shadow.match(/inset/g) || []).length;
+  const parts = cta.shadow.split(/,(?![^(]*\))/).length;
+  check('and both shadows, one inset and one not',
+    parts === 2 && insets === 1,
+    parts + ' shadows, ' + insets + ' inset');
+
+  /*
+   * Tracking has to compute to a real length. Elementor will happily write
+   * `letter-spacing: 5%`, which is not valid anywhere -- browsers drop the
+   * declaration and the tracking silently does nothing. The live site this was
+   * measured from has exactly that on its button.
+   */
+  check('the letter spacing is a real length, not a dropped percentage',
+    /px$/.test(cta.track) && parseFloat(cta.track) > 0,
+    cta.track);
+
+  /* -------------------------------------------------------------- phone --- */
+
+  const phone = await browser.newPage();
+  phone.on('pageerror', e => errs.push('phone: ' + String(e)));
+  await phone.setViewport({ width: 390, height: 780, isMobile: true, hasTouch: true });
+  await phone.goto(URL, { waitUntil: 'load' });
+  await sleep(500);
+
+  const closed = await phone.evaluate(() => {
+    const nav = document.querySelector('.ehdr__nav');
+    return {
+      burger: getComputedStyle(document.querySelector('.ehdr__burger')).display,
+      barCta: getComputedStyle(document.querySelector('.ehdr__bar > .ehdr__cta')).display,
+      navHeight: Math.round(nav.getBoundingClientRect().height),
+      expanded: document.querySelector('.ehdr__burger').getAttribute('aria-expanded'),
+    };
+  });
+  check('a phone gets a burger and loses the bar button',
+    closed.burger === 'block' && closed.barCta === 'none',
+    'burger ' + closed.burger + ', bar button ' + closed.barCta);
+
+  // One pixel, not nought: the hairline is always there so it has something
+  // to transition from. Anything above that is the drawer failing to collapse.
+  check('and the drawer starts shut',
+    closed.navHeight <= 1 && closed.expanded === 'false',
+    'drawer ' + closed.navHeight + 'px, aria-expanded=' + closed.expanded);
+
+  await phone.click('.ehdr__burger');
+  await sleep(700);
+  const drawer = await phone.evaluate(() => ({
+    height: Math.round(document.querySelector('.ehdr__nav').getBoundingClientRect().height),
+    expanded: document.querySelector('.ehdr__burger').getAttribute('aria-expanded'),
+    cta: getComputedStyle(document.querySelector('.ehdr__drawer-cta')).display,
+    sideways: document.documentElement.scrollWidth > window.innerWidth,
+  }));
+  check('tapping the burger opens the drawer',
+    drawer.height > 200 && drawer.expanded === 'true',
+    drawer.height + 'px, aria-expanded=' + drawer.expanded);
+
+  check('the button comes with it, full width',
+    drawer.cta === 'flex', 'display ' + drawer.cta);
+
+  check('and nothing runs off the side of the screen',
+    !drawer.sideways, drawer.sideways ? 'the page scrolls sideways' : 'no sideways scroll');
+
+  /*
+   * The tap that broke this once.
+   *
+   * focusin fires on the way to a click -- mousedown, focus, mouseup, click --
+   * so a handler that opened on any focus at all had the panel open before the
+   * click arrived, and the click then found it open and toggled it shut. The
+   * caret flipped, the label lit, and the links never appeared.
+   */
+  const before = await phone.evaluate(() =>
+    Math.round(document.querySelectorAll('.ehdr__item')[2].querySelector('.ehdr__panel').getBoundingClientRect().height));
+  await phone.click('.ehdr__item:nth-of-type(3) .ehdr__link');
+  await sleep(800);
+  const after = await phone.evaluate(() => {
+    const it = document.querySelectorAll('.ehdr__item')[2];
+    const panel = it.querySelector('.ehdr__panel');
+    return {
+      h: Math.round(panel.getBoundingClientRect().height),
+      on: it.hasAttribute('data-ehdr-on'),
+      links: panel.querySelectorAll('.ehdr__panel-link').length,
+    };
+  });
+  check('tapping an item in the drawer opens its links and leaves them open',
+    after.on && after.h > before + 100,
+    'panel went from ' + before + 'px to ' + after.h + 'px, holding ' + after.links + ' links');
+
+  // The picture and the blurb are desktop luxuries; on a phone they would push
+  // the links people came for off the bottom of the screen.
+  const trimmed = await phone.evaluate(() => {
+    const panel = document.querySelectorAll('.ehdr__item')[2].querySelector('.ehdr__panel');
+    const fig = panel.querySelector('.ehdr__figure');
+    const blurb = panel.querySelector('.ehdr__blurb');
+    return { fig: fig ? getComputedStyle(fig).display : 'absent',
+      blurb: blurb ? getComputedStyle(blurb).display : 'absent' };
+  });
+  check('but not the picture or the blurb',
+    trimmed.fig === 'none' && trimmed.blurb === 'none',
+    'picture ' + trimmed.fig + ', blurb ' + trimmed.blurb);
+
+  await phone.click('.ehdr__burger');
+  await sleep(600);
+  const shut = await phone.evaluate(() => ({
+    height: Math.round(document.querySelector('.ehdr__nav').getBoundingClientRect().height),
+    open: document.querySelector('.ehdr').hasAttribute('data-ehdr-open'),
+  }));
+  check('tapping it again shuts the drawer and everything in it',
+    shut.height <= 1 && !shut.open,
+    shut.height + 'px, panel open=' + shut.open);
+
+  /* ------------------------------------------------ without the script --- */
+
+  /*
+   * The cardinal rule: the navigation has to work with the script removed.
+   * The panels are opened by plain CSS hover and focus-within, and this loads
+   * the page with the script blocked to prove it.
+   */
+  const bare = await browser.newPage();
+  await bare.setRequestInterception(true);
+  bare.on('request', r => {
+    if (/mega-header\.js/.test(r.url())) r.abort(); else r.continue();
+  });
+  await bare.setViewport({ width: 1440, height: 900 });
+  await bare.goto(URL, { waitUntil: 'load' });
+  await sleep(400);
+  const noJsBefore = await bare.evaluate(() =>
+    getComputedStyle(document.querySelectorAll('.ehdr__item')[2].querySelector('.ehdr__panel')).visibility);
+  const svc2 = await bare.$('.ehdr__item:nth-of-type(3) .ehdr__link');
+  await svc2.hover();
+  await sleep(600);
+  const noJs = await bare.evaluate(() => {
+    const root = document.querySelector('.ehdr');
+    const panel = document.querySelectorAll('.ehdr__item')[2].querySelector('.ehdr__panel');
+    const cs = getComputedStyle(panel);
+    return { ready: root.hasAttribute('data-ehdr-ready'), vis: cs.visibility, op: cs.opacity,
+      links: panel.querySelectorAll('.ehdr__panel-link').length };
+  });
+  check('with the script blocked the panels still open on hover',
+    !noJs.ready && noJsBefore === 'hidden' && noJs.vis === 'visible' && +noJs.op > 0.5,
+    'script ran=' + noJs.ready + ', panel ' + noJsBefore + ' -> ' + noJs.vis +
+      ' with ' + noJs.links + ' links');
+
+  /* ------------------------------------------------------------- report --- */
+
+  check('no script errors', errs.length === 0, errs.length ? errs.join(' | ') : 'clean');
+
+  console.log('\nPASS');
+  PASS.forEach(p => console.log('  + ' + p));
+
+  if (FAIL.length) {
+    console.log('\nFAIL');
+    FAIL.forEach(f => console.log('  - ' + f));
+  }
+
+  console.log('\n' + PASS.length + ' passed, ' + FAIL.length + ' failed');
+  await browser.close();
+  process.exit(FAIL.length ? 1 : 0);
+})();

@@ -36,6 +36,7 @@ modules/impact/                    the impact grid widget and its assets
 modules/motion/                    the text animation controls and assets
 modules/story/                     the Scroll Story widget and its assets
 modules/rail/                      the Scroll Rail widget and its assets
+modules/header/                    the Mega Header widget and its assets
 modules/badge/                     the Eruda Spin extension and its assets
 modules/smoothscroll/              eases the whole page's scrolling
 modules/duplicator/                the Duplicate action
@@ -772,6 +773,114 @@ keeps the default cursor. It is still a card; it just does not pretend.
 Pictures are forced to cover for the same reason as the Scroll Story panel, and
 the rail's test page carries the same deliberately hostile theme block so the
 probe proves it.
+
+### Mega Header
+
+A navigation bar that sits over the hero as though it were not there, frosts as
+you scroll away from the top, and opens full-width panels underneath itself
+while everything behind them is blurred back.
+
+Reverse-engineered from hatamex.agency, measured rather than guessed at. Their
+bar frosts permanently because their site is dark; ours starts completely
+transparent — no fill, no blur, no border — so the picture behind it is
+uninterrupted, and frosts only once the page has moved. That is the difference
+between a header on a dark site and one on a light one, and it is the whole
+reason this was not a copy.
+
+**Fixed, not sticky.** Sticky would be tidier and it does not survive contact
+with Elementor: a sticky element is positioned against its scrolling ancestor,
+which here is whatever container the widget was dropped into. One `overflow:
+hidden` anywhere above it, or a transform on it, and the header scrolls away.
+Fixed behaves the same wherever someone puts the widget. "Hold space for the
+bar" adds a placeholder in the flow for pages whose first section is not meant
+to run underneath it.
+
+**The frost is declared at rest and only its value moves.** `backdrop-filter`
+is set to `blur(0px)` on the bar from the start rather than being added under
+the scrolled state. Adding it later promotes the bar to its own compositing
+layer mid-scroll, and the promotion is a visible flicker on the frame it
+happens. It saturates as well as blurring: a little of that is the difference
+between frosted glass and grey plastic.
+
+**The page behind a panel is pushed back by a sheet, never by a filter.** The
+obvious implementation is `filter: blur()` on the page content, and it is a
+trap twice over. A filtered element becomes the containing block for every
+`position: fixed` descendant, so a filtered page drags its own fixed elements —
+this header included — into the scroll; and `filter` cannot be composited, so
+it repaints the entire document. The scrim is a fixed sheet with a
+`backdrop-filter`, costing one layer and touching nothing it covers. It starts
+below the bar so the bar is never blurred by it.
+
+**The bar has to be raised above that scrim explicitly.** `backdrop-filter`
+makes an element a stacking context whether it is positioned or not, so the bar
+and everything in it are painted as one unit against the scrim's `z-index`.
+Without `z-index: 2` on the bar the panel opens correctly and is then blurred
+by its own scrim — which looks exactly like the panel having a blur on it by
+mistake.
+
+**The panel spans the bar, so the item must be `position: static`.** Giving the
+item `position: relative` is the reflex, and it makes each panel the width of
+the word that opened it: a dropdown, not a mega menu. The nearest positioned
+ancestor has to be the bar.
+
+**Panels open on hover and on focus in CSS alone**, so the navigation works
+with the script removed entirely — `header-probe.js` loads the page with the
+script blocked and proves it. What the script adds is what CSS cannot reach: a
+beat of intent before the first panel opens, so sweeping the pointer across the
+bar on the way somewhere else does not flash every panel in turn; one open
+panel rather than one per pointer; the scrim; Escape; and the aria. The moment
+it is ready it sets `data-ehdr-ready`, which switches the hover rules off — two
+sources of truth is how a panel ends up open with nothing under the pointer.
+
+**Two event-ordering traps, both found by measuring.**
+
+`focusin` fires on the way to a click — mousedown, focus, mouseup, click — so
+opening a panel on any focus at all meant a tap on a phone opened it and the
+click that followed found it already open and toggled it straight back shut.
+The caret flipped, the label lit, and the links never appeared. Panels open on
+`:focus-visible` only, which is exactly the line wanted: true from the
+keyboard, false from a pointer that is about to click anyway.
+
+Escape has to put focus back on the trigger, or focus is left inside a panel
+that is no longer on screen — and moving focus fires `focusin`, which opened
+the panel straight back up. A flag held across that one call fixes it.
+
+**The phone drawer is a grid row, and it carries no padding.** `max-height` was
+the old way and it is a guess: one large enough for the longest menu makes
+every shorter one open at the wrong speed, because the transition runs over a
+height that is mostly empty. `grid-template-rows: 0fr → 1fr` animates to the
+content's real height. The catch is that a grid item's automatic minimum size
+includes its padding, so `0fr` cannot take a padded item below the height of
+that padding — the drawer collapsed to 29px rather than nought and left a
+sliver of sheet hanging under the bar at all times. `min-height: 0` frees the
+content, not the box, so the spacing lives on what is inside it.
+
+On a phone the panel becomes an accordion inside that drawer and loses its
+picture and its blurb: both are desktop luxuries that push the links people
+came for off the bottom of the screen.
+
+**The menu is a repeater, and the panel links are a textarea.** Elementor has
+no nested repeater and is not going to grow one — the control is backed by a
+flat array and the panel UI has nowhere to put a second level. One link per
+line, `Label | /url | optional description`, is what every mega menu that works
+in Elementor does, and it has the side benefit of being pasteable: a twelve-item
+panel is one paste rather than twelve clicks of "add item". `parse_links()` is
+covered by fifteen assertions in `tests/run.php`, because it is the one place
+in the widget where someone's typing becomes markup.
+
+**The button is carried over from the live site exactly**, down to both of its
+shadows: an inset one pulled down from above the top edge, which is what gives
+the pill its thickness, and an outer one for the lift off the page. They cannot
+be one declaration — `inset` is per-shadow — and they must not be on different
+elements, or a hover that moves one leaves the other behind. Each is composed
+from four custom properties so offset, blur and colour can be separate controls
+without four of them fighting over a single `box-shadow`.
+
+One thing was fixed rather than copied. The live button carries
+`letter-spacing: 5%`, and a percentage is not a valid letter-spacing anywhere:
+browsers drop the declaration and the tracking silently does nothing. The
+control here is in `em`, and the probe asserts the computed value is a real
+length.
 
 ### Spin
 

@@ -459,6 +459,62 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
 - [ ] Editing a card in the editor re-renders it and the rail still works
 - [ ] Two Scroll Rails on one page travel independently
 
+## Mega Header
+
+`node tests/browser/header-probe.js` measures the two scroll states, the panel
+geometry, the scrim, the button's two shadows, the phone drawer and the
+script-blocked fallback, against `tests/browser/header.html`.
+
+- [ ] Drop it into your header template and set the side padding to match your
+      sections', or the logo will not sit above the words under it
+- [ ] **At the very top the bar is completely invisible** — no fill, no blur,
+      no line under it. The hero should look untouched
+- [ ] Scroll a little: it frosts, and the fill, the blur, the hairline and the
+      shadow all arrive together rather than one after another
+- [ ] Scroll back up: it goes fully transparent again
+- [ ] "What it does on scroll" set to Fill gives a flat colour with no blur,
+      and None leaves it transparent the whole way down
+- [ ] Over a **busy photograph**, check the menu text is still readable once
+      frosted. If it is not, that is the fill's opacity, not the blur
+- [ ] **Hover an item with a panel: it opens full width**, not just under the
+      word. A panel the width of its own label means the item has picked up a
+      `position` it should not have
+- [ ] Sweep the pointer straight across the bar to the far side: **no panel
+      should open on the way**. If they flash open in turn, raise "Pause before
+      a panel opens"
+- [ ] Move from one open panel straight to the next: it swaps immediately, with
+      no pause
+- [ ] The page behind the panel blurs and darkens, and **the panel itself stays
+      sharp**. A blurry panel means the bar has lost its stacking order
+- [ ] The bar is never blurred by its own scrim
+- [ ] Click the scrim: everything closes
+- [ ] Press Escape: the panel closes and **stays closed**, with focus back on
+      the item that opened it
+- [ ] Tab through the bar: each panel opens as you reach it and closes as you
+      leave, and you can tab into the links inside it
+- [ ] **On a phone, tap an item with a panel: the links appear and stay.** If
+      the caret flips and the label lights but nothing opens, the panel is
+      being opened by focus and closed by the click that follows
+- [ ] The drawer is completely flat when shut — no sliver of white hanging
+      under the bar
+- [ ] The drawer's picture and blurb are gone; only the links remain
+- [ ] The button moves into the drawer, full width, and the burger becomes a
+      cross
+- [ ] Following any link shuts the drawer behind you
+- [ ] Resize from phone to desktop with the drawer open: it closes cleanly
+- [ ] **Nothing makes the page scroll sideways.** Check on a real phone
+- [ ] With Reduce Motion on, everything still opens and closes — at once,
+      rather than not at all
+- [ ] **With JavaScript disabled the menu still works**: panels open on hover,
+      links are all reachable
+- [ ] The button keeps its gradient and both shadows, and its letter spacing
+      actually renders. If tracking looks like it is doing nothing, check the
+      unit is em rather than per cent
+- [ ] Something on the page drawing over the header means raising "Stacking
+      order"
+- [ ] Two headers on one page is not a supported arrangement, but neither
+      should take the other down
+
 ## Eruda Spin (on an existing widget)
 
 `node tests/browser/spin-probe.js` measures the turning, the spin-down and the

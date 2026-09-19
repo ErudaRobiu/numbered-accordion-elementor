@@ -625,7 +625,8 @@ check( 'the smooth scroll module is registered', true, in_array( 'smoothscroll',
 check( 'the scroll story module is registered', true, in_array( 'story', Toolkit::instance()->ids(), true ) );
 check( 'the scroll rail module is registered', true, in_array( 'rail', Toolkit::instance()->ids(), true ) );
 check( 'the spin module is registered', true, in_array( 'badge', Toolkit::instance()->ids(), true ) );
-check( 'eight modules ship', 8, count( Toolkit::instance()->ids() ) );
+check( 'the mega header module is registered', true, in_array( 'header', Toolkit::instance()->ids(), true ) );
+check( 'nine modules ship', 9, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -683,6 +684,7 @@ $module_files = array(
 	'modules/impact/class-impact-module.php',
 	'modules/story/class-story-module.php',
 	'modules/rail/class-rail-module.php',
+	'modules/header/class-header-module.php',
 );
 
 foreach ( $module_files as $relative ) {
@@ -719,6 +721,66 @@ foreach ( $module_files as $relative ) {
 		check( "{$short} is declared by a file in {$module_dir}", true, $declared );
 	}
 }
+
+/* ------------------------------------------------ Mega_Header_Widget --- */
+
+/*
+ * The panel-links textarea is the only place in the header where someone's
+ * typing becomes markup, so it is the only place a stray character can empty
+ * a menu. Elementor has no nested repeater, which is why this is a textarea
+ * at all -- see the note on the control.
+ */
+require_once __DIR__ . '/stubs/elementor.php';
+require_once dirname( __DIR__ ) . '/modules/header/widgets/class-mega-header-widget.php';
+
+$header = new \ErudaToolkit\Modules\Header\Widgets\Mega_Header_Widget();
+// No setAccessible(): it has done nothing since PHP 8.1 and is deprecated as
+// of 8.5, which turns a clean run into a wall of notices.
+$parse = new ReflectionMethod( $header, 'parse_links' );
+
+$links = function ( $raw ) use ( $parse, $header ) {
+	return $parse->invoke( $header, $raw );
+};
+
+check( 'no text is no links', array(), $links( '' ) );
+check( 'whitespace is no links', array(), $links( "  \n \t \n " ) );
+check( 'a non-string is no links', array(), $links( null ) );
+
+check(
+	'label, url and note',
+	array( array( 'label' => 'Feasibility', 'url' => '/f', 'note' => 'What it costs' ) ),
+	$links( 'Feasibility | /f | What it costs' )
+);
+
+// A label on its own is a valid row: a heading inside a list of links is a
+// reasonable thing to want, and dropping it would silently eat a line.
+check(
+	'a label alone still counts',
+	array( array( 'label' => 'Services', 'url' => '', 'note' => '' ) ),
+	$links( 'Services' )
+);
+
+check(
+	'blank lines between rows are skipped',
+	2,
+	count( $links( "One | /one\n\n\nTwo | /two" ) )
+);
+
+// Windows and old Mac line endings both reach a textarea through a browser.
+check( 'CRLF splits', 2, count( $links( "One | /one\r\nTwo | /two" ) ) );
+check( 'CR splits', 2, count( $links( "One | /one\rTwo | /two" ) ) );
+
+// A row with no label is not a row, however many pipes it has.
+check( 'a leading pipe drops the row', array(), $links( ' | /nowhere | orphaned' ) );
+
+// Trailing pipes are what you get from deleting a description but not the
+// separator, and they must not become an empty note in the markup.
+check( 'a trailing pipe leaves an empty note', '', $links( 'One | /one |' )[0]['note'] );
+
+// Extra pipes past the third field are ignored rather than shifting the row.
+check( 'a fourth field is ignored', 'note', $links( 'One | /one | note | extra' )[0]['note'] );
+
+check( 'surrounding spaces are trimmed', 'One', $links( '   One   |   /one   ' )[0]['label'] );
 
 /* ------------------------------------------------- SmoothScroll_Module --- */
 
