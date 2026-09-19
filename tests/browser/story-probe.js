@@ -434,12 +434,13 @@ function check(name, ok, detail) {
     phoneSweep.done ? 'picture was ' + Math.round(phoneSweep.done.pictureTop) +
       'px below the top of the window when the words finished' : 'n/a');
 
-  // --- the notch comes with it, along the top ------------------------------
+  // --- the notch comes with it, along the bottom ----------------------------
   /*
    * Down the side is no use on a phone: a stacked picture is wide and short,
    * so a notch on its left edge has almost nowhere to travel. It runs along
-   * the top instead, and travels with the item it belongs to rather than with
-   * the section.
+   * the bottom instead -- the seam between a picture and the item under it,
+   * rather than a bite out of the words above it -- and travels with the item
+   * it belongs to rather than with the section.
    */
   const acrossNotch = await page.evaluate(async () => {
     const slides = [...document.querySelectorAll('.estry__item .estry__slide')];
@@ -447,12 +448,29 @@ function check(name, ok, detail) {
     const max = document.body.scrollHeight - innerHeight;
 
     const edge = (d) => {
-      // Every point the path touches, and which edge each one sits on.
-      const pts = (d.match(/-?[\d.]+,-?[\d.]+/g) || []).map(p => p.split(',').map(Number));
+      /*
+       * Every point the path lands on, read a command at a time.
+       *
+       * Not by pulling every `x,y` pair out of the string: an arc is written
+       * `A rx,ry 0 0 sweep x,y`, so a plain pair-match takes each radius for a
+       * point as well. The shoulder radius is about 17px on a phone, which is
+       * close enough to the notch's own depth to look right and far enough
+       * from it to make a band along the bottom edge measure as one that
+       * covers the whole picture.
+       */
+      const cmds = d.trim().match(/[MLAZ][^MLAZ]*/g) || [];
+      const pts = [];
+
+      for (const c of cmds) {
+        const n = (c.match(/-?[\d.]+/g) || []).map(Number);
+        if (n.length >= 2) pts.push([n[n.length - 2], n[n.length - 1]]);
+      }
+
       const w = Math.max(...pts.map(p => p[0]));
       const h = Math.max(...pts.map(p => p[1]));
       // The notch is the run of points that are off the corners but on an
-      // edge. Along the top means they vary in x at near-constant y.
+      // edge. Along the bottom means they vary in x at near-constant y, and
+      // that y is down at the bottom of the box.
       const inner = pts.filter(p => p[1] > 0.5 && p[1] < h - 0.5 && p[0] > 0.5 && p[0] < w - 0.5);
       return { w, h, inner: inner.length, xs: inner.map(p => p[0]), ys: inner.map(p => p[1]) };
     };
@@ -473,6 +491,8 @@ function check(name, ok, detail) {
       wide: one.w > one.h,
       spreadX: Math.max(...one.xs) - Math.min(...one.xs),
       spreadY: Math.max(...one.ys) - Math.min(...one.ys),
+      h: one.h,
+      highest: Math.min(...one.ys),
     };
   });
 
@@ -480,14 +500,64 @@ function check(name, ok, detail) {
     acrossNotch.clipped === acrossNotch.slides && acrossNotch.slides === 3,
     acrossNotch.clipped + ' of ' + acrossNotch.slides + ' clipped');
 
-  check('and it runs along the top rather than down the side',
+  check('and it runs along the bottom rather than down the side',
     acrossNotch.spreadX > acrossNotch.spreadY * 3,
     'the notch spans ' + Math.round(acrossNotch.spreadX) + 'px across and ' +
       Math.round(acrossNotch.spreadY) + 'px down');
 
+  // The bottom edge and not the top: above the picture the notch cuts into the
+  // words it was meant to sit below.
+  check('and along the bottom edge rather than the top one',
+    acrossNotch.highest > acrossNotch.h / 2,
+    'the notch reaches ' + Math.round(acrossNotch.h - acrossNotch.highest) +
+      'px up from the bottom of a ' + Math.round(acrossNotch.h) + 'px picture');
+
   check('it travels as you scroll, rather than sitting still',
     acrossNotch.moved > 4,
     acrossNotch.moved + ' distinct shapes over the section');
+
+  /*
+   * And the edge the panel had comes with it.
+   *
+   * Wide, the border belongs to the frame; stacked, the frame is empty and
+   * hidden, and without this the section quietly loses its outline on a phone.
+   * Which of the two ways it gets one depends on the notch: a clipped box
+   * cannot carry a CSS border, so a notched picture is outlined by a stroked
+   * copy of the path doing the clipping -- at twice the asked-for width, half
+   * of which the clip takes back.
+   */
+  const stackedEdge = await page.evaluate(() => {
+    const root = document.querySelector('.estry');
+    const slide = document.querySelector('.estry__item .estry__slide');
+    const asked = parseFloat(getComputedStyle(root).getPropertyValue('--estry-media-bw'));
+    const outline = slide.querySelector('.estry__outline path');
+
+    // The other case, which this fixture is not: with the notch off, the same
+    // picture takes a plain border instead.
+    root.removeAttribute('data-estry-notched');
+    const plain = getComputedStyle(slide);
+    const asPlain = { width: parseFloat(plain.borderTopWidth), box: plain.boxSizing };
+    root.setAttribute('data-estry-notched', '');
+
+    return {
+      asked,
+      outlines: document.querySelectorAll('.estry__item .estry__outline path').length,
+      stroke: outline ? (outline.getAttribute('stroke') || '').trim() : '',
+      width: outline ? parseFloat(outline.getAttribute('stroke-width')) : 0,
+      drawn: !!(outline && outline.getAttribute('d')),
+      asPlain,
+    };
+  });
+
+  check('a notched picture keeps the panel\'s edge, as a stroked path',
+    stackedEdge.outlines === 3 && stackedEdge.drawn &&
+      stackedEdge.width === stackedEdge.asked * 2 && stackedEdge.stroke === '#052424',
+    stackedEdge.outlines + ' outlined, stroked ' + stackedEdge.width + 'px in ' +
+      stackedEdge.stroke + ' for a ' + stackedEdge.asked + 'px edge');
+
+  check('and an unnotched one takes an ordinary border',
+    stackedEdge.asPlain.width === stackedEdge.asked && stackedEdge.asPlain.box === 'border-box',
+    stackedEdge.asPlain.width + 'px, ' + stackedEdge.asPlain.box);
 
   // --- and it goes back ------------------------------------------------------
   await page.setViewport({ width: 1280, height: 900 });

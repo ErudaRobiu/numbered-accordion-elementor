@@ -80,17 +80,23 @@
 	 */
 	function notchPath( w, h, depth, run, progress, span, radius, across ) {
 		/*
-		 * Along the top instead of down the side.
+		 * Along the bottom instead of down the side.
 		 *
-		 * The shape is the same shape; only the axis differs. Rather than
+		 * The shape is the same shape; only the edge differs. Rather than
 		 * write it twice, the whole path is built for a vertical edge on a box
-		 * with its sides swapped, and every point is reflected across the
-		 * diagonal on the way out. A reflection turns an arc inside out, so
-		 * the sweep flag is flipped with it.
+		 * with its sides swapped, and every point is turned a quarter turn on
+		 * the way out: (x, y) leaves as (y, w - x), which puts the notched
+		 * edge -- x = 0 -- along the bottom of the real box.
+		 *
+		 * A quarter turn is a rotation, not a mirror, so unlike a plain
+		 * reflection it leaves the arcs the way round they were drawn and the
+		 * sweep flags are passed through untouched.
 		 *
 		 * This is what lets a phone have the notch at all: stacked, a picture
 		 * is wide and short, and a notch down its left edge would have nowhere
-		 * to travel.
+		 * to travel. The bottom edge and not the top, because the notch is the
+		 * seam between a picture and the item under it -- above the picture it
+		 * only cuts into the words it was meant to sit below.
 		 */
 		if ( across ) {
 			var swapped = w;
@@ -106,12 +112,14 @@
 		var c = Math.max( 0, Math.min( radius, w / 2, h / 2 ) );
 
 		function at( x, y ) {
-			return across ? y.toFixed( 2 ) + ',' + x.toFixed( 2 ) : x.toFixed( 2 ) + ',' + y.toFixed( 2 );
+			// `w` is the swapped width by now, which is the real box's height,
+			// so `w - x` is the distance measured up from its bottom edge.
+			return across ? y.toFixed( 2 ) + ',' + ( w - x ).toFixed( 2 ) : x.toFixed( 2 ) + ',' + y.toFixed( 2 );
 		}
 
 		function arc( radius2, sweep, x, y ) {
 			return 'A ' + radius2.toFixed( 2 ) + ',' + radius2.toFixed( 2 ) + ' 0 0 ' +
-				( across ? 1 - sweep : sweep ) + ' ' + at( x, y );
+				sweep + ' ' + at( x, y );
 		}
 
 		// The band lives between the corner arcs, not between the corners.
@@ -429,6 +437,19 @@
 			frame.setAttribute( READY, '' );
 		}
 
+		/*
+		 * The notch is an attribute on the frame, but on a phone the pictures
+		 * are moved out of the frame and in under their items, where no
+		 * stylesheet rule can look back up at it. Mirroring it onto the
+		 * section is what lets the stacked rules tell the two cases apart: a
+		 * plain picture takes an ordinary CSS border, a notched one cannot --
+		 * the clip path would cut it away -- and is outlined by a stroked copy
+		 * of its own path instead.
+		 */
+		if ( notched ) {
+			root.setAttribute( 'data-estry-notched', '' );
+		}
+
 		var videos = toArray( root.querySelectorAll( '.estry__vid' ) );
 
 		/*
@@ -456,13 +477,20 @@
 		} );
 
 		/**
-		 * Give every stacked picture a notch of its own, along its top edge.
+		 * Give every stacked picture a notch of its own, along its bottom edge,
+		 * and the outline that stands in for its border.
 		 */
 		function buildAcross() {
 			clearAcross();
 
 			entries.forEach( function ( entry ) {
+				// A placeholder rather than a skip. The scroll pass looks a
+				// record up by the item's own index, and an item with no
+				// picture of its own would otherwise shift every record after
+				// it onto the wrong picture.
 				if ( ! entry.slide ) {
+					acrossPaths.push( null );
+
 					return;
 				}
 
@@ -492,12 +520,43 @@
 				entry.slide.style.clipPath = 'url(#' + id + ')';
 				entry.slide.style.webkitClipPath = 'url(#' + id + ')';
 
+				var w = entry.slide.offsetWidth;
+				var h = entry.slide.offsetHeight;
+
+				/*
+				 * The same trick as the pinned panel: a clipped box cannot
+				 * carry a border, so the edge is a stroked copy of the very
+				 * path doing the clipping, drawn at twice the asked-for width
+				 * and clipped by it too, which leaves exactly the asked-for
+				 * width on the inside.
+				 *
+				 * Stacked, this is the only border the picture can have, and
+				 * without it a phone loses the outline the panel has on a
+				 * desktop.
+				 */
+				var overlay = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+
+				overlay.setAttribute( 'class', 'estry__outline' );
+				overlay.setAttribute( 'aria-hidden', 'true' );
+				overlay.setAttribute( 'preserveAspectRatio', 'none' );
+				overlay.setAttribute( 'viewBox', '0 0 ' + w + ' ' + h );
+
+				var outlineAcross = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+
+				outlineAcross.setAttribute( 'fill', 'none' );
+				outlineAcross.setAttribute( 'stroke', notch.stroke );
+				outlineAcross.setAttribute( 'stroke-width', String( notch.width * 2 ) );
+				overlay.appendChild( outlineAcross );
+				entry.slide.appendChild( overlay );
+
 				acrossPaths.push( {
 					path: path,
 					svg: svg,
+					outline: outlineAcross,
+					overlay: overlay,
 					slide: entry.slide,
-					w: entry.slide.offsetWidth,
-					h: entry.slide.offsetHeight,
+					w: w,
+					h: h,
 					d: '',
 				} );
 			} );
@@ -505,11 +564,21 @@
 
 		function clearAcross() {
 			acrossPaths.forEach( function ( one ) {
+				if ( ! one ) {
+					return;
+				}
+
 				one.slide.style.clipPath = '';
 				one.slide.style.webkitClipPath = '';
 
 				if ( one.svg.parentNode ) {
 					one.svg.parentNode.removeChild( one.svg );
+				}
+
+				// Inside the slide rather than beside it, so moving the slide
+				// back into the frame would take it along.
+				if ( one.overlay && one.overlay.parentNode ) {
+					one.overlay.parentNode.removeChild( one.overlay );
 				}
 			} );
 
@@ -770,6 +839,10 @@
 					if ( across !== one.d ) {
 						one.d = across;
 						one.path.setAttribute( 'd', across );
+
+						if ( one.outline ) {
+							one.outline.setAttribute( 'd', across );
+						}
 					}
 				}
 			} );

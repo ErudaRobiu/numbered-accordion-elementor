@@ -486,16 +486,34 @@ source. Widening puts them all back in the frame, in order.
 
 **The notch comes with them, turned on its side.** Down the left edge is no use
 on a phone: a stacked picture is wide and short, so a notch there has almost
-nowhere to travel. It runs along the top instead, and travels with the item it
-belongs to rather than with the section. The path is not written twice — it is
-built for a vertical edge on a box with its sides swapped and reflected across
-the diagonal on the way out, which turns each arc inside out, so the sweep flag
-is flipped with it.
+nowhere to travel. It runs along the **bottom** instead — the seam between a
+picture and the item under it, where the desktop panel's own notch sits against
+the text beside it, rather than a bite taken out of the words above — and it
+travels with the item it belongs to rather than with the section. The path is
+not written twice: it is built for a vertical edge on a box with its sides
+swapped and turned a quarter turn on the way out, `(x, y)` leaving as
+`(y, w - x)`. A quarter turn is a rotation rather than a mirror, so unlike a
+plain reflection it leaves each arc the way round it was drawn and the sweep
+flags pass through untouched.
 
 It needs its own proportions, though. A 280px straight run plus two 65px
 shoulders is more than a 310px edge has, so the desktop numbers leave the band
 clamped flat against both corners with nowhere to go. Depth and length have
 their own controls for a phone, defaulting to 18px and 90px.
+
+**And the panel's edge comes with them too.** Wide, the border belongs to the
+frame; stacked, the frame is empty and hidden, so without this a phone quietly
+loses the outline the section has everywhere else. Which of the two ways a
+picture gets one depends on the notch, for the same reason it does on the
+desktop panel: a clipped box cannot carry a CSS border, so a notched picture is
+outlined by a stroked copy of the very path doing the clipping — at twice the
+asked-for width, half of which the clip takes straight back — and an unnotched
+one takes an ordinary border.
+
+The stylesheet can only tell those two cases apart because the script mirrors
+the frame's notch onto the section as `data-estry-notched`. The notch itself is
+an attribute on the frame, and on a phone the pictures are no longer inside the
+frame to look up at it.
 
 The highlight still scrubs — it is the part that works at any width — but it is
 measured against the **words**, not the item. Stacked, an item is its text and
@@ -685,6 +703,24 @@ discoverable. A bar says *some* of the way through; a count says how much is
 left, which is what decides whether anyone keeps swiping. Both are driven by
 the scroller's own `scrollLeft` on a phone and by the page's progress on
 desktop — one `paint()` either way.
+
+**The ends of the row fade.** A row that travels sideways has to stop
+somewhere, and a hard vertical edge where a card meets the end of the scroller
+reads as a card cut in half rather than one on its way out.
+
+It is a mask on the scroller, not a pair of gradient overlays over it. An
+overlay has to be painted in the section's own background colour, which stops
+being true the moment the section sits on a picture or a gradient, and it would
+have to sit above the cards, where it would swallow the hover and the link of
+whichever card was under it. The mask runs the full height, so the vertical
+room a card's shadow and its hover lift live in is untouched, and the fade's
+width is a responsive control defaulting to 96px.
+
+`tests/browser/rail-probe.js` measures it in pixels rather than reading the
+mask property back: it scrolls until a card is lying across the end and samples
+the band, which has to climb from the page behind the row to the card in a
+couple of dozen steps. The property being set is not the point; whether a card
+actually dissolves is.
 
 **The widget sets its own `box-sizing`.** Every theme worth the name sets it,
 and a widget cannot be built on the assumption that this one did: without it

@@ -310,6 +310,33 @@ class Scroll_Rail_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'edge_fade',
+			array(
+				'label'        => esc_html__( 'Fade the ends', 'numbered-accordion' ),
+				'description'  => esc_html__( 'Softens the two ends of the row, so a card leaves the frame rather than being cut off at it. It fades whatever is behind the row, so it works over a picture or a gradient as well as over a flat colour.', 'numbered-accordion' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'separator'    => 'before',
+				'label_on'     => esc_html__( 'Yes', 'numbered-accordion' ),
+				'label_off'    => esc_html__( 'No', 'numbered-accordion' ),
+				'return_value' => 'yes',
+			)
+		);
+
+		$this->add_responsive_control(
+			'fade_width',
+			array(
+				'label'      => esc_html__( 'How wide the fade is', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 320 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 96 ),
+				'selectors'  => array( '{{WRAPPER}} .erail' => '--erail-fade: {{SIZE}}px;' ),
+				'condition'  => array( 'edge_fade' => 'yes' ),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
@@ -948,6 +975,7 @@ class Scroll_Rail_Widget extends Widget_Base {
 		$bar   = ! isset( $settings['progress'] ) || 'yes' === $settings['progress'];
 		$tally = ! isset( $settings['counter'] ) || 'yes' === $settings['counter'];
 		$bleed = ! isset( $settings['bleed'] ) || 'yes' === $settings['bleed'];
+		$fade  = ! isset( $settings['edge_fade'] ) || 'yes' === $settings['edge_fade'];
 
 		$tag = isset( $settings['title_tag'] ) ? $settings['title_tag'] : 'h3';
 		$tag = in_array( $tag, array( 'h2', 'h3', 'h4', 'h5', 'div', 'span' ), true ) ? $tag : 'h3';
@@ -982,6 +1010,7 @@ class Scroll_Rail_Widget extends Widget_Base {
 			data-erail-pause-out="<?php echo esc_attr( (string) $pauseOut ); ?>"
 			data-erail-pin="<?php echo esc_attr( $pin ); ?>"
 			<?php echo $bleed ? ' data-erail-bleed' : ''; ?>
+			<?php echo $fade ? ' data-erail-fade' : ''; ?>
 			data-erail-centre="<?php echo esc_attr( $centre ); ?>"
 			data-erail-start="<?php echo esc_attr( (string) $start ); ?>"
 			data-erail-finish="<?php echo esc_attr( (string) $finish ); ?>"

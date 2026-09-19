@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.19.0
+Stable tag: 2.20.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,22 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.20.0 =
+* Scroll Rail: the two ends of the row now fade instead of stopping at a hard
+  edge, so a card leaves the frame rather than being cut in half at it. It
+  fades whatever is behind the row, so it works over a picture or a gradient as
+  well as over a flat colour. On by default, with a "How wide the fade is"
+  setting per device.
+* Scroll Story: on a phone the notch now runs along the bottom of each picture
+  rather than the top. It belongs on the seam between a picture and the item
+  under it; along the top it cut into the words it was meant to sit below.
+* Scroll Story: a stacked picture keeps the border the pinned panel has. A
+  notched one is outlined by a stroked copy of its own clip path, the way the
+  desktop panel is, and an unnotched one takes an ordinary border. Before this
+  the section quietly lost its outline on a phone.
+* Scroll Story: fixed a phone notch landing on the wrong picture when an item
+  had no media of its own.
 
 = 2.19.0 =
 * Everything that animates on scroll is about three times cheaper. Values that

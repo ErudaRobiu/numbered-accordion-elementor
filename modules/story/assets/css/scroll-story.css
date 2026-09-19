@@ -550,6 +550,27 @@
 		transition: none;
 	}
 
+	/*
+	 * The panel's border, kept.
+	 *
+	 * Wide, the edge belongs to the frame. Stacked, the frame is empty and
+	 * hidden, so without this the pictures lose the outline the panel had and
+	 * the section changes character on a phone for no reason anyone asked for.
+	 *
+	 * Only when there is no notch: a clipped box cannot carry a border, for
+	 * the same reason the pinned panel cannot, and a notched picture is
+	 * outlined by a stroked copy of its own path instead -- see
+	 * .estry__outline and buildAcross() in the script.
+	 *
+	 * box-sizing is not assumed. The slide is sized by an aspect ratio, and
+	 * under content-box a border would be added to the height it works out,
+	 * leaving each picture a couple of pixels taller than the one above it.
+	 */
+	.estry[data-estry-stacked]:not([data-estry-notched]) .estry__item .estry__slide {
+		box-sizing: border-box;
+		border: var(--estry-media-bw, 0px) solid var(--estry-media-border, #052424);
+	}
+
 	.estry[data-estry-stacked] .estry__item .estry__inner {
 		position: absolute;
 		inset: 0;

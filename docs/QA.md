@@ -313,8 +313,16 @@ a real site.
       and the panel is gone. Nothing scrolls sideways
 - [ ] The highlight still runs on a phone, and an item's words finish while
       its picture is still on the way up rather than long after
-- [ ] **Each stacked picture has the notch along its top edge**, and it
-      travels as you scroll that item past. Down the side is the desktop one
+- [ ] **Each stacked picture has the notch along its bottom edge**, and it
+      travels as you scroll that item past. Down the side is the desktop one,
+      and along the top is where it was before 2.20.0 -- there it cuts into the
+      words above rather than sitting on the seam below
+- [ ] **A stacked picture keeps the border the panel has.** With a border width
+      set, it follows the notch as well as the corners and is the width asked
+      for, exactly as on the desktop panel. Turn the notch off and it becomes
+      an ordinary border
+- [ ] Give one item no picture of its own: every other item's notch still
+      lands on its own picture rather than on the one below it
 - [ ] "Notch depth on a phone" and "Notch length on a phone" change it. If the
       notch looks flat against both corners, its length is longer than the
       picture's edge can hold
@@ -429,6 +437,13 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
       just a narrow window
 - [ ] Turning "Edge to edge on a phone" off boxes the row back inside the
       section padding, and still does not overflow
+- [ ] **Both ends of the row fade rather than cutting a card off**, and they
+      fade to whatever is behind the section -- put the rail over a picture or
+      a gradient and the fade still reads as the card leaving
+- [ ] "How wide the fade is" changes it per device, and turning "Fade the ends"
+      off leaves a hard edge
+- [ ] The fade does not clip a card's shadow or its hover lift above and below
+      the row
 - [ ] With Reduce Motion on, the same. No pinning, no hover transitions, and
       the cue is simply always visible
 - [ ] With JavaScript disabled the row is still a usable horizontal scroller

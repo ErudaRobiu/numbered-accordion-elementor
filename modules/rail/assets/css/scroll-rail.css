@@ -109,6 +109,40 @@
 	display: none;
 }
 
+/*
+ * Faded ends.
+ *
+ * A row that travels sideways has to stop somewhere, and a hard vertical edge
+ * where a card meets the end of the scroller reads as a card that has been cut
+ * in half rather than as one on its way out. Fading the two ends lets a card
+ * leave the frame the way it arrived.
+ *
+ * A mask, not two gradient overlays. An overlay has to be painted in the
+ * section's own background colour, which stops being true the moment the
+ * section sits on a picture, a gradient or anything else; and it would have to
+ * sit above the cards, where it would swallow the hover and the link on
+ * whichever card was under it.
+ *
+ * Only the ends fade. The mask runs the full height, so the vertical room that
+ * a card's shadow and its hover lift live in is untouched.
+ */
+.erail[data-erail-fade] .erail__viewport {
+	-webkit-mask-image: linear-gradient(
+		to right,
+		transparent 0,
+		#000 var(--erail-fade, 96px),
+		#000 calc(100% - var(--erail-fade, 96px)),
+		transparent 100%
+	);
+	mask-image: linear-gradient(
+		to right,
+		transparent 0,
+		#000 var(--erail-fade, 96px),
+		#000 calc(100% - var(--erail-fade, 96px)),
+		transparent 100%
+	);
+}
+
 /* Once the script is driving, the row is moved rather than scrolled. */
 .erail[data-erail-ready] .erail__viewport {
 	overflow: hidden;

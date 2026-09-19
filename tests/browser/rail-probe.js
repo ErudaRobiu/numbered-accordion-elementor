@@ -503,6 +503,90 @@ const x = t => {
     focused.right > 0 && focused.left < focused.vw,
     'last card at ' + focused.left + '..' + focused.right + ' in a ' + focused.vw + 'px window');
 
+  // --- the ends of the row fade ---------------------------------------------
+  /*
+   * A row that travels sideways has to stop somewhere, and a hard vertical
+   * edge where a card meets the end of the scroller reads as a card cut in
+   * half rather than one on its way out.
+   *
+   * Measured in pixels, not by reading the mask back off the element. The
+   * property being set is not the point -- the point is whether a card
+   * actually dissolves into whatever is behind the section, which is also the
+   * thing a pair of gradient overlays would only fake over a flat colour.
+   */
+  const fadeBand = await page.evaluate(async () => {
+    const viewport = document.querySelector('.erail__viewport');
+    const band = parseFloat(getComputedStyle(document.querySelector('.erail'))
+      .getPropertyValue('--erail-fade')) || 0;
+    const max = document.body.scrollHeight - innerHeight;
+
+    // A frame where a card is lying across the left end, so there is something
+    // there to fade. Mid-travel is the obvious guess and a gap between two
+    // cards is the obvious way for the guess to be wrong.
+    for (let y = 0; y <= max; y += 60) {
+      window.scrollTo(0, y);
+      await new Promise(r => requestAnimationFrame(r));
+
+      const left = viewport.getBoundingClientRect().left;
+      const card = [...document.querySelectorAll('.erail__card')].find(
+        c => {
+          const r = c.getBoundingClientRect();
+          return r.left < left - 4 && r.right > left + band + 40;
+        }
+      );
+
+      if (card) {
+        const r = card.getBoundingClientRect();
+        return { found: true, band, left: Math.round(left), y: Math.round(r.top + r.height / 2) };
+      }
+    }
+
+    return { found: false, band };
+  });
+
+  const fade = fadeBand.found ? await (async () => {
+    const shot = await page.screenshot({ encoding: 'base64' });
+
+    return page.evaluate(async (data, at) => {
+      const img = new Image();
+      img.src = 'data:image/png;base64,' + data;
+      await img.decode();
+      const cv = document.createElement('canvas');
+      cv.width = img.width;
+      cv.height = img.height;
+      const ctx = cv.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      // How far each pixel across the band is from the page behind the row.
+      // Nought at the very end means the card has gone completely; the same
+      // number all the way across means it was cut off instead.
+      const bg = getComputedStyle(document.body).backgroundColor
+        .match(/-?[\d.]+/g).slice(0, 3).map(Number);
+      const away = [];
+
+      for (let x = 0; x <= at.band; x += 4) {
+        const d = ctx.getImageData(at.left + x, at.y, 1, 1).data;
+        away.push(Math.max(
+          Math.abs(d[0] - bg[0]), Math.abs(d[1] - bg[1]), Math.abs(d[2] - bg[2])
+        ));
+      }
+
+      return { away, steps: new Set(away).size };
+    }, shot, fadeBand);
+  })() : null;
+
+  check('the ends of the row fade rather than cutting a card off',
+    !!fade && fade.away[0] <= 2 && fade.away[fade.away.length - 1] > 8 && fade.steps > 6,
+    fade
+      ? 'across ' + fadeBand.band + 'px the card goes from ' + fade.away[0] + ' to ' +
+        fade.away[fade.away.length - 1] + ' away from the page behind it, in ' +
+        fade.steps + ' steps'
+      : 'no card was lying across the end to fade');
+
+  check('and it climbs the whole way rather than stepping once',
+    !!fade && fade.away.every((v, i) => 0 === i || v >= fade.away[i - 1] - 3),
+    fade ? fade.away.join(' ') : 'n/a');
+
   // --- narrow screens do not pin -------------------------------------------
   await page.setViewport({ width: 420, height: 900 });
   await page.evaluate(() => { window.dispatchEvent(new Event('resize')); });
