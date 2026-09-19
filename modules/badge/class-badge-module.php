@@ -21,6 +21,18 @@ final class Badge_Module implements Module {
 	const STYLE_HANDLE  = 'ebdg-spin-badge';
 	const SCRIPT_HANDLE = 'ebdg-spin-badge';
 
+	// The extension that turns an existing widget. Separate handles, because a
+	// page may use one, the other, or both.
+	const SPIN_STYLE_HANDLE  = 'espin-spin';
+	const SPIN_SCRIPT_HANDLE = 'espin-spin';
+
+	/**
+	 * Has the spin extension's stylesheet been asked for yet this request?
+	 *
+	 * @var bool
+	 */
+	private $spun = false;
+
 	/**
 	 * Module id.
 	 *
@@ -36,7 +48,7 @@ final class Badge_Module implements Module {
 	 * @return string
 	 */
 	public static function label() {
-		return esc_html__( 'Spin Badge', 'numbered-accordion' );
+		return esc_html__( 'Spin', 'numbered-accordion' );
 	}
 
 	/**
@@ -45,7 +57,7 @@ final class Badge_Module implements Module {
 	 * @return string
 	 */
 	public static function description() {
-		return esc_html__( 'Adds a "Spin Badge" widget: a round link whose text turns around its edge and slows to a stop under the pointer.', 'numbered-accordion' );
+		return esc_html__( 'Adds an "Eruda Spin" section to image, icon and button widgets, which turns what they hold and slows it to a stop under the pointer. Also adds a "Spin Badge" widget that draws its own round text.', 'numbered-accordion' );
 	}
 
 	/**
@@ -108,6 +120,54 @@ final class Badge_Module implements Module {
 		add_action( 'elementor/frontend/after_register_styles', array( $this, 'register_styles' ) );
 		add_action( 'elementor/frontend/after_register_scripts', array( $this, 'register_scripts' ) );
 		add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
+
+		require_once ERUDA_PATH . 'modules/badge/class-spin-controls.php';
+
+		$controls = new Spin_Controls();
+
+		add_action( 'elementor/element/after_section_end', array( $controls, 'inject' ), 10, 3 );
+
+		// Loaded only for a widget that is actually turning.
+		add_action( 'elementor/frontend/before_render', array( $this, 'maybe_enqueue_spin' ) );
+
+		// The editor previews every widget, so it gets both unconditionally.
+		add_action( 'elementor/preview/enqueue_styles', array( $this, 'enqueue_spin' ) );
+		add_action( 'elementor/preview/enqueue_scripts', array( $this, 'enqueue_spin' ) );
+	}
+
+	/**
+	 * Load the spin assets if this widget is one that turns.
+	 *
+	 * @param \Elementor\Element_Base $element Element about to render.
+	 */
+	public function maybe_enqueue_spin( $element ) {
+		if ( $this->spun ) {
+			return;
+		}
+
+		if ( ! $element instanceof \Elementor\Widget_Base ) {
+			return;
+		}
+
+		if ( ! Spin_Controls::is_supported( $element->get_name() ) ) {
+			return;
+		}
+
+		if ( 'yes' !== $element->get_settings_for_display( 'espin_on' ) ) {
+			return;
+		}
+
+		$this->enqueue_spin();
+	}
+
+	/**
+	 * Enqueue the spin extension's stylesheet and script.
+	 */
+	public function enqueue_spin() {
+		$this->spun = true;
+
+		wp_enqueue_style( self::SPIN_STYLE_HANDLE );
+		wp_enqueue_script( self::SPIN_SCRIPT_HANDLE );
 	}
 
 	/**
@@ -120,6 +180,13 @@ final class Badge_Module implements Module {
 			array(),
 			ERUDA_VERSION
 		);
+
+		wp_register_style(
+			self::SPIN_STYLE_HANDLE,
+			ERUDA_URL . 'modules/badge/assets/css/spin.css',
+			array(),
+			ERUDA_VERSION
+		);
 	}
 
 	/**
@@ -129,6 +196,14 @@ final class Badge_Module implements Module {
 		wp_register_script(
 			self::SCRIPT_HANDLE,
 			ERUDA_URL . 'modules/badge/assets/js/spin-badge.js',
+			array(),
+			ERUDA_VERSION,
+			true
+		);
+
+		wp_register_script(
+			self::SPIN_SCRIPT_HANDLE,
+			ERUDA_URL . 'modules/badge/assets/js/spin.js',
 			array(),
 			ERUDA_VERSION,
 			true

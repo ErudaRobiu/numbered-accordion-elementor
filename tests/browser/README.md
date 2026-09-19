@@ -16,6 +16,7 @@ node tests/browser/probe.js         # text animation presets
 node tests/browser/story-probe.js   # Scroll Story
 node tests/browser/rail-probe.js    # Scroll Rail
 node tests/browser/badge-probe.js   # Spin Badge
+node tests/browser/spin-probe.js    # Eruda Spin on an existing widget
 ```
 
 Both run headless on purpose. A scrubbed animation is driven by

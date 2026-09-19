@@ -17,6 +17,7 @@ use ErudaToolkit\Toolkit;
 use ErudaToolkit\Modules\Duplicator\Duplicator;
 use ErudaToolkit\Modules\Impact\Impact_Content;
 use ErudaToolkit\Modules\Motion\Motion_Presets;
+use ErudaToolkit\Modules\Badge\Spin_Controls;
 use ErudaToolkit\Modules\Motion\Motion_Controls;
 use ErudaToolkit\Modules\SmoothScroll\SmoothScroll_Module;
 
@@ -566,6 +567,56 @@ check( 'travel defaults to 24px', 24, $controls['eanm_distance']['default']['siz
 check( 'direction is shown only for the directional presets', Motion_Presets::directional(), $controls['eanm_direction']['condition']['eanm_preset'] );
 check( 'travel is shown only for the directional presets', Motion_Presets::directional(), $controls['eanm_distance']['condition']['eanm_preset'] );
 check( 'travel hides when nothing moves', 'none', $controls['eanm_distance']['condition']['eanm_direction!'] );
+
+/* --------------------------------------------------- Spin_Controls --- */
+
+check( 'the image widget can be turned', true, Spin_Controls::is_supported( 'image' ) );
+check( 'so can a button', true, Spin_Controls::is_supported( 'button' ) );
+check( 'a heading cannot', false, Spin_Controls::is_supported( 'heading' ) );
+check( 'nor can a nonsense name', false, Spin_Controls::is_supported( '' ) );
+
+$spin = Spin_Controls::control_definitions();
+
+check( 'the switch that turns it on', true, isset( $spin['espin_on'] ) );
+
+/*
+ * Every value reaches the DOM through prefix_class or selectors, never through
+ * markup. A control that did neither would be one the front end cannot see --
+ * which is how a whole feature shipped doing nothing in 2.3.0.
+ */
+foreach ( $spin as $id => $definition ) {
+	check(
+		"{$id} reaches the page",
+		true,
+		isset( $definition['prefix_class'] ) || isset( $definition['selectors'] )
+	);
+}
+
+// The class the stylesheet and the script both look for.
+check( 'the prefix that makes the widget spin', 'espin-', $spin['espin_on']['prefix_class'] );
+check( 'and the value it is given', 'yes', $spin['espin_on']['return_value'] );
+check( 'off by default, so no widget starts turning on its own', '', $spin['espin_on']['default'] );
+
+// Changing any of these changes which element is animated or how, so the
+// widget has to be rebuilt rather than restyled.
+foreach ( array( 'espin_on', 'espin_target', 'espin_direction', 'espin_hover' ) as $id ) {
+	check( "{$id} re-renders rather than restyles", 'template', $spin[ $id ]['render_type'] );
+}
+
+// Everything but the switch is hidden until it is on.
+foreach ( $spin as $id => $definition ) {
+	if ( 'espin_on' === $id ) {
+		continue;
+	}
+
+	check( "{$id} is hidden until the switch is on", 'yes', $definition['condition']['espin_on'] );
+}
+
+check(
+	'the stopping time is hidden when it is set to keep turning',
+	'stop',
+	$spin['espin_ramp']['condition']['espin_hover']
+);
 
 /* ------------------------------------------------- Toolkit registry --- */
 

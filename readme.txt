@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.16.0
+Stable tag: 2.17.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,22 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.17.0 =
+* New "Eruda Spin" section on the Image, Icon, Button, Image Box and Site Logo
+  widgets. Switch it on and the picture you already have turns, slows to a stop
+  under the pointer, and lifts -- without swapping it for anything.
+* Scroll Story now translates properly to a phone. Below 1024px each picture is
+  moved out of the pinned panel and placed under the item it belongs to, after
+  the words, so the section reads text, picture, text, picture. Widening puts
+  them back. The highlight still runs, and is measured against the words rather
+  than the picture below them, so it no longer finishes late.
+* New Scroll Story settings for the phone layout: picture shape, space above
+  the picture, and space between items.
+* Spin Badge can now take a background picture, with the colour over it as a
+  layer of its own so it can be faded without fading the ring text.
+* Spin Badge now has an inner shadow, cast inside the disc alongside the ring
+  and the shadow it casts.
 
 = 2.16.0 =
 * New "Spin Badge" widget: a round link whose text turns around its edge,

@@ -36,7 +36,7 @@ modules/impact/                    the impact grid widget and its assets
 modules/motion/                    the text animation controls and assets
 modules/story/                     the Scroll Story widget and its assets
 modules/rail/                      the Scroll Rail widget and its assets
-modules/badge/                     the Spin Badge widget and its assets
+modules/badge/                     the Eruda Spin extension, the Spin Badge widget and their assets
 modules/smoothscroll/              eases the whole page's scrolling
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
@@ -472,6 +472,25 @@ This changes between one image or video per item instead — the same effect at
 reading pace, from media a client can actually swap in the media library. Their
 own change between media is a plain 0.5s cross-fade; ours is not.
 
+**A phone gets the story taken apart and put back together as itself.** A
+pinned panel beside a column of text has nowhere to go on a 390px screen:
+stacked, the panel scrolls away long before the text it belongs to, and the
+pairing between the two — which is the entire widget — is lost. Below 1024px
+the script moves each picture out of the pinned frame and in under the item it
+belongs to, so the section reads text, then its picture, one item after
+another.
+
+Moved, not duplicated. Two copies of every picture is two chances for a browser
+to fetch it, and the whole point of a slide is that it is one element with one
+source. Widening puts them all back in the frame, in order.
+
+The highlight still scrubs — it is the part that works at any width — but it is
+measured against the **words**, not the item. Stacked, an item is its text and
+then its picture, and a picture is most of the item's height; measuring the
+sweep against the whole thing would have the text still lighting while the
+reader is looking at the photograph below it. The picture is the bottom of the
+item, so the text ends where it begins.
+
 Safe without the script, like everything else here: the text is its read colour
 and the first slide is simply the picture. Dimming only happens under
 `[data-estry-ready]`, which only the script sets. A stylesheet that dimmed on
@@ -642,10 +661,29 @@ Pictures are forced to cover for the same reason as the Scroll Story panel, and
 the rail's test page carries the same deliberately hostile theme block so the
 probe proves it.
 
+### Spin
+
+Two things, one of them the point: a section added to widgets that already
+exist, and a widget that draws its own.
+
+**Eruda Spin** appears on the Style tab of the Image, Icon, Button, Image Box
+and Site Logo widgets. It turns whatever that widget holds — the picture inside
+it, or the whole widget — slows it to a stop under the pointer, and lifts it.
+Nothing is added to the page: every value reaches the DOM through Elementor's
+own `prefix_class` and selectors, so it applies live in the editor as well as
+on the front end. A render-time attribute would never appear on a widget with a
+`content_template()`, and the native Image has one.
+
+The lift is on the widget and the rotation on the thing inside it, always. One
+element cannot hold two transforms, so sharing would mean the lift wiping out
+the rotation at exactly the moment a pointer arrives — which is when it
+matters.
+
 ### Spin Badge
 
 A round link whose text turns around its edge, slows to a stop under the
-pointer, and lifts.
+pointer, and lifts. Use it when there is no picture to turn; use Eruda Spin
+when there already is one.
 
 **The ring is SVG text on a circular path, not a picture of a circle of
 text.** A bitmap badge is soft the moment it is scaled or rotated, and this one
@@ -686,9 +724,18 @@ Touch gets its own handling, because a finger is not a pointer: there is no
 hovering out of it, so without `touchend` the badge would stay stopped for good
 after one tap.
 
-Under reduced motion it does not turn at all. It is still a round link and it
-still answers the pointer, with the lift alone — a state change rather than
-continuous motion.
+The disc is three layers: a picture, a wash of colour over it, and everything
+else. The wash is a pseudo-element rather than another background layer,
+because CSS gives a background layer no opacity of its own — only the whole box
+gets one, which would take the picture and the ring text down with it. The
+inner shadow is composed in PHP and slotted into the front of the stylesheet's
+own `box-shadow` list, because Elementor's box-shadow group writes the whole
+property and this disc already carries two shadows: the ring and the one it
+casts.
+
+Under reduced motion neither turns at all. Both are still links and both still
+answer the pointer, with the lift alone — a state change rather than continuous
+motion.
 
 ### Smooth scrolling
 

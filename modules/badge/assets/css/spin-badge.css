@@ -27,16 +27,46 @@
 	transition: transform var(--ebdg-lift-ms, 520ms) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/*
+ * Three layers on one disc, bottom to top: a picture, a wash of colour over
+ * it, and everything else.
+ *
+ * The wash is a pseudo-element rather than another background layer, because
+ * CSS gives a background layer no opacity of its own -- only the whole box
+ * gets one, which would take the picture and the ring text down with it. A
+ * pseudo-element can be faded on its own, so the colour can sit at any
+ * strength over the photograph underneath and the words stay at full.
+ *
+ * It paints before the element's children, so the ring and the middle are
+ * over it without needing a stacking context of their own.
+ */
 .ebdg__disc {
 	position: absolute;
 	inset: 0;
 	display: grid;
 	place-items: center;
 	border-radius: 50%;
-	background: var(--ebdg-bg, radial-gradient(circle at 50% 35%, #3f8a5c 0%, #2b6b47 55%, #1f5236 100%));
-	box-shadow: 0 0 0 var(--ebdg-ring-w, 8px) var(--ebdg-ring, #ffffff),
+	overflow: hidden;
+	background-color: var(--ebdg-base, transparent);
+	background-image: var(--ebdg-image, none);
+	background-size: cover;
+	background-position: var(--ebdg-image-pos, 50% 50%);
+	background-repeat: no-repeat;
+	box-shadow:
+		var(--ebdg-inner, inset 0 0 0 0 transparent),
+		0 0 0 var(--ebdg-ring-w, 8px) var(--ebdg-ring, #ffffff),
 		0 var(--ebdg-shadow-y, 18px) var(--ebdg-shadow-blur, 40px) rgba(0, 0, 0, var(--ebdg-shadow, 0.28));
 	transition: box-shadow var(--ebdg-lift-ms, 520ms) ease;
+}
+
+.ebdg__disc::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: var(--ebdg-bg, radial-gradient(circle at 50% 35%, #3f8a5c 0%, #2b6b47 55%, #1f5236 100%));
+	opacity: var(--ebdg-overlay, 1);
+	pointer-events: none;
 }
 
 /* ------------------------------------------------------------ the ring --- */
@@ -128,7 +158,9 @@
 
 .ebdg:hover .ebdg__disc,
 .ebdg:focus-visible .ebdg__disc {
-	box-shadow: 0 0 0 var(--ebdg-ring-w, 8px) var(--ebdg-ring, #ffffff),
+	box-shadow:
+		var(--ebdg-inner, inset 0 0 0 0 transparent),
+		0 0 0 var(--ebdg-ring-w, 8px) var(--ebdg-ring, #ffffff),
 		0 calc(var(--ebdg-shadow-y, 18px) + var(--ebdg-lift, 10px)) calc(var(--ebdg-shadow-blur, 40px) * 1.35)
 			rgba(0, 0, 0, calc(var(--ebdg-shadow, 0.28) * 1.15));
 }

@@ -251,7 +251,20 @@
 	function progressOf( item, lead, tail ) {
 		var height = viewportHeight();
 		var rect = item.getBoundingClientRect();
-		var travel = rect.height + height * ( lead - tail );
+
+		/*
+		 * Only the words count.
+		 *
+		 * Stacked on a phone an item is its text and then its picture, and a
+		 * picture is most of the item's height. Measuring the sweep against
+		 * the whole thing would have the text still lighting while the reader
+		 * is looking at the photograph below it -- the words finished long
+		 * before, and the sweep would simply be late. The picture is the
+		 * bottom of the item, so the text ends where it begins.
+		 */
+		var slide = item.querySelector( '.estry__slide' );
+		var words = slide ? slide.getBoundingClientRect().top - rect.top : rect.height;
+		var travel = words + height * ( lead - tail );
 
 		if ( travel <= 0 ) {
 			return rect.top <= height * lead ? 1 : 0;
@@ -419,6 +432,68 @@
 		var shown = -1;
 		var zTop = 0;
 		var leaveTimer = null;
+		var stacked = null;
+
+		function isNarrow() {
+			return (
+				typeof window.matchMedia === 'function' &&
+				window.matchMedia( '(max-width: 1024px)' ).matches
+			);
+		}
+
+		/**
+		 * Put each picture where it belongs at this width.
+		 *
+		 * Wide, they are a stack of slides in one pinned frame and the panel
+		 * changes to whichever item is being read. Narrow, there is no panel:
+		 * each picture is moved out of the frame and in under the item it
+		 * belongs to, so the section reads text, picture, text, picture.
+		 *
+		 * Moved rather than duplicated. Two copies of every picture is two
+		 * chances for a browser to fetch it, and the whole point of a slide is
+		 * that it is one element with one source.
+		 */
+		function restack() {
+			var want = isNarrow();
+
+			if ( want === stacked ) {
+				return;
+			}
+
+			stacked = want;
+
+			if ( stacked ) {
+				slides.forEach( function ( slide, i ) {
+					var item = items[ owners[ i ] ];
+
+					if ( item ) {
+						item.appendChild( slide );
+					}
+
+					slide.classList.remove( 'is-entering', 'is-instant', 'is-leaving' );
+					slide.style.zIndex = '';
+					slide.removeAttribute( ON );
+				} );
+
+				root.setAttribute( 'data-estry-stacked', '' );
+				return;
+			}
+
+			// Appended in their own order, so the stack is rebuilt as it was.
+			slides.forEach( function ( slide ) {
+				if ( frame ) {
+					frame.appendChild( slide );
+				}
+			} );
+
+			root.removeAttribute( 'data-estry-stacked' );
+
+			// Nothing is showing any more, so the next pass has to pick again
+			// rather than deciding it is already on the right one.
+			current = -1;
+			shown = -1;
+			zTop = 0;
+		}
 
 		/**
 		 * Bring a slide to the top of the stack.
@@ -520,6 +595,12 @@
 				}
 			} );
 
+			if ( stacked ) {
+				// No panel to change and no notch to travel. The sweep above
+				// is the whole of it.
+				return;
+			}
+
 			if ( reached !== current ) {
 				var target = slideFor[ reached ];
 
@@ -577,9 +658,15 @@
 			} );
 		}
 
+		function onResize() {
+			restack();
+			onScroll();
+		}
+
+		restack();
 		update();
 		window.addEventListener( 'scroll', onScroll, { passive: true } );
-		window.addEventListener( 'resize', onScroll, { passive: true } );
+		window.addEventListener( 'resize', onResize, { passive: true } );
 	}
 
 	function initAll( scope ) {

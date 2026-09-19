@@ -80,3 +80,4 @@ require_once dirname( __DIR__ ) . '/modules/impact/class-impact-content.php';
 require_once dirname( __DIR__ ) . '/modules/motion/class-motion-presets.php';
 require_once dirname( __DIR__ ) . '/modules/motion/class-motion-controls.php';
 require_once dirname( __DIR__ ) . '/modules/smoothscroll/class-smoothscroll-module.php';
+require_once dirname( __DIR__ ) . '/modules/badge/class-spin-controls.php';

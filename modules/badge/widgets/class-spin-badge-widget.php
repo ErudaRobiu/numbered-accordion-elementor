@@ -192,6 +192,48 @@ class Spin_Badge_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'bg_image',
+			array(
+				'label'       => esc_html__( 'Background picture', 'numbered-accordion' ),
+				'description' => esc_html__( 'Optional, and it sits under the fill rather than instead of it. Turn the fill\'s strength down to let it through.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::MEDIA,
+			)
+		);
+
+		$this->add_control(
+			'bg_position',
+			array(
+				'label'     => esc_html__( 'Which part of it shows', 'numbered-accordion' ),
+				'type'      => Controls_Manager::SELECT,
+				'default'   => '50% 50%',
+				'options'   => array(
+					'50% 0%'   => esc_html__( 'Top', 'numbered-accordion' ),
+					'50% 25%'  => esc_html__( 'Upper middle', 'numbered-accordion' ),
+					'50% 50%'  => esc_html__( 'Centre', 'numbered-accordion' ),
+					'50% 75%'  => esc_html__( 'Lower middle', 'numbered-accordion' ),
+					'50% 100%' => esc_html__( 'Bottom', 'numbered-accordion' ),
+					'0% 50%'   => esc_html__( 'Left', 'numbered-accordion' ),
+					'100% 50%' => esc_html__( 'Right', 'numbered-accordion' ),
+				),
+				'selectors' => array( '{{WRAPPER}} .ebdg' => '--ebdg-image-pos: {{VALUE}};' ),
+				'condition' => array( 'bg_image[url]!' => '' ),
+			)
+		);
+
+		$this->add_control(
+			'overlay',
+			array(
+				'label'       => esc_html__( 'Fill strength', 'numbered-accordion' ),
+				'description' => esc_html__( 'How strongly the colour below covers the picture. It is a layer of its own, so turning it down lets the photograph through without taking the ring text with it.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( '%' ),
+				'range'       => array( '%' => array( 'min' => 0, 'max' => 100 ) ),
+				'default'     => array( 'unit' => '%', 'size' => 100 ),
+				'selectors'   => array( '{{WRAPPER}} .ebdg' => '--ebdg-overlay: calc({{SIZE}} / 100);' ),
+			)
+		);
+
+		$this->add_control(
 			'fill_type',
 			array(
 				'label'   => esc_html__( 'Fill', 'numbered-accordion' ),
@@ -293,6 +335,69 @@ class Spin_Badge_Widget extends Widget_Base {
 				'range'      => array( 'px' => array( 'min' => 0, 'max' => 120 ) ),
 				'default'    => array( 'unit' => 'px', 'size' => 40 ),
 				'selectors'  => array( '{{WRAPPER}} .ebdg' => '--ebdg-shadow-blur: {{SIZE}}px;' ),
+			)
+		);
+
+		$this->add_control(
+			'inner_heading',
+			array(
+				'label'       => esc_html__( 'Inner shadow', 'numbered-accordion' ),
+				'description' => esc_html__( 'Cast inside the disc rather than under it, which is what gives the edge a lip and makes the badge read as a pressed object instead of a flat circle.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::HEADING,
+				'separator'   => 'before',
+			)
+		);
+
+		$this->add_control(
+			'inner_colour',
+			array(
+				'label'   => esc_html__( 'Colour', 'numbered-accordion' ),
+				'type'    => Controls_Manager::COLOR,
+				'default' => 'rgba(0,0,0,0.15)',
+			)
+		);
+
+		$this->add_control(
+			'inner_x',
+			array(
+				'label'      => esc_html__( 'Across', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => -40, 'max' => 40 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 2 ),
+			)
+		);
+
+		$this->add_control(
+			'inner_y',
+			array(
+				'label'      => esc_html__( 'Down', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => -40, 'max' => 40 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => -4 ),
+			)
+		);
+
+		$this->add_control(
+			'inner_blur',
+			array(
+				'label'      => esc_html__( 'Blur', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 80 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 4 ),
+			)
+		);
+
+		$this->add_control(
+			'inner_spread',
+			array(
+				'label'      => esc_html__( 'Spread', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => -40, 'max' => 40 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 0 ),
 			)
 		);
 
@@ -610,7 +715,11 @@ class Spin_Badge_Widget extends Widget_Base {
 		$ramp    = $this->slider( $settings, 'ramp', 700, 0, 2500 );
 		$reverse = isset( $settings['direction'] ) && 'reverse' === $settings['direction'];
 
-		$fill = $this->fill( $settings );
+		$fill  = $this->fill( $settings );
+		$inner = $this->inner( $settings );
+		$image = isset( $settings['bg_image']['url'] ) && '' !== $settings['bg_image']['url']
+			? sprintf( "url('%s')", esc_url( $settings['bg_image']['url'] ) )
+			: 'none';
 
 		$url      = isset( $settings['link']['url'] ) ? $settings['link']['url'] : '';
 		$element  = '' !== $url ? 'a' : 'span';
@@ -630,7 +739,7 @@ class Spin_Badge_Widget extends Widget_Base {
 			data-ebdg-speed="<?php echo esc_attr( (string) $speed ); ?>"
 			data-ebdg-ramp="<?php echo esc_attr( (string) $ramp ); ?>"
 			<?php echo $reverse ? ' data-ebdg-reverse' : ''; ?>
-			style="--ebdg-bg: <?php echo esc_attr( $fill ); ?>; --ebdg-text-size: <?php echo esc_attr( (string) round( $size, 2 ) ); ?>px;"
+			style="--ebdg-bg: <?php echo esc_attr( $fill ); ?>; --ebdg-image: <?php echo esc_attr( $image ); ?>; --ebdg-inner: <?php echo esc_attr( $inner ); ?>; --ebdg-text-size: <?php echo esc_attr( (string) round( $size, 2 ) ); ?>px;"
 			<?php if ( '' !== $url ) : ?>
 				href="<?php echo esc_url( $url ); ?>"
 				aria-label="<?php echo esc_attr( $spoken ); ?>"
@@ -679,6 +788,35 @@ class Spin_Badge_Widget extends Widget_Base {
 			</span>
 		</<?php echo esc_html( $element ); ?>>
 		<?php
+	}
+
+	/**
+	 * Build the inner shadow from its four numbers and a colour.
+	 *
+	 * Composed here rather than left to Elementor's box-shadow group, because
+	 * that writes the whole `box-shadow` property and this disc already has
+	 * two shadows on it -- the ring and the one it casts. Overwriting the list
+	 * would take both with it, so the inner one is a value the stylesheet
+	 * slots into the front of its own list.
+	 *
+	 * @param array $settings Widget settings.
+	 * @return string A CSS shadow, or a transparent one that costs nothing.
+	 */
+	private function inner( $settings ) {
+		$colour = isset( $settings['inner_colour'] ) ? trim( (string) $settings['inner_colour'] ) : '';
+
+		if ( '' === $colour ) {
+			return 'inset 0 0 0 0 transparent';
+		}
+
+		return sprintf(
+			'inset %spx %spx %spx %spx %s',
+			$this->slider( $settings, 'inner_x', 2, -40, 40 ),
+			$this->slider( $settings, 'inner_y', -4, -40, 40 ),
+			$this->slider( $settings, 'inner_blur', 4, 0, 80 ),
+			$this->slider( $settings, 'inner_spread', 0, -40, 40 ),
+			$colour
+		);
 	}
 
 	/**

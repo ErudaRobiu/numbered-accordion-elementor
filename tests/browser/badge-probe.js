@@ -112,6 +112,45 @@ const angleOf = (t) => {
     sharp.bad.length === 0 && sharp.images === 0,
     sharp.bad.length ? sharp.bad.join(', ') : 'no filters, ' + sharp.images + ' images');
 
+  // --- the picture layer and the inner shadow --------------------------------
+  /*
+   * The colour sits over the picture as a pseudo-element rather than as
+   * another background layer, because CSS gives a background layer no opacity
+   * of its own -- only the whole box gets one, which would take the picture
+   * and the ring text down with it. So the picture must be on the disc, the
+   * colour on its ::before, and the text at full strength regardless.
+   */
+  const layers = await page.evaluate(() => {
+    const disc = document.querySelector('.ebdg__disc');
+    const cs = getComputedStyle(disc);
+    const wash = getComputedStyle(disc, '::before');
+    return {
+      picture: cs.backgroundImage,
+      size: cs.backgroundSize,
+      washOpacity: Number(wash.opacity),
+      washImage: wash.backgroundImage,
+      shadow: cs.boxShadow,
+      textOpacity: Number(getComputedStyle(document.querySelector('.ebdg__ring text')).opacity),
+    };
+  });
+
+  check('a background picture fills the disc under the colour',
+    /url\(/.test(layers.picture) && layers.size === 'cover',
+    'picture set, ' + layers.size);
+
+  check('the colour is a layer of its own, so it can be faded over it',
+    layers.washOpacity > 0 && layers.washOpacity < 1 && /gradient/.test(layers.washImage),
+    'wash at ' + layers.washOpacity + ' opacity');
+
+  check('and fading it does not fade the ring text',
+    layers.textOpacity === 1,
+    'text at ' + layers.textOpacity);
+
+  check('the inner shadow is cast inside the disc, alongside the ring and the drop',
+    /inset/.test(layers.shadow) && layers.shadow.split('inset').length === 2 &&
+      layers.shadow.split('rgb').length >= 4,
+    layers.shadow.slice(0, 110) + '...');
+
   // --- it turns --------------------------------------------------------------
   const turning = await page.evaluate(async () => {
     const seen = [];

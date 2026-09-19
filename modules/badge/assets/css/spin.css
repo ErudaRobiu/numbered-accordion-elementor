@@ -1,0 +1,85 @@
+/**
+ * Eruda Toolkit - Spin
+ *
+ * Turns whatever a widget holds, and lifts it under the pointer.
+ *
+ * Two elements, never one: the lift is on the widget and the rotation on the
+ * thing inside it. A single element cannot hold two transforms, and putting
+ * both on the widget would mean the lift wiping out the rotation every time a
+ * pointer arrived -- which is the exact moment it matters.
+ *
+ * The rotation here is the fallback. The script prefers its own, because a CSS
+ * animation can only be paused dead and the point is that this one slows down;
+ * it marks the widget ready, which switches this off.
+ */
+
+.espin-yes {
+	transform: translateY(0);
+	transition: transform var(--espin-lift-ms, 520ms) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes espin-turn {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/*
+ * Written out for both targets rather than given a class by the script,
+ * because without the script there would be no class -- and the whole purpose
+ * of this rule is to be what runs when the script has not.
+ */
+.espin-yes.espin-target-image:not([data-espin-ready]) img,
+.espin-yes.espin-target-image:not([data-espin-ready]) svg,
+.espin-yes.espin-target-self:not([data-espin-ready]) > .elementor-widget-container {
+	animation: espin-turn var(--espin-speed, 18s) linear infinite;
+}
+
+.espin-yes.espin-dir-reverse:not([data-espin-ready]) img,
+.espin-yes.espin-dir-reverse:not([data-espin-ready]) svg,
+.espin-yes.espin-dir-reverse:not([data-espin-ready]) > .elementor-widget-container {
+	animation-direction: reverse;
+}
+
+/* The thing being turned spins about its own middle, whatever shape it is. */
+.espin-yes img,
+.espin-yes svg,
+.espin-yes > .elementor-widget-container {
+	transform-origin: 50% 50%;
+}
+
+/* ------------------------------------------------------------- hover --- */
+
+.espin-yes:hover,
+.espin-yes:focus-within {
+	transform: translateY(calc(var(--espin-lift, 10px) * -1));
+}
+
+/*
+ * A widget that has been given a link should say so. A widget that has not is
+ * not made to look like one.
+ */
+.espin-yes:has(a) {
+	cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	/*
+	 * Something turning forever is exactly what this setting asks not to see,
+	 * so it stops being that. The lift stays: it is a state change rather than
+	 * continuous motion, and it is the part that says the thing is clickable.
+	 */
+	.espin-yes img,
+	.espin-yes svg,
+	.espin-yes > .elementor-widget-container {
+		animation: none !important;
+	}
+
+	.espin-yes {
+		transition-duration: 1ms;
+	}
+}

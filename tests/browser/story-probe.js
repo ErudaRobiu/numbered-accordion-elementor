@@ -350,6 +350,101 @@ function check(name, ok, detail) {
     onZ === Math.max(...zs),
     'active z=' + onZ + ' of [' + zs.join(', ') + ']');
 
+  // --- a phone takes the story apart and rebuilds it ------------------------
+  /*
+   * Stacked side by side there is no room on a phone: the panel scrolls away
+   * long before the text it belongs to, and the pairing between the two --
+   * which is the whole widget -- is lost. Each picture is moved out of the
+   * pinned frame and in under its own item instead, text first.
+   */
+  await page.setViewport({ width: 390, height: 844 });
+  await page.goto('http://127.0.0.1:8732/tests/browser/story.html', { waitUntil: 'load' });
+  await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
+
+  const phone = await page.evaluate(() => {
+    const root = document.querySelector('.estry');
+    const items = [...document.querySelectorAll('.estry__item')];
+    return {
+      stacked: root.hasAttribute('data-estry-stacked'),
+      media: getComputedStyle(document.querySelector('.estry__media')).display,
+      leftInFrame: document.querySelectorAll('.estry__frame .estry__slide').length,
+      perItem: items.map(item => {
+        const slide = item.querySelector('.estry__slide');
+        if (!slide) return null;
+        const text = item.querySelector('.estry__title');
+        return {
+          last: item.lastElementChild === slide,
+          belowText: slide.getBoundingClientRect().top >= text.getBoundingClientRect().bottom,
+          clip: getComputedStyle(slide).clipPath,
+          position: getComputedStyle(slide).position,
+          fills: slide.querySelector('.estry__img').offsetWidth >= slide.clientWidth - 1,
+        };
+      }),
+      overflows: document.documentElement.scrollWidth > window.innerWidth + 1,
+    };
+  });
+
+  check('a phone gets each picture under its own item',
+    phone.stacked && phone.leftInFrame === 0 && phone.media === 'none' &&
+    phone.perItem.every(Boolean),
+    'frame emptied, panel ' + phone.media + ', ' + phone.perItem.length + ' pictures rehoused');
+
+  check('and the picture comes after the words, not before them',
+    phone.perItem.every(p => p.last && p.belowText),
+    phone.perItem.every(p => p.last) ? 'last child of its item, below the heading' : 'out of order');
+
+  check('a rehoused picture is an ordinary block again, not a clipped slide',
+    phone.perItem.every(p => p.position === 'relative' && p.clip === 'none' && p.fills),
+    phone.perItem.map(p => p.position + '/' + p.clip).join(' '));
+
+  check('and nothing runs off the side of the screen',
+    !phone.overflows,
+    phone.overflows ? 'the page scrolls sideways' : 'no sideways scroll');
+
+  // The sweep is the part that works at any width -- but only if it is
+  // measured against the words, not against the picture below them.
+  const phoneSweep = await page.evaluate(async () => {
+    const max = document.body.scrollHeight - innerHeight;
+    const item = document.querySelectorAll('.estry__item')[0];
+    const chars = item.querySelectorAll('.estry-c').length;
+    const lit = () => [...item.querySelectorAll('.estry-c')].filter(c => c.classList.contains('is-on')).length;
+    const seen = [];
+    for (let y = 0; y <= max; y += 40) {
+      window.scrollTo(0, y);
+      await new Promise(r => requestAnimationFrame(r));
+      const slide = item.querySelector('.estry__slide').getBoundingClientRect();
+      seen.push({ lit: lit(), pictureTop: slide.top });
+    }
+    // The frame at which the words finished, and where the picture was then.
+    const done = seen.find(s => s.lit >= chars);
+    return { chars, done, partial: seen.some(s => s.lit > 0 && s.lit < chars) };
+  });
+
+  check('the highlight still scrubs on a phone',
+    phoneSweep.partial && !!phoneSweep.done,
+    phoneSweep.done ? 'reaches all ' + phoneSweep.chars + ' characters' : 'never completes');
+
+  check('and it finishes while its picture is still coming, not long after',
+    phoneSweep.done && phoneSweep.done.pictureTop > 0,
+    phoneSweep.done ? 'picture was ' + Math.round(phoneSweep.done.pictureTop) +
+      'px below the top of the window when the words finished' : 'n/a');
+
+  // --- and it goes back ------------------------------------------------------
+  await page.setViewport({ width: 1280, height: 900 });
+  await page.evaluate(() => { window.dispatchEvent(new Event('resize')); });
+  await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
+  const backAgain = await page.evaluate(() => ({
+    stacked: document.querySelector('.estry').hasAttribute('data-estry-stacked'),
+    inFrame: document.querySelectorAll('.estry__frame .estry__slide').length,
+    inItems: document.querySelectorAll('.estry__item .estry__slide').length,
+    order: [...document.querySelectorAll('.estry__frame .estry__slide')]
+      .map(s => s.getAttribute('data-estry-for')).join(','),
+  }));
+  check('widening puts every picture back in the panel, in order',
+    !backAgain.stacked && backAgain.inFrame === 3 && backAgain.inItems === 0 &&
+    backAgain.order === '0,1,2',
+    backAgain.inFrame + ' back in the frame as ' + backAgain.order);
+
   // --- report --------------------------------------------------------------
   console.log('\nPASS');
   PASS.forEach(p => console.log('  + ' + p));

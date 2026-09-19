@@ -490,6 +490,18 @@
 
 /* ------------------------------------------------------------- narrow --- */
 
+/*
+ * A phone gets the story taken apart and put back together as itself.
+ *
+ * A pinned panel beside a column of text has nowhere to go on a 390px screen:
+ * stacked, the panel scrolls away long before the text it belongs to, and the
+ * pairing between the two -- which is the entire widget -- is lost. So the
+ * script moves each picture out of the pinned frame and in under the item it
+ * belongs to, and the section becomes what it always was underneath: text,
+ * then its picture, one after another.
+ *
+ * The highlight still scrubs. It is the part that works at any width.
+ */
 @media (max-width: 1024px) {
 	.estry {
 		grid-template-columns: 1fr;
@@ -500,15 +512,47 @@
 		   let items travel the reading band is just a long gap. */
 		gap: var(--estry-item-gap-mobile, 64px);
 		padding: 0;
-		order: 2;
 	}
 
-	.estry__media {
+	/* Emptied by the script, and nothing to show even if it were not. */
+	.estry[data-estry-stacked] .estry__media {
+		display: none;
+	}
+
+	/*
+	 * A picture inside an item is an ordinary block, not one of a stack of
+	 * absolutely positioned slides, so every one of those properties has to be
+	 * put back -- including the clip path, which would otherwise still be
+	 * holding an entrance shape it will never be released from.
+	 */
+	.estry[data-estry-stacked] .estry__item .estry__slide {
 		position: relative;
-		top: auto;
-		height: var(--estry-height-mobile, 56vh);
-		order: 1;
-		margin-bottom: 32px;
+		inset: auto;
+		z-index: auto;
+		height: auto;
+		aspect-ratio: var(--estry-ratio-mobile, 1.33);
+		margin-top: var(--estry-media-space-mobile, 24px);
+		border-radius: var(--estry-radius, 16px);
+		clip-path: none;
+		transform: none;
+		opacity: 1;
+		transition: none;
+	}
+
+	.estry[data-estry-stacked] .estry__item .estry__inner {
+		position: absolute;
+		inset: 0;
+		transform: none;
+		filter: none;
+		transition: none;
+	}
+
+	/* No drift either: it exists to keep a held panel from being still, and
+	   nothing here is held. */
+	.estry[data-estry-stacked] .estry__item .estry__img,
+	.estry[data-estry-stacked] .estry__item .estry__vid {
+		animation: none;
+		transform: none;
 	}
 }
 

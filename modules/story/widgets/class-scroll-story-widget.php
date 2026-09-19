@@ -288,6 +288,51 @@ class Scroll_Story_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'mobile_heading',
+			array(
+				'label'     => esc_html__( 'On a phone', 'numbered-accordion' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_control(
+			'ratio_mobile',
+			array(
+				'label'       => esc_html__( 'Picture shape', 'numbered-accordion' ),
+				'description' => esc_html__( 'Below 1024px nothing is pinned: each picture is moved out of the panel and put under the item it belongs to, so the section reads text, picture, text, picture. This is the shape those pictures take. Width divided by height.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'range'       => array( 'px' => array( 'min' => 0.6, 'max' => 2.2, 'step' => 0.01 ) ),
+				'default'     => array( 'size' => 1.33 ),
+				'selectors'   => array( '{{WRAPPER}} .estry' => '--estry-ratio-mobile: {{SIZE}};' ),
+			)
+		);
+
+		$this->add_control(
+			'media_space_mobile',
+			array(
+				'label'      => esc_html__( 'Space above the picture', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 80 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 24 ),
+				'selectors'  => array( '{{WRAPPER}} .estry' => '--estry-media-space-mobile: {{SIZE}}px;' ),
+			)
+		);
+
+		$this->add_control(
+			'item_gap_mobile',
+			array(
+				'label'      => esc_html__( 'Space between items', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 16, 'max' => 200 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 64 ),
+				'selectors'  => array( '{{WRAPPER}} .estry' => '--estry-item-gap-mobile: {{SIZE}}px;' ),
+			)
+		);
+
 		$this->add_responsive_control(
 			'item_gap',
 			array(

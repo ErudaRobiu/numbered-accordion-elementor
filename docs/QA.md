@@ -309,8 +309,14 @@ a real site.
 
 ### Everything else
 
-- [ ] Below 1024px the panel stops being pinned, sits above the text, and the
-      text reads as an ordinary column
+- [ ] **Below 1024px each picture moves under its own item**, after the words,
+      and the panel is gone. Nothing scrolls sideways
+- [ ] The highlight still runs on a phone, and an item's words finish while
+      its picture is still on the way up rather than long after
+- [ ] Widen the browser again: every picture goes back into the panel, in the
+      right order, and the pinning works as before
+- [ ] "Picture shape", "Space above the picture" and the phone item spacing
+      all work
 - [ ] With JavaScript disabled: every item's text is readable in its read
       colour, and the first picture is visible
 - [ ] With Reduce Motion on: no letter sweep at all, no entrance, no drift;
@@ -441,5 +447,28 @@ ring fit and the reduced-motion case, against `tests/browser/badge.html`.
 - [ ] Two badges on one page turn independently and neither takes the other's
       text (they must not share a path id)
 - [ ] With Reduce Motion on it does not turn at all, and is still a link
+- [ ] With JavaScript disabled it still turns, from the stylesheet, and simply
+      does not slow down
+
+## Eruda Spin (on an existing widget)
+
+`node tests/browser/spin-probe.js` measures the turning, the spin-down and the
+two targets, against `tests/browser/spin.html`.
+
+- [ ] Add an Image widget, open Style, find **Eruda Spin**, switch it on. The
+      picture turns
+- [ ] It slows to a stop under the pointer rather than stopping dead, and the
+      widget lifts. Moving away starts it again
+- [ ] The section appears on Image, Icon, Button, Image Box and Site Logo, and
+      **not** on a Heading
+- [ ] "What turns" set to the whole widget turns the container instead, and the
+      picture inside it no longer turns on its own
+- [ ] "Under the pointer" set to keep turning means hovering does not stop it,
+      and the stopping-time control disappears
+- [ ] Anticlockwise reverses it
+- [ ] It works in the editor preview, not only on the live page
+- [ ] The assets load only on a page that has a widget with it switched on
+- [ ] On a touch screen, tapping slows it and it starts again on release
+- [ ] With Reduce Motion on nothing turns, and the lift still works
 - [ ] With JavaScript disabled it still turns, from the stylesheet, and simply
       does not slow down
