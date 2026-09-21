@@ -548,7 +548,8 @@ the file system.
       Panel padding in particular: it is the one that was being overruled by
       the stylesheet below 1200px
 - [ ] "Picture to footer" moves the pills in one panel and the spec rows in the
-      other, by the same amount
+      other, by the same amount, and opens the space **above** the spec box
+      rather than inside its border
 - [ ] The diagram caption takes its own colour on the plate, and setting an
       italic in the panel italicises both halves of it
 - [ ] Both widgets rise into view once and stay; a re-render in the editor does

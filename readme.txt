@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.35.0
+Stable tag: 2.35.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,13 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.35.1 =
+* **Fixed: "Picture to footer" opened the space inside the spec box rather than
+  above it.** The spec rows are a bordered box, so padding on them left an empty
+  band inside the border instead of separating the box from the diagram. The
+  space now sits between the two, which is where it was always meant to be, and
+  at zero the box sits straight under the diagram.
 
 = 2.35.0 =
 * **Fixed: the panel padding control did nothing below 1200px.** The stylesheet

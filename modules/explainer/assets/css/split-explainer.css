@@ -305,6 +305,7 @@
 
 .eexp-stage {
 	padding-top: var(--eexp-gap-stage);
+	padding-bottom: var(--eexp-gap-footer);
 }
 
 .eexp-stage__img {
@@ -477,9 +478,7 @@
 .eexp-specs {
 	list-style: none;
 	margin: auto 0 0;
-	/* The ink panel's footer needs the same gap the pills get, or "Picture to
-	   footer" only ever moves one of the two panels. */
-	padding: var(--eexp-gap-footer) 0 0;
+	padding: 0;
 	display: grid;
 	gap: 1px;
 	background: var(--eexp-white-11);
@@ -499,7 +498,11 @@
 
 .eexp-loads {
 	margin: auto 0 0;
-	padding-top: var(--eexp-gap-footer);
+	/*
+	 * No padding-top. A panel with no picture has no stage to carry the gap,
+	 * and the auto margin above already separates the footer from whatever is
+	 * over it.
+	 */
 }
 
 .eexp-loads__label {
