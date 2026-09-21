@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.35.1
+Stable tag: 2.35.2
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
