@@ -942,6 +942,16 @@ check( 'rows come back whole', array( array( 'a' => 1 ) ), Explainer_Content::ro
 check( 'a missing repeater is no rows', array(), Explainer_Content::rows( array(), 'r' ) );
 check( 'a scalar repeater is no rows', array(), Explainer_Content::rows( array( 'r' => 'x' ), 'r' ) );
 
+/* ------------------------------- Explainer_Content::pill_classes --- */
+
+check( 'the lit dot is the default and carries no modifier', 'eexp-loads', Explainer_Content::pill_classes( 'dot' ) );
+check( 'filled', 'eexp-loads eexp-loads--solid', Explainer_Content::pill_classes( 'solid' ) );
+check( 'glass', 'eexp-loads eexp-loads--glass', Explainer_Content::pill_classes( 'glass' ) );
+check( 'plain', 'eexp-loads eexp-loads--plain', Explainer_Content::pill_classes( 'plain' ) );
+check( 'an unsaved widget falls back to the default', 'eexp-loads', Explainer_Content::pill_classes( '' ) );
+check( 'so does a style that no longer exists', 'eexp-loads', Explainer_Content::pill_classes( 'neon' ) );
+check( 'and a non-string', 'eexp-loads', Explainer_Content::pill_classes( array( 'solid' ) ) );
+
 /* ----------------------------------- Explainer_Content::mote_style --- */
 
 check( 'no motes asked for, none drawn', 0, Explainer_Content::mote_count( 0 ) );

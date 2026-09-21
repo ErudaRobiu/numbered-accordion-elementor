@@ -227,6 +227,7 @@ namespace {
 		'p1_body'          => 'Grease, soot, moisture, lint and fiber arrive with the airstream — the load that closes a finned exchanger down.',
 		'p1_image'         => array( 'url' => $images . 'lepido-contaminants.webp' ),
 		'p1_loads_label'   => 'Carried in, carried straight back out',
+		'p1_pill_style'    => 'dot',
 		'p1_pills'         => array(
 			array( 'text' => 'Grease' ),
 			array( 'text' => 'Soot' ),
@@ -303,6 +304,10 @@ namespace {
 	$numbered['p2_step'] = '02';
 
 	$bare_slab     = new Slab_Fixture( $slab );
+
+	$solid_pills                  = $slab;
+	$solid_pills['p1_pill_style'] = 'solid';
+	$solid_slab                   = new Slab_Fixture( $solid_pills );
 	$numbered_slab = new Slab_Fixture( $numbered );
 
 	// And the slab with a picture behind the ink panel, under a veil, which is
@@ -356,6 +361,9 @@ img{max-width:100%;height:auto}
 <body>
 <p class="marker">Slab — step numbers empty, the default</p>
 <div class="host"><?php echo $bare_slab->to_html(); // phpcs:ignore ?></div>
+
+<p class="marker">Slab — filled pills</p>
+<div class="host"><?php echo $solid_slab->to_html(); // phpcs:ignore ?></div>
 
 <p class="marker">Slab — step numbers filled in</p>
 <div class="host"><?php echo $numbered_slab->to_html(); // phpcs:ignore ?></div>

@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.32.0
+Stable tag: 2.33.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,30 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.33.0 =
+* **Fixed: the Split Slab did not fill its container.** The ink panel's grid
+  track was `auto`, which sizes to its contents, so the slab stopped short of
+  the width it was given. It is `1fr` now and the two panels plus the bar use
+  the whole width.
+* **The Split Slab is now properly styleable.** Nine typography groups, one per
+  role -- step number, step label, panel headings, body, footer label, pills,
+  spec label, spec value and the diagram caption -- so every piece of text can
+  take its own family, size, weight, case and letter spacing.
+* **A Spacing section**, all of it per device: panel padding, the gap between
+  the step line and the heading, the heading and the body, the body and the
+  picture, the picture and the footer, the footer label and the pills, plus the
+  spec rows' height, padding and corner radius.
+* Heading and body line length are controls now, in characters, pixels or a
+  percentage, instead of being fixed at 16 and 46 characters.
+* **A Picture section**: how large it is allowed to get, how it is aligned in
+  the panel, and its corner radius.
+* **The pills are no longer plain outlines.** Each carries a lit dot with a
+  halo, sits on a soft gradient rather than flat white, and lifts under the
+  pointer with the dot's halo opening out. Four styles -- Lit dot, Filled,
+  Glass and Plain -- with their own colours, gap, height, width and radius.
+* Nothing moved in the markup, so a slab already on a page keeps its layout and
+  simply gains the controls.
 
 = 2.32.0 =
 * A new **Image Compare** widget: two pictures in one frame with a divider you

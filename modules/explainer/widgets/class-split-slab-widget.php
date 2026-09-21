@@ -9,6 +9,7 @@ namespace ErudaToolkit\Modules\Explainer\Widgets;
 
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Background;
+use Elementor\Group_Control_Typography;
 use Elementor\Repeater;
 use Elementor\Widget_Base;
 use ErudaToolkit\Modules\Explainer\Explainer_Content;
@@ -98,6 +99,10 @@ class Split_Slab_Widget extends Widget_Base {
 		$this->register_panel_two_controls();
 
 		$this->register_slab_style_controls();
+		$this->register_spacing_controls();
+		$this->register_typography_controls();
+		$this->register_picture_controls();
+		$this->register_pill_style_controls();
 		$this->register_panel_one_style_controls();
 		$this->register_panel_two_style_controls();
 	}
@@ -206,6 +211,21 @@ class Split_Slab_Widget extends Widget_Base {
 				'label'   => esc_html__( 'Text', 'numbered-accordion' ),
 				'type'    => Controls_Manager::TEXT,
 				'default' => esc_html__( 'Item', 'numbered-accordion' ),
+			)
+		);
+
+		$this->add_control(
+			'p1_pill_style',
+			array(
+				'label'   => esc_html__( 'Pill style', 'numbered-accordion' ),
+				'type'    => Controls_Manager::SELECT,
+				'default' => 'dot',
+				'options' => array(
+					'dot'   => esc_html__( 'Lit dot', 'numbered-accordion' ),
+					'solid' => esc_html__( 'Filled', 'numbered-accordion' ),
+					'glass' => esc_html__( 'Glass', 'numbered-accordion' ),
+					'plain' => esc_html__( 'Plain', 'numbered-accordion' ),
+				),
 			)
 		);
 
@@ -446,7 +466,7 @@ class Split_Slab_Widget extends Widget_Base {
 				),
 				'description' => esc_html__( 'How much of the width the light panel takes. The ink panel takes the rest.', 'numbered-accordion' ),
 				'selectors'   => array(
-					'{{WRAPPER}} .eexp-slab' => 'grid-template-columns: {{SIZE}}% var(--eexp-bar) auto;',
+					'{{WRAPPER}} .eexp-slab' => 'grid-template-columns: {{SIZE}}% var(--eexp-bar) 1fr;',
 				),
 			)
 		);
@@ -607,6 +627,339 @@ class Split_Slab_Widget extends Widget_Base {
 		$this->end_controls_section();
 	}
 
+	/**
+	 * One spacing slider, since there are a lot of them and they are all the
+	 * same shape.
+	 *
+	 * @param string $id       Control id.
+	 * @param string $label    Label.
+	 * @param string $property Custom property to drive.
+	 * @param int    $max      Top of the range.
+	 * @param string $selector Selector to set it on.
+	 */
+	private function add_space_control( $id, $label, $property, $max = 120, $selector = '.eexp' ) {
+		$this->add_responsive_control(
+			$id,
+			array(
+				'label'      => $label,
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => $max,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} ' . $selector => $property . ': {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Space between everything.
+	 */
+	private function register_spacing_controls() {
+		$this->start_controls_section(
+			'section_style_spacing',
+			array(
+				'label' => esc_html__( 'Spacing', 'numbered-accordion' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_control(
+			'heading_padding',
+			array(
+				'label' => esc_html__( 'Panel padding', 'numbered-accordion' ),
+				'type'  => Controls_Manager::HEADING,
+			)
+		);
+
+		$this->add_space_control( 'pad_y', esc_html__( 'Top and bottom', 'numbered-accordion' ), '--eexp-pad-y', 160 );
+		$this->add_space_control( 'pad_x', esc_html__( 'Left and right', 'numbered-accordion' ), '--eexp-pad-x', 160 );
+
+		$this->add_control(
+			'heading_stack',
+			array(
+				'label'     => esc_html__( 'Between the elements', 'numbered-accordion' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_space_control( 'gap_title', esc_html__( 'Step line to heading', 'numbered-accordion' ), '--eexp-gap-title', 80 );
+		$this->add_space_control( 'gap_body', esc_html__( 'Heading to body', 'numbered-accordion' ), '--eexp-gap-body', 80 );
+		$this->add_space_control( 'gap_stage', esc_html__( 'Body to picture', 'numbered-accordion' ), '--eexp-gap-stage', 120 );
+		$this->add_space_control( 'gap_footer', esc_html__( 'Picture to footer', 'numbered-accordion' ), '--eexp-gap-footer', 120 );
+		$this->add_space_control( 'gap_label', esc_html__( 'Footer label to pills', 'numbered-accordion' ), '--eexp-gap-label', 60 );
+
+		$this->add_control(
+			'heading_measure',
+			array(
+				'label'     => esc_html__( 'Line length', 'numbered-accordion' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_responsive_control(
+			'title_measure',
+			array(
+				'label'       => esc_html__( 'Heading width', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'ch', 'px', '%' ),
+				'range'       => array(
+					'ch' => array(
+						'min' => 6,
+						'max' => 40,
+					),
+					'px' => array(
+						'min' => 80,
+						'max' => 900,
+					),
+					'%'  => array(
+						'min' => 20,
+						'max' => 100,
+					),
+				),
+				'description' => esc_html__( 'Where the heading wraps. In ch it is measured in characters, which is how a line length is usually judged.', 'numbered-accordion' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .eexp' => '--eexp-title-measure: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'body_measure',
+			array(
+				'label'      => esc_html__( 'Body width', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'ch', 'px', '%' ),
+				'range'      => array(
+					'ch' => array(
+						'min' => 20,
+						'max' => 90,
+					),
+					'px' => array(
+						'min' => 160,
+						'max' => 900,
+					),
+					'%'  => array(
+						'min' => 20,
+						'max' => 100,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .eexp' => '--eexp-body-measure: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'heading_specs_space',
+			array(
+				'label'     => esc_html__( 'Spec rows', 'numbered-accordion' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_space_control( 'spec_pad_y', esc_html__( 'Row height', 'numbered-accordion' ), '--eexp-spec-pad-y', 60 );
+		$this->add_space_control( 'spec_pad_x', esc_html__( 'Row padding', 'numbered-accordion' ), '--eexp-spec-pad-x', 60 );
+		$this->add_space_control( 'spec_radius', esc_html__( 'Corner radius', 'numbered-accordion' ), '--eexp-spec-radius', 40 );
+
+		$this->end_controls_section();
+	}
+
+	/**
+	 * One typography group per text role.
+	 */
+	private function register_typography_controls() {
+		$this->start_controls_section(
+			'section_style_type',
+			array(
+				'label' => esc_html__( 'Type', 'numbered-accordion' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$roles = array(
+			'type_step_num'  => array( esc_html__( 'Step number', 'numbered-accordion' ), '{{WRAPPER}} .eexp-step__num' ),
+			'type_step'      => array( esc_html__( 'Step label', 'numbered-accordion' ), '{{WRAPPER}} .eexp-step span' ),
+			'type_title'     => array( esc_html__( 'Panel headings', 'numbered-accordion' ), '{{WRAPPER}} .eexp-panel__title' ),
+			'type_body'      => array( esc_html__( 'Body', 'numbered-accordion' ), '{{WRAPPER}} .eexp-panel__body' ),
+			'type_loads'     => array( esc_html__( 'Footer label', 'numbered-accordion' ), '{{WRAPPER}} .eexp-loads__label' ),
+			'type_pills'     => array( esc_html__( 'Pills', 'numbered-accordion' ), '{{WRAPPER}} .eexp-loads li' ),
+			'type_spec_key'  => array( esc_html__( 'Spec label', 'numbered-accordion' ), '{{WRAPPER}} .eexp-specs b' ),
+			'type_spec_val'  => array( esc_html__( 'Spec value', 'numbered-accordion' ), '{{WRAPPER}} .eexp-specs li span' ),
+			'type_caption'   => array( esc_html__( 'Diagram caption', 'numbered-accordion' ), '{{WRAPPER}} .eexp-flow__caption' ),
+		);
+
+		foreach ( $roles as $name => $role ) {
+			$this->add_group_control(
+				Group_Control_Typography::get_type(),
+				array(
+					'name'     => $name,
+					'label'    => $role[0],
+					'selector' => $role[1],
+				)
+			);
+		}
+
+		$this->add_control(
+			'type_note',
+			array(
+				'type'            => Controls_Manager::RAW_HTML,
+				'raw'             => esc_html__( 'Letter spacing must be set in em. Elementor writes a percentage as "2%", which browsers ignore, so a percentage here does nothing at all.', 'numbered-accordion' ),
+				'content_classes' => 'elementor-descriptor',
+			)
+		);
+
+		$this->end_controls_section();
+	}
+
+	/**
+	 * The picture in the light panel.
+	 */
+	private function register_picture_controls() {
+		$this->start_controls_section(
+			'section_style_picture',
+			array(
+				'label' => esc_html__( 'Picture', 'numbered-accordion' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_responsive_control(
+			'img_max',
+			array(
+				'label'      => esc_html__( 'Largest it gets', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px', '%' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 120,
+						'max' => 1200,
+					),
+					'%'  => array(
+						'min' => 20,
+						'max' => 100,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .eexp' => '--eexp-img-max: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'img_align',
+			array(
+				'label'     => esc_html__( 'Alignment', 'numbered-accordion' ),
+				'type'      => Controls_Manager::CHOOSE,
+				'options'   => array(
+					'left'   => array(
+						'title' => esc_html__( 'Left', 'numbered-accordion' ),
+						'icon'  => 'eicon-h-align-left',
+					),
+					'center' => array(
+						'title' => esc_html__( 'Centre', 'numbered-accordion' ),
+						'icon'  => 'eicon-h-align-center',
+					),
+					'right'  => array(
+						'title' => esc_html__( 'Right', 'numbered-accordion' ),
+						'icon'  => 'eicon-h-align-right',
+					),
+				),
+				'default'   => 'center',
+				'selectors' => array(
+					'{{WRAPPER}} .eexp-stage__img' => 'margin-inline: {{VALUE}};',
+				),
+				'selectors_dictionary' => array(
+					'left'   => '0 auto 0 0',
+					'center' => 'auto',
+					'right'  => '0 0 0 auto',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'img_radius',
+			array(
+				'label'      => esc_html__( 'Corner radius', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 60,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .eexp-stage__img' => 'border-radius: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+	}
+
+	/**
+	 * The pills, beyond their two colours.
+	 */
+	private function register_pill_style_controls() {
+		$this->start_controls_section(
+			'section_style_pills',
+			array(
+				'label' => esc_html__( 'Pills', 'numbered-accordion' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_control(
+			'pill_background',
+			array(
+				'label'     => esc_html__( 'Background', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .eexp-loads li' => 'background: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'pill_dot',
+			array(
+				'label'     => esc_html__( 'Dot', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'condition' => array( 'p1_pill_style' => array( 'dot', 'solid', 'glass' ) ),
+				'selectors' => array(
+					'{{WRAPPER}} .eexp-loads li::before' => 'background: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'pill_hover_border',
+			array(
+				'label'     => esc_html__( 'Border on hover', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .eexp-loads li:hover' => 'border-color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_space_control( 'pill_gap', esc_html__( 'Gap between pills', 'numbered-accordion' ), '--eexp-pill-gap', 40 );
+		$this->add_space_control( 'pill_pad_y', esc_html__( 'Height', 'numbered-accordion' ), '--eexp-pill-pad-y', 40 );
+		$this->add_space_control( 'pill_pad_x', esc_html__( 'Width', 'numbered-accordion' ), '--eexp-pill-pad-x', 60 );
+		$this->add_space_control( 'pill_radius', esc_html__( 'Corner radius', 'numbered-accordion' ), '--eexp-pill-radius', 2000 );
+
+		$this->end_controls_section();
+	}
+
 	/* ------------------------------------------------------------------ *
 	 * Defaults
 	 * ------------------------------------------------------------------ */
@@ -746,6 +1099,7 @@ class Split_Slab_Widget extends Widget_Base {
 		$body  = Explainer_Content::text( $settings, 'p1_body' );
 		$label = Explainer_Content::text( $settings, 'p1_loads_label' );
 		$pills = Explainer_Content::rows( $settings, 'p1_pills' );
+		$style = Explainer_Content::pill_classes( Explainer_Content::text( $settings, 'p1_pill_style' ) );
 		?>
 		<div class="eexp-panel eexp-panel--light">
 			<?php $this->render_step( $settings, 'p1' ); ?>
@@ -765,7 +1119,7 @@ class Split_Slab_Widget extends Widget_Base {
 			<?php endif; ?>
 
 			<?php if ( ! empty( $pills ) || '' !== $label ) : ?>
-				<div class="eexp-loads">
+				<div class="<?php echo esc_attr( $style ); ?>">
 					<?php if ( '' !== $label ) : ?>
 						<p class="eexp-loads__label"><?php echo esc_html( $label ); ?></p>
 					<?php endif; ?>

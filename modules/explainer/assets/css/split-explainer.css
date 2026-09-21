@@ -26,6 +26,25 @@
 	--eexp-bar: 6px;
 	--eexp-dim: 0;
 
+	/* Spacing, all of it reachable from the panel. */
+	--eexp-pad-y: 44px;
+	--eexp-pad-x: 48px;
+	--eexp-gap-title: 18px;
+	--eexp-gap-body: 14px;
+	--eexp-gap-stage: 28px;
+	--eexp-gap-footer: 28px;
+	--eexp-gap-label: 14px;
+	--eexp-pill-gap: 8px;
+	--eexp-pill-pad-y: 8px;
+	--eexp-pill-pad-x: 16px;
+	--eexp-pill-radius: 2000px;
+	--eexp-spec-pad-y: 13px;
+	--eexp-spec-pad-x: 18px;
+	--eexp-spec-radius: 20px;
+	--eexp-img-max: 620px;
+	--eexp-title-measure: 16ch;
+	--eexp-body-measure: 46ch;
+
 	color: var(--eexp-white-70);
 }
 
@@ -139,7 +158,9 @@
 
 .eexp-slab {
 	display: grid;
-	grid-template-columns: 1.12fr var(--eexp-bar) 0.88fr;
+	/* 1fr, not auto: an auto track sizes to its contents and leaves the rest
+	   of the width empty instead of filling the slab. */
+	grid-template-columns: 1.12fr var(--eexp-bar) 1fr;
 	border: 1px solid var(--eexp-white-11);
 	border-radius: var(--eexp-radius);
 	overflow: hidden;
@@ -152,7 +173,7 @@
 }
 
 .eexp-panel {
-	padding: 44px 48px;
+	padding: var(--eexp-pad-y) var(--eexp-pad-x);
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
@@ -210,23 +231,23 @@
 }
 
 .eexp-panel__title {
-	margin: 18px 0 0;
-	max-width: 16ch;
+	margin: var(--eexp-gap-title) 0 0;
+	max-width: var(--eexp-title-measure);
 }
 
 .eexp-panel__body {
-	margin-top: 14px;
-	max-width: 46ch;
+	margin-top: var(--eexp-gap-body);
+	max-width: var(--eexp-body-measure);
 }
 
 .eexp-stage {
-	padding-top: 28px;
+	padding-top: var(--eexp-gap-stage);
 }
 
 .eexp-stage__img {
 	width: 100%;
 	height: auto;
-	max-width: 620px;
+	max-width: var(--eexp-img-max);
 	margin-inline: auto;
 }
 
@@ -324,13 +345,13 @@
 	gap: 1px;
 	background: var(--eexp-white-11);
 	border: 1px solid var(--eexp-white-11);
-	border-radius: 20px;
+	border-radius: var(--eexp-spec-radius);
 	overflow: hidden;
 }
 
 .eexp-specs li {
 	background: var(--eexp-ink);
-	padding: 13px 18px;
+	padding: var(--eexp-spec-pad-y) var(--eexp-spec-pad-x);
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -339,11 +360,11 @@
 
 .eexp-loads {
 	margin: auto 0 0;
-	padding-top: 28px;
+	padding-top: var(--eexp-gap-footer);
 }
 
 .eexp-loads__label {
-	margin-bottom: 14px;
+	margin-bottom: var(--eexp-gap-label);
 }
 
 .eexp-loads ul {
@@ -352,15 +373,86 @@
 	padding: 0;
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8px;
+	gap: var(--eexp-pill-gap);
 }
 
+/* ── the pills ──────────────────────────────────────────────────────── */
+
+/*
+ * Not a plain outlined chip. Each one carries a lit dot, sits on a soft
+ * gradient rather than flat white, and lifts under the pointer -- so a row of
+ * them reads as a set of things the unit handles, not as tags.
+ */
 .eexp-loads li {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
 	border: 1px solid var(--eexp-green-30);
-	background: #fff;
+	background: linear-gradient(180deg, #fff, #eef3f0);
 	color: var(--eexp-navy);
-	border-radius: 2000px;
-	padding: 8px 16px;
+	border-radius: var(--eexp-pill-radius);
+	padding: var(--eexp-pill-pad-y) var(--eexp-pill-pad-x);
+	box-shadow: 0 1px 2px rgba(15, 57, 97, 0.06), inset 0 1px 0 #fff;
+	transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+		border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+		box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.eexp-loads li::before {
+	content: "";
+	flex: 0 0 auto;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--eexp-green);
+	box-shadow: 0 0 0 3px var(--eexp-green-08, rgba(7, 134, 79, 0.12));
+	transition: box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.eexp-loads li:hover {
+	transform: translateY(-2px);
+	border-color: var(--eexp-green);
+	box-shadow: 0 6px 18px rgba(7, 134, 79, 0.16), inset 0 1px 0 #fff;
+}
+
+.eexp-loads li:hover::before {
+	box-shadow: 0 0 0 5px rgba(7, 134, 79, 0.16);
+}
+
+/* Without the dot, for a plainer row. */
+.eexp-loads--plain li::before {
+	display: none;
+}
+
+.eexp-loads--plain li {
+	gap: 0;
+}
+
+/* Filled, for when the row should carry more weight than the body under it. */
+.eexp-loads--solid li {
+	background: linear-gradient(180deg, #0a9a5c, #07864f);
+	border-color: transparent;
+	color: #fff;
+	box-shadow: 0 2px 10px rgba(7, 134, 79, 0.28);
+}
+
+.eexp-loads--solid li::before {
+	background: #fff;
+	box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.22);
+}
+
+.eexp-loads--solid li:hover {
+	box-shadow: 0 8px 22px rgba(7, 134, 79, 0.34);
+}
+
+/* Glass, for a pill row that sits over a picture. */
+.eexp-loads--glass li {
+	background: rgba(255, 255, 255, 0.55);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border-color: rgba(255, 255, 255, 0.7);
+	box-shadow: 0 2px 14px rgba(15, 57, 97, 0.1);
 }
 
 /* ── the ledger ─────────────────────────────────────────────────────── */
@@ -462,7 +554,8 @@
 	}
 
 	.eexp-panel {
-		padding: 36px 32px;
+		--eexp-pad-y: 36px;
+		--eexp-pad-x: 32px;
 	}
 }
 
@@ -472,7 +565,8 @@
 	}
 
 	.eexp-panel {
-		padding: 28px 20px;
+		--eexp-pad-y: 28px;
+		--eexp-pad-x: 20px;
 	}
 
 	.eexp-stage__img {
@@ -526,6 +620,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.eexp-loads li:hover {
+		transform: none;
+	}
+
 .eexp *,
 .eexp *::before,
 .eexp *::after {

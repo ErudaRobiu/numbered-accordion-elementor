@@ -520,6 +520,18 @@ the file system.
 - [ ] **On a phone the ledger stacks**, the header row disappears, and the
       middle value is prefixed with the column 2 heading and a middot
 - [ ] Adding a sixth row and deleting one both work without touching the styling
+- [ ] **The slab fills the container it is dropped into**, at every breakpoint,
+      with no dead strip on the right
+- [ ] Every one of the nine typography groups changes the text it names and
+      nothing else
+- [ ] Every spacing slider moves what it names, and can differ on Tablet and
+      Mobile
+- [ ] The four pill styles all render, and the pill colours, gap, height, width
+      and radius controls all take
+- [ ] A pill lifts under the pointer and does not move for a visitor with
+      "reduce motion" on
+- [ ] A slab saved before 2.33.0 opens unchanged, and the new controls start
+      empty rather than overriding what it already looked like
 - [ ] Both widgets rise into view once and stay; a re-render in the editor does
       not leave anything stuck at zero opacity
 - [ ] With JavaScript blocked, both widgets are fully visible

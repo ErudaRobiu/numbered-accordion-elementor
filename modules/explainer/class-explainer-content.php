@@ -94,6 +94,24 @@ final class Explainer_Content {
 	}
 
 	/**
+	 * Classes for the footer pill row.
+	 *
+	 * @param mixed $style Raw control value.
+	 * @return string
+	 */
+	public static function pill_classes( $style ) {
+		$style = is_scalar( $style ) ? (string) $style : '';
+		$known = array( 'solid', 'glass', 'plain' );
+
+		if ( in_array( $style, $known, true ) ) {
+			return 'eexp-loads eexp-loads--' . $style;
+		}
+
+		// "dot" is the default and needs no modifier of its own.
+		return 'eexp-loads';
+	}
+
+	/**
 	 * Inline style for one drifting mote.
 	 *
 	 * The motes are decoration over the flow artwork. Their positions are
