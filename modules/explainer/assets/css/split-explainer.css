@@ -26,6 +26,18 @@
 	--eexp-bar: 6px;
 	--eexp-dim: 0;
 
+	/*
+	 * How the two panels share the width, as a property rather than a
+	 * grid-template-columns written straight onto .eexp-slab. The panel's
+	 * "weight of the light panel" control has to beat this file's fallback,
+	 * and a rule from the panel carries the element id, so it also beat the
+	 * stacking rule at the bottom of this file -- which is why the slab used
+	 * to stay in two columns on a phone and clip the ink panel. Written as a
+	 * token, the control wins where it should and loses to the media query
+	 * where it should.
+	 */
+	--eexp-split: 1.12fr;
+
 	/* Spacing, all of it reachable from the panel. */
 	/*
 	 * Fluid rather than stepped, and set here rather than re-set inside a
@@ -53,6 +65,13 @@
 	--eexp-body-measure: 46ch;
 
 	color: var(--eexp-white-70);
+
+	/*
+	 * A widget dropped into a half-width column is narrow at any viewport, so
+	 * the stacking rule asks the slab's own box as well as the window's. The
+	 * motes are unaffected: .eexp-flow is a container of its own and closer.
+	 */
+	container-type: inline-size;
 }
 
 .eexp *,
@@ -223,7 +242,7 @@
 	display: grid;
 	/* 1fr, not auto: an auto track sizes to its contents and leaves the rest
 	   of the width empty instead of filling the slab. */
-	grid-template-columns: 1.12fr var(--eexp-bar) 1fr;
+	grid-template-columns: var(--eexp-split) var(--eexp-bar) 1fr;
 	border: 1px solid var(--eexp-white-11);
 	border-radius: var(--eexp-radius);
 	overflow: hidden;
@@ -240,6 +259,12 @@
 	display: flex;
 	flex-direction: column;
 	min-height: 0;
+	/*
+	 * min-width, not just min-height: a grid item's automatic minimum size is
+	 * its content, so without this a long spec value pushes the track wider
+	 * than its share and the slab's overflow: hidden cuts the panel off.
+	 */
+	min-width: 0;
 	position: relative;
 }
 
@@ -688,7 +713,27 @@
 
 /* ── responsive ─────────────────────────────────────────────────────── */
 
+/*
+ * Stacked: one column, the bar lying across it as a rule between the two
+ * panels rather than standing between them.
+ *
+ * Twice, because the two questions are different ones. The window is the
+ * breakpoint a client expects -- it lines up with Elementor's own -- and the
+ * container is the case a media query cannot see, a slab in a half-width
+ * column that is narrow at any viewport. Whichever is true first wins, and
+ * the threshold is set below a boxed 1140px container so a slab that fills
+ * the page stays in two columns on the desktop.
+ */
 @media (max-width: 1200px) {
+
+	.eexp-slab {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto var(--eexp-bar) auto;
+	}
+
+}
+
+@container (max-width: 1040px) {
 
 	.eexp-slab {
 		grid-template-columns: 1fr;
@@ -700,6 +745,12 @@
 @media (max-width: 767px) {
 	.eexp {
 		--eexp-radius: 28px;
+	}
+
+	/* Two halves pushed apart do not fit one phone line. Let them sit. */
+	.eexp-flow__caption {
+		flex-wrap: wrap;
+		gap: 6px 16px;
 	}
 
 	.eexp-stage__img {

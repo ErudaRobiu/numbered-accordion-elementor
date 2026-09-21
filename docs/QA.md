@@ -522,6 +522,12 @@ the file system.
 - [ ] Adding a sixth row and deleting one both work without touching the styling
 - [ ] **The slab fills the container it is dropped into**, at every breakpoint,
       with no dead strip on the right
+- [ ] **The slab stacks on a narrow screen** -- one panel over the other, the
+      bar lying across between them -- with the "weight of the light panel"
+      slider set to something other than its default, and nothing cut off the
+      right-hand edge of either panel
+- [ ] **A slab dropped into a half-width column stacks too**, on a full-size
+      desktop, because it is the slab that is narrow and not the window
 - [ ] Every one of the nine typography groups changes the text it names and
       nothing else
 - [ ] Every spacing slider moves what it names, and can differ on Tablet and

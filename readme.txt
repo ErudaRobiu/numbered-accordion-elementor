@@ -110,6 +110,23 @@ untouched, and nothing needs re-saving.
 
 == Changelog ==
 
+= 2.35.2 =
+* **Fixed: the Split Slab never stacked.** Below 1200px the two panels were
+  meant to become one over the other with the bar lying between them. They did
+  not: "Weight of the light panel" writes a rule carrying the element's own id,
+  which outranked the stacking rule in the stylesheet, so the slab held two
+  columns down to a phone -- and because the slab clips what overruns it, most
+  of panel two was simply cut off. The control writes a custom property now,
+  which is a value the layout reads rather than a layout of its own, so it
+  still sets the split on the desktop and stops arguing with the phone.
+* **The slab stacks on its own width, not only the window's.** A slab dropped
+  into a half-width column is narrow at any screen size, and a media query
+  cannot see that. It answers to both now.
+* Nothing inside a panel can force the panel wider than its share of the slab,
+  so a long spec value wraps instead of being clipped, and the two captions
+  under the diagram sit on separate lines on a phone rather than being pushed
+  into one.
+
 = 2.35.1 =
 * **Fixed: "Picture to footer" opened the space inside the spec box rather than
   above it.** The spec rows are a bordered box, so padding on them left an empty

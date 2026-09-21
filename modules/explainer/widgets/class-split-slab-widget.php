@@ -466,9 +466,15 @@ class Split_Slab_Widget extends Widget_Base {
 					'unit' => '%',
 					'size' => 56,
 				),
-				'description' => esc_html__( 'How much of the width the light panel takes. The ink panel takes the rest.', 'numbered-accordion' ),
+				'description' => esc_html__( 'How much of the width the light panel takes. The ink panel takes the rest. On a narrow screen, or in a narrow column, the two stack instead.', 'numbered-accordion' ),
+				/*
+				 * The token, not the property. A rule Elementor writes carries
+				 * the element id, so a grid-template-columns set here outranked
+				 * the stylesheet's stacking rule and held the slab in two
+				 * columns all the way down to a phone.
+				 */
 				'selectors'   => array(
-					'{{WRAPPER}} .eexp-slab' => 'grid-template-columns: {{SIZE}}% var(--eexp-bar) 1fr;',
+					'{{WRAPPER}} .eexp' => '--eexp-split: {{SIZE}}%;',
 				),
 			)
 		);

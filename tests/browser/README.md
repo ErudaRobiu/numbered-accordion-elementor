@@ -17,6 +17,7 @@ node tests/browser/story-probe.js   # Scroll Story
 node tests/browser/rail-probe.js    # Scroll Rail
 node tests/browser/spin-probe.js    # Eruda Spin on an existing widget
 node tests/browser/header-probe.js  # Mega Header
+node tests/browser/slab-probe.js    # Split Slab, stacked and not
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
@@ -37,6 +38,14 @@ Both run headless on purpose. A scrubbed animation is driven by
 visible — drive a real window and every measurement freezes the moment the
 window loses focus, which reads exactly like a broken build. That cost an hour
 once already.
+
+`slab-probe.js` asserts that the Split Slab is two panels beside its bar on a
+wide screen, sharing the width the panel's control asked for, and one panel over
+the other with the bar lying across it once the slab is narrow -- whether that
+is because the window is narrow or because the column it sits in is. It injects
+the rule Elementor writes for "weight of the light panel" before it measures,
+because that rule is what used to beat the stacking rule and hold the slab in
+two columns on a phone. It exits non-zero on any failure.
 
 `rail-probe.js` asserts too: that the section is given exactly the runway its
 row needs, that the row travels sideways and back and lands with the row used
