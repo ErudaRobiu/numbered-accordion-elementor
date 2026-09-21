@@ -20,6 +20,18 @@ node tests/browser/header-probe.js  # Mega Header
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
+The explainer fixture is generated rather than hand-written, from the widgets'
+own `render()`, so one command proves the PHP, the stylesheet and the script
+together:
+
+```sh
+php tests/browser/explainer-fixture.php > tests/browser/explainer.html
+```
+
+It lays out the slab with its step numbers empty and filled, the slab over a
+background picture under the darkening veil, and the ledger with and without
+its winning column marked.
+
 Both run headless on purpose. A scrubbed animation is driven by
 `requestAnimationFrame`, and Chrome does not run rAF in a tab that is not
 visible — drive a real window and every measurement freezes the moment the

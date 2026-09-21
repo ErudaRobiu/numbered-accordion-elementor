@@ -1,0 +1,544 @@
+/**
+ * Split Slab and Comparison Ledger.
+ *
+ * Everything Elementor's controls cannot express lives here: the blend mode
+ * that knocks the flow artwork out of its black plate, the mote drift, the
+ * dashed ledger rules and the phone reflow. Colours, spacing and type come
+ * from the panel as custom properties on .eexp, so a value set in Elementor
+ * always wins over the fallback in this file.
+ *
+ * Both widgets share this sheet and the .eexp root, because they share the
+ * tokens and are nearly always used together.
+ */
+
+.eexp {
+	--eexp-green: #07864f;
+	--eexp-green-light: #4dcf8d;
+	--eexp-green-30: rgba(7, 134, 79, 0.3);
+	--eexp-white-11: rgba(255, 255, 255, 0.11);
+	--eexp-white-70: rgba(255, 255, 255, 0.7);
+	--eexp-ink: #0d1b24;
+	--eexp-offwhite: #f5f6f7;
+	--eexp-navy: #0f3961;
+	--eexp-navy-70: rgba(15, 57, 97, 0.7);
+	--eexp-navy-80: rgba(15, 57, 97, 0.8);
+	--eexp-radius: 52px;
+	--eexp-bar: 6px;
+	--eexp-dim: 0;
+
+	color: var(--eexp-white-70);
+}
+
+.eexp *,
+.eexp *::before,
+.eexp *::after {
+	box-sizing: border-box;
+}
+
+.eexp p {
+	margin: 0;
+}
+
+.eexp img {
+	display: block;
+	max-width: 100%;
+}
+
+/*
+ * The display face. Family inherited on purpose, so the kit's own heading
+ * font carries through; this sets only what the shape needs.
+ */
+.eexp-heading {
+	margin: 0;
+	font-weight: 400;
+	line-height: 1;
+	text-transform: uppercase;
+	letter-spacing: 0.01em;
+	color: #fff;
+}
+
+.eexp-panel__title {
+	font-size: clamp(24px, 2.2vw, 32px);
+}
+
+.eexp-panel--light .eexp-panel__title {
+	color: var(--eexp-navy);
+}
+
+.eexp-label {
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.eexp-panel__body,
+.eexp-lold,
+.eexp-lnew {
+	font-size: 15px;
+	line-height: 1.6;
+}
+
+.eexp-step__num {
+	font-size: 28px;
+	font-weight: 400;
+	letter-spacing: 0.02em;
+	color: var(--eexp-green);
+}
+
+.eexp-panel--ink .eexp-step__num {
+	color: var(--eexp-green-light);
+}
+
+.eexp-panel--light .eexp-step {
+	color: var(--eexp-navy-70);
+}
+
+.eexp-flow__caption,
+.eexp-specs b,
+.eexp-lhead span {
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.eexp-lhead span,
+.eexp-loads__label {
+	font-weight: 700;
+	letter-spacing: 0.08em;
+}
+
+.eexp-specs b {
+	color: #fff;
+}
+
+.eexp-specs li span {
+	font-size: 14px;
+}
+
+.eexp-loads__label {
+	font-size: 12px;
+	text-transform: uppercase;
+	color: var(--eexp-navy-70);
+}
+
+.eexp-loads li {
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.eexp-lnew {
+	font-weight: 600;
+	color: #fff;
+}
+
+/* ── the slab ───────────────────────────────────────────────────────── */
+
+.eexp-slab {
+	display: grid;
+	grid-template-columns: 1.12fr var(--eexp-bar) 0.88fr;
+	border: 1px solid var(--eexp-white-11);
+	border-radius: var(--eexp-radius);
+	overflow: hidden;
+	background: var(--eexp-ink);
+	box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+}
+
+.eexp-bar {
+	background: var(--eexp-green);
+}
+
+.eexp-panel {
+	padding: 44px 48px;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	position: relative;
+}
+
+.eexp-panel--light {
+	background: var(--eexp-offwhite);
+	color: var(--eexp-navy-80);
+}
+
+.eexp-panel--ink {
+	background-color: var(--eexp-ink);
+	background-image: radial-gradient(120% 90% at 85% 0%, #14382a 0%, var(--eexp-ink) 62%);
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+	color: var(--eexp-white-70);
+}
+
+/*
+ * The darkening veil for a background image. It sits under the content and
+ * over the picture, so white text and the green accents keep their contrast
+ * whatever gets uploaded. At the default 0 it costs nothing.
+ */
+.eexp-panel--ink::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: #000;
+	opacity: var(--eexp-dim);
+	pointer-events: none;
+}
+
+.eexp-panel > * {
+	position: relative;
+	z-index: 1;
+}
+
+.eexp-step {
+	display: flex;
+	align-items: baseline;
+	gap: 14px;
+	margin: 0;
+}
+
+/* An empty number closes its own gap rather than leaving one behind. */
+.eexp-step--bare {
+	gap: 0;
+}
+
+.eexp-step__num {
+	line-height: 1;
+	flex: 0 0 auto;
+}
+
+.eexp-panel__title {
+	margin: 18px 0 0;
+	max-width: 16ch;
+}
+
+.eexp-panel__body {
+	margin-top: 14px;
+	max-width: 46ch;
+}
+
+.eexp-stage {
+	padding-top: 28px;
+}
+
+.eexp-stage__img {
+	width: 100%;
+	height: auto;
+	max-width: 620px;
+	margin-inline: auto;
+}
+
+/* ── the flow plate ─────────────────────────────────────────────────── */
+
+.eexp-flow {
+	position: relative;
+	margin: 0;
+	border: 1px solid var(--eexp-white-11);
+	border-radius: 20px;
+	padding: 20px 18px;
+	overflow: hidden;
+	background: #04090d;
+}
+
+/*
+ * The artwork is drawn on black. Screened over the plate, the black falls
+ * away and only the coils and arrows remain. Elementor has no control for a
+ * blend mode, so it is fixed here.
+ */
+.eexp-flow__img {
+	width: 100%;
+	height: auto;
+	mix-blend-mode: screen;
+}
+
+/*
+ * No plate: artwork that brings a background of its own, so there is nothing
+ * to knock out and nothing to knock it out of.
+ */
+.eexp-flow--bare {
+	border: 0;
+	padding: 0;
+	background: none;
+}
+
+.eexp-flow--bare .eexp-flow__img {
+	mix-blend-mode: normal;
+	border-radius: 20px;
+}
+
+.eexp-mote {
+	position: absolute;
+	left: -10px;
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: var(--eexp-white-70);
+	opacity: 0;
+	animation-name: eexp-drift;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+	pointer-events: none;
+}
+
+@keyframes eexp-drift {
+	0% {
+		transform: translateX(0);
+		opacity: 0;
+	}
+
+	8% {
+		opacity: 0.75;
+	}
+
+	84% {
+		opacity: 0.75;
+	}
+
+	100% {
+		transform: translateX(560px);
+		opacity: 0;
+	}
+}
+
+.eexp-flow__caption {
+	margin-top: 14px;
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.eexp-flow__caption i {
+	font-style: normal;
+	color: var(--eexp-green-light);
+}
+
+/* ── panel footers, bottom-aligned ──────────────────────────────────── */
+
+.eexp-specs {
+	list-style: none;
+	margin: auto 0 0;
+	padding: 0;
+	display: grid;
+	gap: 1px;
+	background: var(--eexp-white-11);
+	border: 1px solid var(--eexp-white-11);
+	border-radius: 20px;
+	overflow: hidden;
+}
+
+.eexp-specs li {
+	background: var(--eexp-ink);
+	padding: 13px 18px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 18px;
+}
+
+.eexp-loads {
+	margin: auto 0 0;
+	padding-top: 28px;
+}
+
+.eexp-loads__label {
+	margin-bottom: 14px;
+}
+
+.eexp-loads ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.eexp-loads li {
+	border: 1px solid var(--eexp-green-30);
+	background: #fff;
+	color: var(--eexp-navy);
+	border-radius: 2000px;
+	padding: 8px 16px;
+}
+
+/* ── the ledger ─────────────────────────────────────────────────────── */
+
+.eexp-ledger {
+	border: 1px solid var(--eexp-white-11);
+	border-radius: 25px;
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.eexp-lrow {
+	display: grid;
+	grid-template-columns: 1.1fr 1fr 1.25fr;
+	align-items: center;
+	border-top: 1px dashed rgba(255, 255, 255, 0.14);
+}
+
+.eexp-lrow:first-child {
+	border-top: 0;
+}
+
+.eexp-lrow > * {
+	padding: 20px 28px;
+}
+
+.eexp-lhead {
+	background: rgba(255, 255, 255, 0.04);
+	border-top: 0;
+}
+
+.eexp-lhead .eexp-win {
+	color: var(--eexp-green-light);
+}
+
+.eexp-lold {
+	color: rgba(255, 255, 255, 0.54);
+}
+
+.eexp-lnew {
+	background: linear-gradient(90deg, rgba(77, 207, 141, 0.1), transparent 72%);
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+}
+
+/* A comparison with no winner keeps the rows and drops the claim. */
+.eexp-lnew--plain {
+	background: none;
+	font-weight: inherit;
+	color: inherit;
+}
+
+.eexp-lnew--plain::before {
+	display: none;
+}
+
+.eexp-lnew::before {
+	content: "";
+	flex: 0 0 auto;
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	background: var(--eexp-green-light);
+	margin-top: 8px;
+}
+
+/* ── reveal ─────────────────────────────────────────────────────────── */
+
+.eexp-rise {
+	opacity: 0;
+	transform: translateY(22px);
+	transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+		transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.eexp-rise.eexp-in {
+	opacity: 1;
+	transform: none;
+}
+
+/*
+ * Without the script -- and inside the editor, where the observer is set up
+ * again on every redraw -- everything must simply be visible.
+ */
+.eexp-no-js .eexp-rise,
+.elementor-editor-active .eexp-rise {
+	opacity: 1;
+	transform: none;
+}
+
+/* ── responsive ─────────────────────────────────────────────────────── */
+
+@media (max-width: 1200px) {
+
+	.eexp-slab {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto var(--eexp-bar) auto;
+	}
+
+	.eexp-panel {
+		padding: 36px 32px;
+	}
+}
+
+@media (max-width: 767px) {
+	.eexp {
+		--eexp-radius: 28px;
+	}
+
+	.eexp-panel {
+		padding: 28px 20px;
+	}
+
+	.eexp-stage__img {
+		max-width: none;
+		width: calc(100% + 24px);
+		margin-left: -12px;
+	}
+
+	.eexp-lrow {
+		grid-template-columns: 1fr;
+		border-top: 0;
+	}
+
+	.eexp-lrow > * {
+		padding: 14px 20px;
+	}
+
+	.eexp-lrow + .eexp-lrow {
+		border-top: 1px solid var(--eexp-white-11);
+	}
+
+	.eexp-lhead {
+		display: none;
+	}
+
+	.eexp-lkey {
+		padding-bottom: 2px;
+	}
+
+	.eexp-lold {
+		padding-top: 4px;
+	}
+
+	/*
+	 * The header row is hidden here, so the middle value says what it is.
+	 * Small, uppercase and set off by a middot, or it reads as one run-on
+	 * sentence with the value after it.
+	 */
+	.eexp-lold::before {
+		content: attr(data-eexp-label) " · ";
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		opacity: 0.7;
+	}
+
+	.eexp-lnew {
+		background: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+.eexp *,
+.eexp *::before,
+.eexp *::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+	}
+
+	.eexp-mote {
+		display: none;
+	}
+
+	.eexp-rise {
+		opacity: 1;
+		transform: none;
+	}
+}

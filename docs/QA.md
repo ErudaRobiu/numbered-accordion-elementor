@@ -459,6 +459,45 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
 - [ ] Editing a card in the editor re-renders it and the rail still works
 - [ ] Two Scroll Rails on one page travel independently
 
+## Split Slab and Comparison Ledger
+
+`php tests/browser/explainer-fixture.php > tests/browser/explainer.html` builds
+the fixture from the widgets' own `render()`, with the slab twice (numbers empty
+and filled), the slab over a background picture, and the ledger both with and
+without its winning column marked. Serve the folder rather than opening it from
+the file system.
+
+- [ ] Both widgets appear in the Elementor panel under **Eruda Toolkit**, and
+      neither is in General
+- [ ] **The step numbers start empty.** The label sits hard against the left
+      edge of the panel with no gap where a number would be
+- [ ] Typing `01` into one panel shows it and opens the gap; clearing it again
+      closes the gap rather than leaving a hole
+- [ ] A number in one panel and not the other looks deliberate, not broken
+- [ ] **Panel 2 takes a background picture** from its own background group, and
+      position, size and repeat all work on it
+- [ ] **Raise "Darken behind the text"** and the white heading, the body and the
+      green step number all keep their contrast over the picture. At 0 the
+      panel is flat ink again
+- [ ] The veil sits under the words and over the picture -- never over the text
+- [ ] The diagram loses its black background against the plate. Switching the
+      plate off leaves the artwork on the panel with its own background intact
+- [ ] Both panel footers -- the pills and the spec rows -- sit on the bottom
+      edge when one panel is longer than the other
+- [ ] The motes drift across the diagram, and stop entirely for a visitor with
+      "reduce motion" on. Setting the count to 0 removes them
+- [ ] Pictures come out of the media library with their own dimensions and
+      srcset, and both are lazily loaded
+- [ ] **The ledger's third column is tinted and dotted.** Switching off "Mark
+      the third column" removes both and leaves the row readable
+- [ ] Switching off the header row removes it without moving the rows
+- [ ] **On a phone the ledger stacks**, the header row disappears, and the
+      middle value is prefixed with the column 2 heading and a middot
+- [ ] Adding a sixth row and deleting one both work without touching the styling
+- [ ] Both widgets rise into view once and stay; a re-render in the editor does
+      not leave anything stuck at zero opacity
+- [ ] With JavaScript blocked, both widgets are fully visible
+
 ## Mega Header
 
 `node tests/browser/header-probe.js` measures the two scroll states, the panel

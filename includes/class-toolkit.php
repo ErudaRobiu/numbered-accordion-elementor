@@ -60,6 +60,10 @@ final class Toolkit {
 			'file'  => 'modules/badge/class-badge-module.php',
 			'class' => '\ErudaToolkit\Modules\Badge\Badge_Module',
 		),
+		'explainer'  => array(
+			'file'  => 'modules/explainer/class-explainer-module.php',
+			'class' => '\ErudaToolkit\Modules\Explainer\Explainer_Module',
+		),
 	);
 
 	/**

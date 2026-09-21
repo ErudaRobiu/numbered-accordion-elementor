@@ -7,6 +7,7 @@ A small toolkit of site-building modules. Each one can be switched off from
 | --- | --- | --- |
 | Numbered Accordion | A numbered, lightly animated accordion widget for Elementor | Elementor 3.5+ |
 | Impact Grid | A grid of numbered figure and checklist cards that animate into view | Elementor 3.5+ |
+| Split Slab and Ledger | A two-panel slab divided by a coloured bar, and a row-per-point comparison ledger | Elementor 3.5+ |
 | Duplicate Pages | A Duplicate row action and bulk action on Pages and Posts | Nothing beyond core |
 
 ![Widget](docs/preview.png)
@@ -38,6 +39,7 @@ modules/story/                     the Scroll Story widget and its assets
 modules/rail/                      the Scroll Rail widget and its assets
 modules/header/                    the Mega Header widget and its assets
 modules/badge/                     the Eruda Spin extension and its assets
+modules/explainer/                 the Split Slab and Comparison Ledger widgets
 modules/smoothscroll/              eases the whole page's scrolling
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php

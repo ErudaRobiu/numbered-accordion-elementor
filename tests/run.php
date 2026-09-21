@@ -16,6 +16,7 @@ require_once __DIR__ . '/bootstrap.php';
 use ErudaToolkit\Toolkit;
 use ErudaToolkit\Modules\Duplicator\Duplicator;
 use ErudaToolkit\Modules\Impact\Impact_Content;
+use ErudaToolkit\Modules\Explainer\Explainer_Content;
 use ErudaToolkit\Modules\Motion\Motion_Presets;
 use ErudaToolkit\Modules\Badge\Spin_Controls;
 use ErudaToolkit\Modules\Motion\Motion_Controls;
@@ -626,7 +627,8 @@ check( 'the scroll story module is registered', true, in_array( 'story', Toolkit
 check( 'the scroll rail module is registered', true, in_array( 'rail', Toolkit::instance()->ids(), true ) );
 check( 'the spin module is registered', true, in_array( 'badge', Toolkit::instance()->ids(), true ) );
 check( 'the mega header module is registered', true, in_array( 'header', Toolkit::instance()->ids(), true ) );
-check( 'nine modules ship', 9, count( Toolkit::instance()->ids() ) );
+check( 'the split explainer module is registered', true, in_array( 'explainer', Toolkit::instance()->ids(), true ) );
+check( 'ten modules ship', 10, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -899,6 +901,100 @@ $GLOBALS['eruda_test_filters']['eruda_smooth_scroll_options'] = function () {
 check( 'a corrupt filter return falls back', 1.1, SmoothScroll_Module::options()['duration'] );
 
 unset( $GLOBALS['eruda_test_filters']['eruda_smooth_scroll_options'] );
+
+/* ------------------------------------------------- split explainer --- */
+
+/* ------------------------------------- Explainer_Content::has_step --- */
+
+// The correction that started this widget: the numbers are a control, and an
+// empty one takes the gap with it rather than leaving a hole behind.
+check( 'an empty number is no number', false, Explainer_Content::has_step( '' ) );
+check( 'whitespace is no number either', false, Explainer_Content::has_step( "  \t " ) );
+check( 'a number is a number', true, Explainer_Content::has_step( '01' ) );
+check( 'so is a word', true, Explainer_Content::has_step( 'Step one' ) );
+check( 'null is no number', false, Explainer_Content::has_step( null ) );
+check( 'an array is no number', false, Explainer_Content::has_step( array( '01' ) ) );
+check( 'the number is trimmed', '01', Explainer_Content::step_text( '  01 ' ) );
+check( 'zero counts', true, Explainer_Content::has_step( '0' ) );
+
+check(
+	'an empty number closes its own gap',
+	'eexp-step eexp-step--bare',
+	Explainer_Content::step_classes( '' )
+);
+check(
+	'a number keeps the gap',
+	'eexp-step',
+	Explainer_Content::step_classes( '02' )
+);
+
+/* ------------------------------ Explainer_Content::text and ::rows --- */
+
+check( 'a setting is trimmed', 'Flow', Explainer_Content::text( array( 'k' => '  Flow ' ), 'k' ) );
+check( 'a missing setting is empty', '', Explainer_Content::text( array(), 'k' ) );
+check( 'a non-array is empty', '', Explainer_Content::text( 'nope', 'k' ) );
+check( 'an array value is empty', '', Explainer_Content::text( array( 'k' => array( 'x' ) ), 'k' ) );
+check( 'a number comes back as a string', '5', Explainer_Content::text( array( 'k' => 5 ), 'k' ) );
+
+check( 'rows come back whole', array( array( 'a' => 1 ) ), Explainer_Content::rows( array( 'r' => array( array( 'a' => 1 ) ) ), 'r' ) );
+check( 'a missing repeater is no rows', array(), Explainer_Content::rows( array(), 'r' ) );
+check( 'a scalar repeater is no rows', array(), Explainer_Content::rows( array( 'r' => 'x' ), 'r' ) );
+
+/* ----------------------------------- Explainer_Content::mote_style --- */
+
+check( 'no motes asked for, none drawn', 0, Explainer_Content::mote_count( 0 ) );
+check( 'the default five', 5, Explainer_Content::mote_count( 5 ) );
+check( 'a negative count is none', 0, Explainer_Content::mote_count( -3 ) );
+check( 'the count is capped', 7, Explainer_Content::mote_count( 99 ) );
+check( 'a non-number is none', 0, Explainer_Content::mote_count( array() ) );
+
+check(
+	'the first mote',
+	'top:26%;animation-duration:7.5s;animation-delay:0s',
+	Explainer_Content::mote_style( 0, 5 )
+);
+check(
+	'the second is offset in time, not stacked on the first',
+	'top:41%;animation-duration:9s;animation-delay:1.45s',
+	Explainer_Content::mote_style( 1, 5 )
+);
+
+// Deterministic: the same page must look the same on every load.
+check(
+	'the same index gives the same style twice',
+	Explainer_Content::mote_style( 3, 5 ),
+	Explainer_Content::mote_style( 3, 5 )
+);
+
+$styles = array();
+
+for ( $i = 0; $i < 7; $i++ ) {
+	$styles[] = Explainer_Content::mote_style( $i, 7 );
+}
+
+check( 'seven motes, seven different styles', 7, count( array_unique( $styles ) ) );
+
+// The count is capped at seven, so an eighth mote is unreachable. If the cap
+// ever moves, its position and speed wrap round the table rather than reading
+// off the end of it -- only the delay goes on climbing, which is the point.
+check(
+	'an index past the end wraps its position',
+	'top:26%',
+	substr( Explainer_Content::mote_style( 7, 7 ), 0, 7 )
+);
+check(
+	'and keeps stepping the delay rather than stacking',
+	'top:26%;animation-duration:7.5s;animation-delay:10.15s',
+	Explainer_Content::mote_style( 7, 7 )
+);
+
+/* ---------------------------- Explainer_Content::panel_sizes_attr --- */
+
+check(
+	'the sizes hint follows the slab',
+	'(max-width: 767px) 92vw, (max-width: 1200px) 88vw, 44vw',
+	Explainer_Content::panel_sizes_attr()
+);
 
 /* ------------------------------------------------------------- report --- */
 

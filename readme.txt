@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.30.0
+Stable tag: 2.31.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,28 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.31.0 =
+* Two new widgets, **Split Slab** and **Comparison Ledger**, under a module
+  called Split Slab and Ledger.
+* The slab is one rounded object divided by a coloured bar: a light panel with
+  a step line, heading, body, picture and a row of pills, and an ink panel with
+  the same plus a diagram on a plate and a list of specs. Both footers sit on
+  the bottom edge whichever panel runs longer.
+* The step numbers are a text control on each panel, not fixed to 01 and 02.
+  Leaving one empty hides the number and closes the gap the label would
+  otherwise sit after; both ship empty.
+* The ink panel takes a full background group -- picture, position, size,
+  repeat, or a gradient -- over its colour, with a **Darken behind the text**
+  slider that lays a black veil between the picture and the words so the white
+  text and the accent keep their contrast.
+* The diagram is screened onto its plate, so artwork drawn on black loses the
+  black and keeps only the drawing. Switch the plate off for artwork that
+  brings a background of its own.
+* The ledger is a row per point across three columns, with the third tinted and
+  marked as the one that won. Both the tint and the header row can be switched
+  off. On a phone the columns stack and the middle value takes the header's
+  wording inline, so it still says what it is.
 
 = 2.30.0 =
 * The dropdown now sits off the bar as a card of its own, with three new

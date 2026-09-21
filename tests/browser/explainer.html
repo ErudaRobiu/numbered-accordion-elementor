@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split Explainer — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Urbanist:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../../modules/explainer/assets/css/split-explainer.css">
+<style>
+/*
+ * The kit's job, not the widget's: the families and the section surface. The
+ * widget inherits both, which is the whole point of leaving them out of the
+ * module stylesheet.
+ */
+body{margin:0;background:#08121C;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif}
+.host{padding:10% 24px;max-width:1440px;margin-inline:auto}
+.eexp-heading,.eexp-step__num,.eexp-outs b{font-family:"Bebas Neue",Impact,sans-serif}
+.eexp-chip,.eexp-label,.eexp-loads li,.eexp-loads__label,.eexp-specs b,.eexp-lhead span,
+.eexp-flow__caption,.eexp-btn{font-family:"Urbanist",system-ui,sans-serif}
+.marker{max-width:1440px;margin:0 auto;padding:0 24px;color:#4DCF8D;
+  font:600 13px/1 "Urbanist",system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+
+/* A hostile theme, the same block the other harnesses carry. */
+img{max-width:100%;height:auto}
+.eexp img{object-fit:contain}
+</style>
+</head>
+<body>
+<p class="marker">Slab — step numbers empty, the default</p>
+<div class="host">		<div class="eexp eexp-no-js">
+			<div class="eexp-slab eexp-rise">
+						<div class="eexp-panel eexp-panel--light">
+					<p class="eexp-step eexp-step--bare eexp-label">
+										<span>What the air carries</span>
+					</p>
+		
+							<h3 class="eexp-heading eexp-panel__title">Exhaust that fouls everything else</h3>
+			
+							<p class="eexp-panel__body">Grease, soot, moisture, lint and fiber arrive with the airstream — the load that closes a finned exchanger down.</p>
+			
+							<div class="eexp-stage">
+							<img class="eexp-stage__img" src="../../../../Documents/ThermStar/1-plan/sections/images/lepido-contaminants.webp" alt="" loading="lazy" />
+						</div>
+			
+							<div class="eexp-loads">
+											<p class="eexp-loads__label">Carried in, carried straight back out</p>
+					
+											<ul>
+																							<li>Grease</li>
+																							<li>Soot</li>
+																							<li>Moisture</li>
+																							<li>Lint</li>
+																							<li>Fibre</li>
+																							<li>Fumes</li>
+													</ul>
+									</div>
+					</div>
+						<div class="eexp-bar" role="presentation"></div>
+						<div class="eexp-panel eexp-panel--ink">
+					<p class="eexp-step eexp-step--bare eexp-label">
+										<span>What the geometry does</span>
+					</p>
+		
+							<h3 class="eexp-heading eexp-panel__title">Particles are repelled, not trapped</h3>
+			
+							<p class="eexp-panel__body">Ample spacing between the coils creates an airflow pattern that carries particles straight through the unit instead of onto its surfaces.</p>
+			
+							<div class="eexp-stage">
+					<figure class="eexp-flow">
+								<img class="eexp-flow__img" src="../../../../Documents/ThermStar/1-plan/sections/images/prg-flow.webp" alt="" loading="lazy" />
+		
+													<span class="eexp-mote" style="top:26%;animation-duration:7.5s;animation-delay:0s"></span>
+													<span class="eexp-mote" style="top:41%;animation-duration:9s;animation-delay:1.45s"></span>
+													<span class="eexp-mote" style="top:57%;animation-duration:8.2s;animation-delay:2.9s"></span>
+													<span class="eexp-mote" style="top:72%;animation-duration:10s;animation-delay:4.35s"></span>
+													<span class="eexp-mote" style="top:34%;animation-duration:11s;animation-delay:5.8s"></span>
+						
+													<figcaption class="eexp-flow__caption">
+								<span>Hot contaminated exhaust in</span>
+								<i>Cooled air out →</i>
+							</figcaption>
+											</figure>
+				</div>
+			
+							<ul class="eexp-specs">
+																	<li>
+							<b>Flow</b>
+							<span>100% counter-current</span>
+						</li>
+																	<li>
+							<b>Circuiting</b>
+							<span>Multiple fluid patterns</span>
+						</li>
+																	<li>
+							<b>Transfer area</b>
+							<span>Matched to a conventional coil</span>
+						</li>
+									</ul>
+					</div>
+					</div>
+		</div>
+		</div>
+
+<p class="marker">Slab — step numbers filled in</p>
+<div class="host">		<div class="eexp eexp-no-js">
+			<div class="eexp-slab eexp-rise">
+						<div class="eexp-panel eexp-panel--light">
+					<p class="eexp-step eexp-label">
+							<b class="eexp-step__num">01</b>
+										<span>What the air carries</span>
+					</p>
+		
+							<h3 class="eexp-heading eexp-panel__title">Exhaust that fouls everything else</h3>
+			
+							<p class="eexp-panel__body">Grease, soot, moisture, lint and fiber arrive with the airstream — the load that closes a finned exchanger down.</p>
+			
+							<div class="eexp-stage">
+							<img class="eexp-stage__img" src="../../../../Documents/ThermStar/1-plan/sections/images/lepido-contaminants.webp" alt="" loading="lazy" />
+						</div>
+			
+							<div class="eexp-loads">
+											<p class="eexp-loads__label">Carried in, carried straight back out</p>
+					
+											<ul>
+																							<li>Grease</li>
+																							<li>Soot</li>
+																							<li>Moisture</li>
+																							<li>Lint</li>
+																							<li>Fibre</li>
+																							<li>Fumes</li>
+													</ul>
+									</div>
+					</div>
+						<div class="eexp-bar" role="presentation"></div>
+						<div class="eexp-panel eexp-panel--ink">
+					<p class="eexp-step eexp-label">
+							<b class="eexp-step__num">02</b>
+										<span>What the geometry does</span>
+					</p>
+		
+							<h3 class="eexp-heading eexp-panel__title">Particles are repelled, not trapped</h3>
+			
+							<p class="eexp-panel__body">Ample spacing between the coils creates an airflow pattern that carries particles straight through the unit instead of onto its surfaces.</p>
+			
+							<div class="eexp-stage">
+					<figure class="eexp-flow">
+								<img class="eexp-flow__img" src="../../../../Documents/ThermStar/1-plan/sections/images/prg-flow.webp" alt="" loading="lazy" />
+		
+													<span class="eexp-mote" style="top:26%;animation-duration:7.5s;animation-delay:0s"></span>
+													<span class="eexp-mote" style="top:41%;animation-duration:9s;animation-delay:1.45s"></span>
+													<span class="eexp-mote" style="top:57%;animation-duration:8.2s;animation-delay:2.9s"></span>
+													<span class="eexp-mote" style="top:72%;animation-duration:10s;animation-delay:4.35s"></span>
+													<span class="eexp-mote" style="top:34%;animation-duration:11s;animation-delay:5.8s"></span>
+						
+													<figcaption class="eexp-flow__caption">
+								<span>Hot contaminated exhaust in</span>
+								<i>Cooled air out →</i>
+							</figcaption>
+											</figure>
+				</div>
+			
+							<ul class="eexp-specs">
+																	<li>
+							<b>Flow</b>
+							<span>100% counter-current</span>
+						</li>
+																	<li>
+							<b>Circuiting</b>
+							<span>Multiple fluid patterns</span>
+						</li>
+																	<li>
+							<b>Transfer area</b>
+							<span>Matched to a conventional coil</span>
+						</li>
+									</ul>
+					</div>
+					</div>
+		</div>
+		</div>
+
+<style>.backed .eexp-panel--ink{background-image:url(../../../../Documents/ThermStar/1-plan/sections/images/lepido-contaminants.webp);background-size:cover;background-position:center}.backed .eexp{--eexp-dim:.62}</style><p class="marker">Slab — a picture behind the ink panel, veiled at 62%</p>
+<div class="host backed">		<div class="eexp eexp-no-js">
+			<div class="eexp-slab eexp-rise">
+						<div class="eexp-panel eexp-panel--light">
+					<p class="eexp-step eexp-label">
+							<b class="eexp-step__num">01</b>
+										<span>What the air carries</span>
+					</p>
+		
+							<h3 class="eexp-heading eexp-panel__title">Exhaust that fouls everything else</h3>
+			
+							<p class="eexp-panel__body">Grease, soot, moisture, lint and fiber arrive with the airstream — the load that closes a finned exchanger down.</p>
+			
+							<div class="eexp-stage">
+							<img class="eexp-stage__img" src="../../../../Documents/ThermStar/1-plan/sections/images/lepido-contaminants.webp" alt="" loading="lazy" />
+						</div>
+			
+							<div class="eexp-loads">
+											<p class="eexp-loads__label">Carried in, carried straight back out</p>
+					
+											<ul>
+																							<li>Grease</li>
+																							<li>Soot</li>
+																							<li>Moisture</li>
+																							<li>Lint</li>
+																							<li>Fibre</li>
+																							<li>Fumes</li>
+													</ul>
+									</div>
+					</div>
+						<div class="eexp-bar" role="presentation"></div>
+						<div class="eexp-panel eexp-panel--ink">
+					<p class="eexp-step eexp-label">
+							<b class="eexp-step__num">02</b>
+										<span>What the geometry does</span>
+					</p>
+		
+							<h3 class="eexp-heading eexp-panel__title">Particles are repelled, not trapped</h3>
+			
+							<p class="eexp-panel__body">Ample spacing between the coils creates an airflow pattern that carries particles straight through the unit instead of onto its surfaces.</p>
+			
+							<div class="eexp-stage">
+					<figure class="eexp-flow">
+								<img class="eexp-flow__img" src="../../../../Documents/ThermStar/1-plan/sections/images/prg-flow.webp" alt="" loading="lazy" />
+		
+													<span class="eexp-mote" style="top:26%;animation-duration:7.5s;animation-delay:0s"></span>
+													<span class="eexp-mote" style="top:41%;animation-duration:9s;animation-delay:1.45s"></span>
+													<span class="eexp-mote" style="top:57%;animation-duration:8.2s;animation-delay:2.9s"></span>
+													<span class="eexp-mote" style="top:72%;animation-duration:10s;animation-delay:4.35s"></span>
+													<span class="eexp-mote" style="top:34%;animation-duration:11s;animation-delay:5.8s"></span>
+						
+													<figcaption class="eexp-flow__caption">
+								<span>Hot contaminated exhaust in</span>
+								<i>Cooled air out →</i>
+							</figcaption>
+											</figure>
+				</div>
+			
+							<ul class="eexp-specs">
+																	<li>
+							<b>Flow</b>
+							<span>100% counter-current</span>
+						</li>
+																	<li>
+							<b>Circuiting</b>
+							<span>Multiple fluid patterns</span>
+						</li>
+																	<li>
+							<b>Transfer area</b>
+							<span>Matched to a conventional coil</span>
+						</li>
+									</ul>
+					</div>
+					</div>
+		</div>
+		</div>
+
+<p class="marker">Ledger</p>
+<div class="host">		<div class="eexp eexp-no-js">
+			<div class="eexp-ledger eexp-rise">
+									<div class="eexp-lrow eexp-lhead">
+						<span>Across the same dirty airstream</span>
+						<span>Conventional finned exchanger</span>
+						<span class="eexp-win">Lepido with PRG</span>
+					</div>
+				
+									<div class="eexp-lrow">
+						<div class="eexp-lkey eexp-label">Coil surface</div>
+						<div class="eexp-lold" data-eexp-label="Conventional finned exchanger">Tightly spaced fins, narrow passages</div>
+						<div class="eexp-lnew">Finless, open coil with wide spacing</div>
+					</div>
+									<div class="eexp-lrow">
+						<div class="eexp-lkey eexp-label">Particle path</div>
+						<div class="eexp-lold" data-eexp-label="Conventional finned exchanger">Grease and soot collect and stick</div>
+						<div class="eexp-lnew">Particles pass through without clogging</div>
+					</div>
+									<div class="eexp-lrow">
+						<div class="eexp-lkey eexp-label">Pressure drop</div>
+						<div class="eexp-lold" data-eexp-label="Conventional finned exchanger">Climbs as the unit fouls</div>
+						<div class="eexp-lnew">Stays close to where it started</div>
+					</div>
+									<div class="eexp-lrow">
+						<div class="eexp-lkey eexp-label">Maintenance</div>
+						<div class="eexp-lold" data-eexp-label="Conventional finned exchanger">Frequent cleaning to hold output</div>
+						<div class="eexp-lnew">Drastically reduced intervention</div>
+					</div>
+									<div class="eexp-lrow">
+						<div class="eexp-lkey eexp-label">Heat transfer</div>
+						<div class="eexp-lold" data-eexp-label="Conventional finned exchanger">Depends on fin area staying clean</div>
+						<div class="eexp-lnew">Same surface area, held by counter-current flow</div>
+					</div>
+							</div>
+		</div>
+		</div>
+
+<p class="marker">Ledger — no winner, no header row</p>
+<div class="host">		<div class="eexp eexp-no-js">
+			<div class="eexp-ledger eexp-rise">
+				
+									<div class="eexp-lrow">
+						<div class="eexp-lkey eexp-label">Coil surface</div>
+						<div class="eexp-lold" data-eexp-label="Conventional finned exchanger">Tightly spaced fins, narrow passages</div>
+						<div class="eexp-lnew eexp-lnew--plain">Finless, open coil with wide spacing</div>
+					</div>
+									<div class="eexp-lrow">
+						<div class="eexp-lkey eexp-label">Particle path</div>
+						<div class="eexp-lold" data-eexp-label="Conventional finned exchanger">Grease and soot collect and stick</div>
+						<div class="eexp-lnew eexp-lnew--plain">Particles pass through without clogging</div>
+					</div>
+									<div class="eexp-lrow">
+						<div class="eexp-lkey eexp-label">Pressure drop</div>
+						<div class="eexp-lold" data-eexp-label="Conventional finned exchanger">Climbs as the unit fouls</div>
+						<div class="eexp-lnew eexp-lnew--plain">Stays close to where it started</div>
+					</div>
+									<div class="eexp-lrow">
+						<div class="eexp-lkey eexp-label">Maintenance</div>
+						<div class="eexp-lold" data-eexp-label="Conventional finned exchanger">Frequent cleaning to hold output</div>
+						<div class="eexp-lnew eexp-lnew--plain">Drastically reduced intervention</div>
+					</div>
+									<div class="eexp-lrow">
+						<div class="eexp-lkey eexp-label">Heat transfer</div>
+						<div class="eexp-lold" data-eexp-label="Conventional finned exchanger">Depends on fin area staying clean</div>
+						<div class="eexp-lnew eexp-lnew--plain">Same surface area, held by counter-current flow</div>
+					</div>
+							</div>
+		</div>
+		</div>
+
+<script src="../../modules/explainer/assets/js/split-explainer.js"></script>
+</body>
+</html>
+	
