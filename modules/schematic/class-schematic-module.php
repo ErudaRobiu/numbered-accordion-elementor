@@ -152,6 +152,7 @@ final class Schematic_Module implements Module {
 			}
 
 			require_once ERUDA_PATH . 'modules/schematic/class-schematic-content.php';
+			require_once ERUDA_PATH . 'modules/schematic/class-schematic-svg.php';
 			require_once ERUDA_PATH . 'modules/schematic/widgets/class-flow-schematic-widget.php';
 
 			if ( class_exists( '\ErudaToolkit\Modules\Schematic\Widgets\Flow_Schematic_Widget' ) ) {

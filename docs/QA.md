@@ -532,6 +532,15 @@ opening it from the file system.
 - [ ] **Block the script.** The diagram still pans by swipe and by keyboard, and
       no slider appears
 - [ ] "Smallest readable width" changes the point at which panning begins
+- [ ] **An SVG letters in the site's own typeface**, not Helvetica — compare a
+      label in the diagram against the same face in the body copy beside it
+- [ ] Its labels can be selected with the cursor and found with the browser's
+      own find
+- [ ] Switching "print the SVG into the page" off falls back to a picture, and
+      the diagram still pans
+- [ ] A raster image is never inlined, and still pans
+- [ ] **Upload an SVG carrying a script tag** (or an onclick attribute) and
+      confirm neither reaches the page — view source on the front end
 
 ## Split Slab and Comparison Ledger
 

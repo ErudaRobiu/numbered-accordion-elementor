@@ -75,7 +75,20 @@ if ( ! function_exists( 'esc_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'get_attached_file' ) ) {
+	/**
+	 * The fixture has one attachment, and it sits beside this file.
+	 *
+	 * @param int $id Attachment id.
+	 * @return string
+	 */
+	function get_attached_file( $id ) { // phpcs:ignore
+		return 1 === (int) $id ? __DIR__ . '/schematic-art.svg' : '';
+	}
+}
+
 require_once dirname( __DIR__, 2 ) . '/modules/schematic/class-schematic-content.php';
+require_once dirname( __DIR__, 2 ) . '/modules/schematic/class-schematic-svg.php';
 }
 
 namespace ErudaToolkit {
@@ -318,8 +331,22 @@ namespace {
 		'frame'   => '',
 	);
 
+	// The same file printed into the page rather than loaded as a picture,
+	// which is the only way it letters in the page's own typeface.
+	$art_inline = array_merge(
+		$art,
+		array(
+			'art'        => array(
+				'url' => 'schematic-art.svg',
+				'id'  => 1,
+			),
+			'art_inline' => 'yes',
+		)
+	);
+
 	$loop_widget   = new Schematic_Fixture( $loop );
 	$art_widget    = new Schematic_Fixture( $art );
+	$inline_widget = new Schematic_Fixture( $art_inline );
 	$bare_widget   = new Schematic_Fixture( $bare );
 	$single_widget = new Schematic_Fixture( $single );
 
@@ -361,6 +388,9 @@ body{margin:0;background:#060c11;font:16px/1.6 "Plus Jakarta Sans",system-ui,san
 
 <p class="marker">Artwork mode — no frame, pans on a narrow screen</p>
 <div class="host" style="--efs-art-min:1100px"><?php echo $art_widget->to_html(); // phpcs:ignore ?></div>
+
+<p class="marker">Artwork mode, printed into the page — letters in the page's own typeface</p>
+<div class="host" style="--efs-art-min:1100px"><?php echo $inline_widget->to_html(); // phpcs:ignore ?></div>
 
 <p class="marker">Artwork mode in a 560px column — the slider appears</p>
 <div class="host host--narrow" style="--efs-art-min:1100px"><?php echo $art_widget->to_html(); // phpcs:ignore ?></div>

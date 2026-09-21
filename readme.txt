@@ -79,6 +79,8 @@ connectors between them.
 * Stacks into a vertical flow when the diagram's own box gets narrow
 * Or set a finished drawing instead — an SVG or an image — and it pans sideways
   with a slider once it is wider than the space it has
+* An SVG is printed into the page, so it letters in the site's own typeface and
+  its labels stay selectable; it is stripped back to drawing instructions first
 
 = Duplicate Pages =
 
@@ -129,6 +131,24 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.38.0 =
+* **Fixed: an SVG diagram did not letter in the site's typeface.** An SVG
+  referenced with <img> is loaded as a document of its own, and that isolation
+  means it cannot reach the fonts the page loads — so a diagram drawn in the
+  site's face silently fell back to Helvetica or Arial for every visitor.
+  Measured rather than assumed: rendering the same file through <img> with the
+  webfont on the page and without it produced byte-identical pixels, and both
+  differed from the same file printed into the page.
+* **So an SVG is printed into the page instead**, which also makes its labels
+  selectable and searchable. Switch "print the SVG into the page" off to go
+  back to using it as a picture.
+* **The file is reduced to drawing instructions first.** Inlining gives up the
+  isolation an <img> provides, so the markup is parsed and rebuilt from an
+  allowlist before any of it reaches the document: script and foreignObject go
+  with their subtrees, every on* handler goes, a reference may point inside the
+  file and nowhere else, and a style that fetches something is dropped. Raster
+  images are untouched and still load as pictures.
 
 = 2.37.0 =
 * **New: artwork mode on the Flow Schematic.** Set a diagram — an SVG, ideally

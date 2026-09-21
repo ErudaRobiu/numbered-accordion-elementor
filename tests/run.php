@@ -19,6 +19,7 @@ use ErudaToolkit\Modules\Impact\Impact_Content;
 use ErudaToolkit\Modules\Explainer\Explainer_Content;
 use ErudaToolkit\Modules\Compare\Compare_Content;
 use ErudaToolkit\Modules\Schematic\Schematic_Content;
+use ErudaToolkit\Modules\Schematic\Schematic_Svg;
 use ErudaToolkit\Modules\Motion\Motion_Presets;
 use ErudaToolkit\Modules\Badge\Spin_Controls;
 use ErudaToolkit\Modules\Motion\Motion_Controls;
@@ -1205,6 +1206,62 @@ check( 'and cannot be pushed off either edge', 100.0, Schematic_Content::clamp_p
 
 check( 'a width is written the way CSS reads it', '1.4', Schematic_Content::number( 1.4 ) );
 check( 'with no trailing zeroes', '2', Schematic_Content::number( 2.0 ) );
+
+/* ----------------------------------------- Schematic_Svg::sanitise --- */
+
+/*
+ * Printing a file into the page gives up the isolation an <img> provides, so
+ * this is the thing replacing it. Every assertion here is a way that isolation
+ * used to be doing the work.
+ */
+
+$dirty = '<?xml version="1.0"?><!-- a comment --><svg xmlns="http://www.w3.org/2000/svg" '
+	. 'viewBox="0 0 10 10" width="10" height="10">'
+	. '<script>alert(1)</script>'
+	. '<foreignObject><body onload="alert(2)">hi</body></foreignObject>'
+	. '<title>A drawing</title>'
+	. '<path d="M0 0 L10 10" fill="#fff" stroke-width="2" font-family="Inter" onclick="alert(3)"/>'
+	. '<a href="https://example.com/evil"><rect x="1" y="1" width="2" height="2"/></a>'
+	. '<use href="#thing"/><use href="https://elsewhere/thing"/>'
+	. '<rect style="fill:url(https://elsewhere/x)" x="0" y="0" width="1" height="1"/>'
+	. '</svg>';
+
+$clean = Schematic_Svg::sanitise( $dirty, 'efs__art' );
+
+check( 'a script element does not survive', false, false !== strpos( $clean, '<script' ) );
+check( 'nor does foreignObject, which can carry a whole document', false, false !== strpos( $clean, 'foreignObject' ) );
+check( 'nor a handler attribute', false, false !== strpos( $clean, 'onclick' ) );
+check( 'nor the one inside the element that was removed', false, false !== strpos( $clean, 'onload' ) );
+check( 'nor a comment', false, false !== strpos( $clean, 'a comment' ) );
+check( 'an element with no business drawing is dropped with its subtree', false, false !== strpos( $clean, '<a ' ) );
+check( 'a reference inside the file is kept', true, false !== strpos( $clean, 'href="#thing"' ) );
+check( 'a reference out of it is not', false, false !== strpos( $clean, 'elsewhere/thing' ) );
+check( 'a style that fetches something is dropped', false, false !== strpos( $clean, 'url(' ) );
+
+check( 'the drawing itself survives', true, false !== strpos( $clean, 'd="M0 0 L10 10"' ) );
+check( 'so do its presentation attributes', true, false !== strpos( $clean, 'stroke-width="2"' ) );
+check( 'and the typeface, which is the entire point of inlining', true, false !== strpos( $clean, 'font-family="Inter"' ) );
+check( 'the title survives, because it is the accessible name', true, false !== strpos( $clean, '<title>A drawing</title>' ) );
+check( 'the viewBox survives', true, false !== strpos( $clean, 'viewBox="0 0 10 10"' ) );
+check( 'the class asked for is added', true, false !== strpos( $clean, 'efs__art' ) );
+
+// width and height give an <img> its ratio; inlined they only fight the
+// stylesheet for the size.
+check( 'a fixed width is dropped', false, false !== strpos( $clean, 'width="10"' ) );
+check( 'and a fixed height with it', false, false !== strpos( $clean, 'height="10"' ) );
+
+check(
+	'something that is not an SVG at all yields nothing',
+	'',
+	Schematic_Svg::sanitise( '<html><body>no</body></html>' )
+);
+check( 'and neither does a file that will not parse', '', Schematic_Svg::sanitise( '<svg><unclosed>' ) );
+check( 'an empty string yields nothing', '', Schematic_Svg::sanitise( '' ) );
+check( 'a path that is not a file yields nothing', '', Schematic_Svg::inline( '/no/such/file.svg' ) );
+
+check( 'letter-spacing counts as a presentation attribute', true, Schematic_Svg::allowed_attribute( 'letter-spacing' ) );
+check( 'text-anchor does too', true, Schematic_Svg::allowed_attribute( 'text-anchor' ) );
+check( 'and formaction does not', false, Schematic_Svg::allowed_attribute( 'formaction' ) );
 
 /* ------------------------------------------------------------- report --- */
 

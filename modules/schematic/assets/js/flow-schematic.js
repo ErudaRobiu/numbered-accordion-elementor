@@ -103,8 +103,9 @@
 			window.addEventListener( 'resize', measure );
 		}
 
-		// An SVG or a picture may not have laid out yet.
-		var art = pan.querySelector( '.efs__art' );
+		// A picture may not have laid out yet. An inline SVG always has, and
+		// has no load event to wait for either.
+		var art = pan.querySelector( 'img.efs__art' );
 
 		if ( art && ! art.complete ) {
 			art.addEventListener( 'load', measure );

@@ -12,6 +12,7 @@ use Elementor\Group_Control_Typography;
 use Elementor\Repeater;
 use Elementor\Widget_Base;
 use ErudaToolkit\Modules\Schematic\Schematic_Content;
+use ErudaToolkit\Modules\Schematic\Schematic_Svg;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -120,6 +121,18 @@ class Flow_Schematic_Widget extends Widget_Base {
 				'type'        => Controls_Manager::MEDIA,
 				'media_types' => array( 'image', 'svg' ),
 				'description' => esc_html__( 'An SVG keeps its edges at any size and stays a few kilobytes. Set one and it is drawn instead of the stages below; leave it empty and the stages are used.', 'numbered-accordion' ),
+			)
+		);
+
+		$this->add_control(
+			'art_inline',
+			array(
+				'label'        => esc_html__( 'Print the SVG into the page', 'numbered-accordion' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'return_value' => 'yes',
+				'description'  => esc_html__( 'An SVG loaded as a picture is a document of its own, so it cannot reach the fonts the page loads — it falls back to Helvetica for every visitor. Printed into the page it letters in the site\'s own typeface, and its text can be selected and searched. The file is stripped back to drawing instructions first. Off, it is used as a picture.', 'numbered-accordion' ),
+				'condition'    => array( 'art[url]!' => '' ),
 			)
 		);
 
@@ -1084,13 +1097,34 @@ class Flow_Schematic_Widget extends Widget_Base {
 		$alt   = isset( $settings['art_alt'] ) ? trim( (string) $settings['art_alt'] ) : '';
 		$root  = 'efs efs--art';
 		$root .= 'yes' === ( isset( $settings['frame'] ) ? $settings['frame'] : '' ) ? '' : ' efs--plain';
+
+		$inline = '';
+
+		if ( 'yes' === ( isset( $settings['art_inline'] ) ? $settings['art_inline'] : '' ) && ! empty( $settings['art']['id'] ) ) {
+			$path = get_attached_file( (int) $settings['art']['id'] );
+
+			if ( is_string( $path ) ) {
+				$inline = Schematic_Svg::inline( $path, 'efs__art' );
+			}
+		}
 		?>
 		<div class="<?php echo esc_attr( $root ); ?>">
 			<div class="efs__pan">
-				<img class="efs__art" src="<?php echo esc_url( $art ); ?>"
-					alt="<?php echo esc_attr( $alt ); ?>"
-					<?php echo '' === $alt ? 'role="presentation"' : ''; ?>
-					loading="lazy" decoding="async">
+				<?php if ( '' !== $inline ) : ?>
+					<?php
+					/*
+					 * Already reduced to an allowlist of drawing elements and
+					 * attributes by Schematic_Svg, which is the whole reason
+					 * that class exists.
+					 */
+					echo $inline; // phpcs:ignore WordPress.Security.EscapeOutputWithCast, WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
+				<?php else : ?>
+					<img class="efs__art" src="<?php echo esc_url( $art ); ?>"
+						alt="<?php echo esc_attr( $alt ); ?>"
+						<?php echo '' === $alt ? 'role="presentation"' : ''; ?>
+						loading="lazy" decoding="async">
+				<?php endif; ?>
 			</div>
 			<input class="efs__slider" type="range" min="0" max="1000" value="0" step="1"
 				aria-label="<?php echo esc_attr__( 'Pan the diagram sideways', 'numbered-accordion' ); ?>">
