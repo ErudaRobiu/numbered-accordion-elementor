@@ -459,6 +459,32 @@ centring, the cue and the narrow-screen fallback in headless Chrome, against
 - [ ] Editing a card in the editor re-renders it and the rail still works
 - [ ] Two Scroll Rails on one page travel independently
 
+## Image Compare
+
+`php tests/browser/compare-fixture.php > tests/browser/compare.html` builds the
+fixture from the widget's own `render()`. The probe in that page asserts the
+divider actually moves rather than merely existing.
+
+- [ ] **Drag the divider across.** The second picture is revealed as it goes,
+      with no lag between the line and the edge of the reveal
+- [ ] Clicking anywhere in the frame jumps the divider there
+- [ ] **Tab to it.** The grip takes a visible focus ring, and the arrow keys,
+      Home and End all move the divider
+- [ ] A screen reader announces it as a slider with a percentage
+- [ ] Set **Moves on** to Hover: it follows the mouse and springs back to its
+      starting position when the pointer leaves
+- [ ] On a phone it drags with a finger in both modes, and the page does not
+      scroll while dragging
+- [ ] **Up and down** clips from the top, and the grip turns with it
+- [ ] Two pictures of different shapes: the first sets the height, the second is
+      cropped to fill rather than squashed
+- [ ] Setting a fixed height crops both, and clearing it hands the height back
+      to the first picture
+- [ ] Nothing jumps about as the pictures load
+- [ ] Setting only one picture renders nothing at all, rather than half a widget
+- [ ] The labels fade as the divider passes under them, and an empty label is
+      gone rather than blank
+
 ## Split Slab and Comparison Ledger
 
 `php tests/browser/explainer-fixture.php > tests/browser/explainer.html` builds

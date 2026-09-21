@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.31.0
+Stable tag: 2.32.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,20 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.32.0 =
+* A new **Image Compare** widget: two pictures in one frame with a divider you
+  drag across to swap between them.
+* The divider runs side to side or up and down, and moves on drag and click or
+  on hover -- hover springs back where it started when the pointer leaves, and
+  a finger drags either way because a touch has no hover.
+* The control is a real range input laid invisibly over the frame, so it takes
+  focus, answers the arrow keys, Home and End, announces itself and its value,
+  and a click anywhere jumps the divider there.
+* The first picture sits in the flow and gives the frame its height, so nothing
+  jumps about as it loads. Set a fixed height instead and both are cropped to
+  fill it.
+* Labels fade out of the way as the divider passes under them.
 
 = 2.31.0 =
 * Two new widgets, **Split Slab** and **Comparison Ledger**, under a module

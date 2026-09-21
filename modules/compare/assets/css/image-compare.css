@@ -1,0 +1,238 @@
+/**
+ * Image Compare.
+ *
+ * Two pictures in one frame, the second clipped back to a divider you drag.
+ *
+ * The control is a real range input laid over the frame and made invisible,
+ * not a div with pointer handlers. That is the whole accessibility story for
+ * free: it takes focus, it answers the arrow keys, Home and End, it announces
+ * itself and its value, and a click anywhere on the frame jumps the divider
+ * there because that is what a range track does.
+ */
+
+.ecmp {
+	--ecmp-pos: 50%;
+	--ecmp-n: 50;
+	--ecmp-clip: inset(0 0 0 50%);
+	--ecmp-line: 3px;
+	--ecmp-grip: 46px;
+	--ecmp-accent: #4dcf8d;
+	--ecmp-radius: 20px;
+
+	position: relative;
+}
+
+.ecmp *,
+.ecmp *::before,
+.ecmp *::after {
+	box-sizing: border-box;
+}
+
+.ecmp__frame {
+	position: relative;
+	overflow: hidden;
+	border-radius: var(--ecmp-radius);
+	/* The first picture sits in the flow and gives the frame its height, so
+	   there is no aspect ratio to guess and nothing shifts as it loads. */
+	line-height: 0;
+	touch-action: none;
+}
+
+.ecmp__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-width: 100%;
+}
+
+.ecmp__clip {
+	position: absolute;
+	inset: 0;
+	clip-path: var(--ecmp-clip);
+}
+
+.ecmp__clip .ecmp__img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* ── the divider ────────────────────────────────────────────────────── */
+
+.ecmp__divider {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: var(--ecmp-pos);
+	width: var(--ecmp-line);
+	margin-left: calc(var(--ecmp-line) / -2);
+	background: #fff;
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18), 0 2px 12px rgba(0, 0, 0, 0.35);
+	pointer-events: none;
+}
+
+.ecmp--vertical .ecmp__divider {
+	top: var(--ecmp-pos);
+	left: 0;
+	right: 0;
+	bottom: auto;
+	width: auto;
+	height: var(--ecmp-line);
+	margin-left: 0;
+	margin-top: calc(var(--ecmp-line) / -2);
+}
+
+.ecmp__grip {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: var(--ecmp-grip);
+	height: var(--ecmp-grip);
+	margin: calc(var(--ecmp-grip) / -2) 0 0 calc(var(--ecmp-grip) / -2);
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+	display: grid;
+	place-items: center;
+	color: #07131c;
+	transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ecmp--vertical .ecmp__grip {
+	transform: rotate(90deg);
+}
+
+.ecmp__grip svg {
+	width: 55%;
+	height: 55%;
+	display: block;
+}
+
+.ecmp__frame:hover .ecmp__grip {
+	transform: scale(1.06);
+}
+
+.ecmp--vertical .ecmp__frame:hover .ecmp__grip {
+	transform: rotate(90deg) scale(1.06);
+}
+
+/* ── labels ─────────────────────────────────────────────────────────── */
+
+.ecmp__label {
+	position: absolute;
+	top: 18px;
+	z-index: 2;
+	padding: 7px 14px;
+	border-radius: 2000px;
+	background: rgba(7, 19, 28, 0.62);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	color: #fff;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	line-height: 1.4;
+	pointer-events: none;
+	transition: opacity 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ecmp__label--before {
+	left: 18px;
+}
+
+.ecmp__label--after {
+	right: 18px;
+}
+
+/*
+ * Near the ends the divider runs under a label and the label starts to read
+ * as though it belongs to the other picture, so it steps out of the way.
+ */
+.ecmp__label--before {
+	opacity: clamp(0, calc((var(--ecmp-n, 50) - 12) / 6), 1);
+}
+
+.ecmp__label--after {
+	opacity: clamp(0, calc((88 - var(--ecmp-n, 50)) / 6), 1);
+}
+
+/* ── the control ────────────────────────────────────────────────────── */
+
+.ecmp__range {
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	appearance: none;
+	-webkit-appearance: none;
+	cursor: ew-resize;
+	opacity: 0;
+}
+
+/*
+ * Rotated rather than set vertical, because a rotation behaves the same in
+ * every browser that ships a range input at all. The container query unit is
+ * what makes it the height of the frame rather than its width.
+ */
+.ecmp--vertical .ecmp__frame {
+	container-type: size;
+}
+
+.ecmp--vertical .ecmp__range {
+	inset: auto;
+	top: 50%;
+	left: 50%;
+	width: 100cqh;
+	height: 100cqw;
+	transform: translate(-50%, -50%) rotate(90deg);
+	cursor: ns-resize;
+}
+
+.ecmp__range::-webkit-slider-thumb {
+	appearance: none;
+	-webkit-appearance: none;
+	width: var(--ecmp-grip);
+	height: var(--ecmp-grip);
+	border-radius: 50%;
+	background: none;
+}
+
+.ecmp__range::-moz-range-thumb {
+	width: var(--ecmp-grip);
+	height: var(--ecmp-grip);
+	border: 0;
+	border-radius: 50%;
+	background: none;
+}
+
+/* Focus has to land on something, since the input itself is invisible. */
+.ecmp__range:focus-visible {
+	outline: none;
+}
+
+.ecmp__range:focus-visible ~ .ecmp__divider .ecmp__grip {
+	box-shadow: 0 0 0 3px var(--ecmp-accent), 0 2px 14px rgba(0, 0, 0, 0.4);
+}
+
+/* Hover mode: the pointer scrubs, so the input must not swallow it. */
+.ecmp--hover .ecmp__range {
+	cursor: default;
+}
+
+.ecmp--hover .ecmp__frame:hover .ecmp__range {
+	pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ecmp *,
+	.ecmp *::before,
+	.ecmp *::after {
+		transition-duration: 0.01ms !important;
+	}
+}

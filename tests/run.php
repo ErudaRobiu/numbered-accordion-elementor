@@ -17,6 +17,7 @@ use ErudaToolkit\Toolkit;
 use ErudaToolkit\Modules\Duplicator\Duplicator;
 use ErudaToolkit\Modules\Impact\Impact_Content;
 use ErudaToolkit\Modules\Explainer\Explainer_Content;
+use ErudaToolkit\Modules\Compare\Compare_Content;
 use ErudaToolkit\Modules\Motion\Motion_Presets;
 use ErudaToolkit\Modules\Badge\Spin_Controls;
 use ErudaToolkit\Modules\Motion\Motion_Controls;
@@ -628,7 +629,8 @@ check( 'the scroll rail module is registered', true, in_array( 'rail', Toolkit::
 check( 'the spin module is registered', true, in_array( 'badge', Toolkit::instance()->ids(), true ) );
 check( 'the mega header module is registered', true, in_array( 'header', Toolkit::instance()->ids(), true ) );
 check( 'the split explainer module is registered', true, in_array( 'explainer', Toolkit::instance()->ids(), true ) );
-check( 'ten modules ship', 10, count( Toolkit::instance()->ids() ) );
+check( 'the image compare module is registered', true, in_array( 'compare', Toolkit::instance()->ids(), true ) );
+check( 'eleven modules ship', 11, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -994,6 +996,55 @@ check(
 	'the sizes hint follows the slab',
 	'(max-width: 767px) 92vw, (max-width: 1200px) 88vw, 44vw',
 	Explainer_Content::panel_sizes_attr()
+);
+
+/* ------------------------------- Compare_Content::clamp_position --- */
+
+check( 'the middle by default', 50.0, Compare_Content::clamp_position( null ) );
+check( 'a slider array is read', 30.0, Compare_Content::clamp_position( array( 'size' => 30 ) ) );
+check( 'an empty slider array falls back', 50.0, Compare_Content::clamp_position( array() ) );
+check( 'a number passes through', 12.5, Compare_Content::clamp_position( 12.5 ) );
+check( 'a numeric string passes through', 80.0, Compare_Content::clamp_position( '80' ) );
+check( 'below zero is zero', 0.0, Compare_Content::clamp_position( -20 ) );
+check( 'above a hundred is a hundred', 100.0, Compare_Content::clamp_position( 240 ) );
+check( 'nonsense falls back to the middle', 50.0, Compare_Content::clamp_position( 'halfway' ) );
+
+/* ----------------------------------- Compare_Content::clip_inset --- */
+
+// The second picture is cut back to the divider: from the left when the
+// divider runs up and down, from the top when it runs across.
+check( 'side to side', 'inset(0 0 0 50%)', Compare_Content::clip_inset( 50, 'horizontal' ) );
+check( 'up and down', 'inset(50% 0 0 0)', Compare_Content::clip_inset( 50, 'vertical' ) );
+check( 'a fraction keeps its decimals', 'inset(0 0 0 33.33%)', Compare_Content::clip_inset( 33.333, 'horizontal' ) );
+check( 'a whole number loses its zeros', 'inset(0 0 0 40%)', Compare_Content::clip_inset( 40.0, 'horizontal' ) );
+check( 'fully closed', 'inset(0 0 0 0%)', Compare_Content::clip_inset( 0, 'horizontal' ) );
+check( 'fully open', 'inset(0 0 0 100%)', Compare_Content::clip_inset( 100, 'horizontal' ) );
+
+check(
+	'the frame carries both the position and the clip',
+	'--ecmp-pos:25%;--ecmp-n:25;--ecmp-clip:inset(0 0 0 25%)',
+	Compare_Content::frame_style( 25, 'horizontal' )
+);
+
+/* --------------------------------- Compare_Content::root_classes --- */
+
+check( 'plain', 'ecmp', Compare_Content::root_classes( 'horizontal', 'drag' ) );
+check( 'vertical', 'ecmp ecmp--vertical', Compare_Content::root_classes( 'vertical', 'drag' ) );
+check( 'hover', 'ecmp ecmp--hover', Compare_Content::root_classes( 'horizontal', 'hover' ) );
+check( 'both', 'ecmp ecmp--vertical ecmp--hover', Compare_Content::root_classes( 'vertical', 'hover' ) );
+check( 'an unknown direction is the usual one', 'ecmp', Compare_Content::root_classes( 'sideways', 'drag' ) );
+
+/* -------------------------------- Compare_Content::slider_label --- */
+
+check(
+	'the control says what it swaps between',
+	'Reveal Before or After',
+	Compare_Content::slider_label( 'Before', 'After' )
+);
+check(
+	'with a label missing it still says something',
+	'Compare the two pictures',
+	Compare_Content::slider_label( 'Before', '' )
 );
 
 /* ------------------------------------------------------------- report --- */

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Image Compare — browser fixture</title>
+<link rel="stylesheet" href="../../modules/compare/assets/css/image-compare.css">
+<style>
+body{margin:0;background:#08121C;font:16px/1.6 system-ui,sans-serif;color:#fff}
+.host{max-width:900px;margin:0 auto;padding:40px 24px}
+.marker{color:#4DCF8D;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
+/* A hostile theme, the same block the other harnesses carry. */
+img{max-width:100%;height:auto}
+</style>
+</head>
+<body>
+<div class="host">
+	<p class="marker">Side to side, drag</p>
+	<div id="a">		<div class="ecmp"
+			style="--ecmp-pos:50%;--ecmp-n:50;--ecmp-clip:inset(0 0 0 50%)">
+			<div class="ecmp__frame">
+						<img class="ecmp__img ecmp__img--before" src="images/roof-before.webp" alt="" loading="lazy" />
+		
+				<div class="ecmp__clip">
+							<img class="ecmp__img ecmp__img--after" src="images/roof-after.webp" alt="" loading="lazy" />
+						</div>
+
+									<span class="ecmp__label ecmp__label--before">Before</span>
+				
+									<span class="ecmp__label ecmp__label--after">After</span>
+				
+				<input
+					class="ecmp__range"
+					type="range"
+					min="0"
+					max="100"
+					step="0.1"
+					value="50"
+					aria-label="Reveal Before or After" />
+
+				<div class="ecmp__divider" aria-hidden="true">
+					<span class="ecmp__grip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 6-6 6 6 6"/><path d="m15 6 6 6-6 6"/></svg></span>
+				</div>
+			</div>
+		</div>
+		</div>
+</div>
+<div class="host">
+	<p class="marker">Up and down</p>
+	<div id="b">		<div class="ecmp ecmp--vertical"
+			style="--ecmp-pos:50%;--ecmp-n:50;--ecmp-clip:inset(50% 0 0 0)">
+			<div class="ecmp__frame">
+						<img class="ecmp__img ecmp__img--before" src="images/roof-before.webp" alt="" loading="lazy" />
+		
+				<div class="ecmp__clip">
+							<img class="ecmp__img ecmp__img--after" src="images/roof-after.webp" alt="" loading="lazy" />
+						</div>
+
+									<span class="ecmp__label ecmp__label--before">Without Lepido</span>
+				
+									<span class="ecmp__label ecmp__label--after">With Lepido</span>
+				
+				<input
+					class="ecmp__range"
+					type="range"
+					min="0"
+					max="100"
+					step="0.1"
+					value="50"
+					aria-label="Reveal Without Lepido or With Lepido" />
+
+				<div class="ecmp__divider" aria-hidden="true">
+					<span class="ecmp__grip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 6-6 6 6 6"/><path d="m15 6 6 6-6 6"/></svg></span>
+				</div>
+			</div>
+		</div>
+		</div>
+</div>
+<div class="host">
+	<p class="marker">Starting at 8% — the label should step out of the way</p>
+	<div id="c">		<div class="ecmp"
+			style="--ecmp-pos:8%;--ecmp-n:8;--ecmp-clip:inset(0 0 0 8%)">
+			<div class="ecmp__frame">
+						<img class="ecmp__img ecmp__img--before" src="images/roof-before.webp" alt="" loading="lazy" />
+		
+				<div class="ecmp__clip">
+							<img class="ecmp__img ecmp__img--after" src="images/roof-after.webp" alt="" loading="lazy" />
+						</div>
+
+									<span class="ecmp__label ecmp__label--before">Before</span>
+				
+									<span class="ecmp__label ecmp__label--after">After</span>
+				
+				<input
+					class="ecmp__range"
+					type="range"
+					min="0"
+					max="100"
+					step="0.1"
+					value="8"
+					aria-label="Reveal Before or After" />
+
+				<div class="ecmp__divider" aria-hidden="true">
+					<span class="ecmp__grip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 6-6 6 6 6"/><path d="m15 6 6 6-6 6"/></svg></span>
+				</div>
+			</div>
+		</div>
+		</div>
+</div>
+<div class="host">
+	<p class="marker">Only one picture set — renders nothing</p>
+	<div id="d"></div>
+</div>
+<script src="../../modules/compare/assets/js/image-compare.js"></script>
+</body>
+</html>
+	

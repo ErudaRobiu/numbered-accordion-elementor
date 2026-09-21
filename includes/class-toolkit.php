@@ -64,6 +64,10 @@ final class Toolkit {
 			'file'  => 'modules/explainer/class-explainer-module.php',
 			'class' => '\ErudaToolkit\Modules\Explainer\Explainer_Module',
 		),
+		'compare'    => array(
+			'file'  => 'modules/compare/class-compare-module.php',
+			'class' => '\ErudaToolkit\Modules\Compare\Compare_Module',
+		),
 	);
 
 	/**
