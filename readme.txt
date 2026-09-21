@@ -127,6 +127,9 @@ untouched, and nothing needs re-saving.
 * The diagram is screened onto its plate, so artwork drawn on black loses the
   black and keeps only the drawing. Switch the plate off for artwork that
   brings a background of its own.
+* Both widgets ship carrying the Lepido section's own wording, so dropping
+  either one in gives the section as designed rather than placeholders to
+  replace. Every field is still a control; nothing is fixed in the markup.
 * The ledger is a row per point across three columns, with the third tinted and
   marked as the one that won. Both the tint and the header row can be switched
   off. On a phone the columns stack and the middle value takes the header's

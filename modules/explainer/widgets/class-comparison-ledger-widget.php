@@ -112,7 +112,7 @@ class Comparison_Ledger_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Column 1 heading', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXT,
 				'label_block' => true,
-				'default'     => esc_html__( 'Measured the same way', 'numbered-accordion' ),
+				'default'     => esc_html__( 'Across the same dirty airstream', 'numbered-accordion' ),
 			)
 		);
 
@@ -122,7 +122,7 @@ class Comparison_Ledger_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Column 2 heading', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXT,
 				'label_block' => true,
-				'default'     => esc_html__( 'The usual way', 'numbered-accordion' ),
+				'default'     => esc_html__( 'Conventional finned exchanger', 'numbered-accordion' ),
 				'description' => esc_html__( 'On a phone the columns stack and the header row is hidden, so this heading labels the middle value inline instead.', 'numbered-accordion' ),
 			)
 		);
@@ -133,7 +133,7 @@ class Comparison_Ledger_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Column 3 heading', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXT,
 				'label_block' => true,
-				'default'     => esc_html__( 'This way', 'numbered-accordion' ),
+				'default'     => esc_html__( 'Lepido with PRG', 'numbered-accordion' ),
 			)
 		);
 
@@ -317,18 +317,33 @@ class Comparison_Ledger_Widget extends Widget_Base {
 	 * @return array
 	 */
 	private function default_rows() {
-		$rows = array();
-
-		for ( $i = 1; $i <= 5; $i++ ) {
-			$rows[] = array(
-				/* translators: %d: row number */
-				'key' => sprintf( esc_html__( 'Row %d', 'numbered-accordion' ), $i ),
-				'old' => esc_html__( 'How it goes today', 'numbered-accordion' ),
-				'new' => esc_html__( 'How it goes instead', 'numbered-accordion' ),
-			);
-		}
-
-		return $rows;
+		return array(
+			array(
+				'key' => esc_html__( 'Coil surface', 'numbered-accordion' ),
+				'old' => esc_html__( 'Tightly spaced fins, narrow passages', 'numbered-accordion' ),
+				'new' => esc_html__( 'Finless, open coil with wide spacing', 'numbered-accordion' ),
+			),
+			array(
+				'key' => esc_html__( 'Particle path', 'numbered-accordion' ),
+				'old' => esc_html__( 'Grease and soot collect and stick', 'numbered-accordion' ),
+				'new' => esc_html__( 'Particles pass through without clogging', 'numbered-accordion' ),
+			),
+			array(
+				'key' => esc_html__( 'Pressure drop', 'numbered-accordion' ),
+				'old' => esc_html__( 'Climbs as the unit fouls', 'numbered-accordion' ),
+				'new' => esc_html__( 'Stays close to where it started', 'numbered-accordion' ),
+			),
+			array(
+				'key' => esc_html__( 'Maintenance', 'numbered-accordion' ),
+				'old' => esc_html__( 'Frequent cleaning to hold output', 'numbered-accordion' ),
+				'new' => esc_html__( 'Drastically reduced intervention', 'numbered-accordion' ),
+			),
+			array(
+				'key' => esc_html__( 'Heat transfer', 'numbered-accordion' ),
+				'old' => esc_html__( 'Depends on fin area staying clean', 'numbered-accordion' ),
+				'new' => esc_html__( 'Same surface area, held by counter-current flow', 'numbered-accordion' ),
+			),
+		);
 	}
 
 	/**

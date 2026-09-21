@@ -107,14 +107,15 @@ class Split_Slab_Widget extends Widget_Base {
 	 *
 	 * @param string $prefix  Control prefix, p1 or p2.
 	 * @param string $default Default label.
+	 * @param string $number  Default number.
 	 */
-	private function add_step_controls( $prefix, $default ) {
+	private function add_step_controls( $prefix, $default, $number = '' ) {
 		$this->add_control(
 			$prefix . '_step',
 			array(
 				'label'       => esc_html__( 'Step number', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXT,
-				'default'     => '',
+				'default'     => $number,
 				'placeholder' => esc_html__( 'e.g. 01', 'numbered-accordion' ),
 				'description' => esc_html__( 'Empty hides the number and closes the gap before the label.', 'numbered-accordion' ),
 			)
@@ -140,7 +141,7 @@ class Split_Slab_Widget extends Widget_Base {
 			array( 'label' => esc_html__( 'Panel 1 (light)', 'numbered-accordion' ) )
 		);
 
-		$this->add_step_controls( 'p1', esc_html__( 'What arrives', 'numbered-accordion' ) );
+		$this->add_step_controls( 'p1', esc_html__( 'What the air carries', 'numbered-accordion' ), '01' );
 
 		$this->add_control(
 			'p1_title',
@@ -148,7 +149,7 @@ class Split_Slab_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Heading', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXT,
 				'label_block' => true,
-				'default'     => esc_html__( 'The problem, named', 'numbered-accordion' ),
+				'default'     => esc_html__( 'Exhaust that fouls everything else', 'numbered-accordion' ),
 			)
 		);
 
@@ -173,7 +174,7 @@ class Split_Slab_Widget extends Widget_Base {
 				'label'   => esc_html__( 'Body', 'numbered-accordion' ),
 				'type'    => Controls_Manager::TEXTAREA,
 				'rows'    => 4,
-				'default' => esc_html__( 'Two lines on what the reader is up against.', 'numbered-accordion' ),
+				'default' => esc_html__( 'Grease, soot, moisture, lint and fiber arrive with the airstream — the load that closes a finned exchanger down.', 'numbered-accordion' ),
 			)
 		);
 
@@ -193,7 +194,7 @@ class Split_Slab_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Footer label', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXT,
 				'label_block' => true,
-				'default'     => esc_html__( 'What it has to handle', 'numbered-accordion' ),
+				'default'     => esc_html__( 'Carried in, carried straight back out', 'numbered-accordion' ),
 			)
 		);
 
@@ -231,7 +232,7 @@ class Split_Slab_Widget extends Widget_Base {
 			array( 'label' => esc_html__( 'Panel 2 (ink)', 'numbered-accordion' ) )
 		);
 
-		$this->add_step_controls( 'p2', esc_html__( 'What answers it', 'numbered-accordion' ) );
+		$this->add_step_controls( 'p2', esc_html__( 'What the geometry does', 'numbered-accordion' ), '02' );
 
 		$this->add_control(
 			'p2_title',
@@ -239,7 +240,7 @@ class Split_Slab_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Heading', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXT,
 				'label_block' => true,
-				'default'     => esc_html__( 'The answer, shown', 'numbered-accordion' ),
+				'default'     => esc_html__( 'Particles are repelled, not trapped', 'numbered-accordion' ),
 			)
 		);
 
@@ -264,7 +265,7 @@ class Split_Slab_Widget extends Widget_Base {
 				'label'   => esc_html__( 'Body', 'numbered-accordion' ),
 				'type'    => Controls_Manager::TEXTAREA,
 				'rows'    => 4,
-				'default' => esc_html__( 'Two lines on how it is answered.', 'numbered-accordion' ),
+				'default' => esc_html__( 'Ample spacing between the coils creates an airflow pattern that carries particles straight through the unit instead of onto its surfaces.', 'numbered-accordion' ),
 			)
 		);
 
@@ -295,7 +296,7 @@ class Split_Slab_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Caption, left', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXT,
 				'label_block' => true,
-				'default'     => esc_html__( 'In', 'numbered-accordion' ),
+				'default'     => esc_html__( 'Hot contaminated exhaust in', 'numbered-accordion' ),
 			)
 		);
 
@@ -305,7 +306,7 @@ class Split_Slab_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Caption, right', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXT,
 				'label_block' => true,
-				'default'     => esc_html__( 'Out →', 'numbered-accordion' ),
+				'default'     => esc_html__( 'Cooled air out →', 'numbered-accordion' ),
 			)
 		);
 
@@ -618,7 +619,16 @@ class Split_Slab_Widget extends Widget_Base {
 	private function default_pills() {
 		$rows = array();
 
-		foreach ( array( 'One', 'Two', 'Three', 'Four' ) as $item ) {
+		$items = array(
+			esc_html__( 'Grease', 'numbered-accordion' ),
+			esc_html__( 'Soot', 'numbered-accordion' ),
+			esc_html__( 'Moisture', 'numbered-accordion' ),
+			esc_html__( 'Lint', 'numbered-accordion' ),
+			esc_html__( 'Fibre', 'numbered-accordion' ),
+			esc_html__( 'Fumes', 'numbered-accordion' ),
+		);
+
+		foreach ( $items as $item ) {
 			$rows[] = array( 'text' => $item );
 		}
 
@@ -631,16 +641,20 @@ class Split_Slab_Widget extends Widget_Base {
 	 * @return array
 	 */
 	private function default_specs() {
-		$rows = array();
-
-		for ( $i = 0; $i < 3; $i++ ) {
-			$rows[] = array(
-				'label' => esc_html__( 'Label', 'numbered-accordion' ),
-				'value' => esc_html__( 'Value', 'numbered-accordion' ),
-			);
-		}
-
-		return $rows;
+		return array(
+			array(
+				'label' => esc_html__( 'Flow', 'numbered-accordion' ),
+				'value' => esc_html__( '100% counter-current', 'numbered-accordion' ),
+			),
+			array(
+				'label' => esc_html__( 'Circuiting', 'numbered-accordion' ),
+				'value' => esc_html__( 'Multiple fluid patterns', 'numbered-accordion' ),
+			),
+			array(
+				'label' => esc_html__( 'Transfer area', 'numbered-accordion' ),
+				'value' => esc_html__( 'Matched to a conventional coil', 'numbered-accordion' ),
+			),
+		);
 	}
 
 	/* ------------------------------------------------------------------ *
