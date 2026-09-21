@@ -485,6 +485,42 @@ divider actually moves rather than merely existing.
 - [ ] The labels fade as the divider passes under them, and an empty label is
       gone rather than blank
 
+## Flow Schematic
+
+`php tests/browser/schematic-fixture.php > tests/browser/schematic.html` builds
+the fixture from the widget's own `render()`. Serve the folder rather than
+opening it from the file system.
+
+- [ ] The widget appears in the Elementor panel under **Eruda Toolkit**
+- [ ] **Adding and removing a stage re-flows the whole diagram** — the
+      connectors stay between the nodes, and the return path and monitoring bar
+      still span the stages they name
+- [ ] A stage with no pin number opens no gap where one would be
+- [ ] The four treatments all render: standard, accent, quiet (no fill) and
+      dashed
+- [ ] A connector label set to sit **on** the line cuts it; set to sit **above**
+      it, the line runs unbroken underneath
+- [ ] **The surface colour matches whatever is behind the diagram.** Every label
+      that cuts a line paints this colour behind itself, so a mismatch shows as
+      a pale block on the rule
+- [ ] Switching the card frame off leaves the diagram sitting straight on the
+      section, with no border and no padding
+- [ ] Switching off the return path, the monitoring bar or the boundary removes
+      the band **and** the space it occupied — no empty strip is left behind
+- [ ] "From stage" and "to stage" typed in backwards still describe the same
+      band, and a number past the last stage is pulled back rather than
+      breaking the grid
+- [ ] A one-stage diagram renders, and drops the return path rather than drawing
+      a bracket from a node to itself
+- [ ] **Narrow the browser**: the diagram turns through ninety degrees. The
+      connectors stand up as 1px rules with the arrow pointing down, and the
+      three bands become labelled horizontal rules
+- [ ] **Put the widget in a half-width column on a full-size desktop.** It
+      stacks there too — it asks its own width, not the window's
+- [ ] A stage carrying a link is a real link: it lifts on hover, takes keyboard
+      focus, and does not move for a visitor with "reduce motion" on
+- [ ] Every colour control changes what it names and nothing else
+
 ## Split Slab and Comparison Ledger
 
 `php tests/browser/explainer-fixture.php > tests/browser/explainer.html` builds

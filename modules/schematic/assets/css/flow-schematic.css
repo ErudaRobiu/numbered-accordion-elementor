@@ -1,0 +1,581 @@
+/**
+ * Flow Schematic.
+ *
+ * A process diagram drawn in CSS rather than exported as a picture, so every
+ * label stays real text -- selectable, translatable, searchable, and readable
+ * by a screen reader -- and every colour stays reachable from the Elementor
+ * panel. An SVG export of the same drawing would be none of those things.
+ *
+ * The whole diagram is one grid. Columns alternate node, connector, node, so
+ * a connector is a grid cell of its own and never needs a coordinate: the
+ * line is a flex child that grows, and a label placed on it cuts it in half
+ * by painting the surface colour behind itself. The return path and the
+ * monitoring bar are grid items spanning the columns they belong to, which is
+ * why neither needs a script to find out where anything is.
+ *
+ * Colours, spacing and type come from the panel as custom properties on .efs,
+ * so a value set in Elementor always beats the fallback here.
+ */
+
+.efs {
+	--efs-surface: #0b141b;
+	--efs-node: #141f27;
+	--efs-line: #28363f;
+	--efs-text: #e6edf2;
+	--efs-muted: #8b9da8;
+	--efs-accent: #4dcf8d;
+	--efs-accent-line: #2f6b4c;
+	--efs-accent-fill: #0e2119;
+	--efs-flow: #4dcf8d;
+	--efs-quiet: #5e7280;
+
+	--efs-radius: 12px;
+	--efs-stroke: 1px;
+	--efs-node-min: 132px;
+	--efs-return: 74px;
+	--efs-monitor: 58px;
+	--efs-pad-y: 44px;
+	--efs-pad-x: 40px;
+
+	position: relative;
+	color: var(--efs-text);
+	background: var(--efs-surface);
+	border: var(--efs-stroke) solid var(--efs-line);
+	border-radius: 20px;
+	padding: var(--efs-pad-y) var(--efs-pad-x);
+
+	/*
+	 * The diagram answers to its own width, not the window's. A schematic
+	 * dropped into a half-width column is narrow at any screen size, and a
+	 * media query cannot see that.
+	 */
+	container-type: inline-size;
+}
+
+.efs *,
+.efs *::before,
+.efs *::after {
+	box-sizing: border-box;
+}
+
+.efs--plain {
+	background: none;
+	border: 0;
+	border-radius: 0;
+	padding: 0;
+}
+
+/* ── zone captions ──────────────────────────────────────────────────── */
+
+.efs__zones {
+	display: flex;
+	justify-content: space-between;
+	gap: 20px;
+	margin-bottom: 22px;
+}
+
+.efs__zone {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--efs-muted);
+}
+
+/* ── the grid ───────────────────────────────────────────────────────── */
+
+.efs__grid {
+	position: relative;
+	display: grid;
+	grid-template-columns: var(--efs-cols, 1fr);
+	grid-template-rows: auto auto auto;
+	align-items: center;
+}
+
+/* Rows collapse to nothing when their band is switched off, so a diagram
+   with no monitoring bar does not carry an empty strip above it. */
+.efs--mon .efs__grid {
+	grid-template-rows: var(--efs-monitor) auto auto;
+}
+
+.efs--ret .efs__grid {
+	grid-template-rows: auto auto var(--efs-return);
+}
+
+.efs--mon.efs--ret .efs__grid {
+	grid-template-rows: var(--efs-monitor) auto var(--efs-return);
+}
+
+/* ── nodes ──────────────────────────────────────────────────────────── */
+
+.efs__cell {
+	grid-row: 2;
+	position: relative;
+	display: flex;
+	justify-content: center;
+}
+
+.efs__node {
+	width: 100%;
+	min-height: var(--efs-node-min);
+	padding: 22px 18px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	position: relative;
+	text-align: center;
+	text-decoration: none;
+	color: inherit;
+	background: var(--efs-node);
+	border: var(--efs-stroke) solid var(--efs-line);
+	border-radius: var(--efs-radius);
+}
+
+.efs__node--accent {
+	background: var(--efs-accent-fill);
+	border-color: var(--efs-accent-line);
+}
+
+/* No fill at all, for the thing that is context rather than equipment. */
+.efs__node--quiet {
+	background: none;
+	min-height: calc(var(--efs-node-min) - 28px);
+}
+
+.efs__node--dashed {
+	border-style: dashed;
+}
+
+a.efs__node {
+	transition: border-color 200ms ease, transform 200ms ease;
+}
+
+a.efs__node:hover,
+a.efs__node:focus-visible {
+	border-color: var(--efs-accent);
+	transform: translateY(-2px);
+}
+
+.efs__t {
+	font-size: 17px;
+	font-weight: 600;
+	line-height: 1.25;
+	letter-spacing: 0.01em;
+	color: #fff;
+}
+
+.efs__s {
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--efs-accent);
+}
+
+/* The eyebrow only carries the accent on the node that is the accent. */
+.efs__node:not(.efs__node--accent) .efs__s {
+	color: var(--efs-muted);
+}
+
+.efs__m {
+	font-size: 12.5px;
+	line-height: 1.5;
+	color: var(--efs-muted);
+}
+
+.efs__num {
+	position: absolute;
+	top: -11px;
+	left: 16px;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	background: var(--efs-accent);
+	color: var(--efs-surface);
+}
+
+/* ── connectors ─────────────────────────────────────────────────────── */
+
+.efs__link {
+	grid-row: 2;
+	position: relative;
+	display: flex;
+	align-items: center;
+	padding: 0 6px;
+	min-width: 0;
+}
+
+.efs__line {
+	flex: 1;
+	min-width: 6px;
+	height: var(--efs-stroke);
+	background: var(--efs-flow);
+}
+
+.efs__arrow {
+	flex: none;
+	width: 0;
+	height: 0;
+	border-left: 7px solid var(--efs-flow);
+	border-top: 4.5px solid transparent;
+	border-bottom: 4.5px solid transparent;
+}
+
+.efs__dot {
+	flex: none;
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: var(--efs-flow);
+}
+
+.efs__link--quiet .efs__line {
+	background: var(--efs-quiet);
+}
+
+.efs__link--quiet .efs__arrow {
+	border-left-color: var(--efs-quiet);
+}
+
+.efs__link--quiet .efs__dot {
+	background: var(--efs-quiet);
+}
+
+/*
+ * A label sitting on the line, painting the surface behind itself so the line
+ * appears to pass through it rather than under it.
+ */
+.efs__chip {
+	flex: none;
+	margin: 0 8px;
+	padding: 7px 11px;
+	border-radius: 7px;
+	font-size: 11.5px;
+	line-height: 1;
+	white-space: nowrap;
+	color: var(--efs-text);
+	background: var(--efs-node);
+	border: var(--efs-stroke) solid var(--efs-line);
+}
+
+.efs__chip--accent {
+	font-weight: 600;
+	color: var(--efs-surface);
+	background: var(--efs-accent);
+	border-color: transparent;
+}
+
+.efs__chip--ghost {
+	color: var(--efs-muted);
+	background: var(--efs-surface);
+}
+
+/* Or floating clear of the line, for a longer phrase that a chip would crowd. */
+.efs__over {
+	position: absolute;
+	left: 50%;
+	bottom: calc(50% + 12px);
+	transform: translateX(-50%);
+	max-width: 100%;
+	font-size: 12px;
+	line-height: 1.4;
+	text-align: center;
+	color: var(--efs-muted);
+}
+
+/* ── the return path ────────────────────────────────────────────────── */
+
+.efs__return {
+	grid-row: 3;
+	align-self: stretch;
+	position: relative;
+	border: var(--efs-stroke) solid var(--efs-quiet);
+	border-top: 0;
+	border-bottom-left-radius: var(--efs-radius);
+	border-bottom-right-radius: var(--efs-radius);
+}
+
+.efs__ret {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	transform: translateY(50%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	padding: 0 10px;
+}
+
+.efs__ret span {
+	padding: 0 10px;
+	font-size: 12px;
+	white-space: nowrap;
+	color: var(--efs-muted);
+	background: var(--efs-surface);
+}
+
+.efs__ret i {
+	flex: none;
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	background: var(--efs-surface);
+	border: var(--efs-stroke) solid var(--efs-quiet);
+}
+
+/* The return runs right to left, so its marker points that way too. */
+.efs__ret i::after {
+	content: "";
+	width: 0;
+	height: 0;
+	border-right: 6px solid var(--efs-quiet);
+	border-top: 4px solid transparent;
+	border-bottom: 4px solid transparent;
+}
+
+.efs__ret i.is-box {
+	border-radius: 6px;
+}
+
+.efs__ret i.is-box::after {
+	content: none;
+}
+
+/* ── the monitoring bar ─────────────────────────────────────────────── */
+
+.efs__mon {
+	grid-row: 1;
+	align-self: center;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.efs__mon::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	border-top: var(--efs-stroke) dashed var(--efs-accent-line);
+}
+
+.efs__mon > * {
+	position: relative;
+}
+
+/* The drop from the bar to the node it reads. */
+.efs__tap {
+	grid-row: 1;
+	align-self: stretch;
+	position: relative;
+}
+
+.efs__tap::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	bottom: -14px;
+	border-left: var(--efs-stroke) dashed var(--efs-accent-line);
+}
+
+/* ── the boundary ───────────────────────────────────────────────────── */
+
+.efs__divide {
+	position: absolute;
+	top: -18px;
+	bottom: -6px;
+	left: var(--efs-at, 50%);
+	z-index: 2;
+	border-left: var(--efs-stroke) dashed var(--efs-accent);
+	pointer-events: none;
+}
+
+.efs__divide span {
+	position: absolute;
+	bottom: -34px;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 7px 16px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	color: var(--efs-accent);
+	background: var(--efs-surface);
+	border: var(--efs-stroke) solid var(--efs-accent-line);
+}
+
+/* ── the delivery-target group ──────────────────────────────────────── */
+
+.efs__outs {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 9px;
+}
+
+.efs__out {
+	padding: 11px 14px;
+	border-radius: 9px;
+	font-size: 13px;
+	text-align: center;
+	color: var(--efs-text);
+	background: var(--efs-node);
+	border: var(--efs-stroke) solid var(--efs-line);
+}
+
+.efs__foot {
+	margin-top: 4px;
+	font-size: 12px;
+	text-align: center;
+	color: var(--efs-muted);
+}
+
+/* ── stacked ────────────────────────────────────────────────────────── */
+
+/*
+ * Below the width the row needs, the diagram turns through ninety degrees
+ * rather than shrinking: one column, the connectors becoming short vertical
+ * runs between the nodes. Everything that spanned columns -- the return path,
+ * the monitoring bar, the boundary -- stops being a bracket and becomes a
+ * labelled rule, because a bracket drawn around a vertical stack is a box,
+ * and a box says something the diagram does not mean.
+ */
+@container (max-width: 900px) {
+
+	.efs__grid,
+	.efs--mon .efs__grid,
+	.efs--ret .efs__grid,
+	.efs--mon.efs--ret .efs__grid {
+		grid-template-columns: 1fr;
+		grid-template-rows: none;
+		grid-auto-rows: auto;
+	}
+
+	.efs__cell,
+	.efs__link,
+	.efs__return,
+	.efs__mon {
+		grid-row: auto !important;
+		grid-column: 1 !important;
+	}
+
+	.efs__tap {
+		display: none;
+	}
+
+	.efs__link {
+		flex-direction: column;
+		padding: 14px 0;
+		min-height: 78px;
+	}
+
+	.efs__line {
+		width: var(--efs-stroke);
+		height: auto;
+		/*
+		 * min-width, not just width. The horizontal line carries a 6px floor
+		 * so a short run stays visible; turned upright that floor becomes the
+		 * line's thickness, and a 1px rule renders as a 6px bar.
+		 */
+		min-width: 0;
+		min-height: 10px;
+		flex: 1;
+	}
+
+	.efs__arrow {
+		border-left: 4.5px solid transparent;
+		border-right: 4.5px solid transparent;
+		border-top: 7px solid var(--efs-flow);
+		border-bottom: 0;
+	}
+
+	.efs__link--quiet .efs__arrow {
+		border-top-color: var(--efs-quiet);
+		border-left-color: transparent;
+	}
+
+	.efs__chip {
+		margin: 8px 0;
+	}
+
+	/* A floating label has nowhere to float to in a column. */
+	.efs__over {
+		position: static;
+		transform: none;
+		padding: 8px 0;
+	}
+
+	.efs__mon {
+		order: -1;
+		justify-content: flex-start;
+		margin-bottom: 18px;
+	}
+
+	.efs__mon::before {
+		content: none;
+	}
+
+	.efs__return {
+		border: 0;
+		border-top: var(--efs-stroke) dashed var(--efs-quiet);
+		border-radius: 0;
+		margin-top: 22px;
+		padding-top: 4px;
+	}
+
+	.efs__ret {
+		position: static;
+		transform: none;
+		justify-content: flex-start;
+		padding: 0;
+	}
+
+	.efs__ret span {
+		padding-left: 0;
+	}
+
+	.efs__divide {
+		position: static;
+		border-left: 0;
+		border-top: var(--efs-stroke) dashed var(--efs-accent);
+		margin: 26px 0 0;
+		padding-top: 18px;
+		text-align: center;
+	}
+
+	.efs__divide span {
+		position: static;
+		display: inline-block;
+		transform: none;
+	}
+
+	.efs__zones {
+		flex-direction: column;
+		gap: 4px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	a.efs__node:hover,
+	a.efs__node:focus-visible {
+		transform: none;
+	}
+}

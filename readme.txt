@@ -60,6 +60,24 @@ points, each of which can have plain bullets nested under it.
 
 Requires Elementor 3.5 or greater.
 
+= Flow Schematic =
+
+Adds a "Flow Schematic" widget: a process diagram built out of stages and the
+connectors between them.
+
+* Up to five stages, each with a name, an eyebrow, a detail line, an optional
+  pin number, an optional link and one of four treatments
+* A label on each connector, sitting on the line or floating above it
+* An optional source block on the left and an optional target group on the right
+* A return path under the stages it names, with inline markers for a pump and a
+  vessel
+* A monitoring bar over the stages it reads, dropping onto each one
+* A boundary line at any position across the diagram, with its own label and a
+  caption either side
+* Colours, line weight, corner radius, node height and the run between stages
+  all set from the panel
+* Stacks into a vertical flow when the diagram's own box gets narrow
+
 = Duplicate Pages =
 
 Adds a "Duplicate" link to the Pages and Posts list tables, and a matching bulk
@@ -109,6 +127,23 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.36.0 =
+* **New: Flow Schematic.** A process diagram as a widget — stages in a row,
+  connectors between them, and the three bands a real system drawing needs: a
+  return path under the middle, a monitoring bar over it, and a boundary line
+  through it. A source block on the left and a target group on the right are
+  optional, as is every band.
+* **Drawn in CSS, not exported as a picture.** Every label stays real text, so
+  it is selectable, translatable, searchable and readable by a screen reader,
+  and every colour, weight and radius stays reachable from the panel. An
+  exported SVG is none of those things, and it goes stale the first time a
+  word changes.
+* **It turns rather than shrinks.** Below the width the row needs, the diagram
+  becomes a vertical flow: the connectors stand up, and the return path, the
+  monitoring bar and the boundary stop being brackets and become labelled
+  rules. It asks its own box, not the window, so a schematic dropped into a
+  half-width column stacks on a full-size desktop.
 
 = 2.35.2 =
 * **Fixed: the Split Slab never stacked.** Below 1200px the two panels were

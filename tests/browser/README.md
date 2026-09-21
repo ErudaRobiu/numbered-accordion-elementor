@@ -33,6 +33,19 @@ It lays out the slab with its step numbers empty and filled, the slab over a
 background picture under the darkening veil, and the ledger with and without
 its winning column marked.
 
+The Flow Schematic has a generated fixture of its own, for the same reason --
+the widget emits a grid that names columns, and only a browser turns those
+names into positions:
+
+```sh
+php tests/browser/schematic-fixture.php > tests/browser/schematic.html
+```
+
+It draws the full loop with every band switched on, three stages with none of
+them, a single stage unframed, and the loop again inside a 760px column, which
+is the case that proves the diagram stacks on its own width rather than the
+window's.
+
 Both run headless on purpose. A scrubbed animation is driven by
 `requestAnimationFrame`, and Chrome does not run rAF in a tab that is not
 visible — drive a real window and every measurement freezes the moment the

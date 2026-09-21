@@ -18,6 +18,7 @@ use ErudaToolkit\Modules\Duplicator\Duplicator;
 use ErudaToolkit\Modules\Impact\Impact_Content;
 use ErudaToolkit\Modules\Explainer\Explainer_Content;
 use ErudaToolkit\Modules\Compare\Compare_Content;
+use ErudaToolkit\Modules\Schematic\Schematic_Content;
 use ErudaToolkit\Modules\Motion\Motion_Presets;
 use ErudaToolkit\Modules\Badge\Spin_Controls;
 use ErudaToolkit\Modules\Motion\Motion_Controls;
@@ -630,7 +631,8 @@ check( 'the spin module is registered', true, in_array( 'badge', Toolkit::instan
 check( 'the mega header module is registered', true, in_array( 'header', Toolkit::instance()->ids(), true ) );
 check( 'the split explainer module is registered', true, in_array( 'explainer', Toolkit::instance()->ids(), true ) );
 check( 'the image compare module is registered', true, in_array( 'compare', Toolkit::instance()->ids(), true ) );
-check( 'eleven modules ship', 11, count( Toolkit::instance()->ids() ) );
+check( 'the flow schematic module is registered', true, in_array( 'schematic', Toolkit::instance()->ids(), true ) );
+check( 'twelve modules ship', 12, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -1102,6 +1104,107 @@ check(
 	'Compare the two pictures',
 	Compare_Content::slider_label( 'Before', '' )
 );
+
+/* ------------------------------------ Schematic_Content::columns --- */
+
+/*
+ * The column model is the whole diagram. Everything else -- the return path,
+ * the monitoring bar, the arrow out to the targets -- is placed by naming
+ * columns, so if this is wrong the drawing is wrong in a way no amount of CSS
+ * can rescue.
+ */
+
+check(
+	'two stages between a source and its targets take seven columns',
+	7,
+	Schematic_Content::total_columns( 2, true, true )
+);
+check(
+	'without either end they take three',
+	3,
+	Schematic_Content::total_columns( 2, false, false )
+);
+check(
+	'a source pushes the first stage to column three',
+	3,
+	Schematic_Content::stage_column( 1, true )
+);
+check(
+	'and without one it starts at column one',
+	1,
+	Schematic_Content::stage_column( 1, false )
+);
+check(
+	'stages sit two columns apart, with the connector between',
+	5,
+	Schematic_Content::stage_column( 2, true )
+);
+check(
+	'the connector after a stage is the column following it',
+	4,
+	Schematic_Content::link_column( 1, true )
+);
+check(
+	'the targets sit two past the last stage',
+	7,
+	Schematic_Content::outputs_column( 2, true )
+);
+check(
+	'the track list names a floor for every node and lets the runs stretch',
+	'minmax(110px, 0.85fr) 0.9fr minmax(150px, 1.05fr) 1.4fr minmax(150px, 1.05fr) 0.8fr minmax(130px, 0.9fr)',
+	Schematic_Content::columns( 2, true, true )
+);
+check(
+	'a single stage has no run between anything',
+	'minmax(150px, 1.05fr)',
+	Schematic_Content::columns( 1, false, false )
+);
+check(
+	'more stages than the row can carry are dropped, not squeezed',
+	Schematic_Content::MAX_STAGES,
+	Schematic_Content::stage_count( array_fill( 0, 9, array() ) )
+);
+
+/* --------------------------------------- Schematic_Content::span --- */
+
+check(
+	'a band over two stages spans from the first to past the second',
+	array( 3, 6 ),
+	Schematic_Content::span( 1, 2, 2, true )
+);
+check(
+	'the numbers typed in backwards still describe the same band',
+	array( 3, 6 ),
+	Schematic_Content::span( 2, 1, 2, true )
+);
+check(
+	'a stage that is not there is pulled back to one that is',
+	array( 3, 6 ),
+	Schematic_Content::span( 1, 7, 2, true )
+);
+check(
+	'a band over one stage still has width',
+	array( 3, 4 ),
+	Schematic_Content::span( 1, 1, 2, true )
+);
+
+/* ------------------------------ Schematic_Content::clamp_spread --- */
+
+check( 'the run between stages has a default', 1.4, Schematic_Content::clamp_spread( null ) );
+check( 'a slider value is read out of its array', 2.5, Schematic_Content::clamp_spread( array( 'size' => 2.5 ) ) );
+check( 'a run too short to draw is opened up', 0.4, Schematic_Content::clamp_spread( 0.05 ) );
+check( 'and one long enough to break the row is reined in', 4.0, Schematic_Content::clamp_spread( 99 ) );
+check( 'nonsense lands on the default', 1.4, Schematic_Content::clamp_spread( 'wide' ) );
+
+/* ----------------------------- Schematic_Content::clamp_percent --- */
+
+check( 'the boundary defaults to the middle', 50.0, Schematic_Content::clamp_percent( 'x' ) );
+check( 'and cannot be pushed off either edge', 100.0, Schematic_Content::clamp_percent( 140 ) );
+
+/* --------------------------------------- Schematic_Content::number --- */
+
+check( 'a width is written the way CSS reads it', '1.4', Schematic_Content::number( 1.4 ) );
+check( 'with no trailing zeroes', '2', Schematic_Content::number( 2.0 ) );
 
 /* ------------------------------------------------------------- report --- */
 

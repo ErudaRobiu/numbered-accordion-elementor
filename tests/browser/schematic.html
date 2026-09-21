@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flow Schematic — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../../modules/schematic/assets/css/flow-schematic.css">
+<style>
+/* The kit's job, not the widget's: the family and the page surface. */
+body{margin:0;background:#060c11;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif}
+.host{padding:60px 40px;max-width:1600px;margin-inline:auto}
+.marker{max-width:1600px;margin:0 auto;padding:0 40px;color:#4dcf8d;
+  font:600 12px/1 "Plus Jakarta Sans",system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase}
+/* A narrow column at a wide window — the case a media query cannot see. */
+.host--column{max-width:760px;margin-inline:0}
+</style>
+</head>
+<body>
+
+<p class="marker">The loop — every band switched on</p>
+<div class="host">		<div class="efs efs--mon efs--ret">
+
+							<div class="efs__zones">
+					<span class="efs__zone">Contaminated side</span>
+					<span class="efs__zone">Sealed circuit — clean side</span>
+				</div>
+			
+			<div class="efs__grid" style="--efs-cols:minmax(110px, 0.85fr) 0.9fr minmax(150px, 1.05fr) 1.4fr minmax(150px, 1.05fr) 0.8fr minmax(130px, 0.9fr)">
+
+									<div class="efs__mon" style="grid-column:3/6">
+													<span class="efs__chip efs__chip--accent">Power Intelligence</span>
+											</div>
+											<div class="efs__tap" style="grid-column:3"></div>
+												<div class="efs__tap" style="grid-column:5"></div>
+						
+									<div class="efs__cell" style="grid-column:1">
+						<div class="efs__node efs__node--quiet">
+															<span class="efs__t">Process</span>
+																						<span class="efs__m">oven · washer · fryer</span>
+													</div>
+					</div>
+							<div class="efs__link efs__link--quiet" style="grid-column:2">
+						<i class="efs__line"></i>
+							<span class="efs__chip efs__chip--ghost">grease · lint · soot</span>
+				<i class="efs__line"></i>
+						<i class="efs__arrow"></i>
+		</div>
+						
+						<div class="efs__cell" style="grid-column:3">
+			<a class="efs__node efs__node--accent"
+				href="#lepido"			>
+									<span class="efs__num">01</span>
+													<span class="efs__t">Lepido®</span>
+													<span class="efs__s">Source unit · PRG®</span>
+													<span class="efs__m">finless · staggered tube</span>
+							</a>
+		</div>
+				<div class="efs__link" style="grid-column:4">
+							<span class="efs__over">heat transfer fluid, warmed</span>
+						<i class="efs__line"></i>
+						<i class="efs__arrow"></i>
+		</div>
+				<div class="efs__cell" style="grid-column:5">
+			<div class="efs__node"
+							>
+									<span class="efs__num">03</span>
+													<span class="efs__t">HeatCore Hx™</span>
+													<span class="efs__s">Delivery unit</span>
+													<span class="efs__m">one — or several</span>
+							</div>
+		</div>
+				<div class="efs__link" style="grid-column:6">
+						<i class="efs__line"></i>
+						<i class="efs__arrow"></i>
+		</div>
+		
+									<div class="efs__cell" style="grid-column:7">
+						<div class="efs__outs">
+																							<div class="efs__out">Process / makeup air</div>
+																							<div class="efs__out">Process water</div>
+																							<div class="efs__out">Boiler feedwater</div>
+																						<p class="efs__foot">…and four more</p>
+													</div>
+					</div>
+				
+									<div class="efs__return" style="grid-column:3/6">
+						<div class="efs__ret">
+															<span>returned to the source unit, cooled</span>
+																						<i></i>
+																						<i class="is-box"></i>
+													</div>
+					</div>
+					
+									<div class="efs__divide">
+													<span>The two fluids never mix</span>
+											</div>
+				
+			</div>
+		</div>
+		</div>
+
+<p class="marker">Three stages, no source, no targets, no bands</p>
+<div class="host">		<div class="efs">
+
+			
+			<div class="efs__grid" style="--efs-cols:minmax(150px, 1.05fr) 1fr minmax(150px, 1.05fr) 1fr minmax(150px, 1.05fr)">
+
+				
+				
+						<div class="efs__cell" style="grid-column:1">
+			<div class="efs__node efs__node--quiet"
+							>
+													<span class="efs__t">Intake</span>
+																	<span class="efs__m">ambient</span>
+							</div>
+		</div>
+				<div class="efs__link efs__link--quiet" style="grid-column:2">
+						<i class="efs__line"></i>
+							<span class="efs__chip efs__chip--ghost">raw</span>
+				<i class="efs__line"></i>
+						<i class="efs__arrow"></i>
+		</div>
+				<div class="efs__cell" style="grid-column:3">
+			<div class="efs__node efs__node--accent"
+							>
+									<span class="efs__num">02</span>
+													<span class="efs__t">Treatment</span>
+													<span class="efs__s">Stage two</span>
+											</div>
+		</div>
+				<div class="efs__link" style="grid-column:4">
+						<i class="efs__line"></i>
+							<span class="efs__chip efs__chip--ghost">conditioned</span>
+				<i class="efs__line"></i>
+						<i class="efs__arrow"></i>
+		</div>
+				<div class="efs__cell" style="grid-column:5">
+			<div class="efs__node efs__node--dashed"
+							>
+													<span class="efs__t">Output</span>
+																	<span class="efs__m">to the plant</span>
+							</div>
+		</div>
+		
+				
+				
+				
+			</div>
+		</div>
+		</div>
+
+<p class="marker">One stage, unframed</p>
+<div class="host">		<div class="efs efs--plain efs--mon">
+
+			
+			<div class="efs__grid" style="--efs-cols:minmax(110px, 0.85fr) 0.9fr minmax(150px, 1.05fr) 0.8fr minmax(130px, 0.9fr)">
+
+									<div class="efs__mon" style="grid-column:3/4">
+													<span class="efs__chip efs__chip--accent">Watched</span>
+											</div>
+											<div class="efs__tap" style="grid-column:3"></div>
+						
+									<div class="efs__cell" style="grid-column:1">
+						<div class="efs__node efs__node--quiet">
+															<span class="efs__t">In</span>
+																				</div>
+					</div>
+							<div class="efs__link efs__link--quiet" style="grid-column:2">
+						<i class="efs__line"></i>
+						<i class="efs__arrow"></i>
+		</div>
+						
+						<div class="efs__cell" style="grid-column:3">
+			<div class="efs__node"
+							>
+													<span class="efs__t">The only stage</span>
+															</div>
+		</div>
+				<div class="efs__link" style="grid-column:4">
+						<i class="efs__line"></i>
+						<i class="efs__arrow"></i>
+		</div>
+		
+									<div class="efs__cell" style="grid-column:5">
+						<div class="efs__outs">
+																							<div class="efs__out">Out</div>
+																				</div>
+					</div>
+				
+				
+				
+			</div>
+		</div>
+		</div>
+
+<p class="marker">The loop again, in a 760px column</p>
+<div class="host host--column">		<div class="efs efs--mon efs--ret">
+
+							<div class="efs__zones">
+					<span class="efs__zone">Contaminated side</span>
+					<span class="efs__zone">Sealed circuit — clean side</span>
+				</div>
+			
+			<div class="efs__grid" style="--efs-cols:minmax(110px, 0.85fr) 0.9fr minmax(150px, 1.05fr) 1.4fr minmax(150px, 1.05fr) 0.8fr minmax(130px, 0.9fr)">
+
+									<div class="efs__mon" style="grid-column:3/6">
+													<span class="efs__chip efs__chip--accent">Power Intelligence</span>
+											</div>
+											<div class="efs__tap" style="grid-column:3"></div>
+												<div class="efs__tap" style="grid-column:5"></div>
+						
+									<div class="efs__cell" style="grid-column:1">
+						<div class="efs__node efs__node--quiet">
+															<span class="efs__t">Process</span>
+																						<span class="efs__m">oven · washer · fryer</span>
+													</div>
+					</div>
+							<div class="efs__link efs__link--quiet" style="grid-column:2">
+						<i class="efs__line"></i>
+							<span class="efs__chip efs__chip--ghost">grease · lint · soot</span>
+				<i class="efs__line"></i>
+						<i class="efs__arrow"></i>
+		</div>
+						
+						<div class="efs__cell" style="grid-column:3">
+			<a class="efs__node efs__node--accent"
+				href="#lepido #lepido"			>
+									<span class="efs__num">01</span>
+													<span class="efs__t">Lepido®</span>
+													<span class="efs__s">Source unit · PRG®</span>
+													<span class="efs__m">finless · staggered tube</span>
+							</a>
+		</div>
+				<div class="efs__link" style="grid-column:4">
+							<span class="efs__over">heat transfer fluid, warmed</span>
+						<i class="efs__line"></i>
+						<i class="efs__arrow"></i>
+		</div>
+				<div class="efs__cell" style="grid-column:5">
+			<div class="efs__node"
+							>
+									<span class="efs__num">03</span>
+													<span class="efs__t">HeatCore Hx™</span>
+													<span class="efs__s">Delivery unit</span>
+													<span class="efs__m">one — or several</span>
+							</div>
+		</div>
+				<div class="efs__link" style="grid-column:6">
+						<i class="efs__line"></i>
+						<i class="efs__arrow"></i>
+		</div>
+		
+									<div class="efs__cell" style="grid-column:7">
+						<div class="efs__outs">
+																							<div class="efs__out">Process / makeup air</div>
+																							<div class="efs__out">Process water</div>
+																							<div class="efs__out">Boiler feedwater</div>
+																						<p class="efs__foot">…and four more</p>
+													</div>
+					</div>
+				
+									<div class="efs__return" style="grid-column:3/6">
+						<div class="efs__ret">
+															<span>returned to the source unit, cooled</span>
+																						<i></i>
+																						<i class="is-box"></i>
+													</div>
+					</div>
+					
+									<div class="efs__divide">
+													<span>The two fluids never mix</span>
+											</div>
+				
+			</div>
+		</div>
+		</div>
+
+</body>
+</html>
+	

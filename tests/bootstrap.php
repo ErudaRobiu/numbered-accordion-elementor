@@ -79,6 +79,7 @@ require_once dirname( __DIR__ ) . '/modules/duplicator/class-duplicator.php';
 require_once dirname( __DIR__ ) . '/modules/impact/class-impact-content.php';
 require_once dirname( __DIR__ ) . '/modules/explainer/class-explainer-content.php';
 require_once dirname( __DIR__ ) . '/modules/compare/class-compare-content.php';
+require_once dirname( __DIR__ ) . '/modules/schematic/class-schematic-content.php';
 require_once dirname( __DIR__ ) . '/modules/motion/class-motion-presets.php';
 require_once dirname( __DIR__ ) . '/modules/motion/class-motion-controls.php';
 require_once dirname( __DIR__ ) . '/modules/smoothscroll/class-smoothscroll-module.php';

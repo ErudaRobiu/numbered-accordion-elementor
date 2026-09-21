@@ -68,6 +68,10 @@ final class Toolkit {
 			'file'  => 'modules/compare/class-compare-module.php',
 			'class' => '\ErudaToolkit\Modules\Compare\Compare_Module',
 		),
+		'schematic'  => array(
+			'file'  => 'modules/schematic/class-schematic-module.php',
+			'class' => '\ErudaToolkit\Modules\Schematic\Schematic_Module',
+		),
 	);
 
 	/**
