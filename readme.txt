@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.33.0
+Stable tag: 2.34.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,25 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.34.0 =
+* **The motes on the diagram are no longer five identical dots on a straight
+  line.** Each one now has its own size, speed, brightness and wander, and
+  carries a thin trail behind it, so they read as particles carried through the
+  coils rather than as a conveyor belt. Depth comes from size and brightness
+  together, so some pass close and some far off.
+* They also start already in flight, spread across the crossing, so the plate is
+  never empty and they never enter as a group.
+* Their travel is measured against the plate, so a mote crosses it at any width.
+  It used to be a fixed 560px, which stopped short or overshot on every screen
+  but one.
+* New **Motes** section: colour, size, speed and a switch for the trails.
+* **A heading fill.** Panel headings can pour a gradient through the letters --
+  with a from colour, a to colour and an angle -- or fill in a word at a time as
+  the panel is reached, which is the motion from the original design. The text
+  stays real text either way: selectable, searchable and readable aloud.
+* The gradient starts from the heading's own colour unless told otherwise, so it
+  works on the light panel and the ink one without being set up twice.
 
 = 2.33.0 =
 * **Fixed: the Split Slab did not fill its container.** The ink panel's grid

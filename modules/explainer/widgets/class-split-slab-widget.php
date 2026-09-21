@@ -103,6 +103,8 @@ class Split_Slab_Widget extends Widget_Base {
 		$this->register_typography_controls();
 		$this->register_picture_controls();
 		$this->register_pill_style_controls();
+		$this->register_mote_controls();
+		$this->register_fill_controls();
 		$this->register_panel_one_style_controls();
 		$this->register_panel_two_style_controls();
 	}
@@ -628,6 +630,172 @@ class Split_Slab_Widget extends Widget_Base {
 	}
 
 	/**
+	 * How the panel headings are filled.
+	 */
+	private function register_fill_controls() {
+		$this->start_controls_section(
+			'section_style_fill',
+			array(
+				'label' => esc_html__( 'Heading fill', 'numbered-accordion' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_control(
+			'title_fill',
+			array(
+				'label'   => esc_html__( 'Fill', 'numbered-accordion' ),
+				'type'    => Controls_Manager::SELECT,
+				'default' => 'solid',
+				'options' => array(
+					'solid'    => esc_html__( 'Solid colour', 'numbered-accordion' ),
+					'gradient' => esc_html__( 'Gradient through the letters', 'numbered-accordion' ),
+					'reveal'   => esc_html__( 'Fills in a word at a time as you reach it', 'numbered-accordion' ),
+				),
+			)
+		);
+
+		$this->add_control(
+			'fill_from',
+			array(
+				'label'     => esc_html__( 'From', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'condition' => array( 'title_fill' => 'gradient' ),
+				'selectors' => array(
+					'{{WRAPPER}} .eexp' => '--eexp-fill-from: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'fill_to',
+			array(
+				'label'     => esc_html__( 'To', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'condition' => array( 'title_fill' => 'gradient' ),
+				'selectors' => array(
+					'{{WRAPPER}} .eexp' => '--eexp-fill-to: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'fill_angle',
+			array(
+				'label'      => esc_html__( 'Angle', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'deg' ),
+				'range'      => array(
+					'deg' => array(
+						'min' => 0,
+						'max' => 360,
+					),
+				),
+				'default'    => array(
+					'unit' => 'deg',
+					'size' => 95,
+				),
+				'condition'  => array( 'title_fill' => 'gradient' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .eexp' => '--eexp-fill-angle: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'fill_dim',
+			array(
+				'label'       => esc_html__( 'Before it fills', 'numbered-accordion' ),
+				'type'        => Controls_Manager::COLOR,
+				'condition'   => array( 'title_fill' => 'reveal' ),
+				'description' => esc_html__( 'The colour the words wait in. It has to be readable on its own -- anyone who scrolls past quickly reads it in this state.', 'numbered-accordion' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .eexp' => '--eexp-fill-dim: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+	}
+
+	/**
+	 * The drifting motes.
+	 */
+	private function register_mote_controls() {
+		$this->start_controls_section(
+			'section_style_motes',
+			array(
+				'label'     => esc_html__( 'Motes', 'numbered-accordion' ),
+				'tab'       => Controls_Manager::TAB_STYLE,
+				'condition' => array( 'p2_motes!' => array( '', '0', 0 ) ),
+			)
+		);
+
+		$this->add_control(
+			'mote_colour',
+			array(
+				'label'     => esc_html__( 'Colour', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .eexp' => '--eexp-mote-colour: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mote_scale',
+			array(
+				'label'       => esc_html__( 'Size', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'range'       => array(
+					'px' => array(
+						'min'  => 0.4,
+						'max'  => 3,
+						'step' => 0.1,
+					),
+				),
+				'default'     => array( 'size' => 1 ),
+				'description' => esc_html__( 'Scales all of them at once. They keep their own sizes relative to each other, which is what gives the depth.', 'numbered-accordion' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .eexp' => '--eexp-mote-scale: {{SIZE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mote_speed',
+			array(
+				'label'     => esc_html__( 'Speed', 'numbered-accordion' ),
+				'type'      => Controls_Manager::SLIDER,
+				'range'     => array(
+					'px' => array(
+						'min'  => 0.2,
+						'max'  => 4,
+						'step' => 0.1,
+					),
+				),
+				'default'   => array( 'size' => 1 ),
+				'selectors' => array(
+					'{{WRAPPER}} .eexp' => '--eexp-mote-speed: {{SIZE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'mote_trails',
+			array(
+				'label'        => esc_html__( 'Trails', 'numbered-accordion' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'return_value' => 'yes',
+				'description'  => esc_html__( 'The streak behind each mote, which is what makes the direction of travel readable.', 'numbered-accordion' ),
+			)
+		);
+
+		$this->end_controls_section();
+	}
+
+	/**
 	 * One spacing slider, since there are a lot of them and they are all the
 	 * same shape.
 	 *
@@ -1028,6 +1196,24 @@ class Split_Slab_Widget extends Widget_Base {
 	}
 
 	/**
+	 * Print a panel heading, in word spans when the fill arrives a word at a
+	 * time and as plain text otherwise.
+	 *
+	 * @param string $title Heading text.
+	 * @param string $fill  Fill mode.
+	 */
+	private function print_title( $title, $fill ) {
+		if ( 'reveal' !== $fill ) {
+			echo esc_html( $title );
+
+			return;
+		}
+
+		// Each span is built and escaped by Explainer_Content.
+		echo implode( ' ', Explainer_Content::heading_words( $title ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
 	 * Print one panel's step line.
 	 *
 	 * @param array  $settings Settings.
@@ -1095,6 +1281,7 @@ class Split_Slab_Widget extends Widget_Base {
 	 */
 	private function render_panel_one( $settings ) {
 		$tag   = $this->heading_tag( $settings, 'p1_title_tag' );
+		$fill  = Explainer_Content::text( $settings, 'title_fill' );
 		$title = Explainer_Content::text( $settings, 'p1_title' );
 		$body  = Explainer_Content::text( $settings, 'p1_body' );
 		$label = Explainer_Content::text( $settings, 'p1_loads_label' );
@@ -1105,7 +1292,7 @@ class Split_Slab_Widget extends Widget_Base {
 			<?php $this->render_step( $settings, 'p1' ); ?>
 
 			<?php if ( '' !== $title ) : ?>
-				<<?php echo esc_attr( $tag ); ?> class="eexp-heading eexp-panel__title"><?php echo esc_html( $title ); ?></<?php echo esc_attr( $tag ); ?>>
+				<<?php echo esc_attr( $tag ); ?> class="<?php echo esc_attr( Explainer_Content::title_classes( $fill ) ); ?>"><?php $this->print_title( $title, $fill ); ?></<?php echo esc_attr( $tag ); ?>>
 			<?php endif; ?>
 
 			<?php if ( '' !== $body ) : ?>
@@ -1151,6 +1338,7 @@ class Split_Slab_Widget extends Widget_Base {
 	 */
 	private function render_panel_two( $settings ) {
 		$tag     = $this->heading_tag( $settings, 'p2_title_tag' );
+		$fill    = Explainer_Content::text( $settings, 'title_fill' );
 		$title   = Explainer_Content::text( $settings, 'p2_title' );
 		$body    = Explainer_Content::text( $settings, 'p2_body' );
 		$specs   = Explainer_Content::rows( $settings, 'p2_specs' );
@@ -1159,12 +1347,16 @@ class Split_Slab_Widget extends Widget_Base {
 		$right   = Explainer_Content::text( $settings, 'p2_caption_right' );
 		$motes   = Explainer_Content::mote_count( isset( $settings['p2_motes'] ) ? $settings['p2_motes'] : 0 );
 		$classes = $plate ? 'eexp-flow' : 'eexp-flow eexp-flow--bare';
+
+		if ( 'yes' !== Explainer_Content::text( $settings, 'mote_trails' ) ) {
+			$classes .= ' eexp-flow--no-trails';
+		}
 		?>
 		<div class="eexp-panel eexp-panel--ink">
 			<?php $this->render_step( $settings, 'p2' ); ?>
 
 			<?php if ( '' !== $title ) : ?>
-				<<?php echo esc_attr( $tag ); ?> class="eexp-heading eexp-panel__title"><?php echo esc_html( $title ); ?></<?php echo esc_attr( $tag ); ?>>
+				<<?php echo esc_attr( $tag ); ?> class="<?php echo esc_attr( Explainer_Content::title_classes( $fill ) ); ?>"><?php $this->print_title( $title, $fill ); ?></<?php echo esc_attr( $tag ); ?>>
 			<?php endif; ?>
 
 			<?php if ( '' !== $body ) : ?>

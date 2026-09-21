@@ -942,6 +942,33 @@ check( 'rows come back whole', array( array( 'a' => 1 ) ), Explainer_Content::ro
 check( 'a missing repeater is no rows', array(), Explainer_Content::rows( array(), 'r' ) );
 check( 'a scalar repeater is no rows', array(), Explainer_Content::rows( array( 'r' => 'x' ), 'r' ) );
 
+/* ------------------------------ Explainer_Content::title_classes --- */
+
+check( 'solid is the default and adds nothing', 'eexp-heading eexp-panel__title', Explainer_Content::title_classes( 'solid' ) );
+check( 'an unsaved widget is solid too', 'eexp-heading eexp-panel__title', Explainer_Content::title_classes( '' ) );
+check( 'gradient', 'eexp-heading eexp-panel__title eexp-panel__title--gradient', Explainer_Content::title_classes( 'gradient' ) );
+check(
+	'reveal also takes the class the script watches for',
+	'eexp-heading eexp-panel__title eexp-panel__title--reveal eexp-anim',
+	Explainer_Content::title_classes( 'reveal' )
+);
+
+/* ------------------------------- Explainer_Content::heading_words --- */
+
+$words = Explainer_Content::heading_words( 'How Lepido™ works' );
+
+check( 'one span per word', 3, count( $words ) );
+check( 'the first word', '<span>How</span>', $words[0] );
+check( 'the trademark keeps its own element', '<span>Lepido<i class="eexp-tm">™</i></span>', $words[1] );
+check( 'a registered sign too', array( '<span>Norrel<i class="eexp-tm">®</i></span>' ), Explainer_Content::heading_words( 'Norrel®' ) );
+check( 'an empty heading makes no spans', array(), Explainer_Content::heading_words( '   ' ) );
+check( 'runs of whitespace make no empty spans', 2, count( Explainer_Content::heading_words( "How    works" ) ) );
+check(
+	'markup in a heading is escaped, not run',
+	array( '<span>&lt;script&gt;alert(1)&lt;/script&gt;</span>' ),
+	Explainer_Content::heading_words( '<script>alert(1)</script>' )
+);
+
 /* ------------------------------- Explainer_Content::pill_classes --- */
 
 check( 'the lit dot is the default and carries no modifier', 'eexp-loads', Explainer_Content::pill_classes( 'dot' ) );
@@ -961,14 +988,41 @@ check( 'the count is capped', 7, Explainer_Content::mote_count( 99 ) );
 check( 'a non-number is none', 0, Explainer_Content::mote_count( array() ) );
 
 check(
-	'the first mote',
-	'top:26%;animation-duration:7.5s;animation-delay:0s',
+	'the first mote carries its whole character, not just a position',
+	'top:26%;--eexp-mote-size:8px;--eexp-mote-dur:7.5s;--eexp-mote-peak:0.92;--eexp-mote-wander:14px;animation-delay:0s',
 	Explainer_Content::mote_style( 0, 5 )
 );
+
+// Depth: no two neighbours share a size, a speed or a brightness, or the row
+// reads as a conveyor belt rather than as air.
+$sizes  = array();
+$speeds = array();
+$peaks  = array();
+
+for ( $i = 0; $i < 7; $i++ ) {
+	preg_match( '/--eexp-mote-size:([0-9.]+)px/', Explainer_Content::mote_style( $i, 7 ), $m );
+	$sizes[] = $m[1];
+	preg_match( '/--eexp-mote-dur:([0-9.]+)s/', Explainer_Content::mote_style( $i, 7 ), $m );
+	$speeds[] = $m[1];
+	preg_match( '/--eexp-mote-peak:([0-9.]+)/', Explainer_Content::mote_style( $i, 7 ), $m );
+	$peaks[] = $m[1];
+}
+
+check( 'seven motes, seven sizes', 7, count( array_unique( $sizes ) ) );
+check( 'seven speeds', 7, count( array_unique( $speeds ) ) );
+check( 'seven brightnesses', 7, count( array_unique( $peaks ) ) );
+
+// The delays are negative, which starts each mote partway across rather than
+// leaving the plate empty until the first one arrives.
 check(
-	'the second is offset in time, not stacked on the first',
-	'top:41%;animation-duration:9s;animation-delay:1.45s',
-	Explainer_Content::mote_style( 1, 5 )
+	'the first starts at the edge',
+	true,
+	(bool) preg_match( '/animation-delay:0s$/', Explainer_Content::mote_style( 0, 5 ) )
+);
+check(
+	'the rest start already in flight',
+	true,
+	(bool) preg_match( '/animation-delay:-[0-9.]+s$/', Explainer_Content::mote_style( 2, 5 ) )
 );
 
 // Deterministic: the same page must look the same on every load.
@@ -986,18 +1040,10 @@ for ( $i = 0; $i < 7; $i++ ) {
 
 check( 'seven motes, seven different styles', 7, count( array_unique( $styles ) ) );
 
-// The count is capped at seven, so an eighth mote is unreachable. If the cap
-// ever moves, its position and speed wrap round the table rather than reading
-// off the end of it -- only the delay goes on climbing, which is the point.
 check(
-	'an index past the end wraps its position',
+	'an index past the end wraps its layer',
 	'top:26%',
 	substr( Explainer_Content::mote_style( 7, 7 ), 0, 7 )
-);
-check(
-	'and keeps stepping the delay rather than stacking',
-	'top:26%;animation-duration:7.5s;animation-delay:10.15s',
-	Explainer_Content::mote_style( 7, 7 )
 );
 
 /* ---------------------------- Explainer_Content::panel_sizes_attr --- */

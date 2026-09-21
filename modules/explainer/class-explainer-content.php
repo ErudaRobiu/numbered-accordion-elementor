@@ -94,6 +94,66 @@ final class Explainer_Content {
 	}
 
 	/**
+	 * Split a heading into word spans, ready for the fill to arrive.
+	 *
+	 * Authored here rather than by splitting innerHTML in the browser: the
+	 * trademark sign is its own element, and a naive split eats it.
+	 *
+	 * Each returned string is already escaped and safe to echo.
+	 *
+	 * @param mixed $text Heading text.
+	 * @return string[] One span per word.
+	 */
+	public static function heading_words( $text ) {
+		if ( ! is_scalar( $text ) ) {
+			return array();
+		}
+
+		$words = preg_split( '/\s+/u', trim( (string) $text ), -1, PREG_SPLIT_NO_EMPTY );
+
+		if ( ! is_array( $words ) ) {
+			return array();
+		}
+
+		$spans = array();
+
+		foreach ( $words as $word ) {
+			$escaped = function_exists( 'esc_html' )
+				? esc_html( $word )
+				: htmlspecialchars( $word, ENT_QUOTES, 'UTF-8' );
+
+			$spans[] = '<span>' . preg_replace(
+				'/(\x{2122}|\x{00AE})/u',
+				'<i class="eexp-tm">$1</i>',
+				$escaped
+			) . '</span>';
+		}
+
+		return $spans;
+	}
+
+	/**
+	 * Classes for a panel heading, given how it should be filled.
+	 *
+	 * @param mixed $fill Raw control value.
+	 * @return string
+	 */
+	public static function title_classes( $fill ) {
+		$fill    = is_scalar( $fill ) ? (string) $fill : '';
+		$classes = 'eexp-heading eexp-panel__title';
+
+		if ( 'gradient' === $fill ) {
+			return $classes . ' eexp-panel__title--gradient';
+		}
+
+		if ( 'reveal' === $fill ) {
+			return $classes . ' eexp-panel__title--reveal eexp-anim';
+		}
+
+		return $classes;
+	}
+
+	/**
 	 * Classes for the footer pill row.
 	 *
 	 * @param mixed $style Raw control value.
@@ -114,9 +174,11 @@ final class Explainer_Content {
 	/**
 	 * Inline style for one drifting mote.
 	 *
-	 * The motes are decoration over the flow artwork. Their positions are
-	 * spread deterministically rather than randomly so that a page looks the
-	 * same on every load, and so this can be asserted.
+	 * Every mote gets its own size, speed, brightness, height and wander. The
+	 * spread is deterministic rather than random, so a page looks the same on
+	 * every load and this can be asserted -- and the seven sets of values are
+	 * chosen to be mutually awkward, so motes do not fall into step with one
+	 * another however long they run.
 	 *
 	 * @param int $index Zero-based mote index.
 	 * @param int $total How many motes in total.
@@ -126,17 +188,30 @@ final class Explainer_Content {
 		$index = max( 0, (int) $index );
 		$total = max( 1, (int) $total );
 
-		$tops      = array( 26, 41, 57, 72, 34, 63, 48 );
-		$durations = array( 7.5, 9.0, 8.2, 10.0, 11.0, 8.8, 9.6 );
+		// top %, size px, seconds, peak opacity, wander px.
+		$layers = array(
+			array( 26, 8.0, 7.5, 0.92, 14 ),
+			array( 41, 4.5, 11.0, 0.5, 9 ),
+			array( 57, 6.5, 8.8, 0.78, 18 ),
+			array( 72, 9.5, 6.4, 1.0, 11 ),
+			array( 34, 5.0, 12.5, 0.55, 21 ),
+			array( 63, 7.0, 9.6, 0.82, 7 ),
+			array( 48, 3.5, 13.5, 0.45, 15 ),
+		);
 
-		$top      = $tops[ $index % count( $tops ) ];
-		$duration = $durations[ $index % count( $durations ) ];
-		$delay    = round( ( $index * 1.45 ), 2 );
+		$layer = $layers[ $index % count( $layers ) ];
+
+		// Spread the starts across the whole crossing, so the plate is never
+		// empty and never shows the whole set entering together.
+		$delay = -1 * ( ( $index * $layer[2] ) / max( 2, $total ) );
 
 		return sprintf(
-			'top:%d%%;animation-duration:%ss;animation-delay:%ss',
-			$top,
-			self::trim_zeros( $duration ),
+			'top:%d%%;--eexp-mote-size:%spx;--eexp-mote-dur:%ss;--eexp-mote-peak:%s;--eexp-mote-wander:%spx;animation-delay:%ss',
+			$layer[0],
+			self::trim_zeros( $layer[1] ),
+			self::trim_zeros( $layer[2] ),
+			self::trim_zeros( $layer[3] ),
+			self::trim_zeros( $layer[4] ),
 			self::trim_zeros( $delay )
 		);
 	}

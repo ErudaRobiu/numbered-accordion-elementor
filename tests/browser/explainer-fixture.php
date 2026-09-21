@@ -305,6 +305,14 @@ namespace {
 
 	$bare_slab     = new Slab_Fixture( $slab );
 
+	$gradient                = $slab;
+	$gradient['title_fill']  = 'gradient';
+	$gradient_slab           = new Slab_Fixture( $gradient );
+
+	$reveal                  = $slab;
+	$reveal['title_fill']    = 'reveal';
+	$reveal_slab             = new Slab_Fixture( $reveal );
+
 	$solid_pills                  = $slab;
 	$solid_pills['p1_pill_style'] = 'solid';
 	$solid_slab                   = new Slab_Fixture( $solid_pills );
@@ -361,6 +369,12 @@ img{max-width:100%;height:auto}
 <body>
 <p class="marker">Slab — step numbers empty, the default</p>
 <div class="host"><?php echo $bare_slab->to_html(); // phpcs:ignore ?></div>
+
+<p class="marker">Slab — gradient heading fill</p>
+<div class="host"><?php echo $gradient_slab->to_html(); // phpcs:ignore ?></div>
+
+<p class="marker">Slab — heading fills a word at a time</p>
+<div class="host"><?php echo $reveal_slab->to_html(); // phpcs:ignore ?></div>
 
 <p class="marker">Slab — filled pills</p>
 <div class="host"><?php echo $solid_slab->to_html(); // phpcs:ignore ?></div>

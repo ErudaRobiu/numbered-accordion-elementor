@@ -532,6 +532,18 @@ the file system.
       "reduce motion" on
 - [ ] A slab saved before 2.33.0 opens unchanged, and the new controls start
       empty rather than overriding what it already looked like
+- [ ] **Watch the motes for a full crossing.** No two are the same size or
+      speed, they rise and fall rather than tracking straight, and each drags a
+      short trail
+- [ ] They are already spread across the plate on load, not queued at the left
+- [ ] Widen the browser: they still cross the whole plate, and still do at a
+      phone width
+- [ ] Colour, size and speed all take, and switching trails off removes them
+- [ ] With "reduce motion" on, no mote moves at all
+- [ ] **Heading fill set to gradient**: the letters carry it on both panels, the
+      text can still be selected, and a screen reader still reads it
+- [ ] **Set to a word at a time**: the words wait dimmed and fill as the panel
+      is reached. With JavaScript blocked they are readable, not dimmed
 - [ ] Both widgets rise into view once and stay; a re-render in the editor does
       not leave anything stuck at zero opacity
 - [ ] With JavaScript blocked, both widgets are fully visible
