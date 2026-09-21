@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.34.0
+Stable tag: 2.35.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -109,6 +109,23 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.35.0 =
+* **Fixed: the panel padding control did nothing below 1200px.** The stylesheet
+  re-set the padding inside a media query on the panel itself, and a custom
+  property set on a descendant beats the same one set where the controls write,
+  so the slider was being overruled at exactly the widths people check. The
+  default is fluid now and there is nothing left to overrule it.
+* **Fixed: "Picture to footer" only moved the pills.** The ink panel's spec rows
+  had no gap of their own, so the diagram and the rows under it could not be
+  separated. Both panels take the setting now.
+* **Fixed: an italic caption was italic on one half only.** The stylesheet
+  forced the right half back to normal, so a font style set in the panel applied
+  to "hot contaminated exhaust in" and not to "cooled air out".
+* **The diagram caption is now styleable.** It sits on the plate rather than on
+  the panel, so it has its own colour -- and its own colour for the right half,
+  and its own gap under the diagram. It used to inherit the panel's text colour
+  and sink into the black.
 
 = 2.34.0 =
 * **The motes on the diagram are no longer five identical dots on a straight

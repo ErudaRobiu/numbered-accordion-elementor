@@ -544,6 +544,13 @@ the file system.
       text can still be selected, and a screen reader still reads it
 - [ ] **Set to a word at a time**: the words wait dimmed and fill as the panel
       is reached. With JavaScript blocked they are readable, not dimmed
+- [ ] **Check the spacing sliders at a narrow window, not just a wide one.**
+      Panel padding in particular: it is the one that was being overruled by
+      the stylesheet below 1200px
+- [ ] "Picture to footer" moves the pills in one panel and the spec rows in the
+      other, by the same amount
+- [ ] The diagram caption takes its own colour on the plate, and setting an
+      italic in the panel italicises both halves of it
 - [ ] Both widgets rise into view once and stay; a re-render in the editor does
       not leave anything stuck at zero opacity
 - [ ] With JavaScript blocked, both widgets are fully visible

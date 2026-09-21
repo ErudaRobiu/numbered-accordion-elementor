@@ -614,6 +614,29 @@ class Split_Slab_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'caption_colour',
+			array(
+				'label'       => esc_html__( 'Caption', 'numbered-accordion' ),
+				'type'        => Controls_Manager::COLOR,
+				'description' => esc_html__( 'The line under the diagram. It sits on the plate rather than on the panel, so it needs its own colour to stay readable.', 'numbered-accordion' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .eexp' => '--eexp-caption-colour: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'caption_accent',
+			array(
+				'label'     => esc_html__( 'Caption, right half', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .eexp' => '--eexp-caption-accent: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
 			'p2_plate_colour',
 			array(
 				'label'       => esc_html__( 'Diagram plate', 'numbered-accordion' ),
@@ -862,6 +885,7 @@ class Split_Slab_Widget extends Widget_Base {
 		$this->add_space_control( 'gap_stage', esc_html__( 'Body to picture', 'numbered-accordion' ), '--eexp-gap-stage', 120 );
 		$this->add_space_control( 'gap_footer', esc_html__( 'Picture to footer', 'numbered-accordion' ), '--eexp-gap-footer', 120 );
 		$this->add_space_control( 'gap_label', esc_html__( 'Footer label to pills', 'numbered-accordion' ), '--eexp-gap-label', 60 );
+		$this->add_space_control( 'gap_caption', esc_html__( 'Diagram to its caption', 'numbered-accordion' ), '--eexp-gap-caption', 60 );
 
 		$this->add_control(
 			'heading_measure',
