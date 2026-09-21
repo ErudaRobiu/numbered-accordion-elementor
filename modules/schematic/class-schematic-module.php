@@ -18,7 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class Schematic_Module implements Module {
 
-	const STYLE_HANDLE = 'efs-flow-schematic';
+	const STYLE_HANDLE  = 'efs-flow-schematic';
+	const SCRIPT_HANDLE = 'efs-flow-schematic';
 
 	/**
 	 * Module id.
@@ -105,6 +106,7 @@ final class Schematic_Module implements Module {
 	 */
 	public function boot() {
 		add_action( 'elementor/frontend/after_register_styles', array( $this, 'register_styles' ) );
+		add_action( 'elementor/frontend/after_register_scripts', array( $this, 'register_scripts' ) );
 		add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
 	}
 
@@ -117,6 +119,19 @@ final class Schematic_Module implements Module {
 			ERUDA_URL . 'modules/schematic/assets/css/flow-schematic.css',
 			array(),
 			ERUDA_VERSION
+		);
+	}
+
+	/**
+	 * Register the script. Enqueued on demand via get_script_depends().
+	 */
+	public function register_scripts() {
+		wp_register_script(
+			self::SCRIPT_HANDLE,
+			ERUDA_URL . 'modules/schematic/assets/js/flow-schematic.js',
+			array(),
+			ERUDA_VERSION,
+			true
 		);
 	}
 

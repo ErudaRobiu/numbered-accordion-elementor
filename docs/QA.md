@@ -520,6 +520,18 @@ opening it from the file system.
 - [ ] A stage carrying a link is a real link: it lifts on hover, takes keyboard
       focus, and does not move for a visitor with "reduce motion" on
 - [ ] Every colour control changes what it names and nothing else
+- [ ] **Set a diagram under Artwork** and it replaces the stages entirely
+- [ ] With no card, the artwork sits on the section with no border, no
+      background and no padding — a transparent SVG shows the section through it
+- [ ] **Narrow the browser until the artwork stops fitting.** It pans sideways
+      rather than shrinking, and the slider appears under it
+- [ ] The slider and the frame stay in step both ways: dragging the handle moves
+      the diagram, and swiping the diagram moves the handle
+- [ ] Widen it again and the slider disappears rather than sitting there doing
+      nothing
+- [ ] **Block the script.** The diagram still pans by swipe and by keyboard, and
+      no slider appears
+- [ ] "Smallest readable width" changes the point at which panning begins
 
 ## Split Slab and Comparison Ledger
 

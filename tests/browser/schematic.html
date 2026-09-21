@@ -16,6 +16,7 @@ body{margin:0;background:#060c11;font:16px/1.6 "Plus Jakarta Sans",system-ui,san
   font:600 12px/1 "Plus Jakarta Sans",system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase}
 /* A narrow column at a wide window — the case a media query cannot see. */
 .host--column{max-width:760px;margin-inline:0}
+.host--narrow{max-width:560px;margin-inline:0}
 </style>
 </head>
 <body>
@@ -277,6 +278,32 @@ body{margin:0;background:#060c11;font:16px/1.6 "Plus Jakarta Sans",system-ui,san
 			</div>
 		</div>
 		</div>
+
+<p class="marker">Artwork mode — no frame, pans on a narrow screen</p>
+<div class="host" style="--efs-art-min:1100px">		<div class="efs efs--art efs--plain">
+			<div class="efs__pan">
+				<img class="efs__art" src="schematic-art.svg"
+					alt="Contaminated process exhaust enters a Lepido source unit; a sealed circuit carries the recovered energy to a HeatCore Hx delivery unit."
+										loading="lazy" decoding="async">
+			</div>
+			<input class="efs__slider" type="range" min="0" max="1000" value="0" step="1"
+				aria-label="Pan the diagram sideways">
+		</div>
+		</div>
+
+<p class="marker">Artwork mode in a 560px column — the slider appears</p>
+<div class="host host--narrow" style="--efs-art-min:1100px">		<div class="efs efs--art efs--plain">
+			<div class="efs__pan">
+				<img class="efs__art" src="schematic-art.svg"
+					alt="Contaminated process exhaust enters a Lepido source unit; a sealed circuit carries the recovered energy to a HeatCore Hx delivery unit."
+										loading="lazy" decoding="async">
+			</div>
+			<input class="efs__slider" type="range" min="0" max="1000" value="0" step="1"
+				aria-label="Pan the diagram sideways">
+		</div>
+		</div>
+
+<script src="../../modules/schematic/assets/js/flow-schematic.js"></script>
 
 </body>
 </html>

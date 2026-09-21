@@ -81,9 +81,19 @@ class Flow_Schematic_Widget extends Widget_Base {
 	}
 
 	/**
+	 * Scripts to enqueue when this widget is on the page.
+	 *
+	 * @return array
+	 */
+	public function get_script_depends() {
+		return array( \ErudaToolkit\Modules\Schematic\Schematic_Module::SCRIPT_HANDLE );
+	}
+
+	/**
 	 * Controls.
 	 */
 	protected function register_controls() {
+		$this->register_artwork_controls();
 		$this->register_stage_controls();
 		$this->register_source_controls();
 		$this->register_output_controls();
@@ -92,6 +102,64 @@ class Flow_Schematic_Widget extends Widget_Base {
 		$this->register_node_style_controls();
 		$this->register_line_style_controls();
 		$this->register_type_style_controls();
+	}
+
+	/**
+	 * A finished drawing, used instead of the stages.
+	 */
+	private function register_artwork_controls() {
+		$this->start_controls_section(
+			'section_artwork',
+			array( 'label' => esc_html__( 'Artwork', 'numbered-accordion' ) )
+		);
+
+		$this->add_control(
+			'art',
+			array(
+				'label'       => esc_html__( 'Diagram', 'numbered-accordion' ),
+				'type'        => Controls_Manager::MEDIA,
+				'media_types' => array( 'image', 'svg' ),
+				'description' => esc_html__( 'An SVG keeps its edges at any size and stays a few kilobytes. Set one and it is drawn instead of the stages below; leave it empty and the stages are used.', 'numbered-accordion' ),
+			)
+		);
+
+		$this->add_control(
+			'art_alt',
+			array(
+				'label'       => esc_html__( 'Described for a screen reader', 'numbered-accordion' ),
+				'type'        => Controls_Manager::TEXTAREA,
+				'rows'        => 3,
+				'label_block' => true,
+				'description' => esc_html__( 'What the diagram says, in a sentence or two. An SVG with its own title and description needs nothing here.', 'numbered-accordion' ),
+				'condition'   => array( 'art[url]!' => '' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'art_min',
+			array(
+				'label'       => esc_html__( 'Smallest readable width', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array(
+					'px' => array(
+						'min' => 320,
+						'max' => 2000,
+					),
+				),
+				'default'     => array(
+					'unit' => 'px',
+					'size' => 1100,
+				),
+				'description' => esc_html__( 'Below this the diagram stops shrinking and pans sideways instead, with a slider under it.', 'numbered-accordion' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .efs' => '--efs-art-min: {{SIZE}}{{UNIT}};',
+				),
+				'condition'   => array( 'art[url]!' => '' ),
+			)
+		);
+
+		$this->end_controls_section();
 	}
 
 	/**
@@ -594,9 +662,8 @@ class Flow_Schematic_Widget extends Widget_Base {
 			array(
 				'label'        => esc_html__( 'Draw the card around it', 'numbered-accordion' ),
 				'type'         => Controls_Manager::SWITCHER,
-				'default'      => 'yes',
 				'return_value' => 'yes',
-				'description'  => esc_html__( 'Off, the diagram sits straight on the section behind it.', 'numbered-accordion' ),
+				'description'  => esc_html__( 'Off by default: the diagram sits straight on the section behind it, with no border and nothing painted underneath.', 'numbered-accordion' ),
 			)
 		);
 
@@ -1002,10 +1069,48 @@ class Flow_Schematic_Widget extends Widget_Base {
 	}
 
 	/**
+	 * A finished drawing, in a frame that pans rather than shrinks.
+	 *
+	 * The frame scrolls on its own, so the diagram is reachable by swipe and by
+	 * keyboard whether the script runs or not. The slider is the affordance
+	 * over that scroll -- a phone shows no scrollbar, so without it nothing
+	 * says there is more drawing to the right -- and it stays hidden until the
+	 * script has confirmed there is somewhere to pan.
+	 *
+	 * @param array  $settings Settings.
+	 * @param string $art      Image URL.
+	 */
+	private function render_artwork( $settings, $art ) {
+		$alt   = isset( $settings['art_alt'] ) ? trim( (string) $settings['art_alt'] ) : '';
+		$root  = 'efs efs--art';
+		$root .= 'yes' === ( isset( $settings['frame'] ) ? $settings['frame'] : '' ) ? '' : ' efs--plain';
+		?>
+		<div class="<?php echo esc_attr( $root ); ?>">
+			<div class="efs__pan">
+				<img class="efs__art" src="<?php echo esc_url( $art ); ?>"
+					alt="<?php echo esc_attr( $alt ); ?>"
+					<?php echo '' === $alt ? 'role="presentation"' : ''; ?>
+					loading="lazy" decoding="async">
+			</div>
+			<input class="efs__slider" type="range" min="0" max="1000" value="0" step="1"
+				aria-label="<?php echo esc_attr__( 'Pan the diagram sideways', 'numbered-accordion' ); ?>">
+		</div>
+		<?php
+	}
+
+	/**
 	 * Render the widget on the front end.
 	 */
 	protected function render() {
 		$settings = $this->get_settings_for_display();
+
+		$art = isset( $settings['art']['url'] ) ? (string) $settings['art']['url'] : '';
+
+		if ( '' !== $art ) {
+			$this->render_artwork( $settings, $art );
+
+			return;
+		}
 
 		$stages = isset( $settings['stages'] ) && is_array( $settings['stages'] ) ? $settings['stages'] : array();
 		$stages = array_slice( $stages, 0, Schematic_Content::MAX_STAGES );

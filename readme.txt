@@ -77,6 +77,8 @@ connectors between them.
 * Colours, line weight, corner radius, node height and the run between stages
   all set from the panel
 * Stacks into a vertical flow when the diagram's own box gets narrow
+* Or set a finished drawing instead — an SVG or an image — and it pans sideways
+  with a slider once it is wider than the space it has
 
 = Duplicate Pages =
 
@@ -127,6 +129,26 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.37.0 =
+* **New: artwork mode on the Flow Schematic.** Set a diagram — an SVG, ideally
+  — and it is drawn instead of the stages. Some drawings are not a row of
+  stages, and forcing one through a grid is how a diagram ends up almost
+  aligned.
+* **A wide diagram pans rather than shrinks.** Below the width at which its
+  labels stop being readable, the frame scrolls sideways with a slider under
+  it. The frame scrolls natively, so the diagram is reachable by swipe,
+  trackpad and keyboard whether the script runs or not; the slider is the
+  affordance over that, because a phone shows no scrollbar and nothing else
+  says there is more drawing to the right. It stays hidden until there is
+  actually somewhere to pan, so it is never a control that does nothing.
+* **The card is off by default now.** A diagram sits straight on the section
+  behind it, with no border and nothing painted underneath, which is what a
+  transparent SVG wants. Switch "draw the card around it" on to get the old
+  framed look.
+* Fixed: a vertical connector rendered as a 6px bar. The horizontal line
+  carries a 6px floor so a short run stays visible, and turned upright that
+  floor became the line's thickness.
 
 = 2.36.0 =
 * **New: Flow Schematic.** A process diagram as a widget — stages in a row,

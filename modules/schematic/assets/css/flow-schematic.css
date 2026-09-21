@@ -579,3 +579,88 @@ a.efs__node:focus-visible {
 		transform: none;
 	}
 }
+
+/* ── the drawing as artwork ─────────────────────────────────────────── */
+
+/*
+ * A diagram that arrives as a picture -- an SVG, usually -- rather than being
+ * built out of stages. Same widget, because the thing around it is the same
+ * problem: a system drawing is wide, and a wide drawing on a phone has only
+ * two honest answers. Shrinking it to fit is not one of them, so it pans.
+ *
+ * The frame scrolls natively. The slider is an affordance over that scroll,
+ * not a replacement for it: a phone shows no scrollbar, so nothing otherwise
+ * says there is more drawing to the right. It stays hidden until the script
+ * has confirmed there is somewhere to pan.
+ */
+.efs__pan {
+	overflow-x: auto;
+	overflow-y: hidden;
+	overscroll-behavior-x: contain;
+	scrollbar-width: none;
+	-webkit-overflow-scrolling: touch;
+}
+
+.efs__pan::-webkit-scrollbar {
+	display: none;
+}
+
+.efs__art {
+	display: block;
+	width: 100%;
+	height: auto;
+	/* Below this the labels stop being readable, so it pans instead. */
+	min-width: var(--efs-art-min, 1100px);
+}
+
+.efs__slider {
+	display: none;
+	width: 100%;
+	margin: 26px 0 0;
+	padding: 0;
+	background: none;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.efs.is-pannable .efs__slider {
+	display: block;
+}
+
+.efs__slider::-webkit-slider-runnable-track {
+	height: 1px;
+	background: var(--efs-line);
+}
+
+.efs__slider::-moz-range-track {
+	height: 1px;
+	background: var(--efs-line);
+}
+
+.efs__slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 14px;
+	height: 14px;
+	margin-top: -6.5px;
+	border-radius: 50%;
+	background: var(--efs-accent);
+	border: 3px solid var(--efs-surface);
+	box-shadow: 0 0 0 1px var(--efs-accent);
+	cursor: grab;
+}
+
+.efs__slider::-moz-range-thumb {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: var(--efs-accent);
+	border: 3px solid var(--efs-surface);
+	box-shadow: 0 0 0 1px var(--efs-accent);
+	cursor: grab;
+}
+
+.efs__slider:focus-visible {
+	outline: 2px solid var(--efs-accent);
+	outline-offset: 6px;
+}

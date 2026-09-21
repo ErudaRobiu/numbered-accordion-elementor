@@ -54,6 +54,17 @@ if ( ! function_exists( 'esc_attr' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_attr__' ) ) {
+	/**
+	 * @param string $text   Text.
+	 * @param string $domain Domain.
+	 * @return string
+	 */
+	function esc_attr__( $text, $domain = 'default' ) { // phpcs:ignore
+		return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
 if ( ! function_exists( 'esc_url' ) ) {
 	/**
 	 * @param string $url URL.
@@ -296,7 +307,19 @@ namespace {
 		'frame'       => '',
 	);
 
+	// The same diagram as finished artwork, which is the mode that pans.
+	$art = array(
+		'art'     => array( 'url' => 'schematic-art.svg' ),
+		'art_alt' => 'Contaminated process exhaust enters a Lepido source unit; a sealed circuit carries the recovered energy to a HeatCore Hx delivery unit.',
+		'art_min' => array(
+			'unit' => 'px',
+			'size' => 1100,
+		),
+		'frame'   => '',
+	);
+
 	$loop_widget   = new Schematic_Fixture( $loop );
+	$art_widget    = new Schematic_Fixture( $art );
 	$bare_widget   = new Schematic_Fixture( $bare );
 	$single_widget = new Schematic_Fixture( $single );
 
@@ -319,6 +342,7 @@ body{margin:0;background:#060c11;font:16px/1.6 "Plus Jakarta Sans",system-ui,san
   font:600 12px/1 "Plus Jakarta Sans",system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase}
 /* A narrow column at a wide window — the case a media query cannot see. */
 .host--column{max-width:760px;margin-inline:0}
+.host--narrow{max-width:560px;margin-inline:0}
 </style>
 </head>
 <body>
@@ -334,6 +358,14 @@ body{margin:0;background:#060c11;font:16px/1.6 "Plus Jakarta Sans",system-ui,san
 
 <p class="marker">The loop again, in a 760px column</p>
 <div class="host host--column"><?php echo $loop_widget->to_html(); // phpcs:ignore ?></div>
+
+<p class="marker">Artwork mode — no frame, pans on a narrow screen</p>
+<div class="host" style="--efs-art-min:1100px"><?php echo $art_widget->to_html(); // phpcs:ignore ?></div>
+
+<p class="marker">Artwork mode in a 560px column — the slider appears</p>
+<div class="host host--narrow" style="--efs-art-min:1100px"><?php echo $art_widget->to_html(); // phpcs:ignore ?></div>
+
+<script src="<?php echo esc_attr( $assets ); ?>js/flow-schematic.js"></script>
 
 </body>
 </html>
