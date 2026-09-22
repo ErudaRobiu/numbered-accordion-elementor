@@ -34,8 +34,14 @@ sed -i '' -E "s/^(Stable tag: ).*/\1${VERSION}/" readme.txt
 # Build the distributable zip from a clean export.
 BUILD="$(mktemp -d)"
 mkdir -p "${BUILD}/${SLUG}"
+# node_modules is in the list because the browser tests ask for puppeteer-core
+# and README.md says to install it "anywhere" -- the repository root being the
+# obvious anywhere. It is gitignored, so nothing here would have complained,
+# and 60MB of somebody else's Chrome bindings would have gone out to every
+# client site inside the plugin.
 rsync -a --exclude '.git' --exclude '.gitignore' --exclude 'bin' --exclude 'docs' \
       --exclude 'tests' --exclude 'README.md' --exclude '*.zip' --exclude '.DS_Store' \
+      --exclude 'node_modules' --exclude 'package.json' --exclude 'package-lock.json' \
       ./ "${BUILD}/${SLUG}/"
 ( cd "$BUILD" && zip -rq "${SLUG}.zip" "$SLUG" )
 mv "${BUILD}/${SLUG}.zip" "./${SLUG}.zip"
