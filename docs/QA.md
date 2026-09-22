@@ -663,9 +663,15 @@ script-blocked fallback, against `tests/browser/header.html`.
 - [ ] Below 1025px the compact bar stays full width. A little tab floating in
       the middle of a phone screen means the fit-to-contents rule has leaked
       past the breakpoint
-- [ ] **Open a panel while it is floating: the bar snaps back to full width and
-      back up to the top**, and bar and panel become one sheet. Close it and it
-      returns to the floating bar
+- [ ] **Open a panel while it is floating: the bar stays exactly where it is.**
+      It used to snap back to full width, and the panel fading in while the bar
+      resized under it is what juddered
+- [ ] **Open the same panel at the very top of the page: the bar must stay
+      transparent.** The panel gets a fill; the bar does not, and the hero
+      should still be visible straight through it
+- [ ] **And the panel opens at the same width in both places.** Open one at the
+      top, scroll down, open it again — it should be the same card in the same
+      position, not a sheet across the window and then a card
 - [ ] The bar carries the button **once**. Two side by side means the drawer's
       copy is not being hidden
 - [ ] **Menu labels shuffle their own letters on hover** and settle back on the
@@ -685,9 +691,22 @@ script-blocked fallback, against `tests/browser/header.html`.
       and None leaves it transparent the whole way down
 - [ ] Over a **busy photograph**, check the menu text is still readable once
       frosted. If it is not, that is the fill's opacity, not the blur
-- [ ] **Hover an item with a panel: it opens full width**, not just under the
-      word. A panel the width of its own label means the item has picked up a
-      `position` it should not have
+- [ ] **Hover an item whose panel has a picture in it: it opens wide**, not
+      just under the word. A panel the width of its own label means the item
+      has picked up a `position` it should not have
+- [ ] **An item whose panel is nothing but links opens as a dropdown instead**,
+      sized to its links and hanging under the word. One of those stretched
+      across the header is the thing this replaced
+- [ ] Put a links-only panel on the **last** item in the menu: it should open
+      to the left rather than running off the side of the bar
+- [ ] **A panel is two sides: the list, and the picture with the eyebrow and
+      blurb under it.** The picture should finish level with the bottom of the
+      list -- a band of white under it means it has kept a shape of its own
+- [ ] **Hover the picture: nothing should happen to it.** It eases in a little
+      while the panel is open and holds there. A fade, a grey, or a zoom that
+      follows the pointer is the theme's own `img:hover` getting through
+- [ ] Clear a panel's picture and its blurb: the links should take the whole
+      width rather than leaving half a panel empty
 - [ ] Sweep the pointer straight across the bar to the far side: **no panel
       should open on the way**. If they flash open in turn, raise "Pause before
       a panel opens"

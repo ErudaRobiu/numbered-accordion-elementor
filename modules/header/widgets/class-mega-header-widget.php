@@ -888,13 +888,29 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
+		/*
+		 * A new id for a control that used to mean something else.
+		 *
+		 * This was `panel_cols`, and it described three columns: the links,
+		 * the text and the picture. The panel has two sides now, and a saved
+		 * `1.1fr 1fr 0.9fr` would lay them out in the first two tracks of
+		 * three and leave a third of the panel empty. Elementor writes a
+		 * control's default into the page as well as an edited value, so
+		 * every site that has ever saved this widget is carrying that string,
+		 * and changing the default alone would not have reached them.
+		 *
+		 * Under a new id the old value is orphaned -- kept in the database,
+		 * read by nothing -- and the panel gets the two-column default. The
+		 * one site that had deliberately tuned the old three has to say so
+		 * again, which is the cost of the change and is paid once.
+		 */
 		$this->add_control(
-			'panel_cols',
+			'panel_split',
 			array(
-				'label'       => esc_html__( 'Columns', 'numbered-accordion' ),
-				'description' => esc_html__( 'Any valid grid-template-columns value. The three parts are the links, the text and the picture.', 'numbered-accordion' ),
+				'label'       => esc_html__( 'How the two sides divide', 'numbered-accordion' ),
+				'description' => esc_html__( 'Any valid grid-template-columns value. The two parts are the list of links and the picture. Leave it alone unless the list is unusually long or unusually short.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXT,
-				'default'     => '1.1fr 1fr 0.9fr',
+				'default'     => 'minmax(0, 1fr) minmax(0, 1.15fr)',
 				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-panel-cols: {{VALUE}};' ),
 			)
 		);
@@ -1006,14 +1022,37 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
+		/*
+		 * A height rather than a shape, and a new id for the same reason as
+		 * the split above.
+		 *
+		 * The picture used to hold an aspect ratio, which is what left a band
+		 * of nothing under it whenever the list beside it was taller than the
+		 * shape allowed. It fills its side of the panel now and takes its
+		 * height from the list, so the only number still worth setting is how
+		 * short it is allowed to get when the list is a line or two.
+		 */
 		$this->add_control(
-			'figure_ratio',
+			'figure_min',
 			array(
-				'label'      => esc_html__( 'Picture shape', 'numbered-accordion' ),
+				'label'      => esc_html__( 'Shortest the picture may be', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
-				'range'      => array( 'px' => array( 'min' => 0.6, 'max' => 2.4, 'step' => 0.05 ) ),
-				'default'    => array( 'size' => 1.5 ),
-				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-figure-ratio: {{SIZE}};' ),
+				'size_units' => array( 'px', 'vh' ),
+				'range'      => array( 'px' => array( 'min' => 80, 'max' => 480 ), 'vh' => array( 'min' => 5, 'max' => 60 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 200 ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-figure-min: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_control(
+			'figure_zoom',
+			array(
+				'label'       => esc_html__( 'How far the picture drifts', 'numbered-accordion' ),
+				'description' => esc_html__( 'The picture eases in a little while the panel is open. Nought holds it still.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'range'       => array( '%' => array( 'min' => 0, 'max' => 12, 'step' => 1 ) ),
+				'default'     => array( 'unit' => '%', 'size' => 5 ),
+				'selectors'   => array( '{{WRAPPER}} .ehdr' => '--ehdr-figure-zoom: calc(1 + {{SIZE}} / 100);' ),
 			)
 		);
 
@@ -1623,9 +1662,23 @@ class Mega_Header_Widget extends Widget_Base {
 						// A panel with nothing in it is not a panel. Without
 						// this an item switched to "opens a panel" and then
 						// left empty gets a caret that opens a white strip.
-						$hasPanel = $hasPanel && ( $links || '' !== $blurb || '' !== $figure );
+						$hasPanel = $hasPanel && ( $links || '' !== $blurb || '' !== $eyebrow || '' !== $figure );
+
+						// The panel has two sides: the list, and the picture
+						// with whatever the panel says about itself under it.
+						// Either can be missing, and when one is the other
+						// takes the whole width -- a two-column grid with one
+						// thing in it is a panel half full of nothing.
+						$aside = ( '' !== $figure || '' !== $blurb || '' !== $eyebrow );
+						$split = ( $links && $aside );
+
+						// And a panel that is only links is a dropdown rather
+						// than a mega menu: it sizes to its list and hangs
+						// under the word that opened it, instead of stretching
+						// four short rows across the width of the header.
+						$drop = ( $hasPanel && $links && ! $aside );
 						?>
-						<li class="ehdr__item">
+						<li class="ehdr__item<?php echo $drop ? ' ehdr__item--drop' : ''; ?>">
 							<a class="ehdr__link"<?php $this->link_attrs( isset( $item['link'] ) ? $item['link'] : array() ); ?>>
 								<?php $this->label( $label, $anim ); ?>
 								<?php
@@ -1637,7 +1690,7 @@ class Mega_Header_Widget extends Widget_Base {
 
 							<?php if ( $hasPanel ) : ?>
 								<div class="ehdr__panel">
-									<div class="ehdr__panel-inner">
+									<div class="ehdr__panel-inner<?php echo $split ? '' : ' ehdr__panel-inner--solo'; ?>">
 										<?php if ( $links ) : ?>
 											<ul class="ehdr__links">
 												<?php foreach ( $links as $row ) : ?>
@@ -1656,19 +1709,23 @@ class Mega_Header_Widget extends Widget_Base {
 											</ul>
 										<?php endif; ?>
 
-										<?php if ( '' !== $blurb || '' !== $eyebrow ) : ?>
-											<p class="ehdr__blurb">
-												<?php if ( '' !== $eyebrow ) : ?>
-													<strong><?php echo esc_html( $eyebrow ); ?></strong>
+										<?php if ( $aside ) : ?>
+											<div class="ehdr__panel-aside">
+												<?php if ( '' !== $figure ) : ?>
+													<figure class="ehdr__figure">
+														<img src="<?php echo esc_url( $figure ); ?>" alt="" loading="lazy" decoding="async" />
+													</figure>
 												<?php endif; ?>
-												<?php echo esc_html( $blurb ); ?>
-											</p>
-										<?php endif; ?>
 
-										<?php if ( '' !== $figure ) : ?>
-											<figure class="ehdr__figure">
-												<img src="<?php echo esc_url( $figure ); ?>" alt="" loading="lazy" decoding="async" />
-											</figure>
+												<?php if ( '' !== $blurb || '' !== $eyebrow ) : ?>
+													<p class="ehdr__blurb">
+														<?php if ( '' !== $eyebrow ) : ?>
+															<strong><?php echo esc_html( $eyebrow ); ?></strong>
+														<?php endif; ?>
+														<?php echo esc_html( $blurb ); ?>
+													</p>
+												<?php endif; ?>
+											</div>
 										<?php endif; ?>
 									</div>
 								</div>

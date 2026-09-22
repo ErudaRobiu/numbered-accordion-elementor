@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.38.0
+Stable tag: 2.39.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,41 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.39.0 =
+* **Fixed: opening a menu at the top of the page turned the whole header
+  white.** The bar is meant to be transparent over a hero, and it was —
+  until you hovered a menu item, at which point the full width of the window
+  went opaque behind a dropdown a fraction of its size. The panel gets a fill
+  now; the bar keeps the picture behind it and only hardens once it has
+  already frosted.
+* **The dropdown opens at one width, wherever you are on the page.** It used
+  to span the bar, and the bar is two widths — full bleed at the top, folded
+  to its own contents once it frosts — so the same menu gave you a sheet
+  across the window at the top and a card lower down. It is the folded width
+  in both, centred, landing in the same place either way.
+* **A panel is two sides rather than three.** The links, and the picture with
+  whatever the panel says about itself underneath it. The middle column was a
+  sentence given the largest share of the panel, and it left the picture
+  stranded at the end with the panel's own height showing under it.
+* **The picture fills its side.** It had a fixed shape regardless of the list
+  beside it, and the difference between the two came out as white space. It
+  takes its height from the list now, so the two sides finish level.
+* **And it no longer flinches at the pointer.** Whatever a theme does to an
+  `img` on hover — a fade, a filter, a lightbox cursor — is switched off
+  inside a panel, where it reads as a fault rather than a flourish. What
+  replaces it is a slow drift that belongs to the panel being open. Set "how
+  far the picture drifts" to nought to hold it still.
+* **A panel that is only links is a dropdown.** Four short rows stretched
+  across the width of the header is the other half of what looked wrong. One
+  with nothing but links now sizes to its links and hangs under the word that
+  opened it, flipping to the other edge when it would otherwise run off the
+  side of the bar.
+* **Two panel controls have moved.** "Columns" described three of them and is
+  now "How the two sides divide"; "Picture shape" is now "Shortest the picture
+  may be", since the picture takes its height from the list. Both are new
+  settings rather than renamed ones, so a header that had either tuned by hand
+  takes the new default and needs setting again — nothing else is affected.
 
 = 2.38.0 =
 * **Fixed: an SVG diagram did not letter in the site's typeface.** An SVG

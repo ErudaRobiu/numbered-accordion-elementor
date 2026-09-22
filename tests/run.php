@@ -1263,6 +1263,130 @@ check( 'letter-spacing counts as a presentation attribute', true, Schematic_Svg:
 check( 'text-anchor does too', true, Schematic_Svg::allowed_attribute( 'text-anchor' ) );
 check( 'and formaction does not', false, Schematic_Svg::allowed_attribute( 'formaction' ) );
 
+/* ----------------------------------------- Mega_Header_Widget markup --- */
+
+/*
+ * The shape of a panel, proven from the widget's own render().
+ *
+ * A panel is two sides: the list of links, and the picture with whatever the
+ * panel says about itself underneath it. Which of the two it actually has
+ * decides the layout, and the layout is a class the stylesheet keys off -- so
+ * the class being right is the whole of the contract between the PHP and the
+ * CSS, and it is not something reading either one on its own can confirm.
+ */
+foreach ( array( 'esc_html', 'esc_attr', 'esc_url' ) as $fn ) {
+	if ( ! function_exists( $fn ) ) {
+		eval( 'function ' . $fn . '( $v ) { return htmlspecialchars( (string) $v, ENT_QUOTES, "UTF-8" ); }' ); // phpcs:ignore
+	}
+}
+
+if ( ! function_exists( 'esc_attr__' ) ) {
+	/**
+	 * @param string $text   Text.
+	 * @param string $domain Domain.
+	 * @return string
+	 */
+	function esc_attr__( $text, $domain = 'default' ) { // phpcs:ignore
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
+/**
+ * The widget with a settings array pushed into it.
+ *
+ * render() is protected and reads its settings through Elementor; a subclass
+ * is the whole of what it takes to call it without either.
+ */
+class Header_Render_Probe extends \ErudaToolkit\Modules\Header\Widgets\Mega_Header_Widget {
+
+	/**
+	 * @var array
+	 */
+	public $feed = array();
+
+	/**
+	 * @return array
+	 */
+	public function get_settings_for_display() {
+		return $this->feed;
+	}
+
+	/**
+	 * @param array $settings Settings to render with.
+	 * @return string
+	 */
+	public function markup( $settings ) {
+		$this->feed = $settings;
+
+		ob_start();
+		( new ReflectionMethod( $this, 'render' ) )->invoke( $this );
+
+		return (string) ob_get_clean();
+	}
+}
+
+/**
+ * One menu item, with whatever panel parts are asked for.
+ *
+ * @param array $parts Panel parts to include.
+ * @return string
+ */
+function header_panel_markup( $parts ) {
+	$probe = new Header_Render_Probe();
+
+	$item = array(
+		'label'     => 'Systems',
+		'has_panel' => 'yes',
+	);
+
+	if ( ! empty( $parts['links'] ) ) {
+		$item['panel_links'] = "How it works | /how\nSpecifications | /spec";
+	}
+
+	if ( ! empty( $parts['image'] ) ) {
+		$item['panel_image'] = array( 'url' => 'https://example.test/p.jpg' );
+	}
+
+	if ( ! empty( $parts['blurb'] ) ) {
+		$item['panel_blurb'] = 'What it does.';
+	}
+
+	return $probe->markup( array( 'items' => array( $item ) ) );
+}
+
+$both  = header_panel_markup( array( 'links' => true, 'image' => true, 'blurb' => true ) );
+$only  = header_panel_markup( array( 'links' => true ) );
+$noimg = header_panel_markup( array( 'links' => true, 'blurb' => true ) );
+
+check( 'a panel with both sides is not marked solo', false, (bool) strpos( $both, 'ehdr__panel-inner--solo' ) );
+check( 'and not marked as a short dropdown either', false, (bool) strpos( $both, 'ehdr__item--drop' ) );
+
+// The picture and the caption are one column, so they have to be one element.
+check( 'the picture and the blurb are in the same side', 1, preg_match(
+	'/<div class="ehdr__panel-aside">.*?<figure class="ehdr__figure">.*?<\/figure>.*?<p class="ehdr__blurb">.*?<\/p>.*?<\/div>/s',
+	$both
+) );
+
+check( 'the picture comes before the words under it', true,
+	strpos( $both, 'ehdr__figure' ) < strpos( $both, 'ehdr__blurb' ) );
+
+check( 'a links-only panel is one column', true, (bool) strpos( $only, 'ehdr__panel-inner--solo' ) );
+check( 'and its item is a short dropdown', true, (bool) strpos( $only, 'ehdr__item--drop' ) );
+check( 'with no empty second side left behind', false, (bool) strpos( $only, 'ehdr__panel-aside' ) );
+
+// A blurb with no picture is still a second side; it is only the drop-down
+// form that needs the item to have nothing but links.
+check( 'a blurb without a picture still makes two sides', false, (bool) strpos( $noimg, 'ehdr__panel-inner--solo' ) );
+check( 'and that is not a short dropdown', false, (bool) strpos( $noimg, 'ehdr__item--drop' ) );
+
+// An eyebrow on its own used to be dropped: the emptiness test named the
+// blurb and the picture and forgot it, so a panel carrying only a heading
+// rendered a caret over nothing.
+$eyebrow = ( new Header_Render_Probe() )->markup( array(
+	'items' => array( array( 'label' => 'Systems', 'has_panel' => 'yes', 'panel_eyebrow' => 'What we do' ) ),
+) );
+check( 'a panel with only an eyebrow still opens', true, (bool) strpos( $eyebrow, 'ehdr__panel' ) );
+
 /* ------------------------------------------------------------- report --- */
 
 

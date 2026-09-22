@@ -647,6 +647,82 @@
 			return width + ( isNaN( inset ) ? 32 : inset ) * 2;
 		}
 
+		/**
+		 * What the folded bar actually comes out at, in pixels.
+		 *
+		 * The panel has to be this wide at the top of the page, where the bar
+		 * it hangs off is still full bleed -- and a percentage will not do it.
+		 * A share written as `80%` resolves against whatever box the thing
+		 * carrying it sits in, and the bar and the panel sit in different
+		 * boxes, so the same 80% is two different widths. Resolved here once,
+		 * against the window the bar is a share of, it is one number that both
+		 * of them can agree on.
+		 *
+		 * Fitting the contents is the other mode and the default, and there
+		 * the measured width is the answer already.
+		 *
+		 * @param  {number} fit What the row needs, sized to its contents.
+		 * @return {number}     Width in pixels, or 0 if there is no answer.
+		 */
+		function compactWidthPx( fit ) {
+			var share = window.getComputedStyle( root )
+				.getPropertyValue( '--ehdr-stuck-width' ).trim();
+
+			// A custom property comes back as the token that was written, so
+			// this is still '80%' or '1100px' rather than a resolved length.
+			var n = parseFloat( share );
+
+			if ( share && ! isNaN( n ) ) {
+				if ( /(%|vw)$/.test( share ) ) {
+					return Math.round( window.innerWidth * n / 100 );
+				}
+
+				if ( /px$/.test( share ) ) {
+					return Math.round( n );
+				}
+			}
+
+			return fit;
+		}
+
+		/**
+		 * Which short dropdowns have to open the other way.
+		 *
+		 * A links-only panel is anchored to the left edge of the word that
+		 * opened it, which is right for everything but the last item or two,
+		 * where it would run off the side of the bar. The stylesheet cannot
+		 * know which those are; it is a measurement.
+		 *
+		 * The panel is hidden rather than removed, so it still has a box and
+		 * can be measured where it sits without being shown first. The class
+		 * is taken off before reading, or an item that has already flipped
+		 * measures as fitting and flaps back and forth on every resize.
+		 */
+		function placeDrops() {
+			var drops = root.querySelectorAll( '.ehdr__item--drop' );
+
+			if ( ! drops.length ) {
+				return;
+			}
+
+			var edge = bar.getBoundingClientRect().right -
+				parseFloat( window.getComputedStyle( bar ).paddingRight || 0 );
+
+			Array.prototype.forEach.call( drops, function ( item ) {
+				var panel = item.querySelector( '.ehdr__panel' );
+
+				if ( ! panel ) {
+					return;
+				}
+
+				item.classList.remove( 'ehdr__item--end' );
+
+				if ( panel.getBoundingClientRect().right > edge ) {
+					item.classList.add( 'ehdr__item--end' );
+				}
+			} );
+		}
+
 		function measure() {
 			var ms = parseFloat(
 				window.getComputedStyle( root ).getPropertyValue( '--ehdr-ms' )
@@ -671,7 +747,17 @@
 
 				inset = isNaN( inset ) ? 32 : inset;
 
-				root.style.setProperty( '--ehdr-stuck-width-px', ( compact - inset * 2 ) + 'px' );
+				var folded = compact - inset * 2;
+
+				root.style.setProperty( '--ehdr-stuck-width-px', folded + 'px' );
+
+				// What the panel opens at, in both states. Written even in
+				// share mode, where the bar's own width is a percentage the
+				// panel cannot reuse.
+				root.style.setProperty(
+					'--ehdr-panel-w',
+					compactWidthPx( folded ) + 'px'
+				);
 			}
 
 			var box = bar.getBoundingClientRect();
@@ -685,6 +771,10 @@
 			 * bar and blurs it.
 			 */
 			root.style.setProperty( '--ehdr-scrim-top', Math.round( box.bottom ) + 'px' );
+
+			// After the width above, because a folded bar moves every item in
+			// it and with them every dropdown hanging off one.
+			placeDrops();
 
 			if ( spacer ) {
 				spacer.style.height = spacer.hasAttribute( 'data-ehdr-hold' )

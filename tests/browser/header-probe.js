@@ -359,10 +359,216 @@ function check(name, ok, detail) {
   await page.evaluate(() => window.scrollTo(0, 0));
   await sleep(900);
 
-  check('the panel spans the whole bar, not just the word that opened it',
-    open.panelWidth === open.barWidth && open.panelLeft === open.barLeft,
-    'panel ' + open.panelLeft + '..' + (open.panelLeft + open.panelWidth) +
-      ' against a bar of ' + open.barLeft + '..' + (open.barLeft + open.barWidth));
+  /*
+   * A mega panel, not a dropdown -- but no longer the width of the window.
+   *
+   * At the top of the page the bar is full bleed, and the panel used to span
+   * it: a 1440px sheet at the top and a 1055px card once the bar had folded,
+   * from the same menu. The folded one is the one worth keeping, so the panel
+   * carries that width in both and is centred on the bar to get it.
+   */
+  check('the panel is far wider than the word that opened it',
+    open.panelWidth > 600,
+    open.panelWidth + 'px against a trigger of about 70px');
+
+  check('but not as wide as the full-bleed bar it hangs off',
+    open.panelWidth < open.barWidth - 100,
+    'panel ' + open.panelWidth + 'px inside a bar of ' + open.barWidth + 'px');
+
+  check('and it is centred on it',
+    Math.abs((open.panelLeft + open.panelWidth / 2) - (open.barLeft + open.barWidth / 2)) <= 2,
+    'panel centre ' + Math.round(open.panelLeft + open.panelWidth / 2) +
+      ', bar centre ' + Math.round(open.barLeft + open.barWidth / 2));
+
+  /*
+   * The width is the point: the same dropdown has to open in the same place
+   * whether or not the page has been scrolled. Measured at the top, then
+   * again once the bar has folded, and the two boxes have to agree.
+   */
+  const sameBox = await page.evaluate(async () => {
+    const r = () => {
+      const p = [...document.querySelectorAll('.ehdr__panel')]
+        .find(x => getComputedStyle(x).visibility === 'visible');
+      const b = p.getBoundingClientRect();
+      return [Math.round(b.left), Math.round(b.width)];
+    };
+    const item = document.querySelectorAll('.ehdr__item')[2];
+    const hover = async on => {
+      item.dispatchEvent(new MouseEvent(on ? 'mouseenter' : 'mouseleave'));
+      await new Promise(x => setTimeout(x, 700));
+    };
+
+    window.scrollTo(0, 0);
+    await new Promise(x => setTimeout(x, 700));
+    await hover(true);
+    const top = r();
+    await hover(false);
+
+    // Down and back up, which is what leaves the bar folded and visible.
+    for (let y = 0; y <= 1200; y += 150) { window.scrollTo(0, y); await new Promise(x => setTimeout(x, 80)); }
+    await new Promise(x => setTimeout(x, 900));
+    for (let y = 1050; y >= 700; y -= 150) { window.scrollTo(0, y); await new Promise(x => setTimeout(x, 80)); }
+    await new Promise(x => setTimeout(x, 900));
+    await hover(true);
+    const stuck = r();
+    const barBg = getComputedStyle(document.querySelector('.ehdr__bar')).backgroundColor;
+    await hover(false);
+
+    window.scrollTo(0, 0);
+    await new Promise(x => setTimeout(x, 900));
+    return { top, stuck, barBg };
+  });
+
+  check('the dropdown opens at the same width and in the same place either way',
+    Math.abs(sameBox.top[0] - sameBox.stuck[0]) <= 2 &&
+      Math.abs(sameBox.top[1] - sameBox.stuck[1]) <= 2,
+    'at the top ' + sameBox.top.join('/') + ', folded ' + sameBox.stuck.join('/'));
+
+  check('and once folded the bar under it is opaque, as it always was',
+    !/rgba\(\s*0,\s*0,\s*0,\s*0\s*\)/.test(sameBox.barBg), sameBox.barBg);
+
+  /*
+   * The thing that started all this: opening a panel at the top of the page
+   * used to turn the whole bar opaque white over the hero. The panel gets a
+   * fill; the bar does not.
+   */
+  const restOpen = await page.evaluate(async () => {
+    const item = document.querySelectorAll('.ehdr__item')[2];
+    item.dispatchEvent(new MouseEvent('mouseenter'));
+    await new Promise(x => setTimeout(x, 700));
+    const bar = getComputedStyle(document.querySelector('.ehdr__bar'));
+    const panel = [...document.querySelectorAll('.ehdr__panel')]
+      .find(x => getComputedStyle(x).visibility === 'visible');
+    const inner = panel.querySelector('.ehdr__panel-inner');
+    const out = {
+      barBg: bar.backgroundColor,
+      barShadow: bar.boxShadow,
+      panelBg: getComputedStyle(panel).backgroundColor,
+      cols: getComputedStyle(inner).gridTemplateColumns.split(' ').length,
+      aside: !!inner.querySelector('.ehdr__panel-aside .ehdr__figure') &&
+        !!inner.querySelector('.ehdr__panel-aside .ehdr__blurb'),
+      solo: getComputedStyle(
+        document.querySelectorAll('.ehdr__item')[3].querySelector('.ehdr__panel-inner')
+      ).gridTemplateColumns.split(' ').length,
+    };
+
+    // Left open on purpose: the checks below this read the same panel.
+    return out;
+  });
+
+  check('a panel opening at the top of the page leaves the bar transparent',
+    /rgba\(\s*0,\s*0,\s*0,\s*0\s*\)|transparent/.test(restOpen.barBg) &&
+      restOpen.barShadow === 'none',
+    'bar ' + restOpen.barBg + ', shadow ' + restOpen.barShadow);
+
+  check('while the panel itself is a solid card',
+    /rgb\(255,\s*255,\s*255\)/.test(restOpen.panelBg), restOpen.panelBg);
+
+  /* Two sides, and the picture and its caption are one of them. */
+  check('the panel is two columns, not three',
+    restOpen.cols === 2, restOpen.cols + ' tracks');
+
+  check('and the picture and the blurb share the second one',
+    restOpen.aside, 'figure and blurb both inside .ehdr__panel-aside');
+
+  check('a panel with nothing but links is one column',
+    restOpen.solo === 1, restOpen.solo + ' track');
+
+  /*
+   * And it is a dropdown rather than a mega panel: four short rows stretched
+   * across the width of the header is the other half of what looked junky.
+   */
+  const drop = await page.evaluate(async () => {
+    const wide = document.querySelectorAll('.ehdr__item')[2];
+    const item = document.querySelector('.ehdr__item--drop');
+    wide.dispatchEvent(new MouseEvent('mouseleave'));
+    item.dispatchEvent(new MouseEvent('mouseenter'));
+    await new Promise(x => setTimeout(x, 700));
+
+    const b = item.querySelector('.ehdr__panel').getBoundingClientRect();
+    const label = item.querySelector('.ehdr__link').getBoundingClientRect();
+    const bar = document.querySelector('.ehdr__bar').getBoundingClientRect();
+
+    // What the last item would do, which is the case the flip exists for.
+    const last = document.querySelectorAll('.ehdr__item')[5];
+    last.classList.add('ehdr__item--drop');
+    // Forced wide, because the last item in this fixture is nowhere near the
+    // edge at 1440 and the flip is what is being tested, not the arithmetic.
+    last.style.setProperty('--ehdr-drop-min', '900px');
+    const clone = item.querySelector('.ehdr__panel').cloneNode(true);
+    last.appendChild(clone);
+    window.dispatchEvent(new Event('resize'));
+    await new Promise(x => setTimeout(x, 400));
+    const flipped = last.classList.contains('ehdr__item--end');
+    const lastRight = clone.getBoundingClientRect().right;
+    last.removeChild(clone);
+    last.style.removeProperty('--ehdr-drop-min');
+    last.classList.remove('ehdr__item--drop', 'ehdr__item--end');
+
+    // The wide panel goes back up, because the checks below read that one.
+    item.dispatchEvent(new MouseEvent('mouseleave'));
+    wide.dispatchEvent(new MouseEvent('mouseenter'));
+    await new Promise(x => setTimeout(x, 700));
+
+    return {
+      width: Math.round(b.width), barWidth: Math.round(bar.width),
+      left: Math.round(b.left), labelLeft: Math.round(label.left),
+      flipped, overflow: Math.round(lastRight - bar.right),
+    };
+  });
+
+  /*
+   * The one thing the picture does, and proof that it does it.
+   *
+   * It used to inherit whatever the theme did to an `img` on hover -- a fade,
+   * a filter, a cursor that promised a lightbox -- which in a menu panel reads
+   * as a fault. Those are off; what replaces them is a slow drift that belongs
+   * to the panel being open rather than to the pointer crossing the picture.
+   */
+  // The real pointer, parked well clear of the bar: `:hover` is half of what
+  // opens a panel, and a cursor left sitting on an item holds it open behind
+  // the synthetic events below.
+  await page.mouse.move(20, 600);
+
+  const drift = await page.evaluate(async () => {
+    const item = document.querySelectorAll('.ehdr__item')[2];
+    const img = item.querySelector('.ehdr__figure img');
+    const scale = () => {
+      const m = new DOMMatrix(getComputedStyle(img).transform);
+      return Math.round(m.a * 1000) / 1000;
+    };
+
+    item.dispatchEvent(new MouseEvent('mouseleave'));
+    await new Promise(x => setTimeout(x, 1400));
+    const shut = scale();
+
+    item.dispatchEvent(new MouseEvent('mouseenter'));
+    await new Promise(x => setTimeout(x, 1400));
+    const open = scale();
+
+    const cs = getComputedStyle(img);
+    return { shut, open, opacity: cs.opacity, filter: cs.filter, ms: cs.transitionDuration };
+  });
+
+  check('the picture drifts in while the panel is open, and only then',
+    drift.shut === 1 && drift.open > 1.01,
+    'scale ' + drift.shut + ' -> ' + drift.open + ' over ' + drift.ms);
+
+  check('and the theme cannot fade or filter it on the way',
+    drift.opacity === '1' && drift.filter === 'none',
+    'opacity ' + drift.opacity + ', filter ' + drift.filter);
+
+  check('a links-only panel is a dropdown, sized to its links',
+    drop.width < 420 && drop.width < drop.barWidth / 2,
+    drop.width + 'px inside a bar of ' + drop.barWidth + 'px');
+
+  check('and it hangs under the word that opened it',
+    Math.abs(drop.left - drop.labelLeft) <= 4,
+    'panel at ' + drop.left + ', label at ' + drop.labelLeft);
+
+  check('one that would run off the side opens the other way instead',
+    drop.flipped && drop.overflow <= 0,
+    'flipped=' + drop.flipped + ', right edge ' + drop.overflow + 'px past the bar');
 
   /*
    * Detached, but never disconnected.
