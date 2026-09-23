@@ -47,6 +47,13 @@ The data table is generated the same way, and for the same reason:
 php tests/browser/table-fixture.php > tests/browser/table.html
 ```
 
+So are the process steps, which also have a probe of their own:
+
+```sh
+php tests/browser/steps-fixture.php > tests/browser/steps.html
+node tests/browser/steps-probe.js
+```
+
 It lays out the slab with its step numbers empty and filled, the slab over a
 background picture under the darkening veil, and the ledger with and without
 its winning column marked.

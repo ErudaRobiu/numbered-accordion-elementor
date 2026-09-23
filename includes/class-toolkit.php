@@ -76,6 +76,10 @@ final class Toolkit {
 			'file'  => 'modules/table/class-table-module.php',
 			'class' => '\ErudaToolkit\Modules\Table\Table_Module',
 		),
+		'steps'      => array(
+			'file'  => 'modules/steps/class-steps-module.php',
+			'class' => '\ErudaToolkit\Modules\Steps\Steps_Module',
+		),
 	);
 
 	/**

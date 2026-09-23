@@ -619,6 +619,45 @@ the file system.
       not leave anything stuck at zero opacity
 - [ ] With JavaScript blocked, both widgets are fully visible
 
+## Process Steps
+
+`php tests/browser/steps-fixture.php > tests/browser/steps.html` builds the
+fixture from the widget's own render(); `node tests/browser/steps-probe.js`
+measures it. The fixture carries the widget three times over -- on grey, on a
+dark section, and inside something that flattens 3D.
+
+- [ ] **Scroll slowly past the list: each illustration turns as it goes.** It
+      should read as walking past objects on a bench, not as things fading in.
+      All four turning in step means they are sharing one number instead of
+      each reading their own
+- [ ] **The line between the numbers draws downwards** as each step arrives,
+      and reaches the next disc. A short stub under every number means the rail
+      is only as tall as its own disc again
+- [ ] **Point at an illustration.** The chosen plane steps forward, the sensors
+      rise one after another, the bars set back under the baseline, the top
+      sheet lifts. Nothing should jump
+- [ ] Move the pointer around inside one: it should lean towards you a little,
+      and settle back to its scroll angle when you leave
+- [ ] **The widget has no background.** Drop it on a dark section and set the
+      faces to a translucent white, the edges to a light line, and clear the
+      shadow. If it only works on light, something is hardcoded
+- [ ] Exactly one element in each illustration carries the accent. Two is one
+      too many
+- [ ] **Narrow the window: the illustration drops under the words**, in line
+      with the text rather than with the numbers
+- [ ] Set "how close the eye is" to 300: the perspective should get harder,
+      not break. Under about 400 it stops reading as depth
+- [ ] **Block the script.** The steps, the numbers, the line and the
+      illustrations must all still be there, holding the angle they were drawn
+      at. Only the scroll camera goes
+- [ ] Turn on "reduce motion" in the OS: the camera stops following the scroll
+      and the illustrations hold still. Pointing at one still works, it just
+      arrives at once
+- [ ] **If custom CSS puts `overflow` or `filter` on `.estp__scene`**, the
+      widget must notice and fall back to its flat arrangement rather than
+      quietly becoming a pile of rectangles. An ancestor with `overflow:
+      hidden` does *not* do this and must not trigger the fallback
+
 ## Data Table
 
 `php tests/browser/table-fixture.php > tests/browser/table.html` builds the

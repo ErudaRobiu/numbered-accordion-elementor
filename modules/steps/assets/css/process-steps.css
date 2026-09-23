@@ -1,0 +1,712 @@
+/**
+ * Eruda Toolkit - Process Steps
+ *
+ * A numbered process read downwards: the words on the left, and on the right a
+ * small object standing in space that says the same thing without words.
+ *
+ * The idea the whole thing hangs on is that scrolling moves the camera rather
+ * than fading anything in. Each step carries one number -- --estp-p, nought as
+ * it arrives at the bottom of the window and one as it leaves the top -- and
+ * every figure reads that same number and does something different with it.
+ * Going down the list is walking past a row of objects on a bench.
+ *
+ * The objects are all built from the same four things: planes, bars, nodes and
+ * sheets. That is deliberate. Four bespoke illustrations would read as four
+ * pieces of clipart sitting next to each other; four arrangements of one
+ * vocabulary read as one drawing broken into steps.
+ *
+ * Nothing here has a background of its own. It is made to sit on a section's
+ * own colour, so the contrast comes from the objects: near-white faces, a navy
+ * hairline on every edge, and the accent used once per figure on the single
+ * element that is the answer.
+ */
+
+.estp,
+.estp *,
+.estp *::before,
+.estp *::after {
+	box-sizing: border-box;
+}
+
+.estp {
+	--estp-ink: #1b3a61;
+	--estp-body: #55708b;
+	--estp-accent: #2f7a4a;
+	--estp-hairline: rgba(27, 58, 97, 0.16);
+	--estp-face: rgba(255, 255, 255, 0.86);
+	--estp-face-dim: rgba(255, 255, 255, 0.5);
+	--estp-shadow: rgba(27, 58, 97, 0.28);
+
+	--estp-disc: 40px;
+	--estp-fig: 280px;
+	--estp-gap: 56px;
+	--estp-row-gap: 0px;
+
+	/*
+	 * The camera, and the two numbers that move it.
+	 *
+	 * --estp-p is written by the script, per step, from where that step sits
+	 * in the window. --estp-hx and --estp-hy are the pointer, and they are
+	 * nought until something is under it. Both default to a resting value
+	 * here, which is what the no-script case renders at: a figure caught
+	 * halfway through its own arc, which is the angle it looks best at.
+	 */
+	--estp-p: 0.5;
+	--estp-hx: 0;
+	--estp-hy: 0;
+
+	display: block;
+}
+
+/* ---------------------------------------------------------------- rows --- */
+
+/*
+ * Three columns: the spine, the words, the object.
+ *
+ * The spine is its own track rather than a border on the text, because the
+ * numbered disc has to sit centred on a line that runs the whole height of the
+ * list -- including the gap between one step and the next, where there is no
+ * text for a border to belong to.
+ */
+.estp__step {
+	position: relative;
+	display: grid;
+	grid-template-columns: var(--estp-disc) minmax(0, 1fr) var(--estp-fig);
+	column-gap: var(--estp-gap);
+	align-items: start;
+	padding-bottom: var(--estp-step-gap, 72px);
+}
+
+.estp__step:last-child {
+	padding-bottom: 0;
+}
+
+/* -------------------------------------------------------------- the spine --- */
+
+/*
+ * The line between one number and the next.
+ *
+ * Drawn as a scaled pseudo-element rather than a height that grows, so the
+ * drawing is composited: the scale runs on the compositor and a height does
+ * not. It is anchored at the top so it draws downwards, the direction it is
+ * read in.
+ */
+.estp__rail {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	/*
+	 * Full height of the step, and that is what makes the line reach.
+	 *
+	 * The grid sets `align-items: start` so the words and the figure sit at
+	 * the top of their row rather than being stretched to match each other.
+	 * The rail inherited it, came out exactly as tall as its own disc, and the
+	 * line -- positioned against it -- resolved `bottom` against 40px instead
+	 * of against the step. Every spine was the same short stub whatever the
+	 * step above it contained.
+	 */
+	align-self: stretch;
+}
+
+.estp__step:not(:last-child) .estp__rail::after {
+	content: "";
+	position: absolute;
+	top: var(--estp-disc);
+	bottom: calc(var(--estp-step-gap, 72px) * -1);
+	left: 50%;
+	width: 2px;
+	margin-left: -1px;
+	background: var(--estp-accent, #2f7a4a);
+	transform: scaleY(var(--estp-draw, 1));
+	transform-origin: 50% 0;
+	transition: transform 640ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.estp__disc {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: var(--estp-disc);
+	height: var(--estp-disc);
+	border-radius: 50%;
+	background: var(--estp-accent, #2f7a4a);
+	color: #fff;
+	font-size: var(--estp-disc-size, 0.8125rem);
+	font-weight: 700;
+	/* em, never per cent: Elementor writes `4%` and browsers drop it. */
+	letter-spacing: var(--estp-disc-track, 0.02em);
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------- words --- */
+
+.estp__words {
+	padding-top: calc(var(--estp-disc) * 0.18);
+}
+
+.estp .estp__title {
+	margin: 0 0 10px;
+	color: var(--estp-ink, #1b3a61);
+	font-size: var(--estp-title-size, 1.25rem);
+	font-weight: 700;
+	line-height: 1.25;
+	letter-spacing: -0.01em;
+}
+
+.estp .estp__body {
+	margin: 0;
+	max-width: 46ch;
+	color: var(--estp-body, #55708b);
+	font-size: var(--estp-body-size, 1rem);
+	line-height: 1.6;
+}
+
+/* -------------------------------------------------------------- the figure --- */
+
+/*
+ * The stage.
+ *
+ * `perspective` is on this box and the rotation is on the scene inside it, so
+ * every part of a figure is projected by one camera rather than each carrying
+ * its own. The eye is off to one side: an object sitting on the vanishing
+ * point barely changes size as it moves along Z, and a figure built of planes
+ * at different depths came out looking flat until the camera was moved off it.
+ */
+.estp__fig {
+	position: relative;
+	height: var(--estp-fig-h, 200px);
+	perspective: var(--estp-persp, 900px);
+	perspective-origin: 64% 42%;
+}
+
+.estp__scene {
+	position: absolute;
+	inset: 0;
+	transform-style: preserve-3d;
+	/*
+	 * Scroll turns it; the pointer nudges it.
+	 *
+	 * The scroll term is written to swing through about 26 degrees as the step
+	 * crosses the window, centred on the angle the figure is drawn for. The
+	 * pointer terms are added rather than replacing it, so moving the mouse
+	 * over a figure does not snap it out of wherever the scroll had it.
+	 */
+	transform:
+		rotateX( calc( 13deg - (var(--estp-p) - 0.5) * 9deg + var(--estp-hy) * -7deg ) )
+		rotateY( calc( (var(--estp-p) - 0.5) * -26deg + var(--estp-hx) * 10deg ) );
+	transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The pointer is a nudge, not a drag: once it leaves, the scroll angle is the
+   only thing left and the figure eases back to it. */
+.estp__fig:hover .estp__scene {
+	transition-duration: 90ms;
+}
+
+/*
+ * Every part of every figure.
+ *
+ * One rule, because they are all the same object: a rectangle with a hairline
+ * on it, standing somewhere in Z. What changes between figures is where the
+ * parts are put, not what they are made of.
+ */
+.estp__part {
+	position: absolute;
+	border: 1px solid var(--estp-hairline, rgba(27, 58, 97, 0.16));
+	background: var(--estp-face, rgba(255, 255, 255, 0.86));
+	transition:
+		transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+		opacity 420ms cubic-bezier(0.4, 0, 0.2, 1),
+		background-color 420ms cubic-bezier(0.4, 0, 0.2, 1),
+		border-color 420ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*
+ * The one element in each figure that is the answer.
+ *
+ * Used exactly once per figure. An accent spent on three things out of five is
+ * not an accent, it is a second body colour.
+ */
+/*
+ * A filled plane is not an accent.
+ *
+ * The first version made the chosen element solid accent, and at 104 by 74
+ * that is not "this one was picked", it is a green box with two ghosts behind
+ * it -- the figure stopped being about the choice and started being about the
+ * colour. The chosen thing is marked at its edge and tinted just enough to
+ * separate it, and the figures whose key element is genuinely small -- a
+ * sensor, a datum line, a core -- fill it solid in their own rules, where a
+ * dot of accent is the right size to be one.
+ */
+.estp__part--key {
+	border-color: var(--estp-accent, #2f7a4a);
+	border-width: 1.5px;
+	background: var(--estp-key-face, rgba(47, 122, 74, 0.07));
+}
+
+/*
+ * The shadow the object stands on.
+ *
+ * Without a background behind the figure there is nothing to say the parts are
+ * above a surface rather than floating in the page, and on a light section
+ * that reads as a drawing that has come unstuck. It is a blurred ellipse laid
+ * flat in the scene, so it turns with the camera like everything else.
+ */
+.estp__ground {
+	position: absolute;
+	left: 50%;
+	top: 72%;
+	width: 46%;
+	height: 22%;
+	margin-left: -23%;
+	border-radius: 50%;
+	background: var(--estp-shadow, rgba(27, 58, 97, 0.28));
+	filter: blur(14px);
+	opacity: 0.38;
+	transform: translateZ(-1px) rotateX(78deg);
+	/*
+	 * A filter flattens 3D for everything inside the element carrying it --
+	 * which is why the blur is on this leaf and never on a wrapper. It has no
+	 * children, so there is nothing of its own to flatten.
+	 */
+	pointer-events: none;
+}
+
+/* ============================================================ the figures === */
+
+/*
+ * A note that applies to every figure below.
+ *
+ * The camera already tips the whole scene by about 13 degrees, so a figure's
+ * own rotations stack on top of it. The first draft gave the measuring surface
+ * rotateX(72deg) on the reasoning that a surface should lie fairly flat, and
+ * 72 plus 13 is 85: it rendered as a sliver. Every angle here is written for
+ * what it adds up to, not for what it is on its own.
+ */
+
+/* ---- converge: several ways of doing it, and the one that was chosen ----- */
+
+/*
+ * Three candidate planes fanned around a hinge, with the chosen one brought
+ * forward. Scroll closes the fan; hovering steps the choice clear and sets the
+ * two rejected ones back.
+ */
+.estp__fig--converge .estp__part {
+	left: 50%;
+	top: 50%;
+	width: 104px;
+	height: 74px;
+	margin: -37px 0 0 -52px;
+	border-radius: 6px;
+	transform-origin: 50% 50%;
+	/*
+	 * Turn first, then push out along the turned axis.
+	 *
+	 * That order puts the candidates on an arc around the viewer rather than
+	 * spinning them where they stand, which is the difference between a fan of
+	 * cards and three cards rotating in place. The first attempt used a radius
+	 * of about 24px and the two rejected planes ended up almost entirely
+	 * behind the chosen one -- the figure read as one card with a smudge
+	 * behind it, and the choice it was drawn to show was invisible.
+	 */
+	transform:
+		rotateY( calc( (var(--i) - 1) * (44deg - var(--estp-p) * 12deg) ) )
+		translateZ( calc( 76px - var(--estp-p) * 14px ) );
+}
+
+.estp__fig--converge .estp__part:not(.estp__part--key) {
+	background: var(--estp-face-dim, rgba(255, 255, 255, 0.5));
+}
+
+.estp__fig--converge .estp__part--key {
+	transform: translateZ( calc( 104px + var(--estp-p) * 10px ) );
+}
+
+.estp__fig--converge:hover .estp__part--key {
+	transform: translateZ(136px);
+}
+
+.estp__fig--converge:hover .estp__part:not(.estp__part--key) {
+	opacity: 0.4;
+}
+
+/* ---- probe: a surface, and the sensors standing off it ------------------ */
+
+/*
+ * The plane and the nodes share one frame.
+ *
+ * The nodes have to stand *on* the surface, which means they have to be in the
+ * surface's own rotated space -- placed in the scene's space instead they sit
+ * in a vertical plane in front of it and the whole thing reads as dots on
+ * glass. The deck carries the tilt; inside it a node's Z is its height above
+ * the surface, which is the number that actually means something.
+ *
+ * Each node then rotates back by the same angle so it faces the camera. A
+ * sensor drawn lying flat on the surface is a smudge.
+ */
+.estp__fig--probe .estp__deck {
+	position: absolute;
+	left: 50%;
+	top: 48%;
+	width: 190px;
+	height: 130px;
+	margin: -65px 0 0 -95px;
+	transform-style: preserve-3d;
+	transform: rotateX( calc( 44deg + var(--estp-p) * 6deg ) );
+}
+
+.estp__fig--probe .estp__plane {
+	position: absolute;
+	inset: 0;
+	margin: 0;
+	border-radius: 8px;
+	/* The surface being measured, drawn rather than imaged. */
+	background-image:
+		repeating-linear-gradient(0deg, var(--estp-hairline) 0 1px, transparent 1px 24px),
+		repeating-linear-gradient(90deg, var(--estp-hairline) 0 1px, transparent 1px 24px),
+		linear-gradient(var(--estp-face), var(--estp-face));
+}
+
+.estp__fig--probe .estp__node {
+	left: 50%;
+	top: 50%;
+	width: 13px;
+	height: 13px;
+	margin: -6.5px 0 0 -6.5px;
+	border-radius: 50%;
+	box-shadow: 0 2px 6px -2px rgba(27, 58, 97, 0.5);
+	/*
+	 * Where each sensor sits, taken from the markup rather than worked out
+	 * from its index.
+	 *
+	 * The first version staggered them with `var(--i) % 2` and `% 3`, which is
+	 * not a thing: calc() has no modulo operator, so every one of those
+	 * declarations was invalid and dropped -- and five nodes rendered stacked
+	 * on the same spot, looking like one. It failed silently, which is what
+	 * made it worth writing down.
+	 *
+	 * Coordinates in the markup are the better arrangement regardless. The
+	 * stylesheet says what a sensor looks like and how it moves; the markup
+	 * says where it is. Inside the deck, Z is height above the surface.
+	 */
+	transform:
+		translate3d(
+			calc( var(--x, 0) * 1px ),
+			calc( var(--y, 0) * 1px ),
+			calc( (var(--z, 16) - var(--estp-p) * 6) * 1px )
+		)
+		rotateX( calc( -44deg - var(--estp-p) * 6deg ) );
+}
+
+/* The stem, so a node reads as standing on the surface rather than hovering
+   above it by coincidence. */
+.estp__fig--probe .estp__node::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 100%;
+	width: 1px;
+	height: 26px;
+	margin-left: -0.5px;
+	background: var(--estp-hairline, rgba(27, 58, 97, 0.16));
+}
+
+.estp__fig--probe .estp__part--key {
+	background: var(--estp-accent, #2f7a4a);
+	border-color: var(--estp-accent, #2f7a4a);
+	/* A ring, so the sensor that is the point of the figure is the one your
+	   eye lands on without the other four having to be dimmed. */
+	box-shadow:
+		0 2px 6px -2px rgba(27, 58, 97, 0.5),
+		0 0 0 5px rgba(47, 122, 74, 0.18);
+}
+
+/* A scan: the nodes rise one after another rather than all at once. */
+.estp__fig--probe:hover .estp__node {
+	transition-delay: calc(var(--i) * 70ms);
+	transform:
+		translate3d(
+			calc( var(--x, 0) * 1px ),
+			calc( var(--y, 0) * 1px ),
+			calc( (var(--z, 16) + 26) * 1px )
+		)
+		rotateX(-44deg);
+}
+
+/* ---- datum: what it was doing before, and the line drawn through it ------ */
+
+/*
+ * Bars of past usage with a level line finding its height across them. Scroll
+ * raises the line into place; hovering sets the bars back so the line is the
+ * only thing at full strength, which is the point being made.
+ */
+.estp__fig--datum .estp__bar {
+	left: 50%;
+	bottom: 26%;
+	top: auto;
+	width: 18px;
+	margin-left: calc( -9px + (var(--i) - 2.5) * 28px );
+	border-radius: 3px 3px 0 0;
+	/* Heights that are not a straight ramp, because usage never is. */
+	height: calc( 22px + (var(--h) * 0.72px) );
+	transform: translateZ( calc( var(--z, 0) * 1px ) );
+}
+
+.estp__fig--datum .estp__level {
+	left: 50%;
+	bottom: 26%;
+	top: auto;
+	width: 186px;
+	height: 2px;
+	margin-left: -93px;
+	border: 0;
+	border-radius: 2px;
+	background: var(--estp-accent, #2f7a4a);
+	transform: translate3d(0, calc( var(--estp-p) * -44px - 12px ), 26px);
+}
+
+/* The number the line stands for, riding on it. */
+.estp__fig--datum .estp__level::after {
+	content: attr(data-estp-note);
+	position: absolute;
+	right: 0;
+	bottom: 6px;
+	color: var(--estp-accent, #2f7a4a);
+	font-size: 0.5625rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.estp__fig--datum:hover .estp__bar {
+	opacity: 0.35;
+}
+
+.estp__fig--datum:hover .estp__level {
+	transform: translate3d(0, -62px, 40px);
+}
+
+/* ---- sheets: the period, delivered ------------------------------------- */
+
+/*
+ * A stack with the top sheet carrying the figure everybody actually wants.
+ * Scroll opens the stack; hovering lifts the top sheet clear of its workings.
+ */
+.estp__fig--sheets .estp__part {
+	left: 50%;
+	top: 50%;
+	width: 124px;
+	height: 86px;
+	margin: -43px 0 0 -62px;
+	border-radius: 7px;
+	transform:
+		translate3d(
+			calc( (var(--i) - 1.5) * 6px ),
+			calc( (var(--i) - 1.5) * -6px ),
+			calc( (var(--i) - 1.5) * (14px + var(--estp-p) * 12px) )
+		);
+}
+
+/* Lines of writing on the front sheet, drawn rather than set as text so they
+   stay crisp at any size and say nothing a screen reader has to read out. */
+.estp__fig--sheets .estp__part--key::after {
+	content: "";
+	position: absolute;
+	left: 13px;
+	right: 13px;
+	top: 16px;
+	height: 38px;
+	background:
+		linear-gradient(var(--estp-accent), var(--estp-accent)) 0 0 / 40px 6px no-repeat,
+		linear-gradient(var(--estp-hairline), var(--estp-hairline)) 0 15px / 100% 2px no-repeat,
+		linear-gradient(var(--estp-hairline), var(--estp-hairline)) 0 23px / 72% 2px no-repeat,
+		linear-gradient(var(--estp-hairline), var(--estp-hairline)) 0 31px / 88% 2px no-repeat;
+}
+
+.estp__fig--sheets:hover .estp__part--key {
+	transform: translate3d(-4px, -24px, 68px);
+}
+
+/* ---- cycle: something that keeps running ------------------------------- */
+
+/*
+ * Two rings around a core, on different axes. Scroll turns them against each
+ * other; hovering opens them out. The one figure here that is about time
+ * rather than about a thing.
+ */
+.estp__fig--cycle .estp__ring {
+	left: 50%;
+	top: 50%;
+	width: 128px;
+	height: 128px;
+	margin: -64px 0 0 -64px;
+	border-radius: 50%;
+	/*
+	 * A ring has no face to give it presence, so it cannot live on the same
+	 * hairline as an edge that sits on one. At the shared 0.16 alpha both
+	 * orbits were all but invisible on a light section.
+	 */
+	border: 2px solid var(--estp-ring, rgba(27, 58, 97, 0.3));
+	background: none;
+	/*
+	 * Two rings on two different axes, which is the whole figure.
+	 *
+	 * The first version turned both about X with an offset, and at most scroll
+	 * positions they were within a few degrees of each other and of edge-on --
+	 * so they collapsed into a single ellipse and the thing read as one ring,
+	 * not as a system. One ring lies down, the other stands up, and they stay
+	 * distinguishable wherever the scroll has them.
+	 */
+	transform:
+		rotateX( calc( 64deg + var(--estp-p) * 22deg ) )
+		rotateZ( calc( var(--estp-p) * 30deg ) );
+}
+
+.estp__fig--cycle .estp__ring:nth-of-type(2) {
+	transform:
+		rotateY( calc( 62deg - var(--estp-p) * 18deg ) )
+		rotateZ(16deg);
+}
+
+.estp__fig--cycle .estp__part--key {
+	left: 50%;
+	top: 50%;
+	width: 30px;
+	height: 30px;
+	margin: -15px 0 0 -15px;
+	border-radius: 50%;
+	background: var(--estp-accent, #2f7a4a);
+	transform: translateZ(8px);
+}
+
+.estp__fig--cycle:hover .estp__ring {
+	transform: rotateX(48deg) rotateZ(30deg) scale(1.12);
+}
+
+.estp__fig--cycle:hover .estp__ring:nth-of-type(2) {
+	transform: rotateY(40deg) rotateZ(16deg) scale(1.12);
+}
+
+/* ============================================================== flattened === */
+
+/*
+ * What to do when the browser is not going to draw any of this.
+ *
+ * `overflow` or `filter` on the element carrying `transform-style: preserve-3d`
+ * forces it back to `flat`, and the failure is silent: the figure does not
+ * break, it quietly becomes a pile of rectangles on top of each other with the
+ * depth calculated and then thrown away.
+ *
+ * It has to be that element. Measured in Chrome rather than assumed, because
+ * the assumption going in was that any ancestor would do it: with a probe at
+ * translateZ(120px) reading 115px when depth is drawn and 100px when it is
+ * not, `overflow: hidden`, `filter` and `opacity: .99` on an ancestor all
+ * still gave 115, and `overflow: hidden` on the perspective element gave 115
+ * too. Only `overflow` and `filter` on the scene itself gave 100.
+ *
+ * So the realistic way this breaks is somebody's custom CSS reaching the
+ * scene -- a theme with `[class*="..."] { overflow: hidden }`, or a tidy-up
+ * rule aimed at something else. Narrow, but silent, and the guard costs one
+ * measurement at startup: the script probes for it and sets this class, and
+ * every figure falls back to an arrangement that was designed flat rather
+ * than one that lost its depth.
+ */
+.estp.is-flat .estp__scene {
+	transform: none;
+}
+
+.estp.is-flat .estp__ground {
+	display: none;
+}
+
+.estp.is-flat .estp__fig--converge .estp__part {
+	transform: translateX( calc( (var(--i) - 1) * 26px ) ) scale( calc( 0.86 + var(--i) * 0.02 ) );
+}
+
+.estp.is-flat .estp__fig--converge .estp__part--key {
+	transform: translateX(0) scale(1.06);
+}
+
+.estp.is-flat .estp__fig--probe .estp__plane {
+	transform: none;
+}
+
+.estp.is-flat .estp__fig--probe .estp__node {
+	transform: translate( calc( (var(--i) - 2) * 40px ), calc( (var(--i) - 2) * 16px ) );
+}
+
+.estp.is-flat .estp__fig--probe .estp__node::after {
+	display: none;
+}
+
+.estp.is-flat .estp__fig--datum .estp__bar,
+.estp.is-flat .estp__fig--sheets .estp__part {
+	transform: none;
+}
+
+.estp.is-flat .estp__fig--sheets .estp__part {
+	transform: translate( calc( (var(--i) - 1.5) * 12px ), calc( (var(--i) - 1.5) * -10px ) );
+}
+
+.estp.is-flat .estp__fig--cycle .estp__ring {
+	transform: scale( calc( 1 - var(--i) * 0.22 ) );
+}
+
+/* ================================================================ phones === */
+
+@media (max-width: 860px) {
+	.estp__step {
+		grid-template-columns: var(--estp-disc) minmax(0, 1fr);
+		column-gap: 20px;
+		row-gap: 24px;
+		padding-bottom: var(--estp-step-gap-mobile, 44px);
+	}
+
+	.estp__step:not(:last-child) .estp__rail::after {
+		bottom: calc(var(--estp-step-gap-mobile, 44px) * -1);
+	}
+
+	/*
+	 * The figure moves under the words rather than beside them, and stays in
+	 * the second column so it lines up with the text instead of with the
+	 * spine. It is the illustration for that step, not a divider between two.
+	 */
+	.estp__fig {
+		grid-column: 2;
+		height: var(--estp-fig-h-mobile, 160px);
+		/* Pulled in from the right so a figure that reaches out in Z is not
+		   cut off by the edge of a phone screen. */
+		margin-right: 8%;
+	}
+
+	.estp__words {
+		padding-top: calc(var(--estp-disc) * 0.12);
+	}
+}
+
+/* ======================================================== reduced motion === */
+
+@media (prefers-reduced-motion: reduce) {
+	/*
+	 * The camera stops following the scroll, and the figures hold the angle
+	 * they were drawn for. Everything still responds to a pointer, because
+	 * that is an answer to something somebody did rather than motion they did
+	 * not ask for -- it just arrives at once.
+	 */
+	.estp {
+		--estp-p: 0.5;
+	}
+
+	.estp__scene,
+	.estp__part,
+	.estp__rail::after {
+		transition-duration: 1ms !important;
+		transition-delay: 0s !important;
+	}
+}

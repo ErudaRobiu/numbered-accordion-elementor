@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.41.0
+Stable tag: 2.42.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,32 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.42.0 =
+* **New: a "Process Steps" widget.** A numbered process read downwards, with
+  the words on the left and a small object standing in space on the right.
+  Switchable at Settings > Eruda Toolkit like every other module.
+* **Scrolling moves the camera rather than fading anything in.** Each step
+  carries one number — nought as it arrives at the bottom of the window, one as
+  it leaves the top — and every illustration reads that same number and does
+  something different with it. Going down the list is walking past a row of
+  objects on a bench.
+* **Five illustrations, all built from the same four things**: planes, bars,
+  sensors and sheets. Choosing between options, measuring a surface, a baseline
+  across past readings, a stack with the report on top, and something that
+  keeps running. Four bespoke drawings would read as four pieces of clipart in
+  a row; four arrangements of one vocabulary read as one drawing broken into
+  steps.
+* **Pointing at one opens it.** The chosen plane steps forward and the options
+  it beat set back, the sensors rise one after another like a scan, the bars
+  fall away under the baseline, the top sheet lifts clear of its workings.
+* **It carries no background of its own**, so it sits on whatever colour the
+  section behind it is. Every colour in it is a setting, including the shadow
+  the drawings stand on — clear that on a dark section, where a dark shadow
+  does nothing.
+* **Without the script it is still a numbered list with illustrations**, drawn
+  at the angle they were designed at. Only the scroll camera goes. Reduced
+  motion gets the same treatment, and still answers the pointer.
 
 = 2.41.0 =
 * **New: a "Data Table" widget.** A reference table of two or three columns

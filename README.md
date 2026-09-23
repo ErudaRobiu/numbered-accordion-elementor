@@ -9,6 +9,7 @@ A small toolkit of site-building modules. Each one can be switched off from
 | Impact Grid | A grid of numbered figure and checklist cards that animate into view | Elementor 3.5+ |
 | Split Slab and Ledger | A two-panel slab divided by a coloured bar, and a row-per-point comparison ledger | Elementor 3.5+ |
 | Data Table | A reference table of two or three columns with a filled header row, banded rows and a last column you can set apart; folds into labelled blocks on a phone | Elementor 3.5+ |
+| Process Steps | A numbered process read downwards, words left and a small object standing in space on the right; scrolling turns the objects rather than fading them in | Elementor 3.5+ |
 | Image Compare | Two pictures in one frame with a divider you drag across to swap between them | Elementor 3.5+ |
 | Flow Schematic | A process diagram — stages, connectors, a return path, a monitoring bar and a boundary — drawn in CSS so the labels stay text | Elementor 3.5+ |
 | Duplicate Pages | A Duplicate row action and bulk action on Pages and Posts | Nothing beyond core |
@@ -42,6 +43,7 @@ modules/story/                     the Scroll Story widget and its assets
 modules/rail/                      the Scroll Rail widget and its assets
 modules/header/                    the Mega Header widget and its assets
 modules/table/                     the Data Table widget and its stylesheet
+modules/steps/                     the Process Steps widget, its stylesheet and its script
 modules/badge/                     the Eruda Spin extension and its assets
 modules/explainer/                 the Split Slab and Comparison Ledger widgets
 modules/schematic/                 the Flow Schematic widget

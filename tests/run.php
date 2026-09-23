@@ -634,7 +634,8 @@ check( 'the split explainer module is registered', true, in_array( 'explainer', 
 check( 'the image compare module is registered', true, in_array( 'compare', Toolkit::instance()->ids(), true ) );
 check( 'the flow schematic module is registered', true, in_array( 'schematic', Toolkit::instance()->ids(), true ) );
 check( 'the data table module is registered', true, in_array( 'table', Toolkit::instance()->ids(), true ) );
-check( 'thirteen modules ship', 13, count( Toolkit::instance()->ids() ) );
+check( 'the process steps module is registered', true, in_array( 'steps', Toolkit::instance()->ids(), true ) );
+check( 'fourteen modules ship', 14, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -1631,6 +1632,85 @@ $nasty = $tbl->markup( array(
 check( 'a heading cannot carry markup', false, (bool) strpos( $nasty, '<script>' ) );
 check( 'a quote in a cell cannot break out of its label', false, (bool) strpos( $nasty, 'label="Fluid " flow"' ) );
 check( 'and an ampersand survives as an ampersand', true, (bool) strpos( $nasty, 'A &amp; B' ) );
+
+/* ------------------------------------------------- Steps_Content --- */
+
+/*
+ * The figure table, and the two things about it that are easy to get wrong.
+ *
+ * Every figure spends the accent exactly once. An accent on three elements out
+ * of five is not an accent, it is a second body colour -- and the first draft
+ * of the converge figure filled a 104px plane with it and stopped being about
+ * the choice it was drawn to show.
+ *
+ * And every part's coordinates are numbers in the table rather than something
+ * worked out from an index in CSS, because calc() has no modulo operator: the
+ * first version's `var(--i) % 2` was invalid, every declaration carrying it
+ * was dropped, and five sensors rendered stacked on one spot looking like one.
+ */
+require_once dirname( __DIR__ ) . '/modules/steps/class-steps-content.php';
+
+use ErudaToolkit\Modules\Steps\Steps_Content;
+
+$figures = Steps_Content::figures();
+
+check( 'five illustrations ship', 5, count( $figures ) );
+
+foreach ( $figures as $id => $figure ) {
+	$keys = 0;
+
+	foreach ( $figure['parts'] as $part ) {
+		if ( ! empty( $part['key'] ) ) {
+			$keys++;
+		}
+	}
+
+	check( 'the ' . $id . ' figure spends the accent exactly once', 1, $keys );
+	check( 'and it is made of something', true, count( $figure['parts'] ) > 0 );
+}
+
+// A preset id that no longer exists should leave a drawing in place rather
+// than a hole in the page.
+check( 'an unknown figure falls back rather than vanishing', true, is_array( Steps_Content::figure( 'nope' ) ) );
+check( 'and a step asking for one gets a real id', true,
+	in_array( Steps_Content::figure_id( array( 'figure' => 'nope' ) ), Steps_Content::figure_ids(), true ) );
+check( 'a step asking for a real one keeps it', 'datum', Steps_Content::figure_id( array( 'figure' => 'datum' ) ) );
+
+// Numbering: typed wins, otherwise it counts, padded to two digits so 01 and
+// 10 are the same width in a column.
+check( 'steps count from one', '01', Steps_Content::number( array(), 0 ) );
+check( 'and pad to two digits', '09', Steps_Content::number( array(), 8 ) );
+check( 'but stop padding past nine', '10', Steps_Content::number( array(), 9 ) );
+check( 'a typed number wins', 'A', Steps_Content::number( array( 'number' => 'A' ), 3 ) );
+check( 'and whitespace is not a typed number', '04', Steps_Content::number( array( 'number' => '  ' ), 3 ) );
+
+// A step added and then left empty should not draw a row with a figure in it.
+check( 'an empty step is not a step', false, Steps_Content::step_has_content( array( 'title' => '', 'body' => '  ' ) ) );
+check( 'a step with only a heading is', true, Steps_Content::step_has_content( array( 'title' => 'Agree the method' ) ) );
+check( 'and the empty ones are dropped before rendering', 1, count( Steps_Content::visible_steps(
+	array( 'steps' => array( array( 'title' => 'Keep' ), array( 'title' => '', 'body' => '' ) ) )
+) ) );
+
+// Custom properties reach CSS through a style attribute, which is one of the
+// few places a settings string could otherwise arrive unexamined.
+check( 'a part writes its coordinates as custom properties', '--i:0;--x:-64;--y:-30;--z:14',
+	Steps_Content::part_style( array( 'vars' => array( 'i' => 0, 'x' => -64, 'y' => -30, 'z' => 14 ) ) ) );
+check( 'a part with no coordinates writes no style', '', Steps_Content::part_style( array( 'class' => 'estp__plane' ) ) );
+check( 'anything that is not a number is dropped', '--i:1',
+	Steps_Content::part_style( array( 'vars' => array( 'i' => 1, 'x' => '12px; color:red' ) ) ) );
+// The name is stripped of everything but letters rather than truncated at the
+// first bad character, so `x:red;--y` comes out as the harmless `--xredy`.
+// What matters is that no punctuation survives: without a colon or a semicolon
+// there is nothing to close the property with and nothing to open another.
+$hostile = Steps_Content::part_style( array( 'vars' => array( 'x:red;--y' => 5 ) ) );
+check( 'a property name cannot carry punctuation out', '--xredy:5', $hostile );
+check( 'so it cannot close its own declaration', 1, substr_count( $hostile, ':' ) );
+check( 'nor start another', 0, substr_count( $hostile, ';' ) );
+
+check( 'a key part says so in its class', 'estp__part estp__node estp__part--key',
+	Steps_Content::part_class( array( 'class' => 'estp__node', 'key' => true ) ) );
+check( 'and an ordinary one does not', 'estp__part',
+	Steps_Content::part_class( array() ) );
 
 /* ------------------------------------------------------------- report --- */
 
