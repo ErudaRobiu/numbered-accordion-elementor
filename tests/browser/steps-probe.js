@@ -249,6 +249,72 @@ function check(name, ok, detail) {
   await page.mouse.move(4, 4);
   await sleep(300);
 
+  /* ------------------------------------------------- nothing escapes --- */
+
+  /*
+   * Pushed to the top of every range at once, which is where this broke.
+   *
+   * The figure was a box the layout reserved and the drawing ignored: at a
+   * size of 2 the scene ran 264px above its box and 274px below, and the
+   * shadow -- scaled by the zoom, blur and all -- hung 106px under it and
+   * landed across the next step's heading. The row could not give way either,
+   * so a wide illustration took the whole page sideways.
+   *
+   * Clipping is visual, so a clipped child's getBoundingClientRect is
+   * unchanged and layout boxes cannot answer this. Hit-testing is clipped too,
+   * so asking what is actually painted at a point just outside the box can.
+   */
+  const extremes = await page.evaluate(async () => {
+    const w = document.querySelector('.estp');
+    w.style.setProperty('--estp-zoom', '2.2');
+    w.style.setProperty('--estp-fig', '620px');
+    w.style.setProperty('--estp-fig-h', '500px');
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    const escaped = [];
+    const onText = [];
+
+    document.querySelectorAll('.estp .estp__fig').forEach((f, i) => {
+      const b = f.getBoundingClientRect();
+
+      for (const [label, x, y] of [
+        ['above', b.left + b.width / 2, b.top - 10],
+        ['below', b.left + b.width / 2, b.bottom + 10],
+        ['left', b.left - 10, b.top + b.height / 2],
+        ['right', b.right + 10, b.top + b.height / 2],
+      ]) {
+        if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) continue;
+        const el = document.elementFromPoint(x, y);
+        if (el && el.closest('.estp__fig') === f) escaped.push('fig ' + i + ' ' + label);
+      }
+
+      // And the shadow specifically, against every block of words on the page.
+      const g = f.parentElement.querySelector('.estp__ground').getBoundingClientRect();
+      document.querySelectorAll('.estp__words').forEach((words, j) => {
+        const t = words.getBoundingClientRect();
+        const hit = !(g.right < t.left || g.left > t.right || g.bottom < t.top || g.top > t.bottom);
+        if (hit) onText.push('shadow ' + i + ' over words ' + j);
+      });
+    });
+
+    const sideways = document.documentElement.scrollWidth > window.innerWidth + 1;
+
+    w.style.removeProperty('--estp-zoom');
+    w.style.removeProperty('--estp-fig');
+    w.style.removeProperty('--estp-fig-h');
+
+    return { escaped, onText, sideways };
+  });
+
+  check('at the largest settings nothing is drawn outside its own box',
+    extremes.escaped.length === 0, extremes.escaped.join(', ') || 'nothing escapes');
+
+  check('and no shadow reaches any step\'s words',
+    extremes.onText.length === 0, extremes.onText.join(', ') || 'no shadow touches text');
+
+  check('and a wide illustration does not take the page sideways',
+    !extremes.sideways, extremes.sideways ? 'the page scrolls sideways' : 'no sideways scroll');
+
   /* ------------------------------------------------------ flattening --- */
 
   /*

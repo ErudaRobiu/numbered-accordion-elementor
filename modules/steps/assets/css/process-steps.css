@@ -83,7 +83,15 @@
 .estp__step {
 	position: relative;
 	display: grid;
-	grid-template-columns: var(--estp-disc) minmax(0, 1fr) var(--estp-fig);
+	/*
+	 * minmax(0, ...) on the drawing's track, not a bare width.
+	 *
+	 * A fixed track cannot give way, so a wide illustration in a narrow
+	 * container pushed the row past its parent and took the whole page
+	 * sideways with it. As a maximum it takes the width when there is room and
+	 * gives it back when there is not.
+	 */
+	grid-template-columns: var(--estp-disc) minmax(0, 1fr) minmax(0, var(--estp-fig));
 	column-gap: var(--estp-gap);
 	align-items: start;
 	padding-bottom: var(--estp-step-gap, 72px);
@@ -194,7 +202,7 @@
  * when the columns collapse on a phone.
  */
 .estp--alt .estp__step:nth-child(even) {
-	grid-template-columns: var(--estp-disc) var(--estp-fig) minmax(0, 1fr);
+	grid-template-columns: var(--estp-disc) minmax(0, var(--estp-fig)) minmax(0, 1fr);
 }
 
 .estp--alt .estp__step:nth-child(even) > .estp__words {
@@ -235,6 +243,23 @@
 	/* The eye moves back as the object grows, so the two stay in proportion. */
 	perspective: calc( var(--estp-persp, 900px) * var(--estp-zoom, 1) );
 	perspective-origin: var(--estp-eye, 64%) 42%;
+	/*
+	 * Clipped, and this is the one place in the plugin where `overflow:
+	 * hidden` is not a threat to a 3D scene.
+	 *
+	 * `overflow` flattens the element that carries `transform-style:
+	 * preserve-3d`. This element carries `perspective` instead, and the scene
+	 * inside it is the one preserving depth -- measured rather than assumed,
+	 * with a probe at translateZ(120px) reading 115px here against 100px when
+	 * the scene itself is given an overflow.
+	 *
+	 * Without it a figure is a box the layout reserves and the drawing ignores.
+	 * At a size of 2 the scene ran 264px above its box and 274px below, which
+	 * put one step's shadow across the next step's heading -- and because the
+	 * overflow was invisible to the layout, the only thing that moved it was
+	 * adding space nobody wanted.
+	 */
+	overflow: hidden;
 }
 
 .estp__scene {
@@ -318,26 +343,44 @@
  *
  * Without a background behind the figure there is nothing to say the parts are
  * above a surface rather than floating in the page, and on a light section
- * that reads as a drawing that has come unstuck. It is a blurred ellipse laid
- * flat in the scene, so it turns with the camera like everything else.
+ * that reads as a drawing that has come unstuck.
+ *
+ * It sits outside the scene, which is the important part. Inside it, it was
+ * scaled by the zoom along with everything else -- and a blur scales too, so
+ * at a size of 2 a soft contact shadow became a smear half again as wide as
+ * the drawing, hanging 106px below the box and landing on the next step's
+ * heading. Out here it is measured against the box, so it is the same shadow
+ * whatever size the drawing is, and the box clips it.
+ *
+ * It gives up turning with the camera by moving, which costs nothing: a
+ * contact shadow under a small object is a soft ellipse from every angle.
  */
 .estp__ground {
 	position: absolute;
+	/*
+	 * Under the drawing, not at the bottom of the box.
+	 *
+	 * The drawing is centred in whatever box it is given; the shadow was
+	 * pinned near the bottom of it. At the default height the two are close
+	 * enough that nobody would notice, and at 500px they separate -- an object
+	 * floating in the middle of the box with its shadow sitting on the floor a
+	 * long way beneath it. Measured from the centre and offset by the size of
+	 * the drawing, it stays under the thing casting it.
+	 *
+	 * The offset scales with the illustration; the blur only partly does, and
+	 * the width is a length rather than a share of the box, so a wider box
+	 * does not stretch the shadow across it.
+	 */
 	left: 50%;
-	top: 72%;
-	width: 46%;
-	height: 22%;
-	margin-left: -23%;
+	top: 50%;
+	width: calc( 200px * var(--estp-zoom, 1) );
+	height: calc( 26px * var(--estp-zoom, 1) );
+	margin-left: calc( -100px * var(--estp-zoom, 1) );
+	transform: translateY( calc( 62px * var(--estp-zoom, 1) ) );
 	border-radius: 50%;
 	background: var(--estp-shadow, rgba(27, 58, 97, 0.28));
-	filter: blur(14px);
+	filter: blur( calc( 10px + 4px * var(--estp-zoom, 1) ) );
 	opacity: 0.38;
-	transform: translateZ(-1px) rotateX(78deg);
-	/*
-	 * A filter flattens 3D for everything inside the element carrying it --
-	 * which is why the blur is on this leaf and never on a wrapper. It has no
-	 * children, so there is nothing of its own to flatten.
-	 */
 	pointer-events: none;
 }
 

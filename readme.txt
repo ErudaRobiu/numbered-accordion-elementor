@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.43.0
+Stable tag: 2.43.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,20 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.43.1 =
+* **Fixed: at large illustration sizes the shadow landed on the next step's
+  heading.** The shadow sat inside the drawing and was scaled along with it —
+  blur included — so at the top of the size range a soft contact shadow became
+  a smear hanging well below its own box. It is measured against the box now
+  rather than scaled with the drawing, and it stays under the object that casts
+  it at any height instead of sinking to the floor of a tall box.
+* **Fixed: the illustrations were not kept inside their own box.** The box was
+  something the layout reserved and the drawing ignored — at the largest
+  setting it ran over 260px above and below — so the only thing that stopped
+  one step reaching the next was adding space nobody wanted. It is clipped now.
+* **Fixed: a wide illustration could take the whole page sideways.** Its column
+  could not give way when there was no room for it; now it can.
 
 = 2.43.0 =
 * **Process Steps: the illustrations are bigger**, and there is a size control

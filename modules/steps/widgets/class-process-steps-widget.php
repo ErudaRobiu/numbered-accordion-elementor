@@ -553,8 +553,17 @@ class Process_Steps_Widget extends Widget_Base {
 					 */
 					?>
 					<div class="estp__fig estp__fig--<?php echo esc_attr( $figure_id ); ?>" aria-hidden="true">
+						<?php
+						/*
+						 * Outside the scene on purpose. Inside it the shadow
+						 * was scaled by the illustration size along with
+						 * everything else -- blur included -- and at the top
+						 * of the range it became a smear that hung below the
+						 * box and landed on the next step's heading.
+						 */
+						?>
+						<span class="estp__ground"></span>
 						<div class="estp__scene">
-							<span class="estp__ground"></span>
 							<?php
 							$parts = isset( $figure['parts'] ) ? $figure['parts'] : array();
 							$deck  = ! empty( $figure['deck'] );

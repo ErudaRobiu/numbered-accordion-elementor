@@ -652,6 +652,14 @@ dark section, and inside something that flattens 3D.
 - [ ] **Drag "illustration size"**: the drawing should get bigger without the
       perspective getting harder. If it starts to bulge, the camera is not
       moving back with it
+- [ ] **Push size, width and height all the way up at once.** Nothing may be
+      drawn outside its own box, no shadow may touch any step's words, and the
+      page must not scroll sideways. This is the setting that broke it: the box
+      was something the layout reserved and the drawing ignored
+- [ ] The shadow stays under the drawing at every height, rather than sinking
+      to the bottom of a tall box and leaving the object floating above it
+- [ ] Set the space between steps to nought at a large size: the steps should
+      butt up against each other and still not bleed into one another
 - [ ] **Narrow the window: the illustration drops under the words**, in line
       with the text rather than with the numbers. Alternating, every step
       should keep the words above the drawing -- there is one column to stack
