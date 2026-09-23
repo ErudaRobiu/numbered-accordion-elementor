@@ -652,6 +652,18 @@ script-blocked fallback, against `tests/browser/header.html`.
       and can be set differently on Tablet and Mobile
 - [ ] The phone drawer is spaced and rounded the same way, and is completely
       flat when shut
+- [ ] **In the drawer, tapping the word goes to its page** -- tapping
+      "Services" must land on /services. Tapping it and getting a list instead
+      is the old behaviour, where the page could not be reached from the menu
+      at all
+- [ ] **The chevron beside it opens the list**, and tapping it again closes it.
+      One chevron per row, at the right-hand edge, big enough for a thumb
+- [ ] **Close it and watch the chevron: it must turn back the right way up.**
+      A tap leaves `:hover` behind on a touch screen, and a caret still upside
+      down over a closed panel is that, not the panel failing to close
+- [ ] The label must lose its green with it, and the rolling label must settle
+      back on the word rather than staying on its understudy
+- [ ] An item with no sub-links gets no chevron at all
 - [ ] "Goes back to full width" set to **Only at the top** keeps it compact
       while you scroll up mid-page, and restores it when you reach the top.
       Set to **Whenever you scroll up** it comes back on any upward scroll
@@ -669,6 +681,13 @@ script-blocked fallback, against `tests/browser/header.html`.
 - [ ] **Open the same panel at the very top of the page: the bar must stay
       transparent.** The panel gets a fill; the bar does not, and the hero
       should still be visible straight through it
+- [ ] **And the blur behind it runs the full height of the window**, bar
+      included. A crisp strip of hero across the top with the rest pushed back
+      is the scrim starting below a bar that has nothing to protect
+- [ ] Scroll down until the header leaves, scroll back up, then open a panel:
+      **the frosted bar must look exactly as it did the first time.** Muddier
+      or darker means the scrim has crept up underneath it and the frost is
+      blurring its own blur
 - [ ] **And the panel opens at the same width in both places.** Open one at the
       top, scroll down, open it again — it should be the same card in the same
       position, not a sheet across the window and then a card

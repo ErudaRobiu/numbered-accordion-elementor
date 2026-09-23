@@ -668,6 +668,35 @@
 	transform: rotate(180deg);
 }
 
+/*
+ * The drawer's chevron button, which does not exist on a desktop.
+ *
+ * Declared here rather than only inside the phone block so that everything
+ * about it is in one place, and so a stylesheet that somehow loads without the
+ * media query does not leave a stray button in the middle of the menu row.
+ */
+.ehdr .ehdr__toggle {
+	display: none;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 52px;
+	align-self: stretch;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--ehdr-ink, #0f3860);
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.ehdr__toggle:focus-visible {
+	outline: 2px solid var(--ehdr-accent, #00a55d);
+	outline-offset: -4px;
+	border-radius: 8px;
+}
+
 /* --------------------------------------------------------------- the CTA --- */
 
 /*
@@ -1093,8 +1122,19 @@
  * document on a property that cannot be composited. The scrim costs one layer
  * and touches nothing it covers.
  *
- * It starts below the bar rather than at the top of the screen so the bar
- * itself is never blurred by it.
+ * Where it starts depends on whether the bar has a fill.
+ *
+ * Frosted, it starts at the bar's bottom edge: the bar is already blurring
+ * what is behind it, and blurring the blur -- then darkening it -- comes out
+ * muddy and a shade off every other frosted surface on the page.
+ *
+ * At the top of the page the bar has no fill at all, so there is nothing to
+ * protect and starting below it only draws a line: a crisp strip of hero
+ * across the top of the window with the rest of the picture pushed back
+ * underneath it. There it runs the full height and the hero goes back
+ * uniformly, bar included. Nothing in the bar is blurred either way -- the
+ * scrim is a sibling at a lower z-index, so the logo, the menu and the button
+ * are painted over it rather than through it.
  */
 .ehdr__scrim {
 	position: fixed;
@@ -1119,6 +1159,18 @@
 	transition:
 		opacity var(--ehdr-panel-ms, 280ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
 		visibility 0s linear 0s;
+}
+
+/*
+ * The transparent bar gets no exemption.
+ *
+ * Done here rather than by writing a different number into --ehdr-scrim-top,
+ * because the script only re-measures a third of a second after the bar
+ * changes state -- long enough to watch the band appear and then heal. A
+ * selector switches on the same frame the attribute does.
+ */
+.ehdr:not([data-ehdr-stuck]):not([data-ehdr-preview="stuck"]) .ehdr__scrim {
+	top: 0;
 }
 
 /* ------------------------------------------------------------ the burger --- */
@@ -1298,8 +1350,18 @@
 		padding: 8px var(--ehdr-pad-x-mobile, 20px) 0;
 	}
 
+	/*
+	 * A row of two things and a panel under them.
+	 *
+	 * The label takes the room it needs and the chevron sits at the end of the
+	 * row; the panel wraps onto its own line underneath, which is what
+	 * `flex-basis: 100%` on it is for. The item used to be a block with the
+	 * link filling it, and there was nowhere for a second control to go.
+	 */
 	.ehdr__item {
-		display: block;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: stretch;
 		border-bottom: 1px solid var(--ehdr-hairline, rgba(15, 56, 96, 0.1));
 	}
 
@@ -1308,10 +1370,37 @@
 	}
 
 	.ehdr .ehdr__link {
-		width: 100%;
-		justify-content: space-between;
+		flex: 1 1 auto;
+		width: auto;
+		min-width: 0;
+		justify-content: flex-start;
 		padding: 16px 0;
 		font-size: var(--ehdr-link-size-mobile, 1.125rem);
+	}
+
+	/*
+	 * The chevron is its own control here, and the caret inside the link goes.
+	 *
+	 * Two carets on one row would be the giveaway that this is two elements
+	 * pretending to be one. The one in the link is the desktop's; this one is
+	 * the phone's, and it is the only thing on the row that opens the panel.
+	 */
+	.ehdr .ehdr__toggle {
+		display: flex;
+		/* Out to the edge of the drawer's padding, so the tap target reaches
+		   the side of the screen rather than stopping short of it. */
+		margin-right: calc(0px - var(--ehdr-pad-x-mobile, 20px));
+		padding-right: var(--ehdr-pad-x-mobile, 20px);
+		width: calc(52px + var(--ehdr-pad-x-mobile, 20px));
+	}
+
+	.ehdr__link > .ehdr__caret {
+		display: none;
+	}
+
+	/* Full width, on the line under the row that opens it. */
+	.ehdr__panel {
+		flex: 1 0 100%;
 	}
 
 	/* No underline on a phone: a row that is already full width has nothing to
@@ -1507,6 +1596,69 @@
 	 */
 	.ehdr .ehdr__drawer-cta {
 		display: none;
+	}
+}
+
+/* --------------------------------------------------------- no pointer --- */
+
+/*
+ * A tap is not a hover, whatever the browser decides to call it.
+ *
+ * Tap something on a touch screen and it keeps :hover until you tap somewhere
+ * else -- there is no pointer to move away. Every hover state in this header
+ * therefore latched: the caret stayed upside down after the panel had closed,
+ * the label stayed in its hover colour, and the rolling word stayed rolled
+ * over onto its understudy. "The arrows don't flip back" is what that looks
+ * like from the outside, and it is not the script failing to close anything --
+ * the panel had closed, and the caret was being held over by a stylesheet.
+ *
+ * Every rule here is the matching hover rule undone, and every one of them is
+ * qualified with :not([data-ehdr-on]) so it cannot reach an item that really
+ * is open. Without that it would win on source order over the attribute rules
+ * above -- an open item is hovered too -- and the caret would never turn at
+ * all.
+ */
+@media (hover: none) {
+	.ehdr .ehdr__item:not([data-ehdr-on]):hover .ehdr__caret {
+		transform: none;
+	}
+
+	.ehdr .ehdr__item:not([data-ehdr-on]) > .ehdr__link:hover {
+		color: var(--ehdr-ink, #0f3860) !important;
+	}
+
+	.ehdr .ehdr__item:not([data-ehdr-on]) > .ehdr__link:hover::after {
+		transform: scaleX(0);
+	}
+
+	.ehdr .ehdr__item:not([data-ehdr-on]) > .ehdr__link:hover .ehdr__roll span {
+		transform: none;
+	}
+
+	.ehdr .ehdr__item:not([data-ehdr-on]) > .ehdr__link:hover .ehdr__roll span + span {
+		transform: translateY(100%);
+	}
+
+	/*
+	 * And the row you tapped on the way to a page does not stay lit behind
+	 * you. This one shows up on a back-navigation: the drawer opens again with
+	 * one link still tinted and slid across, as though it were selected.
+	 */
+	.ehdr .ehdr__panel-link:hover {
+		background: none;
+		color: var(--ehdr-ink, #0f3860) !important;
+		transform: none;
+	}
+
+	.ehdr .ehdr__panel-link:hover svg {
+		opacity: 0;
+		transform: translateX(-6px);
+	}
+
+	/* The picture drifts because a panel is open, not because something was
+	   touched near it. */
+	.ehdr .ehdr__item:not([data-ehdr-on]):hover > .ehdr__panel .ehdr__figure img {
+		transform: scale(1);
 	}
 }
 

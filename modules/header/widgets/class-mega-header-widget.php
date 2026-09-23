@@ -1688,6 +1688,36 @@ class Mega_Header_Widget extends Widget_Base {
 								?>
 							</a>
 
+							<?php
+							/*
+							 * The drawer's own way in, and the reason the
+							 * label above it can stay a link.
+							 *
+							 * On a phone the first tap on an item used to open
+							 * its panel and the second used to close it again,
+							 * so the page behind the word -- /services, the
+							 * one someone tapped "Services" to reach -- was
+							 * not reachable from the menu at all. Splitting
+							 * the row is the arrangement every phone menu has
+							 * trained people to expect: the word goes to the
+							 * page, the chevron beside it opens the list.
+							 *
+							 * It is a second copy of the caret rather than the
+							 * one in the link moved out here, because on a
+							 * desktop the caret belongs inside the link: it is
+							 * part of the label, it takes the underline with
+							 * it, and a button in the middle of a horizontal
+							 * menu row is a tab stop nobody wanted. One of the
+							 * two is displayed at any width, never both.
+							 */
+							?>
+							<?php if ( $hasPanel ) : ?>
+								<button class="ehdr__toggle" type="button" aria-expanded="false"
+									aria-label="<?php echo esc_attr( sprintf( /* translators: %s: the menu item's label. */ __( 'Open the %s menu', 'numbered-accordion' ), $label ) ); ?>">
+									<?php $this->icon( 'caret' ); ?>
+								</button>
+							<?php endif; ?>
+
 							<?php if ( $hasPanel ) : ?>
 								<div class="ehdr__panel">
 									<div class="ehdr__panel-inner<?php echo $split ? '' : ' ehdr__panel-inner--solo'; ?>">

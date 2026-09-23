@@ -128,6 +128,12 @@
 
 			trigger.setAttribute( 'aria-expanded', 'false' );
 			trigger.setAttribute( 'aria-controls', panel.id );
+
+			var toggle = item.querySelector( '.ehdr__toggle' );
+
+			if ( toggle ) {
+				toggle.setAttribute( 'aria-controls', panel.id );
+			}
 		} );
 
 		function clearTimers() {
@@ -166,6 +172,12 @@
 
 				if ( trigger ) {
 					trigger.setAttribute( 'aria-expanded', on ? 'true' : 'false' );
+				}
+
+				var toggle = one.querySelector( '.ehdr__toggle' );
+
+				if ( toggle ) {
+					toggle.setAttribute( 'aria-expanded', on ? 'true' : 'false' );
 				}
 			} );
 
@@ -281,18 +293,43 @@
 			}
 
 			/*
+			 * The chevron in the drawer, which is the only thing there that
+			 * opens a panel.
+			 *
+			 * It is a real button beside the link rather than a region of it,
+			 * so the two targets cannot be confused: the word goes to the
+			 * page, this opens the list under it. Tapping it again closes it,
+			 * because in a drawer there is no outside to tap.
+			 */
+			var toggle = item.querySelector( '.ehdr__toggle' );
+
+			if ( toggle ) {
+				toggle.addEventListener( 'click', function ( event ) {
+					event.preventDefault();
+					event.stopPropagation();
+					clearTimers();
+					show( current === item ? null : item );
+				} );
+			}
+
+			/*
 			 * A tap, or a click on the trigger.
 			 *
-			 * On a touch screen the first tap on a top-level item opens its
-			 * panel rather than following the link -- otherwise the panel is
-			 * unreachable, since there is no hover to open it with. The second
-			 * tap follows the link, which is the behaviour every phone menu
-			 * has trained people to expect.
+			 * On a touch screen at desktop widths the first tap on a top-level
+			 * item opens its panel rather than following the link -- a mega
+			 * panel is otherwise unreachable there, since there is no hover to
+			 * open it with and no chevron button at that width. The second tap
+			 * follows the link.
+			 *
+			 * In the drawer it does not apply, and that is the fix rather than
+			 * an omission. The trigger used to be a toggle both ways on a
+			 * phone: one tap opened the panel, the next closed it, and the
+			 * page the word names -- /services, from tapping "Services" --
+			 * could not be reached from the menu at all. The chevron above
+			 * owns opening now, so the link is left alone to be a link.
 			 */
 			trigger.addEventListener( 'click', function ( event ) {
-				var narrow = isNarrow();
-
-				if ( ! narrow && ! pointerIsCoarse ) {
+				if ( isNarrow() || ! pointerIsCoarse ) {
 					return;
 				}
 
@@ -300,11 +337,6 @@
 					event.preventDefault();
 					clearTimers();
 					show( item );
-				} else if ( narrow ) {
-					// In the drawer the trigger is a toggle both ways: there
-					// is nowhere else to tap to close it.
-					event.preventDefault();
-					show( null );
 				}
 			} );
 		} );
@@ -587,6 +619,11 @@
 					root.setAttribute( HIDDEN, '' );
 				} else {
 					root.removeAttribute( HIDDEN );
+
+					// Back on screen, at whatever height and gap it has now.
+					// Measured after the slide rather than during it, for the
+					// same reason the fold is.
+					window.setTimeout( measure, 340 );
 				}
 			}
 
@@ -769,8 +806,21 @@
 			 * height and its bottom edge are no longer the same number. The
 			 * scrim has to start at the bottom edge or it creeps up over the
 			 * bar and blurs it.
+			 *
+			 * Not while the bar is off the screen, though. Scrolling down
+			 * hides it with a transform, and a transform is in the rect: the
+			 * measurement that follows reads a bottom edge of zero and writes
+			 * it, and nothing re-measures on the way back up, so the frosted
+			 * bar spent the rest of the session sitting on a scrim that
+			 * started at the top of the window -- blurring its own blur and
+			 * coming out a shade muddier than every other frosted surface on
+			 * the page. Keeping the last good number is right: the bar is the
+			 * same height when it comes back, and the only thing that could
+			 * have changed it is a resize, which measures again anyway.
 			 */
-			root.style.setProperty( '--ehdr-scrim-top', Math.round( box.bottom ) + 'px' );
+			if ( ! hidden ) {
+				root.style.setProperty( '--ehdr-scrim-top', Math.round( box.bottom ) + 'px' );
+			}
 
 			// After the width above, because a folded bar moves every item in
 			// it and with them every dropdown hanging off one.

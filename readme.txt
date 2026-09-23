@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.39.0
+Stable tag: 2.40.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,29 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.40.0 =
+* **Fixed: on a phone, a menu item with sub-links could not reach its own
+  page.** Tapping "Services" opened the list under it and tapping again closed
+  it, so /services was not reachable from the menu at all. The row is two
+  things now: the word goes to the page, and a chevron beside it opens the
+  list. Tapping the chevron again closes it.
+* **Fixed: the chevrons did not turn back after closing.** A tap leaves
+  `:hover` behind on a touch screen — there is no pointer to move away — so
+  every hover state in the header latched. The panel really had closed; the
+  caret was being held upside down by the stylesheet. The label's hover colour
+  and the rolling label were stuck the same way, and are not any more.
+* **Fixed: the page behind an open panel was not blurred behind the bar
+  itself.** At the top of the page the bar has no fill, so starting the blur
+  below it only drew a line — a crisp strip of hero across the top of the
+  window with the rest of the picture pushed back underneath. It runs the full
+  height there now. Frosted, it still starts below the bar, which is what stops
+  the frost blurring its own blur.
+* **Fixed: the frosted bar came back muddy after scrolling down and up.**
+  Scrolling down hides the bar with a transform, and the measurement that
+  followed read its position as the top of the window and wrote that as the
+  blur's starting line. Nothing re-measured on the way back up, so for the rest
+  of the session the bar sat on a blur that started above it.
 
 = 2.39.0 =
 * **Fixed: opening a menu at the top of the page turned the whole header

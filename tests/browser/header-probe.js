@@ -322,7 +322,9 @@ function check(name, ok, detail) {
       barBottom: Math.round(barBox.bottom),
       expanded: [...document.querySelectorAll('.ehdr__link[aria-expanded]')].map(a => a.getAttribute('aria-expanded')),
       scrim: { backdrop: scs.backdropFilter || scs.webkitBackdropFilter, bg: scs.backgroundColor,
-        top: Math.round(scrim.getBoundingClientRect().top), vis: scs.visibility },
+        top: Math.round(scrim.getBoundingClientRect().top), vis: scs.visibility,
+        z: parseInt(scs.zIndex, 10) },
+      barZ: parseInt(getComputedStyle(document.querySelector('.ehdr__bar')).zIndex, 10),
       // A filter on page content would make every fixed element inside it
       // scroll with the page -- this header included.
       filtered: [...document.querySelectorAll('body > *')]
@@ -411,12 +413,15 @@ function check(name, ok, detail) {
     await new Promise(x => setTimeout(x, 900));
     await hover(true);
     const stuck = r();
-    const barBg = getComputedStyle(document.querySelector('.ehdr__bar')).backgroundColor;
+    const bar = document.querySelector('.ehdr__bar');
+    const barBg = getComputedStyle(bar).backgroundColor;
+    const scrimTop = Math.round(document.querySelector('.ehdr__scrim').getBoundingClientRect().top);
+    const barBottom = Math.round(bar.getBoundingClientRect().bottom);
     await hover(false);
 
     window.scrollTo(0, 0);
     await new Promise(x => setTimeout(x, 900));
-    return { top, stuck, barBg };
+    return { top, stuck, barBg, scrimTop, barBottom };
   });
 
   check('the dropdown opens at the same width and in the same place either way',
@@ -649,9 +654,25 @@ function check(name, ok, detail) {
     open.scrim.vis === 'visible' && /blur\((?!0px)/.test(open.scrim.backdrop),
     open.scrim.backdrop + ' over ' + open.scrim.bg);
 
-  check('and it starts below the bar, so the bar is not blurred by it',
-    open.scrim.top >= open.barBottom - 1,
-    'scrim starts at ' + open.scrim.top + ', bar ends at ' + open.barBottom);
+  /*
+   * Where it starts is the bar's state, not a constant.
+   *
+   * Frosted, the bar is already blurring what is behind it and the scrim has
+   * to stop at its bottom edge: blurring the blur and then darkening it comes
+   * out muddy and a shade off every other frosted surface on the page. At the
+   * top the bar has no fill to protect, and stopping below it left a crisp
+   * strip of hero across the top of the window with the rest of the picture
+   * pushed back underneath -- a line drawn by nothing.
+   */
+  check('at the top the scrim runs the full height of the window',
+    open.scrim.top === 0, 'scrim starts at ' + open.scrim.top);
+
+  check('and the bar is painted over it rather than through it',
+    open.scrim.z < open.barZ, 'scrim z-index ' + open.scrim.z + ', bar ' + open.barZ);
+
+  check('frosted, it starts below the bar so the frost is not blurred twice',
+    Math.abs(sameBox.scrimTop - sameBox.barBottom) <= 2,
+    'scrim starts at ' + sameBox.scrimTop + ', bar ends at ' + sameBox.barBottom);
 
   /*
    * The scrim must be a backdrop-filter on a sheet over the page, never a
@@ -897,6 +918,43 @@ function check(name, ok, detail) {
     !drawer.sideways, drawer.sideways ? 'the page scrolls sideways' : 'no sideways scroll');
 
   /*
+   * The row is two targets, and which is which is the whole point.
+   *
+   * The label used to be the toggle: one tap opened the panel, the next closed
+   * it, and the page the word names could not be reached from the menu at all.
+   * The chevron beside it opens the list now; the word goes where it says.
+   */
+  const split = await phone.evaluate(() => {
+    const it = document.querySelectorAll('.ehdr__item')[2];
+    const link = it.querySelector('.ehdr__link');
+    const toggle = it.querySelector('.ehdr__toggle');
+    const w = e => Math.round(e.getBoundingClientRect().width);
+    const h = e => Math.round(e.getBoundingClientRect().height);
+    return {
+      toggle: getComputedStyle(toggle).display,
+      linkCaret: getComputedStyle(link.querySelector('.ehdr__caret')).display,
+      carets: [...it.querySelectorAll(':scope > * .ehdr__caret')]
+        .filter(c => getComputedStyle(c).display !== 'none').length,
+      overlap: Math.round(link.getBoundingClientRect().right) >
+        Math.round(toggle.getBoundingClientRect().left),
+      target: Math.min(w(toggle), h(toggle)),
+      controls: toggle.getAttribute('aria-controls') === link.getAttribute('aria-controls'),
+    };
+  });
+
+  check('the drawer row carries a chevron button beside the label',
+    split.toggle !== 'none' && !split.overlap,
+    'toggle display ' + split.toggle + ', overlapping the link: ' + split.overlap);
+
+  check('and exactly one caret shows on the row',
+    split.carets === 1 && split.linkCaret === 'none',
+    split.carets + ' visible, the link\'s own is ' + split.linkCaret);
+
+  check('the chevron is a thumb-sized target pointed at the same panel',
+    split.target >= 44 && split.controls,
+    split.target + 'px, aria-controls matches the link\'s: ' + split.controls);
+
+  /*
    * The tap that broke this once.
    *
    * focusin fires on the way to a click -- mousedown, focus, mouseup, click --
@@ -906,7 +964,29 @@ function check(name, ok, detail) {
    */
   const before = await phone.evaluate(() =>
     Math.round(document.querySelectorAll('.ehdr__item')[2].querySelector('.ehdr__panel').getBoundingClientRect().height));
-  await phone.click('.ehdr__item:nth-of-type(3) .ehdr__link');
+
+  // The label first, which must not open anything and must not be cancelled.
+  const followed = await phone.evaluate(() => new Promise(resolve => {
+    const link = document.querySelectorAll('.ehdr__item')[2].querySelector('.ehdr__link');
+    link.addEventListener('click', function once(e) {
+      // Read before cancelling, or the answer is always "cancelled". This
+      // listener is added last, so anything the widget did to the event has
+      // already happened by the time it runs.
+      const reached = !e.defaultPrevented;
+      e.preventDefault();
+      link.removeEventListener('click', once);
+      resolve(reached);
+    });
+    link.click();
+  }));
+  const afterLabel = await phone.evaluate(() =>
+    document.querySelectorAll('.ehdr__item')[2].hasAttribute('data-ehdr-on'));
+
+  check('tapping the label in the drawer follows the link to its page',
+    followed && !afterLabel,
+    'the click reached the link with nothing cancelling it, panel open=' + afterLabel);
+
+  await phone.click('.ehdr__item:nth-of-type(3) .ehdr__toggle');
   await sleep(800);
   const after = await phone.evaluate(() => {
     const it = document.querySelectorAll('.ehdr__item')[2];
@@ -915,10 +995,11 @@ function check(name, ok, detail) {
       h: Math.round(panel.getBoundingClientRect().height),
       on: it.hasAttribute('data-ehdr-on'),
       links: panel.querySelectorAll('.ehdr__panel-link').length,
+      expanded: it.querySelector('.ehdr__toggle').getAttribute('aria-expanded'),
     };
   });
-  check('tapping an item in the drawer opens its links and leaves them open',
-    after.on && after.h > before + 100,
+  check('tapping the chevron opens its links and leaves them open',
+    after.on && after.h > before + 100 && after.expanded === 'true',
     'panel went from ' + before + 'px to ' + after.h + 'px, holding ' + after.links + ' links');
 
   // The picture and the blurb are desktop luxuries; on a phone they would push
@@ -933,6 +1014,42 @@ function check(name, ok, detail) {
   check('but not the picture or the blurb',
     trimmed.fig === 'none' && trimmed.blurb === 'none',
     'picture ' + trimmed.fig + ', blurb ' + trimmed.blurb);
+
+  /*
+   * And the caret comes back down.
+   *
+   * A tap leaves :hover latched on a touch screen -- there is no pointer to
+   * move away -- so every hover rule in the header stayed on after the thing
+   * it described had finished. The panel really had closed; the caret was
+   * being held upside down by the stylesheet, which is what "the arrows don't
+   * flip back" was.
+   */
+  await phone.click('.ehdr__item:nth-of-type(3) .ehdr__toggle');
+  await sleep(900);
+  const flipped = await phone.evaluate(() => {
+    const it = document.querySelectorAll('.ehdr__item')[2];
+    const caret = it.querySelector('.ehdr__toggle .ehdr__caret');
+    const m = new DOMMatrix(getComputedStyle(caret).transform);
+    return {
+      on: it.hasAttribute('data-ehdr-on'),
+      hovered: it.matches(':hover'),
+      turn: Math.round(Math.atan2(m.b, m.a) * 180 / Math.PI),
+      colour: getComputedStyle(it.querySelector('.ehdr__link')).color,
+      expanded: it.querySelector('.ehdr__toggle').getAttribute('aria-expanded'),
+      h: Math.round(it.querySelector('.ehdr__panel').getBoundingClientRect().height),
+    };
+  });
+
+  check('tapping the chevron again closes the panel',
+    !flipped.on && flipped.h < 40 && flipped.expanded === 'false',
+    'panel ' + flipped.h + 'px, aria-expanded=' + flipped.expanded);
+
+  check('and the caret flips back even though the tap left :hover behind',
+    flipped.turn === 0 && flipped.hovered,
+    'caret at ' + flipped.turn + ' degrees, still matching :hover: ' + flipped.hovered);
+
+  check('the label loses its hover colour with it',
+    /rgb\(15,\s*56,\s*96\)/.test(flipped.colour), flipped.colour);
 
   await phone.click('.ehdr__burger');
   await sleep(600);

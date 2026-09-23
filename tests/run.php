@@ -1379,6 +1379,31 @@ check( 'with no empty second side left behind', false, (bool) strpos( $only, 'eh
 check( 'a blurb without a picture still makes two sides', false, (bool) strpos( $noimg, 'ehdr__panel-inner--solo' ) );
 check( 'and that is not a short dropdown', false, (bool) strpos( $noimg, 'ehdr__item--drop' ) );
 
+/*
+ * The drawer's chevron, which is why the label above it can be a link.
+ *
+ * On a phone the trigger used to be a toggle both ways -- one tap opened the
+ * panel, the next closed it -- so the page the word names could not be reached
+ * from the menu at all. The button carries a second copy of the caret because
+ * the one in the link belongs to the desktop, where it is part of the label
+ * and takes the underline with it; exactly one of the two is ever displayed.
+ */
+check( 'an item with a panel gets a chevron button', 1, substr_count( $both, 'ehdr__toggle' ) );
+check( 'it is a button rather than a link', 1, preg_match( '/<button class="ehdr__toggle" type="button"/', $both ) );
+check( 'it starts closed', 1, preg_match( '/class="ehdr__toggle"[^>]*aria-expanded="false"/', $both ) );
+check( 'it says which menu it opens', 1, preg_match( '/aria-label="Open the Systems menu"/', $both ) );
+check( 'and it sits outside the link, not inside it', 1, preg_match( '/<\/a>\s*(?:<\?php.*?\?>\s*)?.*?<button class="ehdr__toggle"/s', $both ) );
+
+// Two carets in the markup, one per breakpoint -- never two on one row.
+check( 'the caret is in both the link and the button', 2, substr_count( $both, 'ehdr__caret' ) );
+
+// An item with no panel has nothing to open, so it gets no chevron.
+$plain = ( new Header_Render_Probe() )->markup( array(
+	'items' => array( array( 'label' => 'News' ) ),
+) );
+check( 'an item without a panel gets no chevron', false, (bool) strpos( $plain, 'ehdr__toggle' ) );
+check( 'and no caret either', false, (bool) strpos( $plain, 'ehdr__caret' ) );
+
 // An eyebrow on its own used to be dropped: the emptiness test named the
 // blurb and the picture and forgot it, so a panel carrying only a heading
 // rendered a caret over nothing.
