@@ -47,22 +47,42 @@
 			return false;
 		}
 
-		var probe = document.createElement( 'span' );
+		/*
+		 * Two probes, not one, and the answer is the ratio between them.
+		 *
+		 * The first version measured a single probe at depth against the 100px
+		 * it had been given, which worked until the scene gained a scale of
+		 * its own: a flattened scene at 1.4x renders that probe 140px wide and
+		 * the check cheerfully reported working depth. Measuring a probe at
+		 * the same depth as the surface it would be standing on cancels
+		 * whatever else the scene is doing -- scale, rotation, a zoom the user
+		 * picked -- and leaves only the projection.
+		 */
+		var flat = document.createElement( 'span' );
+		var deep = document.createElement( 'span' );
+		var base = 'position:absolute;left:0;top:0;width:100px;height:10px;' +
+			'pointer-events:none;visibility:hidden;transform:';
 
-		probe.style.cssText =
-			'position:absolute;left:0;top:0;width:100px;height:10px;' +
-			'pointer-events:none;visibility:hidden;transform:translateZ(120px)';
+		flat.style.cssText = base + 'translateZ(0)';
+		deep.style.cssText = base + 'translateZ(120px)';
 
-		scene.appendChild( probe );
+		scene.appendChild( flat );
+		scene.appendChild( deep );
 
-		var drawn = probe.getBoundingClientRect().width;
+		var near = flat.getBoundingClientRect().width;
+		var far = deep.getBoundingClientRect().width;
 
-		scene.removeChild( probe );
+		scene.removeChild( flat );
+		scene.removeChild( deep );
 
-		// Flattened, the probe is exactly the 100px it was given. Projected,
-		// the perspective on the stage makes it wider. A couple of pixels of
+		if ( near <= 0 ) {
+			return false;
+		}
+
+		// Flattened, the two are the same width because the depth went
+		// nowhere. Projected, the nearer one is bigger. Three per cent of
 		// slack, because a zoomed page does not land on round numbers.
-		return drawn > 103;
+		return ( far / near ) > 1.03;
 	}
 
 	/**

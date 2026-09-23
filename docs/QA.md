@@ -643,8 +643,19 @@ dark section, and inside something that flattens 3D.
       shadow. If it only works on light, something is hardcoded
 - [ ] Exactly one element in each illustration carries the accent. Two is one
       too many
+- [ ] **Set "which side" to alternating**: the words and the illustration swap
+      on every other step, and **the numbers stay in one column** throughout. A
+      zigzagging spine means the disc has moved with them
+- [ ] Alternating, the illustrations on the left should look like the same
+      objects seen from the other side, not like objects lit from the wrong
+      one. If they do, the eye has not mirrored with them
+- [ ] **Drag "illustration size"**: the drawing should get bigger without the
+      perspective getting harder. If it starts to bulge, the camera is not
+      moving back with it
 - [ ] **Narrow the window: the illustration drops under the words**, in line
-      with the text rather than with the numbers
+      with the text rather than with the numbers. Alternating, every step
+      should keep the words above the drawing -- there is one column to stack
+      into and nothing left to alternate
 - [ ] Set "how close the eye is" to 300: the perspective should get harder,
       not break. Under about 400 it stops reading as depth
 - [ ] **Block the script.** The steps, the numbers, the line and the

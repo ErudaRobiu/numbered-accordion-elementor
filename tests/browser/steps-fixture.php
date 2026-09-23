@@ -76,6 +76,7 @@ $widget = new Steps_Fixture();
 
 $main = $widget->markup( array(
 	'title_tag' => 'h3',
+	'sides'     => 'alt',
 	'steps'     => array(
 		array(
 			'title'  => 'Agree the method',

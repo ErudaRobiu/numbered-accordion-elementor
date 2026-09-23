@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.42.0
+Stable tag: 2.43.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,22 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.43.0 =
+* **Process Steps: the illustrations are bigger**, and there is a size control
+  for them. It scales the drawing rather than the box it sits in, and moves the
+  eye back as the drawing grows — so it gets larger without the perspective
+  hardening, which is what scaling the object alone would have done.
+* **New: the words and the illustration can alternate sides.** Set "which side
+  the illustration sits on" to alternating and every other step swaps them.
+  The numbers stay in their own column either way: a sequence that zigzags
+  stops reading as a sequence.
+* **The illustrations turn towards the words they belong to.** Moved to the
+  left of the page, one keeps the camera angle it had on the right and stops
+  looking like the same object seen from the other side. Both the turn and the
+  eye mirror with the layout.
+* On a phone alternating has nothing left to alternate, so every step keeps the
+  words above the drawing.
 
 = 2.42.0 =
 * **New: a "Process Steps" widget.** A numbered process read downwards, with

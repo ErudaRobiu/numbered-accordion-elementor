@@ -186,14 +186,40 @@ class Process_Steps_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'sides',
+			array(
+				'label'       => esc_html__( 'Which side the illustration sits on', 'numbered-accordion' ),
+				'description' => esc_html__( 'Alternating swaps the words and the illustration on every other step. The numbers stay in their own column either way — a sequence that zigzags stops reading as a sequence.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'right',
+				'options'     => array(
+					'right' => esc_html__( 'Always on the right', 'numbered-accordion' ),
+					'alt'   => esc_html__( 'Alternating', 'numbered-accordion' ),
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'zoom',
+			array(
+				'label'       => esc_html__( 'Illustration size', 'numbered-accordion' ),
+				'description' => esc_html__( 'How big the drawing is, which is a different question from how much room it has. The eye moves back as it grows, so the perspective stays as drawn instead of hardening.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'range'       => array( 'px' => array( 'min' => 0.6, 'max' => 2.2, 'step' => 0.05 ) ),
+				'default'     => array( 'size' => 1.4 ),
+				'selectors'   => array( '{{WRAPPER}} .estp' => '--estp-zoom: {{SIZE}};' ),
+			)
+		);
+
 		$this->add_responsive_control(
 			'fig_width',
 			array(
 				'label'      => esc_html__( 'Illustration width', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px', 'vw' ),
-				'range'      => array( 'px' => array( 'min' => 180, 'max' => 460 ), 'vw' => array( 'min' => 10, 'max' => 40 ) ),
-				'default'    => array( 'unit' => 'px', 'size' => 280 ),
+				'range'      => array( 'px' => array( 'min' => 180, 'max' => 620 ), 'vw' => array( 'min' => 10, 'max' => 48 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 380 ),
 				'selectors'  => array( '{{WRAPPER}} .estp' => '--estp-fig: {{SIZE}}{{UNIT}};' ),
 			)
 		);
@@ -204,8 +230,8 @@ class Process_Steps_Widget extends Widget_Base {
 				'label'      => esc_html__( 'Illustration height', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 130, 'max' => 340 ) ),
-				'default'    => array( 'unit' => 'px', 'size' => 200 ),
+				'range'      => array( 'px' => array( 'min' => 130, 'max' => 460 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 280 ),
 				'selectors'  => array( '{{WRAPPER}} .estp' => '--estp-fig-h: {{SIZE}}{{UNIT}}; --estp-fig-h-mobile: {{SIZE}}{{UNIT}};' ),
 			)
 		);
@@ -488,9 +514,10 @@ class Process_Steps_Widget extends Widget_Base {
 			return;
 		}
 
-		$tag = $this->title_tag( $settings );
+		$tag   = $this->title_tag( $settings );
+		$sides = 'alt' === Steps_Content::text( $settings, 'sides' ) ? ' estp--alt' : '';
 		?>
-		<div class="estp">
+		<div class="estp<?php echo esc_attr( $sides ); ?>">
 			<?php foreach ( $steps as $position => $step ) : ?>
 				<?php
 				$figure_id = Steps_Content::figure_id( $step );

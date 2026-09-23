@@ -80,6 +80,72 @@ function check(name, ok, detail) {
   check('the baseline label reaches the element that draws it',
     shape.note === 'Baseline', shape.note);
 
+  /* --------------------------------------------------- swapping sides --- */
+
+  /*
+   * Words and drawing trade places down the list, and the numbers do not:
+   * they are a sequence, and a sequence that zigzags stops reading as one.
+   */
+  const sides = await page.evaluate(() => {
+    const steps = [...document.querySelectorAll('.estp--alt .estp__step')];
+    return steps.map(s => {
+      const fig = s.querySelector('.estp__fig').getBoundingClientRect();
+      const words = s.querySelector('.estp__words').getBoundingClientRect();
+      const disc = s.querySelector('.estp__disc').getBoundingClientRect();
+      return {
+        figFirst: fig.left < words.left,
+        disc: Math.round(disc.left),
+        eye: getComputedStyle(s.querySelector('.estp__fig')).perspectiveOrigin,
+      };
+    });
+  });
+
+  check('alternating puts the drawing on the other side every other step',
+    sides.map(s => s.figFirst).join(' ') === 'false true false true',
+    sides.map(s => (s.figFirst ? 'left' : 'right')).join(' '));
+
+  check('and the numbers stay in one column throughout',
+    new Set(sides.map(s => s.disc)).size === 1, sides.map(s => s.disc).join(' '));
+
+  // The eye sits off to one side because an object on the vanishing point
+  // barely changes size along Z. Moved to the left of the page and left
+  // unmirrored, a drawing is turned as though the reader were still on its
+  // right, and the two sides stop looking like the same object seen twice.
+  check('the eye mirrors with it',
+    sides[0].eye !== sides[1].eye,
+    sides[0].eye + '  vs  ' + sides[1].eye);
+
+  /* ---------------------------------------------------------- the size --- */
+
+  /*
+   * Every part of every figure is written at a fixed size, so widening the
+   * column on its own just gives a small object more room to sit in. The zoom
+   * scales the object, and the camera distance with it, so the projection is
+   * unchanged and only the picture gets bigger.
+   */
+  const size = await page.evaluate(() => {
+    const fig = document.querySelector('.estp__fig');
+    const scene = fig.querySelector('.estp__scene');
+    const zoom = parseFloat(getComputedStyle(document.querySelector('.estp'))
+      .getPropertyValue('--estp-zoom'));
+    const m = new DOMMatrix(getComputedStyle(scene).transform);
+    // The scale falls out of the matrix's first column length.
+    const scale = Math.hypot(m.m11, m.m12, m.m13);
+    return {
+      zoom,
+      scale: Math.round(scale * 100) / 100,
+      persp: parseFloat(getComputedStyle(fig).perspective),
+    };
+  });
+
+  check('the drawing is scaled up rather than just given a wider box',
+    size.zoom > 1 && Math.abs(size.scale - size.zoom) < 0.06,
+    'zoom ' + size.zoom + ', scene scaled ' + size.scale);
+
+  check('and the eye moves back with it, so the projection is unchanged',
+    Math.abs(size.persp - 900 * size.zoom) < 2,
+    size.persp + 'px for a zoom of ' + size.zoom);
+
   /* ------------------------------------------------------- the camera --- */
 
   /*
@@ -254,6 +320,23 @@ function check(name, ok, detail) {
 
   check('and nothing runs off the side of the screen',
     !narrow.sideways, narrow.sideways ? 'the page scrolls sideways' : 'no sideways scroll');
+
+  /*
+   * There is one column to stack into, so alternating has nothing left to
+   * alternate -- and a drawing landing above its own heading on every other
+   * step reads as a mistake rather than as a rhythm.
+   */
+  const stacked = await phone.evaluate(() => {
+    const steps = [...document.querySelectorAll('.estp--alt .estp__step')];
+    return steps.map(s => {
+      const fig = s.querySelector('.estp__fig').getBoundingClientRect();
+      const words = s.querySelector('.estp__words').getBoundingClientRect();
+      return fig.top > words.top;
+    });
+  });
+
+  check('and every step keeps the words above the drawing',
+    stacked.every(Boolean), stacked.map(v => (v ? 'words first' : 'DRAWING FIRST')).join(', '));
 
   /* --------------------------------------------- without the script --- */
 

@@ -38,9 +38,21 @@
 	--estp-shadow: rgba(27, 58, 97, 0.28);
 
 	--estp-disc: 40px;
-	--estp-fig: 280px;
+	--estp-fig: 380px;
 	--estp-gap: 56px;
-	--estp-row-gap: 0px;
+
+	/*
+	 * How big the drawing is inside its box, which is not the same question as
+	 * how big the box is.
+	 *
+	 * Every part of every figure is written at a fixed size, so widening the
+	 * column on its own just gives a small object more room to sit in. The
+	 * zoom scales the object -- and the camera distance with it, on the rule
+	 * below -- so the projection is identical and only the picture gets
+	 * bigger. Scaling the object alone would bring it closer to a fixed eye
+	 * and quietly harden the perspective as it grew.
+	 */
+	--estp-zoom: 1.4;
 
 	/*
 	 * The camera, and the two numbers that move it.
@@ -166,6 +178,46 @@
 	line-height: 1.6;
 }
 
+/* ------------------------------------------------------------ alternating --- */
+
+/*
+ * Words and drawing swap sides down the list.
+ *
+ * The numbers stay in their own column on the left whichever side the drawing
+ * is on: they are a sequence, and a sequence that zigzags stops being one --
+ * you lose the line that says which step follows which, which is the whole
+ * point of numbering them.
+ *
+ * So it is the other two tracks that trade places. The row's template is
+ * reversed and both children are placed explicitly, because the markup order
+ * stays words-then-drawing -- which is also the order they should be read in
+ * when the columns collapse on a phone.
+ */
+.estp--alt .estp__step:nth-child(even) {
+	grid-template-columns: var(--estp-disc) var(--estp-fig) minmax(0, 1fr);
+}
+
+.estp--alt .estp__step:nth-child(even) > .estp__words {
+	grid-column: 3;
+	grid-row: 1;
+}
+
+.estp--alt .estp__step:nth-child(even) > .estp__fig {
+	grid-column: 2;
+	grid-row: 1;
+	/*
+	 * Mirrored, both of them.
+	 *
+	 * The eye sits off to one side because an object on the vanishing point
+	 * barely changes size as it travels along Z. Left unmirrored, a drawing
+	 * moved to the left of the page is lit and turned as though the reader
+	 * were still standing to its right, and the two sides stop looking like
+	 * the same object seen twice.
+	 */
+	--estp-eye: 36%;
+	--estp-face-dir: -1;
+}
+
 /* -------------------------------------------------------------- the figure --- */
 
 /*
@@ -179,9 +231,10 @@
  */
 .estp__fig {
 	position: relative;
-	height: var(--estp-fig-h, 200px);
-	perspective: var(--estp-persp, 900px);
-	perspective-origin: 64% 42%;
+	height: var(--estp-fig-h, 280px);
+	/* The eye moves back as the object grows, so the two stay in proportion. */
+	perspective: calc( var(--estp-persp, 900px) * var(--estp-zoom, 1) );
+	perspective-origin: var(--estp-eye, 64%) 42%;
 }
 
 .estp__scene {
@@ -196,9 +249,20 @@
 	 * pointer terms are added rather than replacing it, so moving the mouse
 	 * over a figure does not snap it out of wherever the scroll had it.
 	 */
+	/*
+	 * --estp-face-dir is 1 with the drawing on the right of the words and -1
+	 * with it on the left, so an alternating list turns each object towards
+	 * the text it belongs to rather than all of them the same way.
+	 */
 	transform:
 		rotateX( calc( 13deg - (var(--estp-p) - 0.5) * 9deg + var(--estp-hy) * -7deg ) )
-		rotateY( calc( (var(--estp-p) - 0.5) * -26deg + var(--estp-hx) * 10deg ) );
+		rotateY(
+			calc(
+				( (var(--estp-p) - 0.5) * -26deg + var(--estp-hx) * 10deg )
+				* var(--estp-face-dir, 1)
+			)
+		)
+		scale3d( var(--estp-zoom, 1), var(--estp-zoom, 1), var(--estp-zoom, 1) );
 	transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -617,8 +681,15 @@
  * every figure falls back to an arrangement that was designed flat rather
  * than one that lost its depth.
  */
+/*
+ * Flat, but still the size that was asked for.
+ *
+ * `transform: none` was losing the zoom along with the rotations, so a widget
+ * that fell back also shrank to whatever it happened to be at 1x -- two
+ * changes for the price of one, and only one of them intended.
+ */
 .estp.is-flat .estp__scene {
-	transform: none;
+	transform: scale( var(--estp-zoom, 1) );
 }
 
 .estp.is-flat .estp__ground {
@@ -677,9 +748,32 @@
 	 * the second column so it lines up with the text instead of with the
 	 * spine. It is the illustration for that step, not a divider between two.
 	 */
+	/*
+	 * One order on a phone, whichever side the desktop put things on.
+	 *
+	 * There is only one column to stack into, so alternating has nothing left
+	 * to alternate -- and a drawing that lands above its own heading on every
+	 * other step reads as a mistake rather than as a rhythm.
+	 */
+	.estp--alt .estp__step:nth-child(even) {
+		grid-template-columns: var(--estp-disc) minmax(0, 1fr);
+	}
+
+	.estp--alt .estp__step:nth-child(even) > .estp__words {
+		grid-column: 2;
+		grid-row: 1;
+	}
+
+	.estp--alt .estp__step:nth-child(even) > .estp__fig {
+		grid-column: 2;
+		grid-row: 2;
+		--estp-eye: 64%;
+		--estp-face-dir: 1;
+	}
+
 	.estp__fig {
 		grid-column: 2;
-		height: var(--estp-fig-h-mobile, 160px);
+		height: var(--estp-fig-h-mobile, 220px);
 		/* Pulled in from the right so a figure that reaches out in Z is not
 		   cut off by the edge of a phone screen. */
 		margin-right: 8%;
