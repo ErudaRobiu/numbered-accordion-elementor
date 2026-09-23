@@ -41,6 +41,12 @@ together:
 php tests/browser/explainer-fixture.php > tests/browser/explainer.html
 ```
 
+The data table is generated the same way, and for the same reason:
+
+```sh
+php tests/browser/table-fixture.php > tests/browser/table.html
+```
+
 It lays out the slab with its step numbers empty and filled, the slab over a
 background picture under the darkening veil, and the ledger with and without
 its winning column marked.

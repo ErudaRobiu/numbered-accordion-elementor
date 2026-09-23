@@ -619,6 +619,38 @@ the file system.
       not leave anything stuck at zero opacity
 - [ ] With JavaScript blocked, both widgets are fully visible
 
+## Data Table
+
+`php tests/browser/table-fixture.php > tests/browser/table.html` builds the
+fixture from the widget's own render(), so one command proves the PHP and the
+stylesheet together. It carries a hostile theme block, which is what caught the
+header fill being covered by a theme's own `td { background }`.
+
+- [ ] **The header row is filled and its text is legible on it.** Grey cells
+      with white text on them means a theme is setting `td { background }` and
+      winning
+- [ ] Banding alternates, and the first row under the header is the plain one.
+      Reversed, the header stops reading as a header
+- [ ] **Clear the third heading: the table becomes two columns**, and any third
+      cells already typed into the rows disappear with it. Elementor keeps
+      those values, so seeing them come back as a third column means the row is
+      no longer being fitted to the table
+- [ ] Fill the third heading back in and the cells return, still typed
+- [ ] **Narrow the window past 768px: each row folds into a block** with its
+      heading above every value. It must not scroll sideways and must not
+      squeeze into columns of single words
+- [ ] Folded, the last column takes the ordinary text colour back. Left dimmed
+      it reads as disabled rather than as a note
+- [ ] Switch the header row off: the headings are still drawn beside the values
+      on a phone, because they are the only thing labelling them
+- [ ] **Select the table and copy it into a spreadsheet.** It should arrive as
+      columns. One run of text means the markup is no longer a real table
+- [ ] Set a corner radius: the header fill is clipped to it rather than showing
+      square corners inside a rounded box
+- [ ] Type a column width like `2fr 1fr 1fr` and it takes; clear it and the
+      default returns. It is responsive, so check Tablet separately
+- [ ] Leave a row completely empty: it should draw nothing, not a blank stripe
+
 ## Mega Header
 
 `node tests/browser/header-probe.js` measures the two scroll states, the panel

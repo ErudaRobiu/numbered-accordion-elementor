@@ -72,6 +72,10 @@ final class Toolkit {
 			'file'  => 'modules/schematic/class-schematic-module.php',
 			'class' => '\ErudaToolkit\Modules\Schematic\Schematic_Module',
 		),
+		'table'      => array(
+			'file'  => 'modules/table/class-table-module.php',
+			'class' => '\ErudaToolkit\Modules\Table\Table_Module',
+		),
 	);
 
 	/**

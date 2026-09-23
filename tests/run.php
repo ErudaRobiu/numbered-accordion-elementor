@@ -633,7 +633,8 @@ check( 'the mega header module is registered', true, in_array( 'header', Toolkit
 check( 'the split explainer module is registered', true, in_array( 'explainer', Toolkit::instance()->ids(), true ) );
 check( 'the image compare module is registered', true, in_array( 'compare', Toolkit::instance()->ids(), true ) );
 check( 'the flow schematic module is registered', true, in_array( 'schematic', Toolkit::instance()->ids(), true ) );
-check( 'twelve modules ship', 12, count( Toolkit::instance()->ids() ) );
+check( 'the data table module is registered', true, in_array( 'table', Toolkit::instance()->ids(), true ) );
+check( 'thirteen modules ship', 13, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -1411,6 +1412,225 @@ $eyebrow = ( new Header_Render_Probe() )->markup( array(
 	'items' => array( array( 'label' => 'Systems', 'has_panel' => 'yes', 'panel_eyebrow' => 'What we do' ) ),
 ) );
 check( 'a panel with only an eyebrow still opens', true, (bool) strpos( $eyebrow, 'ehdr__panel' ) );
+
+/* ------------------------------------------------- Table_Content --- */
+
+/*
+ * How wide the table is, and how a row is fitted to it.
+ *
+ * Elementor never forgets a repeater field. A row saved while the table was
+ * three columns wide still carries its third cell after the third heading has
+ * been cleared, so "how many columns" and "which cells" have to be decided
+ * from the headings rather than from whatever the rows happen to hold -- or
+ * the ghost cell comes back as an extra column in the markup.
+ */
+require_once dirname( __DIR__ ) . '/modules/table/class-table-content.php';
+
+use ErudaToolkit\Modules\Table\Table_Content;
+
+$three = array( 'head_1' => 'Measured', 'head_2' => 'What it tells you', 'head_3' => 'Source of the value' );
+$two   = array( 'head_1' => 'Measured', 'head_2' => 'What it tells you', 'head_3' => '' );
+
+check( 'three headings is a three-column table', 3, Table_Content::column_count( $three ) );
+check( 'clearing the last heading makes it two', 2, Table_Content::column_count( $two ) );
+check( 'whitespace in a heading is not a heading', 2, Table_Content::column_count(
+	array( 'head_1' => 'A', 'head_2' => 'B', 'head_3' => "  \n\t " )
+) );
+
+// A gap in the middle is somebody's unfinished work, not a two-column table.
+// Closing it would shift their third column under the second heading.
+check( 'an empty middle heading still leaves three columns', 3, Table_Content::column_count(
+	array( 'head_1' => 'A', 'head_2' => '', 'head_3' => 'C' )
+) );
+check( 'and the empty one is kept in place', array( 'A', '', 'C' ), Table_Content::headings(
+	array( 'head_1' => 'A', 'head_2' => '', 'head_3' => 'C' )
+) );
+
+// With the header row off there are no headings to count, so the widest row
+// decides instead. A table is never narrower than one column.
+check( 'with no headings the widest row sets the width', 3, Table_Content::column_count(
+	array( 'rows' => array(
+		array( 'cell_1' => 'one' ),
+		array( 'cell_1' => 'a', 'cell_2' => 'b', 'cell_3' => 'c' ),
+	) )
+) );
+check( 'an empty table is still one column wide', 1, Table_Content::column_count( array() ) );
+
+// The ghost cell.
+check( 'a row is cut to the table it is in', array( 'a', 'b' ), Table_Content::cells(
+	array( 'cell_1' => 'a', 'cell_2' => 'b', 'cell_3' => 'left over' ), 2
+) );
+check( 'and padded out when the table is wider than the row', array( 'a', '', '' ), Table_Content::cells(
+	array( 'cell_1' => 'a' ), 3
+) );
+check( 'a row asked for no width trims its own blanks', array( 'a' ), Table_Content::cells(
+	array( 'cell_1' => 'a', 'cell_2' => '', 'cell_3' => '' )
+) );
+check( 'a count past the maximum is held at it', 3, count( Table_Content::cells( array(), 9 ) ) );
+
+// A row added and then left alone should not draw a blank stripe.
+check( 'an empty row is not a row', false, Table_Content::row_has_content( array( 'cell_1' => '', 'cell_2' => '  ' ) ) );
+check( 'a row with anything in it is', true, Table_Content::row_has_content( array( 'cell_1' => '', 'cell_3' => 'x' ) ) );
+check( 'and the empty ones are dropped before rendering', 1, count( Table_Content::visible_rows(
+	array( 'rows' => array( array( 'cell_1' => 'keep' ), array( 'cell_1' => '', 'cell_2' => '' ) ) )
+) ) );
+
+// The label a folded cell carries. Out of range is empty rather than a notice.
+check( 'a cell takes its label from its column', 'Source of the value', Table_Content::cell_label( array( 'A', 'B', 'Source of the value' ), 2 ) );
+check( 'a column with no heading has no label', '', Table_Content::cell_label( array( 'A' ), 2 ) );
+check( 'and neither does a heading that is not a string', '', Table_Content::cell_label( array( array() ), 0 ) );
+
+// The template: typed wins, otherwise the shape follows the column count.
+check( 'a typed column setting is used as written', '2fr 1fr', Table_Content::template( array( 'columns' => '2fr 1fr' ), 3 ) );
+check( 'two columns get an even default', 'minmax(0, 1fr) minmax(0, 1fr)', Table_Content::template( array(), 2 ) );
+check( 'three do not', true, false !== strpos( Table_Content::template( array(), 3 ), '0.8fr' ) );
+
+/* --------------------------------------------- Data_Table_Widget markup --- */
+
+/*
+ * A real table, and the attributes that make it one.
+ *
+ * The layout is a grid, which is exactly the arrangement that tempts you to
+ * build it out of divs. What a <table> buys is the association: a screen
+ * reader says "Source of the value, Field sensors" only because the th and
+ * the td are joined by the markup, and someone copying it into a spreadsheet
+ * gets columns rather than one run of text. None of that survives divs, and
+ * none of it is visible in a screenshot -- so it is checked here.
+ */
+require_once dirname( __DIR__ ) . '/modules/table/widgets/class-data-table-widget.php';
+
+/**
+ * The widget with a settings array pushed into it.
+ */
+class Table_Render_Probe extends \ErudaToolkit\Modules\Table\Widgets\Data_Table_Widget {
+
+	/**
+	 * @var array
+	 */
+	public $feed = array();
+
+	/**
+	 * @return array
+	 */
+	public function get_settings_for_display() {
+		return $this->feed;
+	}
+
+	/**
+	 * @param array $settings Settings to render with.
+	 * @return string
+	 */
+	public function markup( $settings ) {
+		$this->feed = $settings;
+
+		ob_start();
+		( new ReflectionMethod( $this, 'render' ) )->invoke( $this );
+
+		return (string) ob_get_clean();
+	}
+}
+
+/**
+ * Repeater rows from a plain list.
+ *
+ * @param array $rows Rows.
+ * @return array
+ */
+function table_rows( $rows ) {
+	$out = array();
+
+	foreach ( $rows as $row ) {
+		$out[] = array(
+			'cell_1' => isset( $row[0] ) ? $row[0] : '',
+			'cell_2' => isset( $row[1] ) ? $row[1] : '',
+			'cell_3' => isset( $row[2] ) ? $row[2] : '',
+		);
+	}
+
+	return $out;
+}
+
+$tbl   = new Table_Render_Probe();
+$three = $tbl->markup( array(
+	'head_1'    => 'Measured',
+	'head_2'    => 'What it tells you',
+	'head_3'    => 'Source of the value',
+	'show_head' => 'yes',
+	'band'      => 'yes',
+	'rows'      => table_rows( array( array( 'Fluid flow', 'Circulation against the design case', 'Field sensors' ) ) ),
+) );
+
+check( 'the table is a table', 1, preg_match( '/<table class="etbl__table">/', $three ) );
+check( 'with a real header row', 1, preg_match( '/<thead>.*<tr class="etbl__tr etbl__tr--head">/s', $three ) );
+check( 'and column headers that say they are columns', 3, substr_count( $three, 'scope="col"' ) );
+check( 'the rows are in a tbody', 1, preg_match( '/<tbody>.*<tr class="etbl__tr">/s', $three ) );
+check( 'three headings give three cells', 3, substr_count( $three, '<td class="etbl__td"' ) );
+check( 'the column count is on the wrapper', 1, preg_match( '/class="etbl etbl--cols-3/', $three ) );
+check( 'banding is a class, not a style', 1, preg_match( '/class="[^"]*etbl--banded/', $three ) );
+
+// Each cell carries its heading, for the phone layout to draw. Written once
+// into the markup rather than repeated as visible text, so a desktop screen
+// reader is not read every heading twice.
+check( 'every cell carries its own heading', 1, preg_match(
+	'/<td class="etbl__td" data-etbl-label="Source of the value">Field sensors<\/td>/', $three ) );
+
+// The ghost cell: a row saved three columns wide, in a table now two wide.
+$ghost = $tbl->markup( array(
+	'head_1'    => 'Measured',
+	'head_2'    => 'What it tells you',
+	'head_3'    => '',
+	'show_head' => 'yes',
+	'rows'      => table_rows( array( array( 'Fluid flow', 'Circulation', 'Field sensors' ) ) ),
+) );
+
+check( 'clearing the last heading gives a two-column table', 1, preg_match( '/etbl--cols-2/', $ghost ) );
+check( 'and the orphaned third cell is not rendered', 2, substr_count( $ghost, '<td class="etbl__td"' ) );
+check( 'nor is its content', false, (bool) strpos( $ghost, 'Field sensors' ) );
+
+// No header row: the thead goes, and with it the labels, because there is
+// nothing left to label the folded cells with.
+$bare = $tbl->markup( array(
+	'head_1'    => 'Measured',
+	'head_2'    => 'What it tells you',
+	'show_head' => '',
+	'rows'      => table_rows( array( array( 'Fluid flow', 'Circulation' ) ) ),
+) );
+
+check( 'the header row can be switched off', false, (bool) strpos( $bare, '<thead>' ) );
+check( 'but the cells keep their labels for the phone', true, (bool) strpos( $bare, 'data-etbl-label="Measured"' ) );
+
+// A caption is the one piece of text that tells a screen reader what it is
+// about to read before it starts reading cells.
+$cap = $tbl->markup( array(
+	'head_1'  => 'Stage',
+	'caption' => 'Commissioning runs in four stages.',
+	'rows'    => table_rows( array( array( 'Survey' ) ) ),
+) );
+check( 'a caption is a real caption element', 1, preg_match( '/<caption class="etbl__caption">Commissioning runs in four stages\.<\/caption>/', $cap ) );
+check( 'and there is none when nobody wrote one', false, (bool) strpos( $three, '<caption' ) );
+
+// Nothing at all should render nothing at all, not an empty shell.
+check( 'a table with no rows renders nothing', '', $tbl->markup( array( 'head_1' => 'Measured', 'rows' => array() ) ) );
+check( 'and neither do rows with nothing in them', '', $tbl->markup( array(
+	'head_1' => 'Measured',
+	'rows'   => table_rows( array( array( '', '', '' ), array( '  ', '' ) ) ),
+) ) );
+
+// The column template is written inline because it depends on a count made at
+// render time, which is after Elementor's selectors have already run.
+check( 'the column template is written onto the wrapper', 1, preg_match( '/--etbl-cols-default: minmax\(0, 1\.05fr\)/', $three ) );
+check( 'and a two-column table gets an even one', 1, preg_match( '/--etbl-cols-default: minmax\(0, 1fr\) minmax\(0, 1fr\);/', $ghost ) );
+
+// Escaping. A table is the one widget people paste supplier data into.
+$nasty = $tbl->markup( array(
+	'head_1'    => '<script>alert(1)</script>',
+	'head_2'    => 'Reading',
+	'show_head' => 'yes',
+	'rows'      => table_rows( array( array( 'Fluid " flow', 'A & B' ) ) ),
+) );
+check( 'a heading cannot carry markup', false, (bool) strpos( $nasty, '<script>' ) );
+check( 'a quote in a cell cannot break out of its label', false, (bool) strpos( $nasty, 'label="Fluid " flow"' ) );
+check( 'and an ampersand survives as an ampersand', true, (bool) strpos( $nasty, 'A &amp; B' ) );
 
 /* ------------------------------------------------------------- report --- */
 

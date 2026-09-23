@@ -1,0 +1,305 @@
+/**
+ * Eruda Toolkit - Data Table
+ *
+ * A reference table: a filled header row, banded rows under it, and a last
+ * column that can be set back from the two carrying the argument.
+ *
+ * It is a real <table>. The layout is a grid laid over it rather than instead
+ * of it, which costs four `display` declarations and buys the two things a
+ * grid of divs gives up: a screen reader that says "Source of the value, Field
+ * sensors" because the markup joins them, and a copy-paste that arrives in a
+ * spreadsheet as columns rather than as one run of text.
+ *
+ * Every colour is a custom property with a fallback, because a table is a
+ * component people drop into someone else's stylesheet and every theme in the
+ * world has an opinion about `td`.
+ */
+
+.etbl,
+.etbl *,
+.etbl *::before,
+.etbl *::after {
+	box-sizing: border-box;
+}
+
+.etbl {
+	--etbl-cols: var(--etbl-cols-default, minmax(0, 1fr));
+
+	/*
+	 * The radius has to be clipped, and clipping is what stops a rounded table
+	 * showing square corners on its own header fill. `overflow: hidden` is
+	 * safe here in a way it is not elsewhere in this plugin: nothing in a
+	 * table is positioned outside it.
+	 */
+	border-radius: var(--etbl-radius, 0px);
+	overflow: hidden;
+	border: 1px solid var(--etbl-outline, transparent);
+	background: var(--etbl-row, #ffffff);
+}
+
+.etbl__table {
+	/*
+	 * Reset, and then rebuilt as a grid.
+	 *
+	 * A theme's `table { border-collapse: collapse }` is harmless once the
+	 * rows are grid containers, but its `table { width: auto }` is not, and
+	 * neither is the margin nearly every reset puts on one.
+	 */
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-spacing: 0;
+	border-collapse: collapse;
+	color: var(--etbl-ink, #1b3a61);
+	text-align: left;
+}
+
+.etbl__table > thead,
+.etbl__table > tbody {
+	display: block;
+	border: 0;
+}
+
+/*
+ * A row is the grid, and the cells are its items.
+ *
+ * `subgrid` would be the tidier way to say this and is not reachable: the
+ * rows are siblings rather than children of one grid, so each has to carry
+ * the same template. It is one custom property, read by every row, which is
+ * also what makes a responsive column setting work with one declaration.
+ */
+.etbl__tr {
+	display: grid;
+	grid-template-columns: var(--etbl-cols);
+	column-gap: var(--etbl-gap, 24px);
+	align-items: baseline;
+	border: 0;
+	background: var(--etbl-row, #ffffff);
+}
+
+.etbl__tr + .etbl__tr {
+	border-top: 1px solid var(--etbl-rule, #e7ecf1);
+}
+
+/*
+ * Banding is on odd rows so the first row under the header is the plain one.
+ *
+ * Reversed, the header's fill and the first band sit against each other and
+ * the header stops reading as a header.
+ */
+.etbl--banded .etbl__table > tbody > .etbl__tr:nth-child(even) {
+	background: var(--etbl-band, #f5f7f9);
+}
+
+/*
+ * Two classes on the cells, and not for tidiness.
+ *
+ * The fill and the banding live on the row, which is right -- one declaration
+ * per row rather than one per cell, and the colour runs through the gaps
+ * between the columns instead of stopping at each cell's edge. It also means
+ * the cells have to be transparent, and a cell is the single most opinionated
+ * element in anybody else's stylesheet: `th, td { background: #fafafa }` is in
+ * half the themes on the planet and it covered the header fill completely --
+ * white text on the theme's grey, with the navy showing only in the gaps.
+ *
+ * `background: transparent` said out loud fixes that at one class. It takes
+ * two to survive `tr:nth-child(odd) td`, which is what a theme's own zebra
+ * striping looks like and which beats a single class on specificity.
+ */
+.etbl .etbl__th,
+.etbl .etbl__td {
+	background: transparent;
+}
+
+.etbl__th,
+.etbl__td {
+	display: block;
+	min-width: 0;
+	margin: 0;
+	padding: var(--etbl-pad-y, 22px) 0;
+	border: 0;
+	/* `break-word`, not `anywhere`: a long URL in a narrow column has to give
+	   way, but an ordinary sentence should still break between its words. */
+	overflow-wrap: break-word;
+	text-align: left;
+	vertical-align: top;
+}
+
+/*
+ * The side padding belongs to the outer cells, not to the row.
+ *
+ * Put on the row it would be inside the grid's own box and the columns would
+ * start measuring from the wrong edge, so a `1fr 1fr` table would come out
+ * lopsided by exactly the padding. On the cells it is part of the track.
+ */
+.etbl__tr > :first-child {
+	padding-left: var(--etbl-pad-x, 28px);
+}
+
+.etbl__tr > :last-child {
+	padding-right: var(--etbl-pad-x, 28px);
+}
+
+/* ------------------------------------------------------------- the head --- */
+
+.etbl__tr--head {
+	background: var(--etbl-head-fill, #1b3a61);
+	border-top: 0;
+}
+
+.etbl__th {
+	color: var(--etbl-head-ink, #ffffff);
+	font-weight: 700;
+	font-size: 0.8125rem;
+	line-height: 1.3;
+	/*
+	 * em, and the control only offers em.
+	 *
+	 * Elementor writes a percentage letter-spacing as `2%`, which is not a
+	 * length and which every browser drops on the floor -- the setting looks
+	 * dead rather than wrong, which is worse.
+	 */
+	letter-spacing: var(--etbl-head-track, 0.06em);
+	text-transform: var(--etbl-head-case, uppercase);
+}
+
+/* ------------------------------------------------------------ the cells --- */
+
+.etbl__td {
+	font-size: 1.0625rem;
+	line-height: 1.45;
+}
+
+/*
+ * The last column of a three-column table, set back.
+ *
+ * Scoped to three columns on purpose. In a two-column table the second column
+ * is half the argument, and dimming it would be dimming the point.
+ */
+.etbl--cols-3 .etbl__tr > .etbl__td:last-child {
+	color: var(--etbl-last-ink, #6e88a6);
+	font-weight: var(--etbl-last-weight, 600);
+}
+
+/* The label each value carries once the columns fold. Drawn from the cell's
+   own data attribute, so it exists in one place and is never read out twice. */
+.etbl__td::before {
+	content: attr(data-etbl-label);
+	display: none;
+	margin-bottom: 4px;
+	color: var(--etbl-label-ink, #8ca3bc);
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	line-height: 1.3;
+	text-transform: uppercase;
+}
+
+.etbl__caption {
+	caption-side: bottom;
+	display: block;
+	padding: 14px var(--etbl-pad-x, 28px);
+	color: var(--etbl-label-ink, #8ca3bc);
+	font-size: 0.8125rem;
+	line-height: 1.5;
+	text-align: left;
+}
+
+/* ------------------------------------------------------------- the fold --- */
+
+/*
+ * Below the breakpoint the columns stop being columns.
+ *
+ * The other two answers are both worse. A table that scrolls sideways hides
+ * the column that matters behind a gesture nobody makes, and one that just
+ * gets narrower turns every cell into a column of single words. Folding each
+ * row into a block keeps all of it on screen and readable, and the heading
+ * travels with the value so a number is never left with nothing to attach it
+ * to.
+ *
+ * A container query is the better tool in principle -- the fold is about how
+ * wide the table is, not how wide the window is, and a table in a narrow
+ * Elementor column is the case a window query gets wrong. It was tried and
+ * taken out: `container-type: inline-size` on the row is `contain: inline-size`
+ * on a grid whose parent is a `display: block` tbody, and the row measured
+ * zero. The window query is the one that works in every browser without a
+ * fallback copy of forty rules, so it is the one that ships.
+ */
+@media (max-width: 768px) {
+	.etbl__table > thead {
+		/*
+		 * Gone, but not `display: none`.
+		 *
+		 * The headings are still doing work down here -- every cell draws one
+		 * -- and a screen reader that has been told the header row does not
+		 * exist will not associate them. Clipped, the row is off screen and
+		 * still in the accessibility tree.
+		 */
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	.etbl__tr {
+		grid-template-columns: minmax(0, 1fr);
+		column-gap: 0;
+		row-gap: 14px;
+		padding: var(--etbl-pad-y, 22px) var(--etbl-pad-x, 28px);
+	}
+
+	/* The padding moved to the row, so the cells give theirs back. */
+	.etbl__td {
+		padding: 0;
+	}
+
+	.etbl__tr > :first-child,
+	.etbl__tr > :last-child {
+		padding-left: 0;
+		padding-right: 0;
+	}
+
+	.etbl__td[data-etbl-label]::before {
+		display: block;
+	}
+
+	/*
+	 * Folded, the last column is a labelled fact like the others rather than
+	 * an aside in the corner of a wide row, so it takes the ordinary colour
+	 * back. Left dimmed it reads as disabled.
+	 */
+	.etbl--cols-3 .etbl__tr > .etbl__td:last-child {
+		color: var(--etbl-ink, #1b3a61);
+	}
+
+	.etbl__caption {
+		padding-left: var(--etbl-pad-x, 28px);
+		padding-right: var(--etbl-pad-x, 28px);
+	}
+}
+
+
+/* ------------------------------------------------------- forced colours --- */
+
+/*
+ * In a high-contrast theme the bands and the header fill are dropped by the
+ * browser and every row comes out identical. The rules are what carry the
+ * structure there, so they are asked for explicitly.
+ */
+@media (forced-colors: active) {
+	.etbl,
+	.etbl__tr + .etbl__tr {
+		border-color: CanvasText;
+	}
+
+	.etbl__tr--head {
+		border-bottom: 2px solid CanvasText;
+	}
+}

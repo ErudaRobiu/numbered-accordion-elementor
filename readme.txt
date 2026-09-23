@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.40.0
+Stable tag: 2.41.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,29 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.41.0 =
+* **New: a "Data Table" widget.** A reference table of two or three columns
+  with a filled header row, banded rows under it, and a last column — the one
+  holding a source, a status or a note — that can be set back a shade so it
+  stops competing with the two carrying the argument. Switchable at
+  Settings > Eruda Toolkit like every other module.
+* **It is a real table.** The layout is a grid, but the markup underneath is a
+  proper `<table>` with column headers, so a screen reader reads "Source of
+  the value, Field sensors" as one fact, and selecting the table and pasting it
+  into a spreadsheet gives you columns rather than one run of text.
+* **Clearing the third heading makes it a two-column table**, and any third
+  cells already typed are left out with it. Elementor never forgets a repeater
+  field, so without that the orphaned cells would come back as a third column
+  nobody asked for.
+* **On a phone each row folds into a block**, with its heading above every
+  value. A table that scrolls sideways hides the column that matters behind a
+  gesture nobody makes, and one that merely narrows turns every cell into a
+  column of single words.
+* **It survives a theme that styles cells.** `td { background }` is in half the
+  themes on the planet and it covered the header fill completely — white text
+  on the theme's grey. The cells are held transparent at a specificity that
+  beats a theme's own zebra striping.
 
 = 2.40.0 =
 * **Fixed: on a phone, a menu item with sub-links could not reach its own
