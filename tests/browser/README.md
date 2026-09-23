@@ -21,6 +21,18 @@ node tests/browser/slab-probe.js    # Split Slab, stacked and not
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
+`spatial.html` is not a test. It is a working sheet for the six CSS properties
+that turn a flat element in space -- perspective, the three rotations,
+transform-origin, backface-visibility -- with a control on each so the values
+can be felt rather than read. It exists because the question "could the toolkit
+do 3D" is really a question about what those properties look like at the
+settings a client would actually want, and that is not answerable by reading
+the spec. Open it directly; it loads nothing from the plugin.
+
+```sh
+open http://localhost:8732/tests/browser/spatial.html
+```
+
 The explainer fixture is generated rather than hand-written, from the widgets'
 own `render()`, so one command proves the PHP, the stylesheet and the script
 together:

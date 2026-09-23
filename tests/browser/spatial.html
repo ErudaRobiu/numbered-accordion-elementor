@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spatial transforms — working sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/*
+ * A working sheet for the six CSS properties that make a flat element spatial.
+ *
+ * Throwaway markup on purpose: this proves the effects in a real browser
+ * before any of it is worth putting behind an Elementor control. Nothing here
+ * is loaded by the plugin and tests/ never reaches the release zip.
+ *
+ * The ground is cyanotype because that is what this subject actually looks
+ * like when people draw it: a blueprint, with the projection construction
+ * left visible. Axis colour follows the engineering convention -- X, Y, Z get
+ * their own hue and keep it on every station, so the colour is telling you
+ * which axis you are looking at rather than decorating the page.
+ */
+
+:root {
+	--ground:      #102A3C;
+	--ground-deep: #0A1C29;
+	--ground-lift: #17394E;
+	--line:        #4E7D99;
+	--line-soft:   rgba(110, 156, 184, 0.22);
+	--ice:         #E9F3FA;
+	--ice-dim:     #9FBDD0;
+
+	/* The three axes, and the one accent that is not an axis. */
+	--x: #E8B04B;
+	--y: #7FD1B9;
+	--z: #D98CC4;
+	--brass: #E8B04B;
+
+	--sheet-max: 1080px;
+	--rule: 1px solid var(--line-soft);
+
+	/* Every station reads these. The controls write them. */
+	--persp: 800px;
+	--depth: 60px;
+	--turn: 34deg;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+	margin: 0;
+	background: var(--ground);
+	/*
+	 * An 8mm drafting grid, and the only decoration on the page. It is drawn
+	 * with gradients rather than an image so it costs nothing and stays crisp
+	 * at any zoom.
+	 */
+	background-image:
+		linear-gradient(var(--line-soft) 1px, transparent 1px),
+		linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+	background-size: 32px 32px, 32px 32px;
+	color: var(--ice);
+	font-family: Archivo, system-ui, sans-serif;
+	font-size: 16px;
+	line-height: 1.55;
+	-webkit-font-smoothing: antialiased;
+}
+
+code, .val {
+	font-family: "IBM Plex Mono", ui-monospace, monospace;
+	font-size: 0.8125em;
+	letter-spacing: -0.01em;
+}
+
+.sheet {
+	max-width: var(--sheet-max);
+	margin: 0 auto;
+	padding: 0 24px 120px;
+}
+
+/* ------------------------------------------------------------ masthead --- */
+
+.masthead {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 28px;
+	align-items: baseline;
+	padding: 22px 0 18px;
+	border-bottom: var(--rule);
+	font-size: 0.8125rem;
+	color: var(--ice-dim);
+}
+
+.masthead b {
+	font-weight: 600;
+	color: var(--ice);
+	letter-spacing: 0.02em;
+}
+
+.masthead span { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- hero --- */
+
+.hero {
+	position: relative;
+	padding: 64px 0 96px;
+	border-bottom: var(--rule);
+}
+
+.hero h1 {
+	max-width: 15ch;
+	margin: 0 0 20px;
+	font-size: clamp(2.5rem, 6.4vw, 4.75rem);
+	font-weight: 800;
+	line-height: 0.98;
+	letter-spacing: -0.035em;
+}
+
+.hero p {
+	max-width: 56ch;
+	margin: 0;
+	font-size: 1.0625rem;
+	color: var(--ice-dim);
+}
+
+/*
+ * The stage, and the construction drawn through it.
+ *
+ * `perspective` belongs to the parent: it describes where the eye is, not
+ * what the element does. Putting it here and the rotation on the child is the
+ * difference between one camera looking at several objects and every object
+ * carrying a camera of its own.
+ */
+/*
+ * The eye is off to the right, and that is the whole reason this reads.
+ *
+ * An object sitting on the vanishing point barely changes size as it moves
+ * along Z -- the projection has nothing to do there, and three planes at three
+ * depths came out as one flat stack. Moving the eye off the object is what
+ * makes depth visible, which is the same reason a photographer does not shoot
+ * everything down the centre line.
+ */
+.stage {
+	position: relative;
+	height: clamp(260px, 30vw, 340px);
+	margin-top: 36px;
+	perspective: var(--persp);
+	perspective-origin: 74% 44%;
+}
+
+/* Horizon and vanishing point: the thing every other line converges on. */
+.stage::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 44%;
+	border-top: 1px dashed var(--line-soft);
+}
+
+.vp {
+	position: absolute;
+	left: 74%;
+	top: 44%;
+	width: 9px;
+	height: 9px;
+	margin: -5px 0 0 -5px;
+	border: 1px solid var(--brass);
+	border-radius: 50%;
+}
+
+.vp::after {
+	content: "vanishing point";
+	position: absolute;
+	left: 16px;
+	top: -6px;
+	font-size: 0.6875rem;
+	letter-spacing: 0.06em;
+	color: var(--brass);
+	white-space: nowrap;
+}
+
+/* The mark itself: three planes standing in one shared space. */
+.mark {
+	position: absolute;
+	inset: 0 auto 0 12%;
+	display: grid;
+	place-items: center;
+	width: clamp(180px, 26vw, 260px);
+	transform-style: preserve-3d;
+	transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+	transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.plane {
+	position: absolute;
+	width: clamp(120px, 15vw, 160px);
+	height: clamp(120px, 15vw, 160px);
+	border: 1.5px solid var(--line);
+	background: linear-gradient(150deg, rgba(31, 74, 100, 0.96), rgba(12, 33, 47, 0.94));
+	/* Each plane sits at its own depth and turn. preserve-3d above is what
+	   lets these three stay separate objects instead of collapsing into one
+	   flat stack in the parent's plane. */
+	transform: translateZ(var(--pz)) rotateZ(var(--pr));
+	box-shadow: 0 30px 60px -40px #000;
+}
+
+.plane:nth-child(1) { --pz: calc(var(--depth) * -1.6); --pr: -14deg; border-color: var(--z); }
+.plane:nth-child(2) { --pz: 0px;                       --pr: 0deg;   border-color: var(--line); }
+.plane:nth-child(3) { --pz: calc(var(--depth) * 1.6);  --pr: 14deg;  border-color: var(--x); }
+
+.plane b {
+	position: absolute;
+	right: 8px;
+	bottom: 6px;
+	font-family: "IBM Plex Mono", monospace;
+	font-size: 0.6875rem;
+	font-weight: 400;
+	color: var(--ice-dim);
+}
+
+.stage-note {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	font-size: 0.8125rem;
+	color: var(--ice-dim);
+}
+
+.stage-note .val { color: var(--brass); }
+
+/* ------------------------------------------------------------- station --- */
+
+.station {
+	display: grid;
+	grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+	gap: 40px 56px;
+	align-items: center;
+	padding: 52px 0;
+	border-bottom: var(--rule);
+}
+
+.station > header h2 {
+	margin: 0 0 4px;
+	font-size: 1.5rem;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+
+.station > header .prop {
+	display: block;
+	margin-bottom: 14px;
+	color: var(--brass);
+}
+
+.station > header p {
+	margin: 0;
+	color: var(--ice-dim);
+	font-size: 0.9375rem;
+}
+
+.station > header p + p { margin-top: 12px; }
+
+.demo {
+	display: grid;
+	gap: 18px;
+	min-height: 220px;
+	align-content: center;
+	justify-items: center;
+	padding: 28px;
+	background: var(--ground-deep);
+	border: 1px solid rgba(110, 156, 184, 0.3);
+	box-shadow: inset 0 1px 0 rgba(233, 243, 250, 0.04);
+}
+
+/* -------------------------------------------------------- the controls --- */
+
+.control {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 6px 12px;
+	align-items: center;
+	margin-top: 20px;
+	font-size: 0.8125rem;
+	color: var(--ice-dim);
+}
+
+.control .val {
+	color: var(--brass);
+	font-variant-numeric: tabular-nums;
+}
+
+.control input[type="range"] {
+	grid-column: 1 / -1;
+	width: 100%;
+	height: 22px;
+	margin: 0;
+	background: none;
+	-webkit-appearance: none;
+	appearance: none;
+	cursor: ew-resize;
+}
+
+.control input[type="range"]::-webkit-slider-runnable-track {
+	height: 1px;
+	background: var(--line);
+}
+
+.control input[type="range"]::-moz-range-track {
+	height: 1px;
+	background: var(--line);
+}
+
+.control input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	width: 3px;
+	height: 18px;
+	margin-top: -9px;
+	border: 0;
+	border-radius: 0;
+	background: var(--brass);
+}
+
+.control input[type="range"]::-moz-range-thumb {
+	width: 3px;
+	height: 18px;
+	border: 0;
+	border-radius: 0;
+	background: var(--brass);
+}
+
+.control input:focus-visible {
+	outline: 2px solid var(--brass);
+	outline-offset: 4px;
+}
+
+.switch {
+	display: inline-flex;
+	gap: 0;
+	margin-top: 20px;
+	border: 1px solid var(--line);
+}
+
+.switch button {
+	padding: 7px 14px;
+	border: 0;
+	background: none;
+	color: var(--ice-dim);
+	font: inherit;
+	font-size: 0.8125rem;
+	cursor: pointer;
+}
+
+.switch button + button { border-left: 1px solid var(--line); }
+
+.switch button[aria-pressed="true"] {
+	background: var(--brass);
+	color: var(--ground-deep);
+	font-weight: 600;
+}
+
+.switch button:focus-visible {
+	outline: 2px solid var(--brass);
+	outline-offset: 2px;
+}
+
+.switch + .switch { margin-left: 14px; }
+
+/* ------------------------------------------------ station 1: the axes --- */
+
+.axes {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 24px;
+	width: 100%;
+	justify-items: center;
+}
+
+.axis {
+	display: grid;
+	justify-items: center;
+	gap: 12px;
+	perspective: 520px;
+}
+
+.axis .tile {
+	display: grid;
+	place-items: center;
+	width: 96px;
+	height: 96px;
+	border: 1.5px solid currentColor;
+	background: var(--ground-lift);
+	font-family: "IBM Plex Mono", monospace;
+	font-size: 1.5rem;
+	animation: spin-axis 5.5s linear infinite;
+}
+
+.axis figcaption {
+	font-family: "IBM Plex Mono", monospace;
+	font-size: 0.75rem;
+	color: var(--ice-dim);
+}
+
+.axis--x { color: var(--x); }
+.axis--y { color: var(--y); }
+.axis--z { color: var(--z); }
+
+.axis--x .tile { animation-name: spin-x; }
+.axis--y .tile { animation-name: spin-y; }
+.axis--z .tile { animation-name: spin-z; }
+
+@keyframes spin-x { to { transform: rotateX(360deg); } }
+@keyframes spin-y { to { transform: rotateY(360deg); } }
+@keyframes spin-z { to { transform: rotateZ(360deg); } }
+
+/* ------------------------------------------------ station 2: the depth --- */
+
+.deck {
+	position: relative;
+	display: grid;
+	place-items: center;
+	width: 100%;
+	height: 200px;
+	perspective: var(--persp);
+}
+
+.deck-inner {
+	position: relative;
+	width: 210px;
+	height: 128px;
+	transform-style: var(--deck-style, preserve-3d);
+	transform: rotateX(-14deg) rotateY(-26deg);
+}
+
+.card {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	align-content: space-between;
+	padding: 14px 16px;
+	border: 1.5px solid var(--line);
+	background: linear-gradient(150deg, var(--ground-lift), var(--ground-deep));
+	transform: translateZ(var(--cz));
+	transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card:nth-child(1) { --cz: calc(var(--depth) * -1); border-color: var(--line-soft); }
+.card:nth-child(2) { --cz: 0px; }
+.card:nth-child(3) { --cz: var(--depth); border-color: var(--x); }
+
+.card b { font-size: 0.875rem; font-weight: 600; }
+.card span { font-size: 0.75rem; color: var(--ice-dim); }
+
+/* ----------------------------------------------- station 3: the origin --- */
+
+.origins {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 20px;
+	width: 100%;
+}
+
+.origin {
+	display: grid;
+	justify-items: center;
+	gap: 12px;
+	perspective: 620px;
+}
+
+.origin .slab {
+	width: 100%;
+	height: 92px;
+	border: 1.5px solid var(--y);
+	background: var(--ground-lift);
+	transform: rotateY(52deg);
+	transform-origin: var(--o);
+}
+
+.origin:nth-child(1) .slab { --o: left center; }
+.origin:nth-child(2) .slab { --o: center; }
+.origin:nth-child(3) .slab { --o: right center; }
+
+.origin figcaption {
+	font-family: "IBM Plex Mono", monospace;
+	font-size: 0.75rem;
+	color: var(--ice-dim);
+}
+
+/* --------------------------------------------- station 4: the backface --- */
+
+.flipper {
+	width: 230px;
+	height: 140px;
+	perspective: 900px;
+}
+
+.flipper-inner {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	transform-style: preserve-3d;
+	transform: rotateY(var(--flip, 0deg));
+	transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.face {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-content: center;
+	gap: 4px;
+	text-align: center;
+	padding: 16px;
+	border: 1.5px solid var(--line);
+	background: var(--ground-lift);
+	backface-visibility: var(--backface, hidden);
+	-webkit-backface-visibility: var(--backface, hidden);
+}
+
+.face--back {
+	transform: rotateY(180deg);
+	border-color: var(--z);
+	background: var(--ground-deep);
+}
+
+.face b { font-size: 1rem; font-weight: 600; }
+.face span { font-size: 0.75rem; color: var(--ice-dim); }
+
+/* ---------------------------------------------- station 5: the gotcha --- */
+
+.trap {
+	display: grid;
+	place-items: center;
+	width: 100%;
+	height: 190px;
+	perspective: 700px;
+}
+
+.trap-inner {
+	position: relative;
+	width: 190px;
+	height: 118px;
+	transform-style: preserve-3d;
+	transform: rotateY(-32deg);
+	/* The switch flips this to `hidden`, which silently flattens everything
+	   inside it. It is the single most common way a 3D layout dies. */
+	overflow: var(--trap-overflow, visible);
+}
+
+.trap-inner .card { --cz: 0px; }
+.trap-inner .card:nth-child(1) { --cz: -48px; }
+.trap-inner .card:nth-child(2) { --cz: 48px; }
+
+/* --------------------------------------------------------------- outro --- */
+
+.outro {
+	padding: 56px 0 0;
+	max-width: 62ch;
+}
+
+.outro h2 {
+	margin: 0 0 14px;
+	font-size: 1.375rem;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+}
+
+.outro p {
+	margin: 0 0 14px;
+	color: var(--ice-dim);
+}
+
+.outro code { color: var(--brass); }
+
+/* --------------------------------------------------------- narrow view --- */
+
+@media (max-width: 860px) {
+	.station { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+	.axes, .origins { grid-template-columns: 1fr; gap: 28px; }
+	.hero { padding: 48px 0 44px; }
+}
+
+/* ------------------------------------------------------ reduced motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+	/* The axis tiles are the only thing that moves without being asked. They
+	   hold a readable angle instead, which is what they were there to show. */
+	.axis--x .tile { animation: none; transform: rotateX(48deg); }
+	.axis--y .tile { animation: none; transform: rotateY(48deg); }
+	.axis--z .tile { animation: none; transform: rotateZ(48deg); }
+
+	.mark, .card, .flipper-inner { transition-duration: 1ms; }
+}
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+	<div class="masthead">
+		<b>Spatial transforms</b>
+		<span>Working sheet</span>
+		<span>Six properties</span>
+		<span>No library, no canvas</span>
+	</div>
+
+	<section class="hero">
+		<h1>Depth is a property, not a renderer.</h1>
+		<p>Everything below is a normal DOM element with normal text in it, turned in space by
+			the browser's own projection. It stays selectable, searchable and styleable the whole
+			time. Drag anything on this page — the transforms are values, so they stay editable.</p>
+
+		<div class="stage" id="stage">
+			<div class="vp" aria-hidden="true"></div>
+			<div class="mark" id="mark">
+				<div class="plane"><b>back</b></div>
+				<div class="plane"><b>ground</b></div>
+				<div class="plane"><b>front</b></div>
+			</div>
+			<p class="stage-note">Point at the sheet — <span class="val" id="tiltRead">rotateX(0deg) rotateY(0deg)</span></p>
+		</div>
+	</section>
+
+	<section class="station">
+		<header>
+			<code class="prop">perspective</code>
+			<h2>How close the eye is</h2>
+			<p>Set on the parent, not the thing that turns. It is the distance from the viewer to
+				the plane of the screen: a small number puts the eye right up against the element
+				and the projection gets violent, a large one flattens towards an isometric view.</p>
+			<p>Under about 400px it stops reading as depth and starts reading as a fisheye. That
+				threshold is the single most useful number on this page.</p>
+			<div class="control">
+				<label for="persp">Distance to the eye</label>
+				<span class="val" id="perspRead">800px</span>
+				<input id="persp" type="range" min="200" max="2400" step="20" value="800">
+			</div>
+		</header>
+		<div class="demo">
+			<div class="deck">
+				<div class="deck-inner">
+					<div class="card"><b>Behind</b><span>translateZ(−60px)</span></div>
+					<div class="card"><b>Ground</b><span>translateZ(0)</span></div>
+					<div class="card"><b>Front</b><span>translateZ(+60px)</span></div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="station">
+		<header>
+			<code class="prop">rotateX() &middot; rotateY() &middot; rotateZ()</code>
+			<h2>Three axes, three different feelings</h2>
+			<p>X tips towards you and away, like a lid. Y turns like a door. Z is the only one
+				that works without perspective at all, because it never leaves the plane of the
+				screen — it is the flat spin you already have.</p>
+			<p>The colours here follow the engineering convention and stay consistent down the
+				sheet, so a hue tells you which axis you are looking at.</p>
+		</header>
+		<div class="demo">
+			<div class="axes">
+				<figure class="axis axis--x"><div class="tile">X</div><figcaption>rotateX</figcaption></figure>
+				<figure class="axis axis--y"><div class="tile">Y</div><figcaption>rotateY</figcaption></figure>
+				<figure class="axis axis--z"><div class="tile">Z</div><figcaption>rotateZ</figcaption></figure>
+			</div>
+		</div>
+	</section>
+
+	<section class="station">
+		<header>
+			<code class="prop">translateZ() + transform-style</code>
+			<h2>Depth between siblings</h2>
+			<p>Pushing an element along Z only means something if its parent keeps a 3D space for
+				it to sit in. That is <code>transform-style: preserve-3d</code>, and without it
+				every child is projected onto the parent's own flat plane first — the depth is
+				computed and then thrown away.</p>
+			<div class="control">
+				<label for="depth">Separation</label>
+				<span class="val" id="depthRead">60px</span>
+				<input id="depth" type="range" min="0" max="160" step="2" value="60">
+			</div>
+			<div class="switch" role="group" aria-label="transform-style">
+				<button type="button" data-style="preserve-3d" aria-pressed="true">preserve-3d</button>
+				<button type="button" data-style="flat" aria-pressed="false">flat</button>
+			</div>
+		</header>
+		<div class="demo">
+			<div class="deck">
+				<div class="deck-inner" id="deck2">
+					<div class="card"><b>Behind</b><span>−z</span></div>
+					<div class="card"><b>Ground</b><span>0</span></div>
+					<div class="card"><b>Front</b><span>+z</span></div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="station">
+		<header>
+			<code class="prop">transform-origin</code>
+			<h2>Where the hinge is</h2>
+			<p>The same 52&deg; turn three times over, with only the hinge moved. A rotation about
+				the left edge reads as a door opening; about the centre it reads as an object being
+				inspected. Nothing else changed.</p>
+			<p>This is the property that decides whether a motion feels like it belongs to the
+				layout or like it was applied to it.</p>
+		</header>
+		<div class="demo">
+			<div class="origins">
+				<figure class="origin"><div class="slab"></div><figcaption>left center</figcaption></figure>
+				<figure class="origin"><div class="slab"></div><figcaption>center</figcaption></figure>
+				<figure class="origin"><div class="slab"></div><figcaption>right center</figcaption></figure>
+			</div>
+		</div>
+	</section>
+
+	<section class="station">
+		<header>
+			<code class="prop">backface-visibility</code>
+			<h2>What is on the other side</h2>
+			<p>Turn a card past 90&deg; and you are looking at the back of its front face —
+				mirrored text, backwards. Hiding the backface and stacking a second face at
+				<code>rotateY(180deg)</code> is what makes a card genuinely two-sided.</p>
+			<p>Switch it to visible and flip: the mirrored text is the bug this property exists
+				to stop.</p>
+			<div class="switch" role="group" aria-label="backface-visibility">
+				<button type="button" data-backface="hidden" aria-pressed="true">hidden</button>
+				<button type="button" data-backface="visible" aria-pressed="false">visible</button>
+			</div>
+			<div class="switch" role="group" aria-label="flip">
+				<button type="button" id="flip" aria-pressed="false">Flip the card</button>
+			</div>
+		</header>
+		<div class="demo">
+			<div class="flipper">
+				<div class="flipper-inner" id="flipper">
+					<div class="face"><b>Front</b><span>rotateY(0)</span></div>
+					<div class="face face--back"><b>Back</b><span>rotateY(180deg)</span></div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="station">
+		<header>
+			<code class="prop">overflow &middot; filter &middot; opacity</code>
+			<h2>The three properties that quietly kill it</h2>
+			<p>Any of these on an ancestor forces it to flatten what is inside, whatever
+				<code>preserve-3d</code> says. The depth is still being calculated; it is just
+				being projected onto a single plane before you see it.</p>
+			<p>On a page builder this is nearly always the culprit: a section with
+				<code>overflow: hidden</code> set to stop something else escaping.</p>
+			<div class="switch" role="group" aria-label="overflow on the parent">
+				<button type="button" data-trap="visible" aria-pressed="true">overflow: visible</button>
+				<button type="button" data-trap="hidden" aria-pressed="false">overflow: hidden</button>
+			</div>
+		</header>
+		<div class="demo">
+			<div class="trap">
+				<div class="trap-inner" id="trap">
+					<div class="card"><b>Behind</b><span>−48px</span></div>
+					<div class="card"><b>Front</b><span>+48px</span></div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="outro">
+		<h2>What this would take as a module</h2>
+		<p>Six properties, one shared <code>perspective</code> on a wrapper, and a pointer handler
+			about fifteen lines long. The same shape as the motion module: presets for the common
+			moves, the raw values exposed underneath for when a preset is nearly right.</p>
+		<p>The part worth building carefully is not the transform. It is the flattening — a widget
+			dropped into a section with <code>overflow: hidden</code> has to degrade to its flat
+			state rather than half-work, and it has to detect that rather than hope.</p>
+	</section>
+
+</div>
+
+<script>
+/*
+ * Everything a control touches is a custom property, which is the whole point
+ * being made: nothing here is baked into a render. The values stay values.
+ */
+(function () {
+	var root = document.documentElement;
+	var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	function wire(id, readId, prop, unit) {
+		var input = document.getElementById(id);
+		var read = document.getElementById(readId);
+
+		function apply() {
+			root.style.setProperty(prop, input.value + unit);
+			read.textContent = input.value + unit;
+		}
+
+		input.addEventListener('input', apply);
+		apply();
+	}
+
+	wire('persp', 'perspRead', '--persp', 'px');
+	wire('depth', 'depthRead', '--depth', 'px');
+
+	/* A group of buttons that writes one custom property. */
+	function group(selector, attr, prop) {
+		var buttons = document.querySelectorAll(selector);
+
+		Array.prototype.forEach.call(buttons, function (button) {
+			button.addEventListener('click', function () {
+				Array.prototype.forEach.call(buttons, function (other) {
+					other.setAttribute('aria-pressed', String(other === button));
+				});
+				root.style.setProperty(prop, button.getAttribute(attr));
+			});
+		});
+	}
+
+	group('[data-style]', 'data-style', '--deck-style');
+	group('[data-backface]', 'data-backface', '--backface');
+	group('[data-trap]', 'data-trap', '--trap-overflow');
+
+	var flip = document.getElementById('flip');
+	var flipped = false;
+
+	flip.addEventListener('click', function () {
+		flipped = !flipped;
+		flip.setAttribute('aria-pressed', String(flipped));
+		document.getElementById('flipper').style.setProperty('--flip', flipped ? '180deg' : '0deg');
+	});
+
+	/*
+	 * The pointer tilt.
+	 *
+	 * Read on pointermove, written on the next frame: the handler fires far
+	 * more often than the screen refreshes, and writing a style per event is
+	 * how a tilt starts costing more than it is worth.
+	 */
+	var stage = document.getElementById('stage');
+	var mark = document.getElementById('mark');
+	var readout = document.getElementById('tiltRead');
+	var queued = false;
+	var point = { x: 0, y: 0 };
+
+	function paint() {
+		queued = false;
+
+		var ry = (point.x * 26).toFixed(1);
+		var rx = (point.y * -18).toFixed(1);
+
+		mark.style.setProperty('--tilt-y', ry + 'deg');
+		mark.style.setProperty('--tilt-x', rx + 'deg');
+		readout.textContent = 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
+	}
+
+	if (!reduced) {
+		window.addEventListener('pointermove', function (event) {
+			var box = stage.getBoundingClientRect();
+
+			point.x = (event.clientX - (box.left + box.width / 2)) / (box.width / 2);
+			point.y = (event.clientY - (box.top + box.height / 2)) / (box.height / 2);
+
+			if (!queued) {
+				queued = true;
+				window.requestAnimationFrame(paint);
+			}
+		}, { passive: true });
+	}
+
+	/*
+	 * The load sequence: the three planes arrive at their depths rather than
+	 * starting there. One orchestrated moment, and then the page is still.
+	 */
+	if (!reduced) {
+		var planes = document.querySelectorAll('.hero .plane');
+
+		Array.prototype.forEach.call(planes, function (plane, i) {
+			plane.animate(
+				[
+					{ opacity: 0, transform: 'translateZ(0px) rotateZ(0deg)' },
+					{ opacity: 1 }
+				],
+				{ duration: 700, delay: 120 * i, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' }
+			);
+		});
+	}
+}());
+</script>
+</body>
+</html>
