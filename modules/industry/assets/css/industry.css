@@ -23,13 +23,17 @@
 
 	/* Layout. Every one of these is an Elementor control; the values here are
 	   what it looks like with nothing set. */
-	--eind-frame-w: 400px;
+	/* These stay responsive until a control replaces them, which is why the
+	   controls ship with no default of their own: an Elementor default is
+	   written out on every page and would flatten the clamp to one number at
+	   every width. */
+	--eind-frame-w: clamp( 260px, 30vw, 400px );
 	--eind-ratio: 3 / 4;
-	--eind-gap: 72px;
-	--eind-pad: 48px;
-	--eind-text-w: 440px;
+	--eind-gap: clamp( 24px, 5vw, 72px );
+	--eind-pad: clamp( 20px, 4vw, 48px );
+	--eind-text-w: clamp( 300px, 32vw, 440px );
 	--eind-stack-gap: 16px;
-	--eind-list-gap: 14px;
+	--eind-list-gap: clamp( 8px, 1.4vh, 16px );
 
 	--eind-fade: 0.6s;
 	--eind-settle: 1.2s;
@@ -86,7 +90,35 @@
 	font-variant-numeric: tabular-nums;
 }
 
-/* Keeps the three columns above anything a section places behind them. */
+/* ------------------------------------------------------------- the bed --- */
+
+/* A background that belongs to the pinned panel rather than to the section.
+   A background set on the section scrolls with the section -- which is the
+   whole length of the showcase -- so a pattern on it slides past while the
+   panel in front of it stays still, and the two read as unrelated. Painted
+   here it is pinned along with everything else and genuinely holds still.
+
+   It is empty until something is set on it, so a widget that wants the
+   section's own background still gets it. */
+.eind__bed {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+}
+
+/* Keeps the content above the bed.
+
+   The label and the counter are left out of the position half deliberately:
+   both are already absolutely positioned, and giving them `position: relative`
+   put them back into the grid as real items — five children in a three-column
+   grid, which wraps to a second row and pushes the whole panel out of its own
+   pinned box. They only need the stacking order. */
+.eind__label,
+.eind__count {
+	z-index: 1;
+}
+
 .eind__list,
 .eind__media,
 .eind__text {
@@ -173,11 +205,23 @@
    one settles out of a 6% overscale over twice the length of its fade, which
    is what stops the change reading as a blink: the fade is done while the
    movement is still finishing. */
-.eind__shot {
+.eind .eind__frame .eind__shot {
 	position: absolute;
 	inset: 0;
+
+	/* Written three ways on purpose. inset alone stretches the box, but a
+	   framework reset that sets `height: auto` on every img wins on
+	   specificity against a single class -- Elementor ships
+	   `.elementor img { height: auto; max-width: 100% }`, which is a class and
+	   an element and therefore outranks `.eind__shot`. Three classes here beat
+	   it outright, and min/max pin the box even if something later sets a
+	   height of its own. */
 	width: 100%;
 	height: 100%;
+	min-width: 100%;
+	min-height: 100%;
+	max-width: none;
+	max-height: none;
 	object-fit: cover;
 	object-position: center;
 	opacity: 0;
@@ -187,7 +231,7 @@
 		transform var( --eind-settle ) var( --eind-ease );
 }
 
-.eind__shot--on {
+.eind .eind__frame .eind__shot--on {
 	opacity: 1;
 	transform: scale( 1 );
 }
@@ -314,8 +358,12 @@
 		gap: 12px;
 	}
 
-	.eind__card img {
+	/* Same fight as the frame above, same answer. */
+	.eind .eind__card img {
+		display: block;
 		width: 100%;
+		height: auto;
+		max-width: 100%;
 		aspect-ratio: var( --eind-ratio );
 		object-fit: cover;
 		object-position: center;
@@ -335,7 +383,7 @@
 /* The section still works: it is a list, some pictures and some words, and
    scrolling still changes which one is showing. What stops is the movement. */
 @media ( prefers-reduced-motion: reduce ) {
-	.eind__shot,
+	.eind .eind__frame .eind__shot,
 	.eind__panel,
 	.eind__tick,
 	.eind__name,
@@ -343,11 +391,10 @@
 		transition: none;
 	}
 
-	.eind__shot {
-		transform: none;
-	}
-
-	.eind__shot--on {
+	/* Has to match the specificity the sizing rules were raised to, or the
+	   picture keeps its overscale and its fade. */
+	.eind .eind__frame .eind__shot,
+	.eind .eind__frame .eind__shot--on {
 		transform: none;
 	}
 }

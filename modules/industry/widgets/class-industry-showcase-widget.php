@@ -8,6 +8,7 @@
 namespace ErudaToolkit\Modules\Industry\Widgets;
 
 use Elementor\Controls_Manager;
+use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Typography;
 use Elementor\Repeater;
 use Elementor\Widget_Base;
@@ -104,6 +105,7 @@ class Industry_Showcase_Widget extends Widget_Base {
 		$this->register_content_controls();
 		$this->register_layout_controls();
 		$this->register_colour_controls();
+		$this->register_background_controls();
 		$this->register_size_controls();
 		$this->register_type_controls();
 	}
@@ -305,6 +307,39 @@ class Industry_Showcase_Widget extends Widget_Base {
 	}
 
 	/**
+	 * The background the pinned panel carries.
+	 */
+	private function register_background_controls() {
+		$this->start_controls_section(
+			'section_bed',
+			array(
+				'label' => esc_html__( 'Background', 'numbered-accordion' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_control(
+			'bed_note',
+			array(
+				'type'            => Controls_Manager::RAW_HTML,
+				'raw'             => esc_html__( 'Set here rather than on the section. A background on the section scrolls with the whole showcase, so a pattern slides past the panel in front of it; set here it is pinned along with the panel and holds still.', 'numbered-accordion' ),
+				'content_classes' => 'elementor-descriptor',
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Background::get_type(),
+			array(
+				'name'     => 'bed',
+				'types'    => array( 'classic', 'gradient' ),
+				'selector' => '{{WRAPPER}} .eind__bed',
+			)
+		);
+
+		$this->end_controls_section();
+	}
+
+	/**
 	 * Widths and spacing.
 	 */
 	private function register_size_controls() {
@@ -326,7 +361,6 @@ class Industry_Showcase_Widget extends Widget_Base {
 					'px' => array( 'min' => 220, 'max' => 1100, 'step' => 10 ),
 					'vw' => array( 'min' => 15, 'max' => 70, 'step' => 1 ),
 				),
-				'default'    => array( 'unit' => 'px', 'size' => 400 ),
 				'selectors'  => array(
 					'{{WRAPPER}} .eind' => '--eind-frame-w: {{SIZE}}{{UNIT}};',
 				),
@@ -359,7 +393,6 @@ class Industry_Showcase_Widget extends Widget_Base {
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px' ),
 				'range'      => array( 'px' => array( 'min' => 260, 'max' => 900, 'step' => 10 ) ),
-				'default'    => array( 'unit' => 'px', 'size' => 440 ),
 				'selectors'  => array(
 					'{{WRAPPER}} .eind' => '--eind-text-w: {{SIZE}}{{UNIT}};',
 				),
@@ -373,7 +406,6 @@ class Industry_Showcase_Widget extends Widget_Base {
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px' ),
 				'range'      => array( 'px' => array( 'min' => 0, 'max' => 200, 'step' => 4 ) ),
-				'default'    => array( 'unit' => 'px', 'size' => 72 ),
 				'separator'  => 'before',
 				'selectors'  => array(
 					'{{WRAPPER}} .eind' => '--eind-gap: {{SIZE}}{{UNIT}};',
@@ -388,7 +420,6 @@ class Industry_Showcase_Widget extends Widget_Base {
 				'type'        => Controls_Manager::SLIDER,
 				'size_units'  => array( 'px' ),
 				'range'       => array( 'px' => array( 'min' => 0, 'max' => 200, 'step' => 4 ) ),
-				'default'     => array( 'unit' => 'px', 'size' => 48 ),
 				'description' => esc_html__( 'Set this to zero to let the section\'s own padding do the work.', 'numbered-accordion' ),
 				'selectors'   => array(
 					'{{WRAPPER}} .eind' => '--eind-pad: {{SIZE}}{{UNIT}};',
@@ -403,7 +434,6 @@ class Industry_Showcase_Widget extends Widget_Base {
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px' ),
 				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60, 'step' => 2 ) ),
-				'default'    => array( 'unit' => 'px', 'size' => 14 ),
 				'selectors'  => array(
 					'{{WRAPPER}} .eind' => '--eind-list-gap: {{SIZE}}{{UNIT}};',
 				),
@@ -417,7 +447,6 @@ class Industry_Showcase_Widget extends Widget_Base {
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px' ),
 				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60, 'step' => 2 ) ),
-				'default'    => array( 'unit' => 'px', 'size' => 16 ),
 				'selectors'  => array(
 					'{{WRAPPER}} .eind' => '--eind-stack-gap: {{SIZE}}{{UNIT}};',
 				),
@@ -502,6 +531,10 @@ class Industry_Showcase_Widget extends Widget_Base {
 	 */
 	private function render_pinned( $settings, $items, $count ) {
 		echo '<div class="eind__pin">';
+
+		// First child, so it sits behind everything without needing to be
+		// taken out of the grid's flow by hand.
+		echo '<div class="eind__bed" aria-hidden="true"></div>';
 
 		if ( ! empty( $settings['label'] ) ) {
 			printf( '<p class="eind__label">%s</p>', esc_html( $settings['label'] ) );
