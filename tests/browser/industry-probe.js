@@ -257,6 +257,61 @@ const STATE = () => {
 		check( 'the panel is as wide as the widget', true, spans.pinWidth === spans.rootWidth );
 		check( 'and the widget fills the window', true, spans.rootWidth >= spans.viewport - 1 );
 
+		// The picture change. Not a crossfade: a hard edge sweeps the frame with
+		// a ragged band of blocks on it.
+		const grid = await page.evaluate( () => {
+			const g = document.querySelector( '.eind__grid' );
+			const cells = [ ...g.querySelectorAll( '.eind__cell' ) ];
+			const ds = cells.map( ( c ) => parseFloat( c.style.getPropertyValue( '--d' ) ) );
+			return {
+				cells: cells.length,
+				spec: g.getAttribute( 'data-eind-grid' ),
+				minD: Math.min.apply( null, ds ),
+				maxD: Math.max.apply( null, ds ),
+				allNumbers: ds.every( ( d ) => isFinite( d ) ),
+				distinct: new Set( ds.map( ( d ) => d.toFixed( 4 ) ) ).size,
+			};
+		} );
+
+		check( 'the grid is built', true, grid.cells > 40 );
+		check( 'every block has a position', true, grid.allNumbers );
+		check( 'they run across the sweep', true, grid.minD < 0.1 && grid.maxD > 0.8 );
+
+		// If every cell in a row shared a number the front would be a straight
+		// line and the blocks would be decoration rather than the effect.
+		check( 'and they are scattered, not in ranks', true, grid.distinct > grid.cells / 3 );
+
+		// Watch an actual change: blocks must light up, and the outgoing
+		// picture must stay visible underneath while the front crosses it.
+		const sweep = await page.evaluate( ( ms ) => new Promise( ( resolve ) => {
+			const frame = document.querySelector( '.eind__frame' );
+			const names = [ ...document.querySelectorAll( '.eind__name' ) ];
+			const out = { litPeak: 0, wipeSeen: false, outSeen: false, frames: 0 };
+			const t0 = performance.now();
+			const tick = () => {
+				out.frames++;
+				if ( frame.classList.contains( 'eind__frame--wipe' ) ) { out.wipeSeen = true; }
+				if ( document.querySelector( '.eind__shot--out' ) ) { out.outSeen = true; }
+				let lit = 0;
+				document.querySelectorAll( '.eind__cell' ).forEach( ( c ) => {
+					if ( +getComputedStyle( c ).opacity > 0.5 ) { lit++; }
+				} );
+				out.litPeak = Math.max( out.litPeak, lit );
+				if ( performance.now() - t0 < ms ) { requestAnimationFrame( tick ); } else { resolve( out ); }
+			};
+			names[ 2 ].click();
+			requestAnimationFrame( tick );
+		} ), 1400 );
+
+		check( 'the wipe runs', true, sweep.wipeSeen );
+		check( 'the outgoing picture is held underneath', true, sweep.outSeen );
+		check( 'blocks light up during it', true, sweep.litPeak > 10 );
+
+		// A band, not the whole frame. The first attempt lit every block at the
+		// same moment, because each stayed visible for longer than the stagger
+		// spread them over -- which is a flash, not a front crossing.
+		check( 'but never more than a band of it at once', true, sweep.litPeak < grid.cells * 0.55 );
+
 		// Past the end the panel must let go rather than stay stuck.
 		await page.evaluate(
 			( t, h ) => window.scrollTo( 0, t + h + 400 ),
@@ -423,6 +478,7 @@ const STATE = () => {
 				shotTransition: getComputedStyle( shot ).transitionDuration,
 				shotTransform: getComputedStyle( shot ).transform,
 				panelTransition: getComputedStyle( panel ).transitionDuration,
+				gridDisplay: getComputedStyle( document.querySelector( '.eind__grid' ) ).display,
 			};
 		} );
 

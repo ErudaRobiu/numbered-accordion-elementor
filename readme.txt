@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.52.1
+Stable tag: 2.53.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,16 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.53.0 =
+* **The picture no longer crossfades. It is eaten by a grid.** A hard edge
+  sweeps across the frame with a ragged, mottled band of coloured blocks riding
+  it; the new picture appears behind the band and the old one stays put
+  underneath until the front has passed over it.
+* Direction, block size, how long it takes, raggedness and the block colour are
+  all controls. A raggedness of zero gives a straight edge.
+* Visitors who have asked for reduced motion get a plain change with no blocks
+  and no sweep.
 
 = 2.52.1 =
 * **Fixed: an industry with no picture set threw every picture after it onto
