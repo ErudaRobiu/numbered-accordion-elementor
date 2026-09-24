@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.53.0
+Stable tag: 2.54.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,14 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.54.0 =
+* **The grid sweep is off by default.** The picture dissolves again, which is
+  what the showcase shipped with. The sweep is still there under Picture change
+  → How it changes, along with its direction, block size, timing, raggedness
+  and colour, so it can be turned back on without another release.
+* With the dissolve chosen, no grid and no blocks are put in the page at all —
+  it is not a hidden element, it is absent.
 
 = 2.53.0 =
 * **The picture no longer crossfades. It is eaten by a grid.** A hard edge

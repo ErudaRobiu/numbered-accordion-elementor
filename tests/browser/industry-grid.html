@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Industry showcase — fixture</title>
+<link rel="stylesheet" href="../../modules/industry/assets/css/industry.css">
+<style>
+	/* Elementor's own reset, copied because the widget ships inside it and
+	   these two declarations are the ones that fight a picture told to fill
+	   its frame. `.elementor img` is a class and an element, so it outranks a
+	   single class -- which is how a picture that covered perfectly here ended
+	   up letterboxed on the real site. Anything styling an img in this widget
+	   has to beat it. */
+	.elementor img { height: auto; max-width: 100%; border: none; border-radius: 0; box-shadow: none; }
+
+	/* A deliberately loud theme, standing in for the real one. Every rule here
+	   is something themes actually do to buttons and lists, written at the
+	   specificity a theme reaches for. The widget has to beat all of it: a
+	   name in this list is a line of text, not a control. */
+	body button,
+	.elementor button {
+		background: #c2185b;
+		background-image: linear-gradient( #c2185b, #a01548 );
+		color: #fff;
+		border: 2px solid #fff;
+		border-radius: 8px;
+		box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+		padding: 10px 18px;
+		min-height: 44px;
+		font-family: Georgia, serif;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.12em;
+	}
+	body button:hover, body button:focus, .elementor button:hover {
+		background: #7b1030;
+		border-color: #ff0;
+	}
+	body ul { list-style: disc; padding-left: 40px; }
+	body li { margin: 0 0 8px; }
+
+	/* The widget draws no background of its own, so the fixture supplies the
+	   dark section it is built to sit on. */
+	body { margin: 0; background: #0b1220; color: #fff;
+		font: 16px/1.6 "Helvetica Neue", Helvetica, Arial, sans-serif; }
+	.before, .after { padding: 18vh 6vw; color: #64748b; }
+	.before p, .after p { max-width: 50ch; }
+</style>
+</head>
+<body class="elementor">
+<div class="before"><p>Scroll down. The panel should pin for one screen and the
+industries should step past it — names on the left lighting up in turn, the
+picture settling in as it changes, the words on the right swapping under it.
+Clicking a name should land on that industry rather than on its edge.</p></div>
+<div class="eind" style="height:610vh" data-eind-reveal="grid" data-eind-axis="y" data-eind-flip="0" data-eind-block="44" data-eind-wipe="900" data-eind-jitter="0.55"><div class="eind__pin"><div class="eind__bed" aria-hidden="true"></div><p class="eind__label">Current focus industries</p><ul class="eind__list"><li><button type="button" class="eind__name" aria-current="true">Industrial Laundry</button></li><li><button type="button" class="eind__name" aria-current="false">Food Manufacturing</button></li><li><button type="button" class="eind__name" aria-current="false">Pet Food</button></li><li><button type="button" class="eind__name" aria-current="false">Foundries</button></li><li><button type="button" class="eind__name" aria-current="false">Manufacturing</button></li><li><button type="button" class="eind__name" aria-current="false">Restaurants &amp; Kitchens</button></li></ul><div class="eind__media"><div class="eind__frame"><img class="eind__shot eind__shot--on" src="industry-img/ind-0.svg" alt="" loading="eager" decoding="async" /><img class="eind__shot" src="industry-img/ind-1.svg" alt="" loading="lazy" decoding="async" /><img class="eind__shot" src="industry-img/ind-2.svg" alt="" loading="lazy" decoding="async" /><img class="eind__shot" src="industry-img/ind-3.svg" alt="" loading="lazy" decoding="async" /><span class="eind__shot" aria-hidden="true"></span><img class="eind__shot" src="industry-img/ind-5.svg" alt="" loading="lazy" decoding="async" /><div class="eind__grid" aria-hidden="true"></div></div><div class="eind__ticks" aria-hidden="true"><span class="eind__tick eind__tick--on"></span><span class="eind__tick"></span><span class="eind__tick"></span><span class="eind__tick"></span><span class="eind__tick"></span><span class="eind__tick"></span></div></div><div class="eind__text"><div class="eind__panel eind__panel--on" aria-hidden="false"><h3 class="eind__heading">Heat from industrial laundry, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#0">Discover Industrial Laundry</a></div><div class="eind__panel" aria-hidden="true"><h3 class="eind__heading">Heat from food manufacturing, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#1">Discover Food Manufacturing</a></div><div class="eind__panel" aria-hidden="true"><h3 class="eind__heading">Heat from pet food, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#2">Discover Pet Food</a></div><div class="eind__panel" aria-hidden="true"><h3 class="eind__heading">Heat from foundries, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#3">Discover Foundries</a></div><div class="eind__panel" aria-hidden="true"><h3 class="eind__heading">Heat from manufacturing, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#4">Discover Manufacturing</a></div><div class="eind__panel" aria-hidden="true"><h3 class="eind__heading">Heat from restaurants &amp; kitchens, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#5">Discover Restaurants &amp; Kitchens</a></div></div><p class="eind__count" data-eind-format="%1$s / %2$s">01 / 06</p></div><div class="eind__stack"><article class="eind__card"><img src="industry-img/ind-0.svg" alt="" loading="lazy" decoding="async" /><h3 class="eind__heading">Heat from industrial laundry, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#0">Discover Industrial Laundry</a></article><article class="eind__card"><img src="industry-img/ind-1.svg" alt="" loading="lazy" decoding="async" /><h3 class="eind__heading">Heat from food manufacturing, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#1">Discover Food Manufacturing</a></article><article class="eind__card"><img src="industry-img/ind-2.svg" alt="" loading="lazy" decoding="async" /><h3 class="eind__heading">Heat from pet food, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#2">Discover Pet Food</a></article><article class="eind__card"><img src="industry-img/ind-3.svg" alt="" loading="lazy" decoding="async" /><h3 class="eind__heading">Heat from foundries, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#3">Discover Foundries</a></article><article class="eind__card"><h3 class="eind__heading">Heat from manufacturing, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#4">Discover Manufacturing</a></article><article class="eind__card"><img src="industry-img/ind-5.svg" alt="" loading="lazy" decoding="async" /><h3 class="eind__heading">Heat from restaurants &amp; kitchens, back into the process</h3><p class="eind__body">Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.</p><a class="eind__link" href="#5">Discover Restaurants &amp; Kitchens</a></article></div><noscript><style>.eind__pin{display:none}.eind__stack{display:flex;flex-direction:column;gap:clamp(32px,7vw,56px);padding:clamp(24px,7vw,48px) clamp(18px,5vw,32px)}</style></noscript></div>
+<div class="after"><p>Past it. The panel should have released.</p></div>
+<script src="../../modules/industry/assets/js/industry.js"></script>
+</body>
+</html>

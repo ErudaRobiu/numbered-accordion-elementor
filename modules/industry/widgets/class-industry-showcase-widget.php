@@ -318,17 +318,32 @@ class Industry_Showcase_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'reveal_style',
+			array(
+				'label'   => esc_html__( 'How it changes', 'numbered-accordion' ),
+				'type'    => Controls_Manager::SELECT,
+				'default' => 'fade',
+				'options' => array(
+					'fade' => esc_html__( 'Dissolve', 'numbered-accordion' ),
+					'grid' => esc_html__( 'Grid sweep', 'numbered-accordion' ),
+				),
+			)
+		);
+
+		$this->add_control(
 			'reveal_note',
 			array(
 				'type'            => Controls_Manager::RAW_HTML,
-				'raw'             => esc_html__( 'A hard edge sweeps across the frame and the new picture appears behind it, with a ragged band of blocks riding the edge. Visitors who have asked for reduced motion get a plain change instead.', 'numbered-accordion' ),
+				'raw'             => esc_html__( 'The grid sweep runs a hard edge across the frame with a ragged band of blocks riding it. Visitors who have asked for reduced motion get a plain change either way.', 'numbered-accordion' ),
 				'content_classes' => 'elementor-descriptor',
+				'condition'       => array( 'reveal_style' => 'grid' ),
 			)
 		);
 
 		$this->add_control(
 			'reveal_axis',
 			array(
+				'condition' => array( 'reveal_style' => 'grid' ),
 				'label'   => esc_html__( 'Direction', 'numbered-accordion' ),
 				'type'    => Controls_Manager::SELECT,
 				'default' => 'y',
@@ -344,6 +359,7 @@ class Industry_Showcase_Widget extends Widget_Base {
 		$this->add_control(
 			'reveal_block',
 			array(
+				'condition' => array( 'reveal_style' => 'grid' ),
 				'label'       => esc_html__( 'Block size', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
 				'size_units'  => array( 'px' ),
@@ -359,6 +375,7 @@ class Industry_Showcase_Widget extends Widget_Base {
 		$this->add_control(
 			'reveal_wipe',
 			array(
+				'condition' => array( 'reveal_style' => 'grid' ),
 				'label'      => esc_html__( 'How long it takes', 'numbered-accordion' ),
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'ms' ),
@@ -373,6 +390,7 @@ class Industry_Showcase_Widget extends Widget_Base {
 		$this->add_control(
 			'reveal_jitter',
 			array(
+				'condition' => array( 'reveal_style' => 'grid' ),
 				'label'       => esc_html__( 'Raggedness', 'numbered-accordion' ),
 				'type'        => Controls_Manager::SLIDER,
 				'range'       => array( 'px' => array( 'min' => 0, 'max' => 2, 'step' => 0.05 ) ),
@@ -384,6 +402,7 @@ class Industry_Showcase_Widget extends Widget_Base {
 		$this->add_control(
 			'reveal_band',
 			array(
+				'condition' => array( 'reveal_style' => 'grid' ),
 				'label'     => esc_html__( 'Block colour', 'numbered-accordion' ),
 				'type'      => Controls_Manager::COLOR,
 				'default'   => '',
@@ -600,11 +619,13 @@ class Industry_Showcase_Widget extends Widget_Base {
 
 		$pace = isset( $settings['pace']['size'] ) ? ( (float) $settings['pace']['size'] ) / 100 : 0.85;
 
-		$axis = isset( $settings['reveal_axis'] ) ? (string) $settings['reveal_axis'] : 'y';
+		$axis  = isset( $settings['reveal_axis'] ) ? (string) $settings['reveal_axis'] : 'y';
+		$style = isset( $settings['reveal_style'] ) && 'grid' === $settings['reveal_style'] ? 'grid' : 'fade';
 
 		printf(
-			'<div class="eind" style="height:%dvh" data-eind-axis="%s" data-eind-flip="%s" data-eind-block="%d" data-eind-wipe="%d" data-eind-jitter="%s">',
+			'<div class="eind" style="height:%dvh" data-eind-reveal="%s" data-eind-axis="%s" data-eind-flip="%s" data-eind-block="%d" data-eind-wipe="%d" data-eind-jitter="%s">',
 			(int) Industry_Content::height( $count, $pace ),
+			esc_attr( $style ),
 			esc_attr( 'x' === $axis || 'xr' === $axis ? 'x' : 'y' ),
 			esc_attr( 'yr' === $axis || 'xr' === $axis ? '1' : '0' ),
 			isset( $settings['reveal_block']['size'] ) ? (int) $settings['reveal_block']['size'] : 44,
@@ -612,7 +633,7 @@ class Industry_Showcase_Widget extends Widget_Base {
 			esc_attr( isset( $settings['reveal_jitter']['size'] ) ? (string) (float) $settings['reveal_jitter']['size'] : '0.55' )
 		);
 
-		$this->render_pinned( $settings, $items, $count );
+		$this->render_pinned( $settings, $items, $count, $style );
 		$this->render_stack( $items );
 
 		echo '</div>';
@@ -621,12 +642,13 @@ class Industry_Showcase_Widget extends Widget_Base {
 	/**
 	 * The pinned panel: names, picture, words.
 	 *
-	 * @param array $settings Settings.
-	 * @param array $items    Usable items.
-	 * @param int   $count    Item count.
+	 * @param array  $settings Settings.
+	 * @param array  $items    Usable items.
+	 * @param int    $count    Item count.
+	 * @param string $style    'fade' or 'grid'.
 	 * @return void
 	 */
-	private function render_pinned( $settings, $items, $count ) {
+	private function render_pinned( $settings, $items, $count, $style = 'fade' ) {
 		echo '<div class="eind__pin">';
 
 		// First child, so it sits behind everything without needing to be
@@ -683,9 +705,13 @@ class Industry_Showcase_Widget extends Widget_Base {
 			);
 		}
 
-		// Filled by the script from the frame's measured size, so the blocks
-		// stay square whatever shape the frame is.
-		echo '<div class="eind__grid" aria-hidden="true"></div>';
+		// Only when the grid sweep is the chosen change. A dissolve has no
+		// blocks, so there is no reason to put an empty grid in the page.
+		if ( 'grid' === $style ) {
+			// Filled by the script from the frame's measured size, so the
+			// blocks stay square whatever shape the frame is.
+			echo '<div class="eind__grid" aria-hidden="true"></div>';
+		}
 
 		echo '</div>';
 

@@ -42,6 +42,7 @@
 		};
 
 		return {
+			grid: root.getAttribute( 'data-eind-reveal' ) === 'grid',
 			axis: root.getAttribute( 'data-eind-axis' ) === 'x' ? 'x' : 'y',
 			flip: root.getAttribute( 'data-eind-flip' ) === '1',
 			block: num( 'data-eind-block', 44 ),
@@ -209,7 +210,7 @@
 				shots[ i ].classList.remove( 'eind__shot--out' );
 			}
 
-			if ( frame && leaving && ! reducedMotion() ) {
+			if ( opts.grid && frame && leaving && ! reducedMotion() ) {
 				leaving.classList.add( 'eind__shot--out' );
 
 				// Restarting an animation means taking the class off, forcing
@@ -344,7 +345,7 @@
 			}( i ) );
 		}
 
-		if ( frame ) {
+		if ( frame && opts.grid ) {
 			frame.style.setProperty( '--eind-reveal-from', revealFrom( opts ) );
 			buildGrid( frame, opts );
 		}
@@ -353,7 +354,7 @@
 		window.addEventListener( 'resize', function () {
 			onScroll();
 
-			if ( frame ) {
+			if ( frame && opts.grid ) {
 				buildGrid( frame, opts );
 			}
 		} );

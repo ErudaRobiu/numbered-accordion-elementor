@@ -126,13 +126,16 @@ namespace {
 		);
 	}
 
+	$style = ( isset( $argv[1] ) && 'grid' === $argv[1] ) ? 'grid' : 'fade';
+
 	$widget = new Industry_Fixture();
 	$widget->set(
 		array(
-			'items'      => $items,
-			'label'      => 'Current focus industries',
-			'show_count' => 'yes',
-			'pace'       => array( 'unit' => 'vh', 'size' => 85 ),
+			'items'        => $items,
+			'label'        => 'Current focus industries',
+			'show_count'   => 'yes',
+			'pace'         => array( 'unit' => 'vh', 'size' => 85 ),
+			'reveal_style' => $style,
 		)
 	);
 

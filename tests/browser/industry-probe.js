@@ -20,6 +20,7 @@
 const puppeteer = require( 'puppeteer' );
 
 const URL = process.env.EIND_URL || 'http://localhost:8732/tests/browser/industry.html';
+const GRID_URL = URL.replace( /industry\.html$/, 'industry-grid.html' );
 
 let passed = 0;
 const failed = [];
@@ -257,6 +258,79 @@ const STATE = () => {
 		check( 'the panel is as wide as the widget', true, spans.pinWidth === spans.rootWidth );
 		check( 'and the widget fills the window', true, spans.rootWidth >= spans.viewport - 1 );
 
+		// Past the end the panel must let go rather than stay stuck.
+		await page.evaluate(
+			( t, h ) => window.scrollTo( 0, t + h + 400 ),
+			geometry.top,
+			geometry.h
+		);
+		await page.evaluate( () => new Promise( ( r ) => requestAnimationFrame( r ) ) );
+		const past = await page.evaluate( STATE );
+		check( 'the panel releases past the section', true, past.pinTop < -100 );
+
+		await page.close();
+	}
+
+	/* -------------------------------------------- the default dissolve --- */
+	{
+		const page = await browser.newPage();
+		if ( process.env.EIND_TRACE ) { console.log( '-> dissolve' ); }
+		await page.setViewport( { width: 1440, height: 900 } );
+		await page.goto( URL, { waitUntil: 'load' } );
+
+		const plain = await page.evaluate( () => {
+			const shot = document.querySelector( '.eind__shot' );
+			return {
+				grid: document.querySelectorAll( '.eind__grid' ).length,
+				cells: document.querySelectorAll( '.eind__cell' ).length,
+				transition: getComputedStyle( shot ).transitionDuration,
+				reveal: document.querySelector( '.eind' ).getAttribute( 'data-eind-reveal' ),
+			};
+		} );
+
+		check( 'the default is the dissolve', 'fade', plain.reveal );
+		check( 'and no grid is put in the page at all', 0, plain.grid );
+		check( 'nor any blocks', 0, plain.cells );
+		check( 'the picture still crossfades', '0.6s, 1.2s', plain.transition );
+
+		// Changing industry must not leave a wipe class or a held picture
+		// behind, since neither has anything to drive them here.
+		await page.evaluate( () => document.querySelectorAll( '.eind__name' )[ 3 ].click() );
+		await page.evaluate( () => new Promise( ( r ) => setTimeout( r, 900 ) ) );
+		const after = await page.evaluate( () => ( {
+			wipe: document.querySelectorAll( '.eind__frame--wipe' ).length,
+			held: document.querySelectorAll( '.eind__shot--out' ).length,
+		} ) );
+		check( 'no sweep is started', 0, after.wipe );
+		check( 'and no picture is held underneath', 0, after.held );
+
+		await page.close();
+	}
+
+	/* ------------------------------------------------- the grid sweep --- */
+	{
+		const page = await browser.newPage();
+		if ( process.env.EIND_TRACE ) { console.log( '-> grid sweep' ); }
+		await page.setViewport( { width: 1440, height: 900 } );
+		await page.goto( GRID_URL, { waitUntil: 'load' } );
+
+		const geometry = await page.evaluate( () => {
+			const root = document.querySelector( '.eind' );
+			return { h: root.offsetHeight, vh: window.innerHeight, top: root.getBoundingClientRect().top + window.pageYOffset };
+		} );
+
+		const at = async ( progress ) => {
+			await page.evaluate(
+				( t, sp, p ) => window.scrollTo( 0, t + sp * p ),
+				geometry.top,
+				geometry.h - geometry.vh,
+				progress
+			);
+			await page.evaluate( () => new Promise( ( r ) => requestAnimationFrame( () => requestAnimationFrame( r ) ) ) );
+			return page.evaluate( STATE );
+		};
+		await at( 0 );
+
 		// The picture change. Not a crossfade: a hard edge sweeps the frame with
 		// a ragged band of blocks on it.
 		const grid = await page.evaluate( () => {
@@ -311,17 +385,6 @@ const STATE = () => {
 		// same moment, because each stayed visible for longer than the stagger
 		// spread them over -- which is a flash, not a front crossing.
 		check( 'but never more than a band of it at once', true, sweep.litPeak < grid.cells * 0.55 );
-
-		// Past the end the panel must let go rather than stay stuck.
-		await page.evaluate(
-			( t, h ) => window.scrollTo( 0, t + h + 400 ),
-			geometry.top,
-			geometry.h
-		);
-		await page.evaluate( () => new Promise( ( r ) => requestAnimationFrame( r ) ) );
-		const past = await page.evaluate( STATE );
-		check( 'the panel releases past the section', true, past.pinTop < -100 );
-
 		await page.close();
 	}
 
@@ -478,7 +541,10 @@ const STATE = () => {
 				shotTransition: getComputedStyle( shot ).transitionDuration,
 				shotTransform: getComputedStyle( shot ).transform,
 				panelTransition: getComputedStyle( panel ).transitionDuration,
-				gridDisplay: getComputedStyle( document.querySelector( '.eind__grid' ) ).display,
+				gridDisplay: ( () => {
+					const g = document.querySelector( '.eind__grid' );
+					return g ? getComputedStyle( g ).display : 'absent';
+				} )(),
 			};
 		} );
 
