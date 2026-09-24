@@ -162,6 +162,87 @@ async function newPage( browser, options = {} ) {
 		await page.close();
 	}
 
+	/* ------------------------------------------- a slow-arriving logo --- */
+	{
+		const page = await newPage( browser );
+		if ( process.env.ETRN_TRACE ) { console.log( '-> slow logo' ); }
+
+		// A media library logo is an HTTP request, and the whole reason this
+		// test exists is that it usually has not arrived when the curtain goes
+		// up. Held back deliberately: with the animation keyed to the
+		// preloading class it finished on an empty box and the logo appeared
+		// afterwards with no animation at all.
+		await page.setRequestInterception( true );
+		page.on( 'request', async ( request ) => {
+			if ( request.url().endsWith( 'logo.svg' ) ) {
+				await new Promise( ( r ) => setTimeout( r, 900 ) );
+			}
+			request.continue();
+		} );
+
+		await page.evaluateOnNewDocument( () => {
+			window.__logo = [];
+			const tick = () => {
+				const logo = document.querySelector( '.etrn__logo' );
+				const img = logo ? logo.querySelector( 'img' ) : null;
+				if ( logo ) {
+					window.__logo.push( {
+						t: Math.round( performance.now() ),
+						o: +getComputedStyle( logo ).opacity,
+						clip: getComputedStyle( logo ).clipPath,
+						loaded: img ? img.complete && img.naturalWidth > 0 : null,
+						curtain: getComputedStyle( document.querySelector( '.etrn' ) ).display,
+					} );
+				}
+				requestAnimationFrame( tick );
+			};
+			requestAnimationFrame( tick );
+		} );
+
+		await page.goto( `${ BASE }/one.html`, { waitUntil: 'domcontentloaded' } );
+		await page.waitForFunction(
+			() => getComputedStyle( document.querySelector( '.etrn' ) ).display === 'none',
+			{ timeout: 20000 }
+		);
+
+		const samples = await page.evaluate( () => window.__logo );
+		const arrived = samples.find( ( s ) => s.loaded );
+		const visible = samples.find( ( s ) => s.o > 0.99 );
+		const midFade = samples.filter( ( s ) => s.o > 0.01 && s.o < 0.99 );
+		const midWipe = samples.filter(
+			( s ) => /inset/.test( s.clip ) && ! /inset\(0px 0px 0px 0px\)|inset\(0%\)|none/.test( s.clip )
+				&& ! /100%/.test( s.clip )
+		);
+
+		check( 'the logo image really did arrive late', true, !! arrived && arrived.t > 400 );
+
+		// Before it arrived the logo must still be hidden. This is the failure
+		// that shipped: the animation had already run to completion on an
+		// empty box.
+		const beforeArrival = samples.filter( ( s ) => ! s.loaded );
+		check(
+			'the logo stays hidden until its image is there',
+			true,
+			beforeArrival.every( ( s ) => s.o < 0.05 )
+		);
+
+		check( 'it becomes fully visible afterwards', true, !! visible );
+		check( 'and it got there by animating, not by appearing', true, midFade.length > 2 );
+		check( 'the wipe runs alongside the fade', true, midWipe.length > 2 );
+
+		if ( arrived && visible ) {
+			check( 'the fade starts only once the image has landed', true, visible.t > arrived.t );
+		}
+
+		// And the curtain must not leave mid-animation.
+		const lastShown = samples.filter( ( s ) => s.curtain !== 'none' ).pop();
+		if ( lastShown && visible ) {
+			check( 'the curtain waits for the logo to finish', true, lastShown.t >= visible.t );
+		}
+
+		await page.close();
+	}
+
 	/* ------------------------------------------------- covering up --- */
 	{
 		if ( process.env.ETRN_TRACE ) { console.log( '-> covering up' ); }
