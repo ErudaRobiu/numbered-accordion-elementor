@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.51.0
+Stable tag: 2.52.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,19 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.52.0 =
+* **Industry Showcase: tablet and phone now follow the reference rather than
+  turning into a list.** It stays one industry at a time, driven by scrolling,
+  at every width — only the arrangement changes. The picture takes the upper
+  part of the screen, the words sit beneath it, the position ticks move to the
+  right edge and the names step aside, since scrolling is how the list is
+  walked there.
+* Fixed: the pinned panel was sized in vh and then padded, which on a phone put
+  its own last line under the browser's toolbar where nothing could scroll it
+  into view. It is sized in svh now, and the widget sets its own box-sizing
+  rather than assuming the theme has.
+* With no script the stack takes over, so every industry can still be read.
 
 = 2.51.0 =
 * **Fixed: the industry names were picking up the theme's button styling** — a

@@ -640,6 +640,15 @@ class Industry_Showcase_Widget extends Widget_Base {
 		}
 
 		echo '</div>';
+
+		// Without a script nothing ever changes which industry is showing, so
+		// the panel would be a single frozen one. The stack is already in the
+		// markup; this is what reveals it.
+		echo '<noscript><style>' .
+			'.eind__pin{display:none}' .
+			'.eind__stack{display:flex;flex-direction:column;' .
+			'gap:clamp(32px,7vw,56px);padding:clamp(24px,7vw,48px) clamp(18px,5vw,32px)}' .
+			'</style></noscript>';
 	}
 
 	/**

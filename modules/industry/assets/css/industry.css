@@ -13,6 +13,19 @@
  * @package ErudaToolkit
  */
 
+/* Owned rather than assumed. Elementor sets border-box globally and a theme
+   usually does too, but this widget sizes a pinned panel in viewport units and
+   then pads it: under content-box that padding is added to the height, the
+   panel ends up taller than the screen it is pinned to, and its last line can
+   never be scrolled into view because it is pinned. Measured at 979px on an
+   844px screen. */
+.eind,
+.eind *,
+.eind *::before,
+.eind *::after {
+	box-sizing: border-box;
+}
+
 .eind {
 	--eind-ink: #ffffff;
 	--eind-muted: rgba( 255, 255, 255, 0.34 );
@@ -51,8 +64,15 @@
 .eind__pin {
 	position: sticky;
 	top: 0;
+
+	/* svh, not vh. On a phone 100vh is the viewport with the browser's own
+	   toolbars hidden, which is taller than what is actually on screen -- so a
+	   panel sized in vh puts its own last line under the address bar, and
+	   nothing inside it ever comes into view because the panel is pinned. svh
+	   is the viewport at its smallest, which is the one that always fits. */
 	height: 100vh;
-	min-height: 560px;
+	height: 100svh;
+	min-height: 480px;
 	overflow: hidden;
 	display: grid;
 
@@ -378,62 +398,131 @@
 	color: var( --eind-accent );
 }
 
-/* ------------------------------------------------------------- mobile --- */
+/* ------------------------------------------------- tablet and phone --- */
 
-/* The stacked version, which is the whole widget below the breakpoint. A
-   pinned panel driven by scroll position fights the browser on a phone, where
-   scrolling is also how you dismiss the address bar — so there is no pinning
-   and no scroll capture here at all, just the same content read downwards. */
+/* It does not become a list. The one-at-a-time, scroll-driven presentation is
+   the whole idea, and the reference keeps it at every width -- only the
+   arrangement changes: the names go, the picture takes the upper part, the
+   words sit under it, and the ticks move to the edge of the screen.
+
+   A pinned panel read from scroll position is fine on touch. What is not fine
+   is translating content against the scroll, which is a different technique
+   and not this one: nothing here captures a gesture, and position: sticky does
+   the holding. */
+@media ( max-width: 900px ) {
+	.eind__pin {
+		/* One column: the picture and the words share the height rather than
+		   sitting beside each other. */
+		grid-template-columns: 1fr;
+		grid-template-rows: minmax( 0, 1fr ) auto;
+		align-items: stretch;
+		gap: clamp( 18px, 4vh, 32px );
+		padding: clamp( 56px, 10vh, 96px ) var( --eind-pad ) clamp( 24px, 6vh, 56px );
+	}
+
+	/* Navigation is by scrolling here, and the ticks say where you are. */
+	.eind .eind__list {
+		display: none;
+	}
+
+	.eind__media {
+		/* Static on purpose. It is position: relative at desktop widths for
+		   stacking, and while it stays that way the ticks below anchor to it
+		   rather than to the panel -- which on a tablet parks them inside the
+		   content column instead of at the edge of the screen. */
+		position: static;
+		min-height: 0;
+		align-items: stretch;
+	}
+
+	/* The picture fills the room it is given rather than holding a shape. On a
+	   tall narrow screen a 3:4 frame either leaves the words no space or
+	   leaves a band of nothing above them. */
+	.eind .eind__frame {
+		aspect-ratio: auto;
+		width: 100%;
+		height: 100%;
+		max-height: none;
+	}
+
+	/* Off the picture and onto the edge of the screen, which is where the
+	   reference puts them and the only place they do not crowd it. */
+	.eind__ticks {
+		position: absolute;
+		right: max( 10px, calc( var( --eind-pad ) / 2 ) );
+		top: 50%;
+		transform: translateY( -50% );
+		padding-bottom: 0;
+		z-index: 2;
+	}
+
+	/* The words become a row of their own, so the column stops being a fixed
+	   box with panels floating inside it. The one showing takes part in the
+	   layout; the rest stay out of it. */
+	.eind__text {
+		position: relative;
+		height: auto;
+		min-height: 0;
+		max-width: none;
+	}
+
+	.eind__panel {
+		position: absolute;
+		inset: auto 0 0 0;
+		top: auto;
+		transform: translateY( 8px );
+	}
+
+	.eind__panel--on {
+		position: relative;
+		transform: translateY( 0 );
+	}
+
+	.eind__heading {
+		font-size: clamp( 24px, 5.5vw, 34px );
+	}
+
+	.eind__count {
+		right: var( --eind-pad );
+	}
+}
+
+/* Wider than a phone but still one column: the words are a column rather than
+   the whole width, the way the reference has them on a tablet. */
+@media ( min-width: 601px ) and ( max-width: 900px ) {
+	.eind__text {
+		width: 100%;
+		max-width: 520px;
+		margin: 0 auto;
+	}
+}
+
+/* ------------------------------------------------------ without script --- */
+
+/* The panel shows one industry and scrolling decides which. With no script
+   there is nothing to decide it, so the stack -- which is in the markup either
+   way -- takes over and every industry can still be read. The widget itself
+   prints the rule that does the swapping, inside a noscript block. */
 .eind__stack {
 	display: none;
 }
 
-@media ( max-width: 900px ) {
-	.eind {
-		/* Whatever the desktop section height was, it is not wanted here. */
-		height: auto !important;
-	}
+.eind__stack .eind__card {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
 
-	.eind__pin {
-		display: none;
-	}
-
-	/* The gutter is the widget's own, in both layouts. This is a full-bleed
-	   component — the desktop panel is pinned across the whole viewport and
-	   pads itself for the same reason — so it cannot assume the container
-	   around it supplies one. Without this the headings sit hard against both
-	   edges of a phone and the long ones are clipped. */
-	.eind__stack {
-		display: flex;
-		flex-direction: column;
-		gap: clamp( 32px, 7vw, 56px );
-		padding: clamp( 24px, 7vw, 48px ) clamp( 18px, 5vw, 32px );
-	}
-
-	.eind__card {
-		display: flex;
-		flex-direction: column;
-		gap: 12px;
-	}
-
-	/* Same fight as the frame above, same answer. */
-	.eind .eind__card img {
-		display: block;
-		width: 100%;
-		height: auto;
-		max-width: 100%;
-		aspect-ratio: var( --eind-ratio );
-		object-fit: cover;
-		object-position: center;
-		border-radius: 16px;
-		margin-bottom: 4px;
-	}
-
-	/* The heading shrinks on a phone only when nothing has been set for it;
-	   a typography control writes its own size and wins on specificity. */
-	.eind__card .eind__heading {
-		font-size: clamp( 24px, 6vw, 32px );
-	}
+.eind .eind__stack .eind__card img {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-width: 100%;
+	aspect-ratio: var( --eind-ratio );
+	object-fit: cover;
+	object-position: center;
+	border-radius: 16px;
+	margin-bottom: 4px;
 }
 
 /* ----------------------------------------------------- reduced motion --- */
