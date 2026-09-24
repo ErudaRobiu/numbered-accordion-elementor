@@ -61,6 +61,62 @@ final class Settings {
 
 		add_action( 'admin_menu', array( $this, 'add_page' ) );
 		add_action( 'admin_init', array( $this, 'register' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
+	}
+
+	/**
+	 * Load the media picker, on this screen only.
+	 *
+	 * wp_enqueue_media() pulls in a large amount of the editor, so it is worth
+	 * being strict about where: any module may declare a media field, but no
+	 * other screen has one.
+	 *
+	 * @param string $hook Current admin page.
+	 * @return void
+	 */
+	public function enqueue( $hook ) {
+		if ( 'settings_page_' . self::PAGE_SLUG !== $hook ) {
+			return;
+		}
+
+		if ( ! $this->has_media_field() ) {
+			return;
+		}
+
+		wp_enqueue_media();
+
+		wp_enqueue_script(
+			'eruda-toolkit-settings',
+			ERUDA_URL . 'includes/assets/js/settings.js',
+			array(),
+			ERUDA_VERSION,
+			true
+		);
+	}
+
+	/**
+	 * Does any enabled-or-not module declare a media field?
+	 *
+	 * @return bool
+	 */
+	private function has_media_field() {
+		$toolkit = Toolkit::instance();
+
+		foreach ( $toolkit->ids() as $id ) {
+			$class = $toolkit->load( $id );
+
+			if ( null === $class || ! is_subclass_of( $class, Configurable::class, true ) ) {
+				continue;
+			}
+
+			foreach ( Fields::valid( $class::settings_fields() ) as $field ) {
+				if ( 'media' === $field['type'] ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -209,7 +265,42 @@ final class Settings {
 				$input = 'eruda-field-' . $id . '-' . $field['id'];
 				?>
 				<p style="margin:0 0 10px;">
-					<?php if ( 'checkbox' === $field['type'] ) : ?>
+					<?php if ( 'media' === $field['type'] ) : ?>
+						<?php
+						$attachment = (int) $value;
+						$preview    = $attachment > 0 && wp_attachment_is_image( $attachment )
+							? (string) wp_get_attachment_image_url( $attachment, 'medium' )
+							: '';
+						?>
+						<span data-etrn-media
+							data-etrn-url="<?php echo esc_attr( $preview ); ?>"
+							style="display:block;">
+							<label for="<?php echo esc_attr( $input ); ?>" style="display:inline-block;min-width:200px;vertical-align:top;">
+								<?php echo esc_html( $field['label'] ); ?>
+							</label>
+							<span style="display:inline-block;vertical-align:top;">
+								<input type="hidden"
+									id="<?php echo esc_attr( $input ); ?>"
+									name="<?php echo esc_attr( $name ); ?>"
+									value="<?php echo esc_attr( (string) $attachment ); ?>"
+									data-etrn-value />
+								<span data-etrn-preview style="display:block;margin-bottom:6px;"></span>
+								<button type="button" class="button"
+									data-etrn-choose="<?php esc_attr_e( 'Choose an image', 'numbered-accordion' ); ?>"
+									data-etrn-button="<?php esc_attr_e( 'Use this image', 'numbered-accordion' ); ?>">
+									<?php esc_html_e( 'Choose image', 'numbered-accordion' ); ?>
+								</button>
+								<button type="button" class="button-link" data-etrn-remove
+									<?php echo $attachment > 0 ? '' : 'hidden'; ?>
+									style="margin-left:8px;">
+									<?php esc_html_e( 'Remove', 'numbered-accordion' ); ?>
+								</button>
+								<?php if ( ! empty( $field['help'] ) ) : ?>
+									<span class="description" style="display:block;margin-top:6px;"><?php echo esc_html( $field['help'] ); ?></span>
+								<?php endif; ?>
+							</span>
+						</span>
+					<?php elseif ( 'checkbox' === $field['type'] ) : ?>
 						<label for="<?php echo esc_attr( $input ); ?>">
 							<input type="checkbox"
 								id="<?php echo esc_attr( $input ); ?>"

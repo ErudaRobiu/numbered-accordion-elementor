@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.44.2
+Stable tag: 2.45.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,16 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.45.0 =
+* **New: choose the preloader's logo.** A picker under Settings -> Eruda
+  Toolkit, using the media library. It falls back to the site logo when nothing
+  is chosen, so a site that only needs one image never picks it twice — the
+  reason to set one is a curtain in a dark brand colour, which usually wants a
+  lighter version of the mark than the header does.
+* The chosen image is never lazily loaded: it is the only thing on screen, and
+  a lazy one would not start fetching until after the curtain it sits on had
+  been drawn.
 
 = 2.44.2 =
 * **Fixed: the logo appeared without animating.** The animation was keyed to

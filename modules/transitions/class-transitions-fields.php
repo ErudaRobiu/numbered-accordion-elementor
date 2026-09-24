@@ -102,6 +102,13 @@ final class Transitions_Fields {
 				'help'    => esc_html__( 'Show the logo and progress bar on the first page of a visit.', 'numbered-accordion' ),
 			),
 			array(
+				'id'      => 'logo',
+				'label'   => esc_html__( 'Preloader logo', 'numbered-accordion' ),
+				'type'    => 'media',
+				'default' => 0,
+				'help'    => esc_html__( 'Falls back to the site logo. Set one here when the curtain needs a different version of the mark to the header does.', 'numbered-accordion' ),
+			),
+			array(
 				'id'      => 'minimum',
 				'label'   => esc_html__( 'Minimum preloader time', 'numbered-accordion' ),
 				'type'    => 'number',

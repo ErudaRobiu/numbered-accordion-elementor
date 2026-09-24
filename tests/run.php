@@ -1722,6 +1722,7 @@ $decl = array(
 	array( 'id' => 'count',  'type' => 'number',   'default' => 6, 'min' => 1, 'max' => 12, 'step' => 1 ),
 	array( 'id' => 'speed',  'type' => 'number',   'default' => 0.18, 'min' => 0.05, 'max' => 1.5, 'step' => 0.01 ),
 	array( 'id' => 'on',     'type' => 'checkbox', 'default' => true ),
+	array( 'id' => 'image',  'type' => 'media',    'default' => 0 ),
 );
 
 check( 'a six-digit colour survives', '#0042ff', Fields::color( '#0042FF' ) );
@@ -1744,7 +1745,7 @@ check( 'a usable one is kept',
 check( 'a missing value falls back',
 	'#111111', Fields::values( $decl, array() )['color'] );
 check( 'a corrupt option falls back throughout',
-	array( 'color' => '#111111', 'count' => 6, 'speed' => 0.18, 'on' => true ),
+	array( 'color' => '#111111', 'count' => 6, 'speed' => 0.18, 'on' => true, 'image' => 0 ),
 	Fields::values( $decl, 'not an array' ) );
 
 check( 'a number above its range is clamped', 12, Fields::values( $decl, array( 'count' => 99 ) )['count'] );
@@ -1766,8 +1767,20 @@ check( 'an absent number sanitises to its default', 6, Fields::sanitize( $decl, 
 check( 'an undeclared key is dropped', false,
 	array_key_exists( 'sneaky', Fields::sanitize( $decl, array( 'sneaky' => 'x' ) ) ) );
 check( 'a non-array submission yields defaults',
-	array( 'color' => '#111111', 'count' => 6, 'speed' => 0.18, 'on' => false ),
+	array( 'color' => '#111111', 'count' => 6, 'speed' => 0.18, 'on' => false, 'image' => 0 ),
 	Fields::sanitize( $decl, 'nonsense' ) );
+
+// A media field is an attachment id. Zero means nothing chosen, which is a
+// state somebody can deliberately return to, so it is the floor and not an
+// error.
+check( 'an attachment id survives', 42, Fields::values( $decl, array( 'image' => '42' ) )['image'] );
+check( 'nothing chosen is zero', 0, Fields::values( $decl, array( 'image' => 0 ) )['image'] );
+check( 'a negative id is floored', 0, Fields::values( $decl, array( 'image' => -8 ) )['image'] );
+check( 'a non-numeric id falls back', 0, Fields::values( $decl, array( 'image' => 'cat.png' ) )['image'] );
+check( 'a boolean is not an id', 0, Fields::values( $decl, array( 'image' => true ) )['image'] );
+check( 'an array is not an id', 0, Fields::values( $decl, array( 'image' => array( 3 ) ) )['image'] );
+check( 'an absent media field sanitises to its default', 0, Fields::sanitize( $decl, array() )['image'] );
+check( 'a media field is a known type', 1, count( Fields::valid( array( array( 'id' => 'a', 'type' => 'media', 'default' => 0 ) ) ) ) );
 
 check( 'a declaration with no id is dropped', array(), Fields::valid( array( array( 'type' => 'color', 'default' => '#fff' ) ) ) );
 check( 'a declaration with no default is dropped', array(), Fields::valid( array( array( 'id' => 'a', 'type' => 'color' ) ) ) );
@@ -1812,9 +1825,14 @@ check( 'and makes every column move together', 0.18, round( Transitions_Fields::
 
 check( 'every declared field has a value', true,
 	count( array_diff(
-		array( 'color', 'columns', 'travel', 'stagger', 'preloader', 'minimum', 'maximum', 'percentage' ),
+		array( 'color', 'columns', 'travel', 'stagger', 'preloader', 'logo', 'minimum', 'maximum', 'percentage' ),
 		array_keys( $opts )
 	) ) === 0 );
+
+// No logo chosen is the normal state: the module falls back to the site logo,
+// so zero has to survive rather than being treated as unset.
+check( 'no preloader logo is chosen by default', 0, $opts['logo'] );
+check( 'a chosen one is kept', 91, Transitions_Fields::options( array( 'logo' => '91' ) )['logo'] );
 
 /* ------------------------------------------------------------- report --- */
 

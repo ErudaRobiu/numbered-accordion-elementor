@@ -66,6 +66,7 @@ namespace {
 		'wp_enqueue_script'   => 'return true;',
 		'wp_add_inline_script' => 'return true;',
 		'has_custom_logo'     => 'return true;',
+		'wp_attachment_is_image' => 'return true;',
 	);
 
 	foreach ( $stubs as $name => $body ) {
@@ -90,6 +91,28 @@ namespace {
 		function get_custom_logo() {
 			return '<a href="/" class="custom-logo-link"><img class="custom-logo" ' .
 				'src="logo.svg" width="260" height="48" alt="Fixture" /></a>';
+		}
+	}
+
+	if ( ! function_exists( 'wp_get_attachment_image' ) ) {
+		/**
+		 * Stand-in for a logo chosen in the module's own settings, so the
+		 * branch that prefers it over the site logo is exercised rather than
+		 * assumed. A different file, so the two are told apart on sight.
+		 *
+		 * @param int    $id    Attachment id.
+		 * @param string $size  Size.
+		 * @param bool   $icon  Icon.
+		 * @param array  $attrs Attributes.
+		 * @return string
+		 */
+		function wp_get_attachment_image( $id, $size = 'full', $icon = false, $attrs = array() ) {
+			$class = isset( $attrs['class'] ) ? $attrs['class'] : '';
+
+			return sprintf(
+				'<img class="%s" src="chosen.svg" width="260" height="48" alt="Chosen" loading="eager" decoding="async" />',
+				htmlspecialchars( $class, ENT_QUOTES, 'UTF-8' )
+			);
 		}
 	}
 
@@ -155,14 +178,24 @@ namespace {
 		return (string) ob_get_clean();
 	}
 
+	file_put_contents(
+		$out . '/chosen.svg',
+		'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48">' .
+		'<text x="0" y="36" font-family="Helvetica,Arial" font-size="38" fill="#fff">Chosen</text>' .
+		'</svg>'
+	);
+
+	// 'chosen' carries a logo picked in the module's settings; the rest fall
+	// back to the site logo, which is the ordinary case.
 	$pages = array(
-		'one'   => array( 'Page One', '#0042ff' ),
-		'two'   => array( 'Page Two', '#0042ff' ),
-		'three' => array( 'Page Three', '#0042ff' ),
+		'one'    => array( 'Page One', '#0042ff', array() ),
+		'two'    => array( 'Page Two', '#0042ff', array() ),
+		'three'  => array( 'Page Three', '#0042ff', array() ),
+		'chosen' => array( 'Chosen Logo', '#0042ff', array( 'logo' => 7 ) ),
 	);
 
 	foreach ( $pages as $slug => $page ) {
-		$GLOBALS['eruda_fixture_options'] = array( 'color' => $page[1] );
+		$GLOBALS['eruda_fixture_options'] = array_merge( array( 'color' => $page[1] ), $page[2] );
 
 		// A fresh instance per page: the print-once guard is per request, and
 		// a shared one would silently drop the curtain on pages two and three.

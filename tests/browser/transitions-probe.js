@@ -162,6 +162,53 @@ async function newPage( browser, options = {} ) {
 		await page.close();
 	}
 
+	/* ------------------------------------------- a logo from settings --- */
+	{
+		const page = await newPage( browser );
+		if ( process.env.ETRN_TRACE ) { console.log( '-> chosen logo' ); }
+
+		await page.goto( `${ BASE }/chosen.html`, { waitUntil: 'domcontentloaded' } );
+
+		const logo = await page.evaluate( () => {
+			const img = document.querySelector( '.etrn__logo img' );
+			return img
+				? { src: img.getAttribute( 'src' ), cls: img.className, loading: img.getAttribute( 'loading' ) }
+				: null;
+		} );
+
+		check( 'a logo chosen in the settings is the one used', true, !! logo && logo.src === 'chosen.svg' );
+		check( 'and it is not lazily loaded', 'eager', logo && logo.loading );
+
+		// It has to animate the same way the fallback does.
+		await page.waitForFunction(
+			() => {
+				const l = document.querySelector( '.etrn__logo' );
+				return l && +getComputedStyle( l ).opacity > 0.99;
+			},
+			{ timeout: 15000 }
+		);
+		check( 'and it animates in like any other', true, true );
+
+		await page.waitForFunction(
+			() => getComputedStyle( document.querySelector( '.etrn' ) ).display === 'none',
+			{ timeout: 15000 }
+		);
+
+		await page.close();
+	}
+
+	// The site logo is still what a site without a chosen one gets.
+	{
+		const page = await newPage( browser );
+		await page.goto( `${ BASE }/one.html`, { waitUntil: 'domcontentloaded' } );
+		const fallback = await page.evaluate( () => {
+			const img = document.querySelector( '.etrn__logo img' );
+			return img ? img.getAttribute( 'src' ) : null;
+		} );
+		check( 'without one chosen, the site logo is used', 'logo.svg', fallback );
+		await page.close();
+	}
+
 	/* ------------------------------------------- a slow-arriving logo --- */
 	{
 		const page = await newPage( browser );

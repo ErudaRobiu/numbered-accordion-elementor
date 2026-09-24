@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Page One — transitions fixture</title>
+<title>Chosen Logo — transitions fixture</title>
 <style id="eruda-transitions-critical">.etrn{position:fixed;inset:0;z-index:2147483000;display:none;pointer-events:none;overflow:clip}.etrn__cols{display:flex;width:100%;height:100%}.etrn__col{flex:1 1 0;height:100%;background:var(--etrn-color,#111111);transform:translateY(100%)}html.etrn-covering .etrn,html.etrn-preloading .etrn{display:block}html.etrn-covering .etrn__col,html.etrn-preloading .etrn__col{transform:translateY(0);animation:none}html.etrn-preloading{overflow:hidden}@media (prefers-reduced-motion:reduce){html.etrn-covering .etrn,html.etrn-preloading .etrn{display:none}html.etrn-preloading{overflow:auto}}</style>
 <script id="eruda-transitions-boot">(function(){try{var d=document.documentElement,s=window.sessionStorage;if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){return;}if(window.self!==window.top){return;}if(s.getItem('etrn:covering')==='1'){d.className+=' etrn-covering';return;}if(!s.getItem('etrn:visited')){d.className+=' etrn-preloading';}}catch(e){}})();</script>
 
@@ -30,7 +30,7 @@
 					<div class="etrn__col" style="--etrn-i:5" data-etrn-wide></div>
 			</div>
 			<div class="etrn__stage">
-					<div class="etrn__logo"><span class="etrn__logo-inner"><img class="custom-logo" src="logo.svg" width="260" height="48" alt="Fixture" /></span></div>
+					<div class="etrn__logo"><span class="etrn__logo-inner"><img class="etrn__logo-img" src="chosen.svg" width="260" height="48" alt="Chosen" loading="eager" decoding="async" /></span></div>
 					<div class="etrn__bar"><div class="etrn__fill"></div></div>
 	</div>
 				<div class="etrn__count"><span class="etrn__num">0</span>%</div>
@@ -38,8 +38,8 @@
 <noscript><style>.etrn{display:none !important}html.etrn-preloading{overflow:auto !important}</style></noscript>
 		
 <main>
-	<nav><a href="one.html" aria-current="page">One</a> <a href="two.html">Two</a> <a href="three.html">Three</a> <a href="chosen.html">Chosen</a> </nav>
-	<h1>Page One</h1>
+	<nav><a href="one.html">One</a> <a href="two.html">Two</a> <a href="three.html">Three</a> <a href="chosen.html" aria-current="page">Chosen</a> </nav>
+	<h1>Chosen Logo</h1>
 	<p>Click between the three pages. The columns should rise to cover, the
 	navigation should happen underneath, and the columns should carry on
 	upwards to reveal the next page — one continuous movement, never a
@@ -51,7 +51,7 @@
 	<p>The first page of a session shows the preloader. Clear session storage
 	to see it again.</p>
 </main>
-<script>window.erudaTransitions = { options: {"color":"#0042ff","columns":6,"travel":0.18,"stagger":0.05,"preloader":true,"logo":0,"minimum":600,"maximum":4000,"percentage":true,"mobileColumns":4,"breakpoint":478,"sweep":0.43} };</script>
+<script>window.erudaTransitions = { options: {"color":"#0042ff","columns":6,"travel":0.18,"stagger":0.05,"preloader":true,"logo":7,"minimum":600,"maximum":4000,"percentage":true,"mobileColumns":4,"breakpoint":478,"sweep":0.43} };</script>
 <script src="../../../modules/transitions/assets/js/transitions.js"></script>
 </body>
 </html>
