@@ -80,6 +80,10 @@ final class Toolkit {
 			'file'  => 'modules/steps/class-steps-module.php',
 			'class' => '\ErudaToolkit\Modules\Steps\Steps_Module',
 		),
+		'transitions' => array(
+			'file'  => 'modules/transitions/class-transitions-module.php',
+			'class' => '\ErudaToolkit\Modules\Transitions\Transitions_Module',
+		),
 	);
 
 	/**

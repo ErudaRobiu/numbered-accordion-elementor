@@ -12,6 +12,7 @@ A small toolkit of site-building modules. Each one can be switched off from
 | Process Steps | A numbered process read downwards, words left and a small object standing in space on the right; scrolling turns the objects rather than fading them in | Elementor 3.5+ |
 | Image Compare | Two pictures in one frame with a divider you drag across to swap between them | Elementor 3.5+ |
 | Flow Schematic | A process diagram — stages, connectors, a return path, a monitoring bar and a boundary — drawn in CSS so the labels stay text | Elementor 3.5+ |
+| Page Transitions | A curtain of columns that sweeps between pages, and a logo-and-progress preloader on the first page of a visit | Nothing beyond core |
 | Duplicate Pages | A Duplicate row action and bulk action on Pages and Posts | Nothing beyond core |
 
 ![Widget](docs/preview.png)
@@ -49,6 +50,7 @@ modules/explainer/                 the Split Slab and Comparison Ledger widgets
 modules/schematic/                 the Flow Schematic widget
 modules/compare/                   the Image Compare widget and its assets
 modules/smoothscroll/              eases the whole page's scrolling
+modules/transitions/               the page transition curtain and the preloader
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover

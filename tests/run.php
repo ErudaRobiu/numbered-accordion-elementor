@@ -24,6 +24,8 @@ use ErudaToolkit\Modules\Motion\Motion_Presets;
 use ErudaToolkit\Modules\Badge\Spin_Controls;
 use ErudaToolkit\Modules\Motion\Motion_Controls;
 use ErudaToolkit\Modules\SmoothScroll\SmoothScroll_Module;
+use ErudaToolkit\Fields;
+use ErudaToolkit\Modules\Transitions\Transitions_Fields;
 
 /**
  * Undo wp_slash(), so a round trip can be asserted.
@@ -635,7 +637,8 @@ check( 'the image compare module is registered', true, in_array( 'compare', Tool
 check( 'the flow schematic module is registered', true, in_array( 'schematic', Toolkit::instance()->ids(), true ) );
 check( 'the data table module is registered', true, in_array( 'table', Toolkit::instance()->ids(), true ) );
 check( 'the process steps module is registered', true, in_array( 'steps', Toolkit::instance()->ids(), true ) );
-check( 'fourteen modules ship', 14, count( Toolkit::instance()->ids() ) );
+check( 'the page transitions module is registered', true, in_array( 'transitions', Toolkit::instance()->ids(), true ) );
+check( 'fifteen modules ship', 15, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -1711,6 +1714,107 @@ check( 'a key part says so in its class', 'estp__part estp__node estp__part--key
 	Steps_Content::part_class( array( 'class' => 'estp__node', 'key' => true ) ) );
 check( 'and an ordinary one does not', 'estp__part',
 	Steps_Content::part_class( array() ) );
+
+/* ------------------------------------------------------------ Fields --- */
+
+$decl = array(
+	array( 'id' => 'color',  'type' => 'color',    'default' => '#111111' ),
+	array( 'id' => 'count',  'type' => 'number',   'default' => 6, 'min' => 1, 'max' => 12, 'step' => 1 ),
+	array( 'id' => 'speed',  'type' => 'number',   'default' => 0.18, 'min' => 0.05, 'max' => 1.5, 'step' => 0.01 ),
+	array( 'id' => 'on',     'type' => 'checkbox', 'default' => true ),
+);
+
+check( 'a six-digit colour survives', '#0042ff', Fields::color( '#0042FF' ) );
+check( 'shorthand is expanded', '#00ff00', Fields::color( '#0f0' ) );
+check( 'surrounding space is ignored', '#112233', Fields::color( '  #112233 ' ) );
+check( 'a named colour is refused', null, Fields::color( 'red' ) );
+check( 'a function is refused', null, Fields::color( 'rgb(0,0,0)' ) );
+check( 'a four-digit value is refused', null, Fields::color( '#0042' ) );
+check( 'a non-string is refused', null, Fields::color( array( '#fff' ) ) );
+
+// The colour is printed into a style attribute, so anything that could close
+// it has to be turned away rather than escaped and hoped about.
+check( 'a value that would close the attribute is refused', null, Fields::color( '#fff;x:y' ) );
+check( 'so is one carrying a quote', null, Fields::color( '#fff"' ) );
+
+check( 'an unusable colour falls back to the default',
+	'#111111', Fields::values( $decl, array( 'color' => 'nonsense' ) )['color'] );
+check( 'a usable one is kept',
+	'#0042ff', Fields::values( $decl, array( 'color' => '#0042ff' ) )['color'] );
+check( 'a missing value falls back',
+	'#111111', Fields::values( $decl, array() )['color'] );
+check( 'a corrupt option falls back throughout',
+	array( 'color' => '#111111', 'count' => 6, 'speed' => 0.18, 'on' => true ),
+	Fields::values( $decl, 'not an array' ) );
+
+check( 'a number above its range is clamped', 12, Fields::values( $decl, array( 'count' => 99 ) )['count'] );
+check( 'a number below its range is clamped', 1, Fields::values( $decl, array( 'count' => -4 ) )['count'] );
+check( 'a whole-stepped number comes back an int', 7, Fields::values( $decl, array( 'count' => '7' ) )['count'] );
+check( 'and rounds rather than truncating', 8, Fields::values( $decl, array( 'count' => 7.6 ) )['count'] );
+check( 'a fractional-stepped number stays a float', 0.42, Fields::values( $decl, array( 'speed' => '0.42' ) )['speed'] );
+check( 'a non-numeric number falls back', 6, Fields::values( $decl, array( 'count' => 'six' ) )['count'] );
+check( 'a boolean is not a number', 6, Fields::values( $decl, array( 'count' => true ) )['count'] );
+
+check( 'a stored falsey checkbox is false', false, Fields::values( $decl, array( 'on' => '0' ) )['on'] );
+check( 'a stored truthy checkbox is true', true, Fields::values( $decl, array( 'on' => '1' ) )['on'] );
+
+// Unchecked boxes never reach the POST body, so sanitising has to rebuild the
+// set from the declarations the way the module switches already do.
+check( 'an absent checkbox sanitises to false', false, Fields::sanitize( $decl, array() )['on'] );
+check( 'a present checkbox sanitises to true', true, Fields::sanitize( $decl, array( 'on' => '1' ) )['on'] );
+check( 'an absent number sanitises to its default', 6, Fields::sanitize( $decl, array() )['count'] );
+check( 'an undeclared key is dropped', false,
+	array_key_exists( 'sneaky', Fields::sanitize( $decl, array( 'sneaky' => 'x' ) ) ) );
+check( 'a non-array submission yields defaults',
+	array( 'color' => '#111111', 'count' => 6, 'speed' => 0.18, 'on' => false ),
+	Fields::sanitize( $decl, 'nonsense' ) );
+
+check( 'a declaration with no id is dropped', array(), Fields::valid( array( array( 'type' => 'color', 'default' => '#fff' ) ) ) );
+check( 'a declaration with no default is dropped', array(), Fields::valid( array( array( 'id' => 'a', 'type' => 'color' ) ) ) );
+check( 'a declaration with an unknown type is dropped', array(), Fields::valid( array( array( 'id' => 'a', 'type' => 'wysiwyg', 'default' => '' ) ) ) );
+check( 'a non-array declaration is dropped', array(), Fields::valid( array( 'nope' ) ) );
+check( 'non-array declarations yield nothing', array(), Fields::valid( 'nope' ) );
+
+// One malformed field must not cost a module its other fields.
+check( 'a good declaration beside a bad one survives', 1,
+	count( Fields::valid( array( array( 'id' => 'a', 'type' => 'color', 'default' => '#fff' ), array( 'id' => 'b' ) ) ) ) );
+
+/* --------------------------------------------- Transitions_Fields --- */
+
+$opts = Transitions_Fields::options( array() );
+
+check( 'the curtain defaults to near-black', '#111111', $opts['color'] );
+check( 'six columns by default', 6, $opts['columns'] );
+check( 'a phone gets four', 4, $opts['mobileColumns'] );
+check( 'the preloader is on by default', true, $opts['preloader'] );
+check( 'the percentage is on by default', true, $opts['percentage'] );
+
+// The sweep is what the last column finishes at, and it is what the fallback
+// timer is sized from. Six columns, 0.18s each, 0.05s apart.
+check( 'the sweep spans every column', 0.43, round( $opts['sweep'], 5 ) );
+
+$kit = Transitions_Fields::options( array(), '#c46a2d' );
+check( 'a kit colour is adopted when nothing is stored', '#c46a2d', $kit['color'] );
+check( 'a stored colour beats the kit', '#0042ff', Transitions_Fields::options( array( 'color' => '#0042ff' ), '#c46a2d' )['color'] );
+check( 'an unusable kit colour falls back', '#111111', Transitions_Fields::options( array(), 'chartreuse' )['color'] );
+
+check( 'fewer columns than the phone cap means the phone shows fewer', 2,
+	Transitions_Fields::options( array( 'columns' => 2 ) )['mobileColumns'] );
+
+// A maximum under the minimum is contradictory. The maximum is the promise
+// that matters to a visitor, so it wins.
+$inverted = Transitions_Fields::options( array( 'minimum' => 4000, 'maximum' => 1000 ) );
+check( 'an inverted pair collapses onto the maximum', 1000, $inverted['minimum'] );
+check( 'and the maximum is untouched', 1000, $inverted['maximum'] );
+
+check( 'a stored zero stagger is honoured', 0.0, Transitions_Fields::options( array( 'stagger' => 0 ) )['stagger'] );
+check( 'and makes every column move together', 0.18, round( Transitions_Fields::options( array( 'stagger' => 0 ) )['sweep'], 5 ) );
+
+check( 'every declared field has a value', true,
+	count( array_diff(
+		array( 'color', 'columns', 'travel', 'stagger', 'preloader', 'minimum', 'maximum', 'percentage' ),
+		array_keys( $opts )
+	) ) === 0 );
 
 /* ------------------------------------------------------------- report --- */
 

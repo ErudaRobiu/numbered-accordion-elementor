@@ -185,3 +185,26 @@ to:
   layouts                     37  (3.0ms)
   total work                  111.0ms
 ```
+
+## Page transitions
+
+The only fixture that is a small site rather than a page, because a transition
+needs somewhere to go. It also needs a server: `file://` gives every page a
+null origin, and the covering flag is handed between pages in sessionStorage,
+so over `file://` every page looks like a first visit.
+
+```
+php tests/browser/transitions-fixture.php
+python3 -m http.server 8732
+node tests/browser/transitions-probe.js
+```
+
+The probe checks what only a browser can answer: that the columns really do
+stagger by the configured amount, that a page arriving under the curtain is
+never shown uncovered for a frame, and that each of the timeout fallbacks ends
+with the page revealed — including with every `animationend` suppressed, and
+with `sessionStorage` throwing on access the way it does in private browsing.
+
+`ETRN_TRACE=1` prints each section as it starts, which is what to reach for if
+a run appears to hang. `ETRN_CHROME` points it at a Chrome binary and
+`ETRN_HEADFUL=1` runs it visibly.

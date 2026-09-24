@@ -1,0 +1,214 @@
+/**
+ * Page Transitions.
+ *
+ * The rules that hold the curtain shut are NOT in this file. They are printed
+ * inline in the head by the module, because a linked stylesheet arrives after
+ * the browser has had a chance to paint and the whole point is that a visitor
+ * never sees the new page before the curtain re-establishes. What is here is
+ * everything that only matters once the page is running: the movement, the
+ * preloader, and the reduced-motion refusal.
+ *
+ * Column order comes from --etrn-i, set per column in the markup. Delay is
+ * calc(var(--etrn-stagger) * var(--etrn-i)) — no modulo, no nth-child
+ * arithmetic, because calc() has no modulo operator and a declaration that
+ * uses one is silently dropped, taking every column's position with it.
+ */
+
+.etrn {
+	--etrn-travel: 0.18s;
+	--etrn-stagger: 0.05s;
+	--etrn-ease: cubic-bezier( 0.76, 0, 0.24, 1 );
+
+	position: fixed;
+	inset: 0;
+	z-index: 2147483000;
+	display: none;
+	pointer-events: none;
+	overflow: clip;
+}
+
+.etrn__cols {
+	display: flex;
+	width: 100%;
+	height: 100%;
+}
+
+.etrn__col {
+	flex: 1 1 0;
+	height: 100%;
+	background: var( --etrn-color, #111111 );
+
+	/* Every column overlaps the next by a pixel. Six columns across 1280px are
+	   213.33px each, and the boundaries that land on a fraction leave a
+	   hairline of the page showing straight through the curtain — measured, on
+	   a real screen, at two of the five seams. The overlap is absorbed by the
+	   flex sizing and the last column's pixel is clipped by the root. */
+	margin-right: -1px;
+
+	/* Parked below the fold. A column only ever sits at 0 while something is
+	   holding it there: the covering class, or an animation's fill. */
+	transform: translateY( 100% );
+	will-change: transform;
+}
+
+/* -------------------------------------------------------------- moving --- */
+
+html.etrn-entering .etrn,
+html.etrn-leaving .etrn {
+	display: block;
+}
+
+/* Covering: up from below into place. */
+@keyframes etrn-cover {
+	from { transform: translateY( 100% ); }
+	to   { transform: translateY( 0 ); }
+}
+
+/* Revealing: onwards, out of the top. The curtain never reverses — it keeps
+   travelling the same way it came, which is what makes a cover and the reveal
+   that follows it read as one movement rather than two. */
+@keyframes etrn-reveal {
+	from { transform: translateY( 0 ); }
+	to   { transform: translateY( -100% ); }
+}
+
+html.etrn-entering .etrn__col {
+	animation: etrn-cover var( --etrn-travel ) var( --etrn-ease )
+		calc( var( --etrn-stagger ) * var( --etrn-i ) ) both;
+}
+
+html.etrn-leaving .etrn__col {
+	animation: etrn-reveal var( --etrn-travel ) var( --etrn-ease )
+		calc( var( --etrn-stagger ) * var( --etrn-i ) ) both;
+}
+
+/* While the preloader is up the columns are parked, not animating. The inline
+   critical CSS says this too; repeated here so the file stands on its own if
+   the inline block is ever cached separately. */
+html.etrn-preloading .etrn__col {
+	transform: translateY( 0 );
+	animation: none;
+}
+
+/* ----------------------------------------------------------- preloader --- */
+
+.etrn__stage {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate( -50%, -50% );
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: clamp( 18px, 3vw, 32px );
+	opacity: 0;
+	transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+html.etrn-preloading .etrn__stage {
+	opacity: 1;
+}
+
+/* The logo wipes in from the left rather than fading: a fade reads as a page
+   still loading, a wipe reads as something being shown deliberately. */
+.etrn__logo {
+	overflow: hidden;
+	clip-path: inset( 0 100% 0 0 );
+}
+
+html.etrn-preloading .etrn__logo {
+	animation: etrn-wipe 0.6s cubic-bezier( 0.9, 0, 0.1, 1 ) 0.1s both;
+}
+
+@keyframes etrn-wipe {
+	to { clip-path: inset( 0 0 0 0 ); }
+}
+
+.etrn__logo-inner {
+	display: block;
+}
+
+/* Sized from a definite height, never from the file. A site's Customizer logo
+   can be an 80px favicon or a 2400px export, and an intrinsic-size layout gives
+   the first one a logo nobody can read and the second one a logo wider than the
+   screen. It is also the only sizing that works at all for an SVG with no
+   width and height attributes, which otherwise lays out at zero. */
+.etrn__logo-inner img,
+.etrn__logo-inner svg {
+	display: block;
+	width: auto;
+	height: clamp( 28px, 5vw, 64px );
+	max-width: min( 70vw, 420px );
+
+	/* A wide wordmark hits the max-width first; letting it keep its ratio
+	   there stops it being squashed. */
+	object-fit: contain;
+}
+
+.etrn__bar {
+	position: relative;
+	width: clamp( 180px, 26vw, 320px );
+	height: 2px;
+	background: rgba( 255, 255, 255, 0.24 );
+	overflow: hidden;
+}
+
+/* Scaled rather than resized: width animates on the layout thread and judders
+   under the load this bar exists to cover. drop-shadow rather than box-shadow
+   so the glow follows the scaled edge instead of the untransformed box. */
+.etrn__fill {
+	position: absolute;
+	inset: 0;
+	background: #ffffff;
+	transform: scaleX( 0 );
+	transform-origin: left center;
+	filter: drop-shadow( 0 0 8px rgba( 255, 255, 255, 0.9 ) );
+}
+
+.etrn__count {
+	position: absolute;
+	right: clamp( 16px, 4vw, 64px );
+	bottom: clamp( 16px, 4vw, 38px );
+	color: #ffffff;
+	font-size: clamp( 40px, 10vw, 140px );
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+html.etrn-preloading .etrn__count {
+	opacity: 1;
+}
+
+/* The moment the curtain starts leaving, everything on it goes. Without this
+   the logo rides up with the columns and reads as a second, unrelated move. */
+html.etrn-leaving .etrn__stage,
+html.etrn-leaving .etrn__count {
+	opacity: 0;
+}
+
+/* --------------------------------------------------------------- phone --- */
+
+/* Six columns on a phone are each about sixty pixels wide, which reads as a
+   shimmer rather than a sweep. The count comes from the module. */
+@media ( max-width: 478px ) {
+	.etrn__col[ data-etrn-wide ] {
+		display: none;
+	}
+}
+
+/* ----------------------------------------------------- reduced motion --- */
+
+/* Both sites this was modelled on ignore this, and one of them still holds
+   such a visitor for six and a half seconds. Nothing here runs: no curtain,
+   no preloader, no delay before the page they asked for. */
+@media ( prefers-reduced-motion: reduce ) {
+	.etrn {
+		display: none !important;
+	}
+
+	html.etrn-preloading {
+		overflow: auto !important;
+	}
+}

@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.43.1
+Stable tag: 2.44.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,27 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.44.0 =
+* **New: Page Transitions.** A curtain of coloured columns sweeps upward to
+  cover the page, the next page loads underneath it, and the same columns carry
+  on upward to reveal it — one movement rather than two. On the first page of a
+  visit the curtain is already closed and carries the site's logo and a
+  progress bar instead, then opens when the page is genuinely ready.
+* The progress bar follows the page rather than a stopwatch: it eases toward
+  ninety percent and only completes once the fonts and the images above the
+  fold have arrived, with a minimum so it cannot flash and a maximum so it can
+  never hold a visitor on a slow connection.
+* Everything about it is set under **Settings → Eruda Toolkit** — colour,
+  column count, speed, stagger, and whether the preloader runs at all. The
+  colour starts from the site's Elementor primary, so on most sites there is
+  nothing to set.
+* Nothing runs for a visitor who has asked for reduced motion: no curtain, no
+  preloader, and no delay before the page they asked for. It is also off in the
+  Elementor editor.
+* The first module with settings of its own. Modules now declare what they
+  expose and the settings screen renders it, so the next one needs no screen
+  work at all.
 
 = 2.43.1 =
 * **Fixed: at large illustration sizes the shadow landed on the next step's

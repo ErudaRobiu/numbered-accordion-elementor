@@ -23,6 +23,16 @@ final class Settings {
 	const PAGE_SLUG = 'eruda-toolkit';
 
 	/**
+	 * Where per-module options live.
+	 *
+	 * Deliberately a second option rather than more keys in the first. That
+	 * one is a flat map of module id to bool and its sanitiser rebuilds it
+	 * from the registry every save; nesting arrays inside it would mean that
+	 * sanitiser had to tell a module's settings from a module's switch.
+	 */
+	const SETTINGS_OPTION = 'eruda_toolkit_settings';
+
+	/**
 	 * Singleton instance.
 	 *
 	 * @var Settings|null
@@ -79,6 +89,67 @@ final class Settings {
 				'default'           => array(),
 			)
 		);
+
+		register_setting(
+			self::PAGE_SLUG,
+			self::SETTINGS_OPTION,
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( $this, 'sanitize_settings' ),
+				'default'           => array(),
+			)
+		);
+	}
+
+	/**
+	 * One module's stored settings.
+	 *
+	 * Front-end callers use this rather than reading the option themselves,
+	 * so the storage shape stays this class's business.
+	 *
+	 * @param string $id Module id.
+	 * @return array<string, mixed> Raw stored values. Empty when unset.
+	 */
+	public static function module_values( $id ) {
+		$stored = get_option( self::SETTINGS_OPTION, array() );
+
+		if ( ! is_array( $stored ) || ! isset( $stored[ $id ] ) || ! is_array( $stored[ $id ] ) ) {
+			return array();
+		}
+
+		return $stored[ $id ];
+	}
+
+	/**
+	 * Sanitise every configurable module's submitted settings.
+	 *
+	 * Driven by what each module declares, so this method never learns what
+	 * any particular module's options mean. A module that is switched off
+	 * still keeps its settings: turning a module off and on again should not
+	 * cost somebody the colour they chose.
+	 *
+	 * @param mixed $value Raw submitted value.
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function sanitize_settings( $value ) {
+		$submitted = is_array( $value ) ? $value : array();
+		$clean     = array();
+		$toolkit   = Toolkit::instance();
+
+		foreach ( $toolkit->ids() as $id ) {
+			$class = $toolkit->load( $id );
+
+			if ( null === $class || ! is_subclass_of( $class, Configurable::class, true ) ) {
+				continue;
+			}
+
+			$clean[ $id ] = Fields::sanitize(
+				$class::settings_fields(),
+				isset( $submitted[ $id ] ) ? $submitted[ $id ] : array()
+			);
+		}
+
+		return $clean;
 	}
 
 	/**
@@ -103,6 +174,72 @@ final class Settings {
 		$clean[ Toolkit::AUTO_UPDATE ] = ! empty( $submitted[ Toolkit::AUTO_UPDATE ] );
 
 		return $clean;
+	}
+
+	/**
+	 * Render whatever a module declares, under its switch.
+	 *
+	 * The screen knows nothing about any module's options: it renders the
+	 * declarations it is handed. A module that declares nothing, or that does
+	 * not implement the contract at all, prints nothing here and is otherwise
+	 * untouched.
+	 *
+	 * @param string $id    Module id.
+	 * @param string $class Module class name.
+	 * @return void
+	 */
+	private function module_fields( $id, $class ) {
+		if ( ! is_subclass_of( $class, Configurable::class, true ) ) {
+			return;
+		}
+
+		$declarations = Fields::valid( $class::settings_fields() );
+
+		if ( empty( $declarations ) ) {
+			return;
+		}
+
+		$values = Fields::values( $declarations, self::module_values( $id ) );
+		?>
+		<div class="eruda-module-settings" style="margin-top:12px;padding-left:24px;border-left:3px solid #dcdcde;">
+			<?php foreach ( $declarations as $field ) : ?>
+				<?php
+				$value = $values[ $field['id'] ];
+				$name  = self::SETTINGS_OPTION . '[' . $id . '][' . $field['id'] . ']';
+				$input = 'eruda-field-' . $id . '-' . $field['id'];
+				?>
+				<p style="margin:0 0 10px;">
+					<?php if ( 'checkbox' === $field['type'] ) : ?>
+						<label for="<?php echo esc_attr( $input ); ?>">
+							<input type="checkbox"
+								id="<?php echo esc_attr( $input ); ?>"
+								name="<?php echo esc_attr( $name ); ?>"
+								value="1"
+								<?php checked( (bool) $value ); ?> />
+							<?php echo esc_html( $field['label'] ); ?>
+							<?php if ( ! empty( $field['help'] ) ) : ?>
+								<span class="description">— <?php echo esc_html( $field['help'] ); ?></span>
+							<?php endif; ?>
+						</label>
+					<?php else : ?>
+						<label for="<?php echo esc_attr( $input ); ?>" style="display:inline-block;min-width:200px;">
+							<?php echo esc_html( $field['label'] ); ?>
+						</label>
+						<input type="<?php echo 'color' === $field['type'] ? 'color' : 'number'; ?>"
+							id="<?php echo esc_attr( $input ); ?>"
+							name="<?php echo esc_attr( $name ); ?>"
+							value="<?php echo esc_attr( (string) $value ); ?>"
+							<?php if ( isset( $field['min'] ) ) : ?>min="<?php echo esc_attr( (string) $field['min'] ); ?>"<?php endif; ?>
+							<?php if ( isset( $field['max'] ) ) : ?>max="<?php echo esc_attr( (string) $field['max'] ); ?>"<?php endif; ?>
+							<?php if ( isset( $field['step'] ) ) : ?>step="<?php echo esc_attr( (string) $field['step'] ); ?>"<?php endif; ?> />
+						<?php if ( ! empty( $field['help'] ) ) : ?>
+							<span class="description"><?php echo esc_html( $field['help'] ); ?></span>
+						<?php endif; ?>
+					<?php endif; ?>
+				</p>
+			<?php endforeach; ?>
+		</div>
+		<?php
 	}
 
 	/**
@@ -158,6 +295,8 @@ final class Settings {
 										?>
 									</p>
 								<?php endif; ?>
+
+								<?php $this->module_fields( $id, $class ); ?>
 							</td>
 						</tr>
 						<?php
