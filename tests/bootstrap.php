@@ -88,3 +88,4 @@ require_once dirname( __DIR__ ) . '/modules/motion/class-motion-controls.php';
 require_once dirname( __DIR__ ) . '/modules/smoothscroll/class-smoothscroll-module.php';
 require_once dirname( __DIR__ ) . '/modules/badge/class-spin-controls.php';
 require_once dirname( __DIR__ ) . '/modules/transitions/class-transitions-fields.php';
+require_once dirname( __DIR__ ) . '/modules/industry/class-industry-content.php';

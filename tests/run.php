@@ -26,6 +26,7 @@ use ErudaToolkit\Modules\Motion\Motion_Controls;
 use ErudaToolkit\Modules\SmoothScroll\SmoothScroll_Module;
 use ErudaToolkit\Fields;
 use ErudaToolkit\Modules\Transitions\Transitions_Fields;
+use ErudaToolkit\Modules\Industry\Industry_Content;
 
 /**
  * Undo wp_slash(), so a round trip can be asserted.
@@ -638,7 +639,8 @@ check( 'the flow schematic module is registered', true, in_array( 'schematic', T
 check( 'the data table module is registered', true, in_array( 'table', Toolkit::instance()->ids(), true ) );
 check( 'the process steps module is registered', true, in_array( 'steps', Toolkit::instance()->ids(), true ) );
 check( 'the page transitions module is registered', true, in_array( 'transitions', Toolkit::instance()->ids(), true ) );
-check( 'fifteen modules ship', 15, count( Toolkit::instance()->ids() ) );
+check( 'the industry showcase module is registered', true, in_array( 'industry', Toolkit::instance()->ids(), true ) );
+check( 'sixteen modules ship', 16, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -1840,6 +1842,76 @@ check( 'an absurd one is clamped down', 300, Transitions_Fields::options( array(
 check( 'and a vanishing one is clamped up', 10, Transitions_Fields::options( array( 'logo_scale' => 0 ) )['logo_scale'] );
 check( 'a whole-stepped percentage stays an int', 65, Transitions_Fields::options( array( 'logo_scale' => '65' ) )['logo_scale'] );
 check( 'a chosen one is kept', 91, Transitions_Fields::options( array( 'logo' => '91' ) )['logo'] );
+
+/* ------------------------------------------- Industry_Content --- */
+
+// A half-filled repeater row is not content. Without a name it cannot be
+// chosen from the list; without a heading it has nothing to say once chosen.
+check( 'a complete item is kept', 1, count( Industry_Content::usable( array(
+	array( 'name' => 'Foundries', 'heading' => 'Furnace heat back into the process' ),
+) ) ) );
+check( 'a nameless item is dropped', 0, count( Industry_Content::usable( array(
+	array( 'name' => '', 'heading' => 'Something' ),
+) ) ) );
+check( 'a headingless item is dropped', 0, count( Industry_Content::usable( array(
+	array( 'name' => 'Foundries', 'heading' => '   ' ),
+) ) ) );
+check( 'a missing key counts as empty', 0, count( Industry_Content::usable( array( array( 'name' => 'Foundries' ) ) ) ) );
+check( 'a non-array row is dropped', 0, count( Industry_Content::usable( array( 'nope' ) ) ) );
+check( 'a non-array argument yields nothing', array(), Industry_Content::usable( 'nonsense' ) );
+
+$many = array();
+for ( $i = 0; $i < 30; $i++ ) {
+	$many[] = array( 'name' => 'N' . $i, 'heading' => 'H' . $i );
+}
+check( 'the list is capped', Industry_Content::MAX_ITEMS, count( Industry_Content::usable( $many ) ) );
+
+// The section is one viewport for the pinned panel plus a stretch per item.
+check( 'six items at the default pace', 610, Industry_Content::height( 6 ) );
+check( 'a faster pace is shorter', 460, Industry_Content::height( 6, 0.6 ) );
+check( 'an absurd pace is clamped', 1000, Industry_Content::height( 6, 9 ) );
+check( 'and a vanishing one too', 400, Industry_Content::height( 6, 0.01 ) );
+
+// One item has nothing to scroll between, so it is just the panel. A section
+// taller than the viewport with nothing to advance to is dead scrolling.
+check( 'one item is a single viewport', 100, Industry_Content::height( 1 ) );
+check( 'no items need no section', 0, Industry_Content::height( 0 ) );
+check( 'a negative count needs none either', 0, Industry_Content::height( -3 ) );
+
+// Progress 1.0 must land on the last item, not one past it.
+check( 'the start is the first item', 0, Industry_Content::index( 0, 6 ) );
+check( 'the end is the last item', 5, Industry_Content::index( 1, 6 ) );
+check( 'just under the end is still the last', 5, Industry_Content::index( 0.99, 6 ) );
+// Halfway through six items is the boundary between the third and fourth, and
+// floor puts it on the third.
+check( 'halfway is the third of six', 2, Industry_Content::index( 0.5, 6 ) );
+check( 'past the end is clamped', 5, Industry_Content::index( 4.2, 6 ) );
+check( 'before the start is clamped', 0, Industry_Content::index( -2, 6 ) );
+check( 'a nonsense progress is the first item', 0, Industry_Content::index( NAN, 6 ) );
+check( 'no items means index zero', 0, Industry_Content::index( 0.5, 0 ) );
+
+// Clicking a name should land on the item, not on the boundary where the next
+// one is about to take over.
+check( 'the anchor is mid-band, not its start', 0.375, Industry_Content::anchor( 1, 4 ) );
+check( 'the first anchor is not zero', 0.125, Industry_Content::anchor( 0, 4 ) );
+check( 'the last anchor is not one', 0.875, Industry_Content::anchor( 3, 4 ) );
+check( 'an out-of-range index is clamped', 0.875, Industry_Content::anchor( 99, 4 ) );
+
+// Every anchor has to resolve back to the item it belongs to, or clicking a
+// name would land on its neighbour.
+$round_trips = true;
+for ( $n = 1; $n <= 12; $n++ ) {
+	for ( $i = 0; $i < $n; $i++ ) {
+		if ( Industry_Content::index( Industry_Content::anchor( $i, $n ), $n ) !== $i ) {
+			$round_trips = false;
+		}
+	}
+}
+check( 'every anchor resolves to its own item', true, $round_trips );
+
+check( 'the counter is padded', '04 / 06', Industry_Content::counter( 3, 6 ) );
+check( 'and widens together past ninety-nine', '004 / 100', Industry_Content::counter( 3, 100 ) );
+check( 'an empty showcase has no counter', '', Industry_Content::counter( 0, 0 ) );
 
 /* ------------------------------------------------------------- report --- */
 

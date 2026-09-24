@@ -1,0 +1,322 @@
+/**
+ * Industry Showcase.
+ *
+ * A tall section with a panel pinned inside it. Scrolling the section walks a
+ * list of industries; the panel stays put and its three columns — the names,
+ * the picture, the words — change under it.
+ *
+ * Built for a dark section. Everything that carries a colour reads it from a
+ * custom property the widget writes from its Elementor controls, so the
+ * defaults here are what it looks like with nothing set, not the only thing it
+ * can look like.
+ *
+ * @package ErudaToolkit
+ */
+
+.eind {
+	--eind-ink: #ffffff;
+	--eind-muted: rgba( 255, 255, 255, 0.34 );
+	--eind-body: rgba( 255, 255, 255, 0.72 );
+	--eind-accent: #7ab648;
+	--eind-line: rgba( 255, 255, 255, 0.18 );
+	--eind-frame: rgba( 255, 255, 255, 0.06 );
+
+	--eind-fade: 0.6s;
+	--eind-settle: 1.2s;
+	--eind-ease: cubic-bezier( 0.22, 1, 0.36, 1 );
+
+	/* Scroll progress through the section, 0 to 1. The script writes it. */
+	--eind-p: 0;
+
+	position: relative;
+}
+
+/* The panel that stays still while the section moves past it. min-height
+   rather than height alone: on a short laptop window a 100vh panel would clip
+   its own text, and a panel that clips is worse than one that scrolls. */
+.eind__pin {
+	position: sticky;
+	top: 0;
+	height: 100vh;
+	min-height: 560px;
+	overflow: hidden;
+	display: grid;
+	grid-template-columns: 1fr minmax( 280px, 400px ) 1fr;
+	align-items: center;
+	gap: clamp( 24px, 5vw, 72px );
+	padding: 0 clamp( 20px, 4vw, 48px );
+}
+
+.eind__label {
+	position: absolute;
+	top: clamp( 20px, 4vh, 40px );
+	left: 0;
+	right: 0;
+	text-align: center;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var( --eind-muted );
+}
+
+.eind__count {
+	position: absolute;
+	right: clamp( 20px, 4vw, 48px );
+	bottom: clamp( 20px, 4vh, 36px );
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	color: var( --eind-muted );
+	font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------ the list --- */
+
+.eind__list {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: clamp( 8px, 1.4vh, 16px );
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.eind__name {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 4px 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+	font: inherit;
+	font-size: clamp( 16px, 1.5vw, 21px );
+	line-height: 1.2;
+	text-align: right;
+	color: var( --eind-muted );
+	transition: color 0.35s var( --eind-ease );
+}
+
+/* The dot only exists for the current one. Scaled rather than faded so it
+   arrives with the name rather than behind it. */
+.eind__name::before {
+	content: "";
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var( --eind-accent );
+	transform: scale( 0 );
+	transition: transform 0.35s var( --eind-ease );
+}
+
+.eind__name:hover,
+.eind__name:focus-visible {
+	color: var( --eind-body );
+}
+
+.eind__name[ aria-current="true" ] {
+	color: var( --eind-ink );
+}
+
+.eind__name[ aria-current="true" ]::before {
+	transform: scale( 1 );
+}
+
+/* ----------------------------------------------------------- the frame --- */
+
+.eind__media {
+	display: flex;
+	align-items: flex-end;
+	gap: 14px;
+}
+
+.eind__frame {
+	position: relative;
+	flex: 1 1 auto;
+	aspect-ratio: 3 / 4;
+	max-height: 72vh;
+	border-radius: 20px;
+	overflow: hidden;
+	background: var( --eind-frame );
+}
+
+/* Every picture is stacked in the same box and only one is lit. The incoming
+   one settles out of a 6% overscale over twice the length of its fade, which
+   is what stops the change reading as a blink: the fade is done while the
+   movement is still finishing. */
+.eind__shot {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	opacity: 0;
+	transform: scale( 1.06 );
+	transition:
+		opacity var( --eind-fade ) ease,
+		transform var( --eind-settle ) var( --eind-ease );
+}
+
+.eind__shot--on {
+	opacity: 1;
+	transform: scale( 1 );
+}
+
+.eind__ticks {
+	display: flex;
+	flex-direction: column;
+	gap: 9px;
+	align-items: center;
+	padding-bottom: 4px;
+}
+
+.eind__tick {
+	width: 4px;
+	height: 4px;
+	border-radius: 4px;
+	background: var( --eind-line );
+	transition: height 0.4s var( --eind-ease ), background 0.4s ease;
+}
+
+.eind__tick--on {
+	height: 34px;
+	background: var( --eind-ink );
+}
+
+/* ----------------------------------------------------------- the words --- */
+
+/* Fixed height with the panels stacked inside it, so the column does not
+   change height as the text does and shunt everything beside it. */
+.eind__text {
+	position: relative;
+	height: 340px;
+	max-width: 440px;
+}
+
+.eind__panel {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	transform: translateY( -44% );
+	opacity: 0;
+	pointer-events: none;
+	transition:
+		opacity 0.45s ease,
+		transform 0.6s var( --eind-ease );
+}
+
+.eind__panel--on {
+	opacity: 1;
+	transform: translateY( -50% );
+	pointer-events: auto;
+}
+
+.eind__heading {
+	margin: 0;
+	color: var( --eind-ink );
+	font-size: clamp( 26px, 3vw, 40px );
+	line-height: 1.05;
+}
+
+.eind__body {
+	margin: 0;
+	color: var( --eind-body );
+	font-size: clamp( 15px, 1.1vw, 17px );
+	line-height: 1.6;
+}
+
+.eind__link {
+	align-self: flex-start;
+	margin-top: 4px;
+	padding-bottom: 6px;
+	color: var( --eind-ink );
+	text-decoration: none;
+	font-size: 15px;
+	font-weight: 600;
+	border-bottom: 1.5px solid currentColor;
+	transition: color 0.2s ease;
+}
+
+.eind__link:hover,
+.eind__link:focus-visible {
+	color: var( --eind-accent );
+}
+
+/* ------------------------------------------------------------- mobile --- */
+
+/* The stacked version, which is the whole widget below the breakpoint. A
+   pinned panel driven by scroll position fights the browser on a phone, where
+   scrolling is also how you dismiss the address bar — so there is no pinning
+   and no scroll capture here at all, just the same content read downwards. */
+.eind__stack {
+	display: none;
+}
+
+@media ( max-width: 900px ) {
+	.eind {
+		/* Whatever the desktop section height was, it is not wanted here. */
+		height: auto !important;
+	}
+
+	.eind__pin {
+		display: none;
+	}
+
+	/* The gutter is the widget's own, in both layouts. This is a full-bleed
+	   component — the desktop panel is pinned across the whole viewport and
+	   pads itself for the same reason — so it cannot assume the container
+	   around it supplies one. Without this the headings sit hard against both
+	   edges of a phone and the long ones are clipped. */
+	.eind__stack {
+		display: flex;
+		flex-direction: column;
+		gap: clamp( 32px, 7vw, 56px );
+		padding: clamp( 24px, 7vw, 48px ) clamp( 18px, 5vw, 32px );
+	}
+
+	.eind__card {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.eind__card img {
+		width: 100%;
+		aspect-ratio: 4 / 3;
+		object-fit: cover;
+		border-radius: 16px;
+		margin-bottom: 4px;
+	}
+
+	.eind__card .eind__heading {
+		font-size: clamp( 24px, 6vw, 32px );
+	}
+}
+
+/* ----------------------------------------------------- reduced motion --- */
+
+/* The section still works: it is a list, some pictures and some words, and
+   scrolling still changes which one is showing. What stops is the movement. */
+@media ( prefers-reduced-motion: reduce ) {
+	.eind__shot,
+	.eind__panel,
+	.eind__tick,
+	.eind__name,
+	.eind__name::before {
+		transition: none;
+	}
+
+	.eind__shot {
+		transform: none;
+	}
+
+	.eind__shot--on {
+		transform: none;
+	}
+}
