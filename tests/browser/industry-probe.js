@@ -138,52 +138,41 @@ const STATE = () => {
 		}
 		check( 'clicking each name lands on it', [ 0, 1, 2, 3, 4, 5 ], clicked );
 
-		// The dial answers to scroll position continuously, unlike everything
-		// else here, which moves in steps. A rotation that never changes means
-		// the calc silently failed, which CSS does without saying anything.
-		const angles = [];
-		for ( let i = 0; i <= 6; i++ ) {
-			await at( i / 6 );
-			angles.push( await page.evaluate( () => {
-				const dial = document.querySelector( '.eind__dial' );
-				if ( ! dial ) {
-					return null;
-				}
-				const m = new DOMMatrixReadOnly( getComputedStyle( dial ).transform );
-				return Math.round( Math.atan2( m.b, m.a ) * 180 / Math.PI );
-			} ) );
-			// The dial is damped, so give the transition time to arrive.
-			await page.evaluate( () => new Promise( ( r ) => setTimeout( r, 320 ) ) );
-			angles[ angles.length - 1 ] = await page.evaluate( () => {
-				const dial = document.querySelector( '.eind__dial' );
-				const m = new DOMMatrixReadOnly( getComputedStyle( dial ).transform );
-				return Math.round( Math.atan2( m.b, m.a ) * 180 / Math.PI );
-			} );
-		}
-
-		check( 'the dial is there', true, angles.every( ( a ) => a !== null ) );
-		check( 'it starts square', 0, angles[ 0 ] );
-		check( 'it turns as the section is scrolled', true, angles[ angles.length - 1 ] !== 0 );
-		near( 'by the sweep it was given', 120, angles[ angles.length - 1 ], 6 );
-
-		// Monotonic: it must follow the scroll rather than wander.
-		let climbs = true;
-		for ( let i = 1; i < angles.length; i++ ) {
-			if ( angles[ i ] < angles[ i - 1 ] - 2 ) {
-				climbs = false;
-			}
-		}
-		check( 'and turns one way as it goes', true, climbs );
-
-		// It sits behind the content, not over it.
-		const behind = await page.evaluate( () => {
-			const dial = document.querySelector( '.eind__dial' );
-			const name = document.querySelector( '.eind__name' );
-			const r = name.getBoundingClientRect();
-			const hit = document.elementFromPoint( r.left + r.width / 2, r.top + r.height / 2 );
-			return { hitsDial: hit === dial, dialZ: getComputedStyle( dial ).zIndex };
+		// The frame's proportions are a design decision; the photograph's are
+		// an accident. Fitting rather than filling would leave bars.
+		// Measured from layout, not from the painted rectangle: the incoming
+		// picture is still easing out of a 1.06 overscale, which inflates its
+		// bounding box by a few tenths of a percent and makes a comparison
+		// against the frame fail for reasons that have nothing to do with fit.
+		const fill = await page.evaluate( () => {
+			const frame = document.querySelector( '.eind__frame' );
+			const shot = document.querySelector( '.eind__shot--on' );
+			return {
+				fit: getComputedStyle( shot ).objectFit,
+				coversWidth: shot.offsetWidth === frame.offsetWidth,
+				coversHeight: shot.offsetHeight === frame.offsetHeight,
+				ratio: ( frame.offsetWidth / frame.offsetHeight ).toFixed( 2 ),
+			};
 		} );
-		check( 'the dial does not cover the names', false, behind.hitsDial );
+
+		check( 'the picture fills rather than fits', 'cover', fill.fit );
+		check( 'it covers the frame across', true, fill.coversWidth );
+		check( 'and down', true, fill.coversHeight );
+		check( 'the frame keeps its shape', '0.75', fill.ratio );
+
+		// The panel spans the section it is dropped into rather than sitting
+		// in a column of its own.
+		const spans = await page.evaluate( () => {
+			const root = document.querySelector( '.eind' );
+			const pin = root.querySelector( '.eind__pin' );
+			return {
+				rootWidth: Math.round( root.getBoundingClientRect().width ),
+				pinWidth: Math.round( pin.getBoundingClientRect().width ),
+				viewport: window.innerWidth,
+			};
+		} );
+		check( 'the panel is as wide as the widget', true, spans.pinWidth === spans.rootWidth );
+		check( 'and the widget fills the window', true, spans.rootWidth >= spans.viewport - 1 );
 
 		// Past the end the panel must let go rather than stay stuck.
 		await page.evaluate(
@@ -211,10 +200,6 @@ const STATE = () => {
 			const cards = root.querySelectorAll( '.eind__card' );
 			return {
 				pinDisplay: getComputedStyle( pin ).display,
-				dialHidden: ( () => {
-					const dial = root.querySelector( '.eind__dial' );
-					return ! dial || dial.getBoundingClientRect().width === 0;
-				} )(),
 				stackDisplay: getComputedStyle( stack ).display,
 				cards: cards.length,
 				height: root.offsetHeight,
@@ -226,7 +211,6 @@ const STATE = () => {
 		} );
 
 		check( 'the pinned panel is gone on a phone', 'none', mobile.pinDisplay );
-		check( 'and the dial goes with it', true, mobile.dialHidden );
 		check( 'the stack is shown instead', 'flex', mobile.stackDisplay );
 		check( 'every industry is in the stack', 6, mobile.cards );
 		check( 'each one has its words', true, mobile.headings.length === 6 && mobile.headings.every( ( n ) => n > 0 ) );
@@ -309,7 +293,6 @@ const STATE = () => {
 				shotTransition: getComputedStyle( shot ).transitionDuration,
 				shotTransform: getComputedStyle( shot ).transform,
 				panelTransition: getComputedStyle( panel ).transitionDuration,
-				dialTransform: getComputedStyle( document.querySelector( '.eind__dial' ) ).transform,
 			};
 		} );
 
