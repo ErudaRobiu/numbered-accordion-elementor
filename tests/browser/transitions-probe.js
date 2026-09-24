@@ -127,6 +127,38 @@ async function newPage( browser, options = {} ) {
 		const coveredEarly = frames.slice( 0, 3 ).every( ( f ) => f.covered || f.display === 'none' );
 		check( 'the page is never shown uncovered on a first visit', true, coveredEarly );
 
+		// The curtain must not come back. Two paths race to open the
+		// preloader, and the loser used to fire its own reveal a full
+		// maximum-plus-1200ms later, sweeping a second curtain across a page
+		// the visitor was already reading. Waited out past that moment.
+		const settledAt = Date.now();
+		await page.evaluate( () => {
+			window.__returned = false;
+			const watch = () => {
+				const curtain = document.querySelector( '.etrn' );
+				if ( curtain && getComputedStyle( curtain ).display !== 'none' ) {
+					window.__returned = true;
+				}
+				requestAnimationFrame( watch );
+			};
+			requestAnimationFrame( watch );
+		} );
+
+		await page.evaluate(
+			( ms ) => new Promise( ( r ) => setTimeout( r, ms ) ),
+			6500 - ( Date.now() - settledAt )
+		);
+
+		const returned = await page.evaluate( () => ( {
+			seen: window.__returned,
+			html: document.documentElement.className,
+			display: getComputedStyle( document.querySelector( '.etrn' ) ).display,
+		} ) );
+
+		check( 'the curtain never reappears after the preloader', false, returned.seen );
+		check( 'and no leaving class is re-applied', false, returned.html.includes( 'etrn-leaving' ) );
+		check( 'and it is still hidden well past the fallback', 'none', returned.display );
+
 		await page.close();
 	}
 
