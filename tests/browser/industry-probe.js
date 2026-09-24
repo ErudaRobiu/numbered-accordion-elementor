@@ -160,6 +160,33 @@ const STATE = () => {
 		check( 'and down', true, fill.coversHeight );
 		check( 'the frame keeps its shape', '0.75', fill.ratio );
 
+		// The bed is inside the sticky panel, so it must hold still while the
+		// section scrolls past. A background on the section would not.
+		const bedTravel = [];
+		for ( let i = 0; i <= 4; i++ ) {
+			await at( i / 4 );
+			bedTravel.push( await page.evaluate( () => {
+				const bed = document.querySelector( '.eind__bed' );
+				const r = bed.getBoundingClientRect();
+				return { top: Math.round( r.top ), h: Math.round( r.height ) };
+			} ) );
+		}
+
+		check( 'the bed exists', true, bedTravel.every( ( b ) => b.h > 0 ) );
+		check( 'and never moves while the section scrolls', true,
+			bedTravel.every( ( b ) => Math.abs( b.top - bedTravel[ 0 ].top ) <= 2 ) );
+		check( 'it covers the panel', true,
+			bedTravel.every( ( b ) => Math.abs( b.h - 900 ) <= 2 ) );
+
+		// It must sit behind the content, not over it.
+		const bedBehind = await page.evaluate( () => {
+			const bed = document.querySelector( '.eind__bed' );
+			const heading = document.querySelector( '.eind__panel--on .eind__heading' );
+			const r = heading.getBoundingClientRect();
+			return document.elementFromPoint( r.left + 4, r.top + r.height / 2 ) === bed;
+		} );
+		check( 'the bed does not cover the words', false, bedBehind );
+
 		// The panel spans the section it is dropped into rather than sitting
 		// in a column of its own.
 		const spans = await page.evaluate( () => {
@@ -265,14 +292,23 @@ const STATE = () => {
 			const pinRect = pin.getBoundingClientRect();
 			const panelRect = panel.getBoundingClientRect();
 			const listRect = list.getBoundingClientRect();
+			const media = document.querySelector( '.eind__media' ).getBoundingClientRect();
+			const tops = [ listRect.top, media.top, document.querySelector( '.eind__text' ).getBoundingClientRect().top ];
+
 			return {
 				panelInside: panelRect.top >= pinRect.top - 1 && panelRect.bottom <= pinRect.bottom + 1,
 				listInside: listRect.top >= pinRect.top - 1 && listRect.bottom <= pinRect.bottom + 1,
 				overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+				oneRow: Math.max.apply( null, tops ) - Math.min.apply( null, tops ) < pinRect.height,
 			};
 		} );
 
 		check( 'the words fit the panel on a short window', true, fits.panelInside );
+
+		// The failure that produced the above was five children in a
+		// three-column grid, which wraps to a second row. Checking the three
+		// columns share a row says so directly.
+		check( 'the three columns are on one row', true, fits.oneRow );
 		check( 'so does the list', true, fits.listInside );
 		check( 'and nothing overflows sideways', 0, fits.overflowX );
 

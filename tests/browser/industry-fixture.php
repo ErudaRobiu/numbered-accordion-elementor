@@ -142,6 +142,14 @@ namespace {
 <title>Industry showcase — fixture</title>
 <link rel="stylesheet" href="../../modules/industry/assets/css/industry.css">
 <style>
+	/* Elementor's own reset, copied because the widget ships inside it and
+	   these two declarations are the ones that fight a picture told to fill
+	   its frame. `.elementor img` is a class and an element, so it outranks a
+	   single class -- which is how a picture that covered perfectly here ended
+	   up letterboxed on the real site. Anything styling an img in this widget
+	   has to beat it. */
+	.elementor img { height: auto; max-width: 100%; border: none; border-radius: 0; box-shadow: none; }
+
 	/* The widget draws no background of its own, so the fixture supplies the
 	   dark section it is built to sit on. */
 	body { margin: 0; background: #0b1220; color: #fff;
@@ -150,7 +158,7 @@ namespace {
 	.before p, .after p { max-width: 50ch; }
 </style>
 </head>
-<body>
+<body class="elementor">
 <div class="before"><p>Scroll down. The panel should pin for one screen and the
 industries should step past it — names on the left lighting up in turn, the
 picture settling in as it changes, the words on the right swapping under it.

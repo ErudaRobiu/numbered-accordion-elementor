@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.49.0
+Stable tag: 2.50.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,22 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.50.0 =
+* **Industry Showcase: the background can be set on the widget**, under Style →
+  Background, and it is pinned along with the panel. A background set on the
+  section scrolls with the whole showcase, so a pattern on it slides past the
+  panel standing still in front of it; set on the widget it holds still too.
+* The pictures are pinned to their frame in a way no theme or framework reset
+  can undo. Elementor's own `.elementor img { height: auto }` outranks a single
+  class, so anything sizing a picture here now carries enough weight to beat
+  it.
+* Fixed: the section label and the counter were being dropped into the grid as
+  real items, which wrapped the three columns onto a second row and pushed the
+  panel out of its own pinned box on a short window.
+* The width and spacing controls now ship unset, so the responsive defaults
+  hold until something is chosen. An Elementor default is written out at every
+  width and would have flattened them to one number.
 
 = 2.49.0 =
 * **Industry Showcase: the dial is gone**, and the panel now spans whatever
