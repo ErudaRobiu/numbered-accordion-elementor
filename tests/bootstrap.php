@@ -73,6 +73,8 @@ function apply_filters( $hook, $value ) { // phpcs:ignore
 }
 
 require_once dirname( __DIR__ ) . '/includes/interface-module.php';
+require_once dirname( __DIR__ ) . '/includes/interface-configurable.php';
+require_once dirname( __DIR__ ) . '/includes/class-fields.php';
 require_once dirname( __DIR__ ) . '/includes/class-toolkit.php';
 require_once dirname( __DIR__ ) . '/includes/class-panel-category.php';
 require_once dirname( __DIR__ ) . '/modules/duplicator/class-duplicator.php';
@@ -85,3 +87,4 @@ require_once dirname( __DIR__ ) . '/modules/motion/class-motion-presets.php';
 require_once dirname( __DIR__ ) . '/modules/motion/class-motion-controls.php';
 require_once dirname( __DIR__ ) . '/modules/smoothscroll/class-smoothscroll-module.php';
 require_once dirname( __DIR__ ) . '/modules/badge/class-spin-controls.php';
+require_once dirname( __DIR__ ) . '/modules/transitions/class-transitions-fields.php';

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page Two — transitions fixture</title>
+<style id="eruda-transitions-critical">.etrn{position:fixed;inset:0;z-index:2147483000;display:none;pointer-events:none;overflow:clip}.etrn__cols{display:flex;width:100%;height:100%}.etrn__col{flex:1 1 0;height:100%;background:var(--etrn-color,#111111);transform:translateY(100%)}html.etrn-covering .etrn,html.etrn-preloading .etrn{display:block}html.etrn-covering .etrn__col,html.etrn-preloading .etrn__col{transform:translateY(0);animation:none}html.etrn-preloading{overflow:hidden}@media (prefers-reduced-motion:reduce){html.etrn-covering .etrn,html.etrn-preloading .etrn{display:none}html.etrn-preloading{overflow:auto}}</style>
+<script id="eruda-transitions-boot">(function(){try{var d=document.documentElement,s=window.sessionStorage;if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){return;}if(window.self!==window.top){return;}if(s.getItem('etrn:covering')==='1'){d.className+=' etrn-covering';return;}if(!s.getItem('etrn:visited')){d.className+=' etrn-preloading';}}catch(e){}})();</script>
+
+<link rel="stylesheet" href="../../../modules/transitions/assets/css/transitions.css">
+<style>
+	body { margin: 0; background: #0b0b0d; color: #f4f4f5; font: 16px/1.6 system-ui, sans-serif; }
+	main { max-width: 720px; margin: 0 auto; padding: 18vh 24px 40vh; }
+	h1 { font-size: clamp( 32px, 7vw, 64px ); margin: 0 0 24px; letter-spacing: -0.02em; }
+	nav { display: flex; gap: 16px; margin-bottom: 40px; }
+	a { color: #7aa2ff; }
+	a[aria-current] { color: #f4f4f5; text-decoration: none; }
+	.swatch { height: 240px; margin: 32px 0; background: linear-gradient( 120deg, #1a1a20, #26262e ); }
+	.out { color: #9aa0a6; }
+</style>
+</head>
+<body>
+<div class="etrn" aria-hidden="true" style="--etrn-color:#0042ff;--etrn-travel:0.18s;--etrn-stagger:0.05s">
+	<div class="etrn__cols">
+					<div class="etrn__col" style="--etrn-i:0"></div>
+					<div class="etrn__col" style="--etrn-i:1"></div>
+					<div class="etrn__col" style="--etrn-i:2"></div>
+					<div class="etrn__col" style="--etrn-i:3"></div>
+					<div class="etrn__col" style="--etrn-i:4" data-etrn-wide></div>
+					<div class="etrn__col" style="--etrn-i:5" data-etrn-wide></div>
+			</div>
+			<div class="etrn__stage">
+					<div class="etrn__logo"><span class="etrn__logo-inner"><img class="custom-logo" src="data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20260%2048%22%3E%3Ctext%20x%3D%220%22%20y%3D%2236%22%20font-family%3D%22Helvetica%2CArial%22%20font-size%3D%2238%22%20fill%3D%22%23fff%22%3EFixture%3C%2Ftext%3E%3C%2Fsvg%3E" width="260" height="48" alt="Fixture" /></span></div>
+					<div class="etrn__bar"><div class="etrn__fill"></div></div>
+	</div>
+				<div class="etrn__count"><span class="etrn__num">0</span>%</div>
+					</div>
+<noscript><style>.etrn{display:none !important}html.etrn-preloading{overflow:auto !important}</style></noscript>
+		
+<main>
+	<nav><a href="one.html">One</a> <a href="two.html" aria-current="page">Two</a> <a href="three.html">Three</a> </nav>
+	<h1>Page Two</h1>
+	<p>Click between the three pages. The columns should rise to cover, the
+	navigation should happen underneath, and the columns should carry on
+	upwards to reveal the next page — one continuous movement, never a
+	reversal.</p>
+	<p><a href="https://example.com" class="out">An external link</a> and
+	<a href="two.html" class="no-transition">one marked no-transition</a>
+	should both be left alone.</p>
+	<div class="swatch"></div>
+	<p>The first page of a session shows the preloader. Clear session storage
+	to see it again.</p>
+</main>
+<script>window.erudaTransitions = { options: {"color":"#0042ff","columns":6,"travel":0.18,"stagger":0.05,"preloader":true,"minimum":600,"maximum":4000,"percentage":true,"mobileColumns":4,"breakpoint":478,"sweep":0.43} };</script>
+<script src="../../../modules/transitions/assets/js/transitions.js"></script>
+</body>
+</html>
