@@ -162,6 +162,56 @@ async function newPage( browser, options = {} ) {
 		await page.close();
 	}
 
+	/* ----------------------------------------------- the logo's width --- */
+	{
+		const page = await newPage( browser );
+		if ( process.env.ETRN_TRACE ) { console.log( '-> logo width' ); }
+
+		const measure = async ( url ) => {
+			await page.goto( url, { waitUntil: 'domcontentloaded' } );
+			await page.waitForFunction(
+				() => {
+					const i = document.querySelector( '.etrn__logo img' );
+					return i && i.complete && i.naturalWidth > 0;
+				},
+				{ timeout: 15000 }
+			);
+			return page.evaluate( () => {
+				const logo = document.querySelector( '.etrn__logo' );
+				const bar = document.querySelector( '.etrn__bar' );
+				return {
+					logo: logo.getBoundingClientRect().width,
+					bar: bar.getBoundingClientRect().width,
+					scale: getComputedStyle( document.querySelector( '.etrn' ) )
+						.getPropertyValue( '--etrn-logo-scale' ).trim(),
+				};
+			} );
+		};
+
+		// The whole point of sizing against the bar is that the ratio is the
+		// thing that is set, so the ratio is what gets measured.
+		const dflt = await measure( `${ BASE }/one.html` );
+		check( 'the default is seven tenths of the bar', 0.7, dflt.scale === '' ? null : +dflt.scale );
+		near( 'and the rendered width matches it', dflt.bar * 0.7, dflt.logo, 2 );
+
+		const narrow = await measure( `${ BASE }/chosen.html` );
+		check( 'a setting of 40 comes through as 0.4', 0.4, narrow.scale === '' ? null : +narrow.scale );
+		near( 'and renders four tenths of the bar', narrow.bar * 0.4, narrow.logo, 2 );
+
+		check( 'so the setting really does change the size', true, narrow.logo < dflt.logo - 20 );
+
+		// The image fills the box it is given, rather than sitting at its own
+		// intrinsic size inside it.
+		const fills = await page.evaluate( () => {
+			const logo = document.querySelector( '.etrn__logo' );
+			const img = logo.querySelector( 'img' );
+			return Math.abs( img.getBoundingClientRect().width - logo.getBoundingClientRect().width ) < 1.5;
+		} );
+		check( 'the image fills its box', true, fills );
+
+		await page.close();
+	}
+
 	/* ------------------------------------------- a logo from settings --- */
 	{
 		const page = await newPage( browser );

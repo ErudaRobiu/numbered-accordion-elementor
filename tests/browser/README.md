@@ -211,5 +211,11 @@ chrome-headless-shell` before starting clears it; this cost three debugging
 runs before the pattern was obvious, because the probe's own timeouts cannot
 fire when the hang is in the connection to the browser rather than in the page.
 
-`ETRN_TRACE=1` prints each section as it starts, which narrows down where. `ETRN_CHROME` points it at a Chrome binary and
+`ETRN_TRACE=1` prints each section as it starts, which narrows down where.
+
+The generated pages carry a panel in the bottom left that is not part of the
+module and never ships: a slider for the logo's width as a percentage of the
+loading bar, reading out both measurements in pixels, and a button that clears
+the session flags and replays the preloader. It is there so a number can be
+chosen by looking at it rather than by guessing and republishing. `ETRN_CHROME` points it at a Chrome binary and
 `ETRN_HEADFUL=1` runs it visibly.

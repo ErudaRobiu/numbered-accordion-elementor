@@ -162,7 +162,12 @@ namespace {
 	file_put_contents(
 		$out . '/logo.svg',
 		'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48">' .
-		'<text x="0" y="36" font-family="Helvetica,Arial" font-size="38" fill="#fff">Fixture</text>' .
+		// Stretched across the whole viewBox on purpose: a logo file normally
+		// fills its own canvas, and one that does not makes the sizing sheet
+		// lie about where the mark sits relative to the bar.
+		'<text x="130" y="36" text-anchor="middle" textLength="256" ' .
+		'lengthAdjust="spacingAndGlyphs" font-family="Helvetica,Arial" ' .
+		'font-size="38" fill="#fff">Fixture</text>' .
 		'</svg>'
 	);
 
@@ -181,7 +186,9 @@ namespace {
 	file_put_contents(
 		$out . '/chosen.svg',
 		'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48">' .
-		'<text x="0" y="36" font-family="Helvetica,Arial" font-size="38" fill="#fff">Chosen</text>' .
+		'<text x="130" y="36" text-anchor="middle" textLength="256" ' .
+		'lengthAdjust="spacingAndGlyphs" font-family="Helvetica,Arial" ' .
+		'font-size="38" fill="#fff">Chosen</text>' .
 		'</svg>'
 	);
 
@@ -191,7 +198,7 @@ namespace {
 		'one'    => array( 'Page One', '#0042ff', array() ),
 		'two'    => array( 'Page Two', '#0042ff', array() ),
 		'three'  => array( 'Page Three', '#0042ff', array() ),
-		'chosen' => array( 'Chosen Logo', '#0042ff', array( 'logo' => 7 ) ),
+		'chosen' => array( 'Chosen Logo', '#0042ff', array( 'logo' => 7, 'logo_scale' => 40 ) ),
 	);
 
 	foreach ( $pages as $slug => $page ) {
@@ -234,6 +241,12 @@ namespace {
 	a[aria-current] { color: #f4f4f5; text-decoration: none; }
 	.swatch { height: 240px; margin: 32px 0; background: linear-gradient( 120deg, #1a1a20, #26262e ); }
 	.out { color: #9aa0a6; }
+	.sizer { position: fixed; left: 16px; bottom: 16px; z-index: 2147483001;
+		background: #16161c; border: 1px solid #2b2b34; padding: 12px 14px;
+		font: 13px/1.4 system-ui, sans-serif; color: #f4f4f5; }
+	.sizer label { display: block; }
+	.sizer input { vertical-align: middle; width: 200px; }
+	.sizer p { margin: 8px 0 0; color: #9aa0a6; }
 </style>
 </head>
 <body>
@@ -252,6 +265,47 @@ namespace {
 	<p>The first page of a session shows the preloader. Clear session storage
 	to see it again.</p>
 </main>
+<div class="sizer">
+	<label>Logo width
+		<input type="range" min="10" max="300" step="5" value="70" id="scale">
+		<output id="out">70%</output>
+	</label>
+	<p><button type="button" id="again">Replay preloader</button>
+	<span id="px"></span></p>
+</div>
+<script>
+	// Fixture only. Drag the slider to pick a percentage by eye, then type the
+	// number into Settings -> Eruda Toolkit. Nothing here ships.
+	( function () {
+		var curtain = document.querySelector( '.etrn' );
+		var scale = document.getElementById( 'scale' );
+		var out = document.getElementById( 'out' );
+		var px = document.getElementById( 'px' );
+
+		function report() {
+			var logo = document.querySelector( '.etrn__logo' );
+			var bar = document.querySelector( '.etrn__bar' );
+			if ( logo && bar ) {
+				px.textContent = Math.round( logo.getBoundingClientRect().width ) + 'px logo / ' +
+					Math.round( bar.getBoundingClientRect().width ) + 'px bar';
+			}
+		}
+
+		scale.addEventListener( 'input', function () {
+			out.textContent = scale.value + '%';
+			curtain.style.setProperty( '--etrn-logo-scale', scale.value / 100 );
+			report();
+		} );
+
+		document.getElementById( 'again' ).addEventListener( 'click', function () {
+			sessionStorage.removeItem( 'etrn:visited' );
+			sessionStorage.removeItem( 'etrn:covering' );
+			location.reload();
+		} );
+
+		setTimeout( report, 400 );
+	}() );
+</script>
 <script>window.erudaTransitions = { options: {$options} };</script>
 <script src="../../../modules/transitions/assets/js/transitions.js"></script>
 </body>
