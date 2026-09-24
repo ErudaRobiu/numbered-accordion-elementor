@@ -205,6 +205,11 @@ never shown uncovered for a frame, and that each of the timeout fallbacks ends
 with the page revealed — including with every `animationend` suppressed, and
 with `sessionStorage` throwing on access the way it does in private browsing.
 
-`ETRN_TRACE=1` prints each section as it starts, which is what to reach for if
-a run appears to hang. `ETRN_CHROME` points it at a Chrome binary and
+If a run appears to hang with no output at all, the cause is almost always a
+Chrome left behind by an earlier run that was interrupted. `pkill -f
+chrome-headless-shell` before starting clears it; this cost three debugging
+runs before the pattern was obvious, because the probe's own timeouts cannot
+fire when the hang is in the connection to the browser rather than in the page.
+
+`ETRN_TRACE=1` prints each section as it starts, which narrows down where. `ETRN_CHROME` points it at a Chrome binary and
 `ETRN_HEADFUL=1` runs it visibly.

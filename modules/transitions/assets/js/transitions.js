@@ -274,6 +274,35 @@
 		var ready   = false;
 		var frame   = null;
 		var snapAt  = 0;
+		var belt    = null;
+		var opened  = false;
+
+		/**
+		 * Open, once and only once.
+		 *
+		 * Two paths race to get here — the frame loop when the page is ready,
+		 * and the belt timer when the frame loop is not running — and both
+		 * have to be shut down by whichever arrives first.
+		 *
+		 * @param {number} delay Milliseconds to hold the finished bar.
+		 */
+		function done( delay ) {
+			if ( opened ) {
+				return;
+			}
+
+			opened = true;
+
+			if ( belt !== null ) {
+				window.clearTimeout( belt );
+			}
+
+			if ( frame !== null ) {
+				window.cancelAnimationFrame( frame );
+			}
+
+			window.setTimeout( reveal, delay );
+		}
 
 		function now() {
 			return ( window.performance && window.performance.now )
@@ -313,7 +342,7 @@
 
 				if ( span >= 1 ) {
 					paint( 100 );
-					window.setTimeout( reveal, 120 );
+					done( 120 );
 					return;
 				}
 			} else {
@@ -327,15 +356,15 @@
 			ready = true;
 		} );
 
-		// The belt to whenReady's braces. If the frame loop stops running —
-		// a backgrounded tab throttles rAF to nothing — this still opens.
-		window.setTimeout( function () {
-			if ( frame !== null ) {
-				window.cancelAnimationFrame( frame );
-			}
-
+		// The belt to whenReady's braces. If the frame loop stops running — a
+		// backgrounded tab throttles rAF to nothing — this still opens.
+		//
+		// It has to be cancelled by whichever path gets there first. Left
+		// running, it fired long after the preloader had finished and swept a
+		// second curtain across a page the visitor was already reading.
+		belt = window.setTimeout( function () {
 			paint( 100 );
-			reveal();
+			done( 0 );
 		}, opts.maximum + 1200 );
 
 		frame = window.requestAnimationFrame( tick );
@@ -365,10 +394,24 @@
 			session( COVERING, false );
 		}
 
+		var revealed = false;
+
 		/**
 		 * Sweep the columns off the top.
+		 *
+		 * Guarded because a second call does not repeat a finished animation,
+		 * it starts a new one: the leaving class puts the curtain back on
+		 * screen before moving it, so a stray call sweeps a fresh curtain
+		 * across a page the visitor is already reading. A page is revealed
+		 * once.
 		 */
 		function reveal() {
+			if ( revealed ) {
+				return;
+			}
+
+			revealed = true;
+
 			// Removing the covering class and adding the leaving one in the
 			// same frame lets the browser coalesce them, and the columns jump
 			// instead of moving. Reading offsetWidth between the two forces

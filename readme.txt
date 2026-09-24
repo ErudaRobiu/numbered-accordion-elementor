@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.44.0
+Stable tag: 2.44.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,17 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.44.1 =
+* **Fixed: the curtain swept a second time, seconds after the preloader had
+  finished.** Two timers race to open the preloader — the frame loop once the
+  page is ready, and a fallback for when the frame loop is not running at all —
+  and the fallback was never cancelled by the one that won. It fired a little
+  over five seconds later and drew a fresh curtain across a page the visitor was
+  already reading. Whichever gets there first now shuts the other down, and a
+  page can only be revealed once.
+* The logo fades in rather than wiping in, and starts as soon as the curtain is
+  there.
 
 = 2.44.0 =
 * **New: Page Transitions.** A curtain of coloured columns sweeps upward to
