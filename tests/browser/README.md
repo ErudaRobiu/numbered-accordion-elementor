@@ -219,3 +219,26 @@ loading bar, reading out both measurements in pixels, and a button that clears
 the session flags and replays the preloader. It is there so a number can be
 chosen by looking at it rather than by guessing and republishing. `ETRN_CHROME` points it at a Chrome binary and
 `ETRN_HEADFUL=1` runs it visibly.
+
+## Industry showcase
+
+```
+php tests/browser/industry-fixture.php > tests/browser/industry.html
+python3 -m http.server 8732
+node tests/browser/industry-probe.js
+```
+
+The fixture generates six stand-in pictures beside the page, each obviously
+different from the others so a crossfade between them is visible in a
+screenshot rather than merely plausible, and supplies the dark section the
+widget is built to sit on.
+
+The probe checks what the PHP suite cannot: that the panel actually pins and
+then releases, that walking the section reaches every industry in order with
+none skipped, that the name, picture, words and tick all agree at each step —
+a picture of one industry beside the words of another being the failure that
+matters — and that clicking a name lands on that industry rather than its
+neighbour. It also measures the phone layout: the pinned panel gone, the stack
+shown, no sideways overflow, and no text sitting against the edge of the
+screen. A 1024x620 window is checked separately, since that is the size where
+a pinned panel is most likely to clip its own text.

@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.46.0
+Stable tag: 2.47.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,22 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.47.0 =
+* **New: Industry Showcase.** A list of industries walked by scrolling. The
+  section is taller than the screen and the panel inside it is pinned, so
+  scrolling past steps through the list rather than moving it: names on the
+  left lighting up in turn, one picture in the middle that settles in as it
+  changes, and the heading and description on the right. Clicking a name lands
+  on that industry.
+* The picture crossfades over six tenths of a second while easing down from a
+  six percent overscale over twice that, which is what stops the change reading
+  as a blink.
+* Built for a dark section, with every colour exposed as a control. It draws no
+  background of its own.
+* On a phone it stops pinning entirely and reads as a plain stack, because a
+  panel driven by scroll position fights the browser on touch, where scrolling
+  is also how the address bar is dismissed.
 
 = 2.46.0 =
 * **New: the preloader logo's width is now a setting, given as a percentage of
