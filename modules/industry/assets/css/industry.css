@@ -128,7 +128,7 @@
 
 /* ------------------------------------------------------------ the list --- */
 
-.eind__list {
+.eind .eind__list {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-end;
@@ -138,25 +138,83 @@
 	list-style: none;
 }
 
-.eind__name {
+.eind .eind__list > li {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.eind .eind__list > li::before,
+.eind .eind__list > li::marker {
+	content: none;
+}
+
+/* These are <button> elements, and every theme in existence styles buttons: a
+   fill, a radius, a border, a shadow, a min-height, uppercase letters. A
+   single class loses to most of what a theme writes, so this carries three and
+   puts back every property a button might have been given rather than only the
+   ones that have bitten so far. It has to read as a line of text in a list,
+   not as a control. */
+.eind .eind__list .eind__name {
 	display: flex;
 	align-items: center;
 	gap: 12px;
+	width: auto;
+	min-width: 0;
+	min-height: 0;
+	margin: 0;
 	padding: 4px 0;
 	border: 0;
+	border-radius: 0;
 	background: none;
+	background-color: transparent;
+	background-image: none;
+	box-shadow: none;
+	text-shadow: none;
 	cursor: pointer;
 	font: inherit;
 	font-size: clamp( 16px, 1.5vw, 21px );
+	font-weight: inherit;
 	line-height: 1.2;
+	letter-spacing: inherit;
 	text-align: right;
+	text-transform: none;
+	text-decoration: none;
 	color: var( --eind-muted );
+	appearance: none;
+	-webkit-appearance: none;
 	transition: color 0.35s var( --eind-ease );
+}
+
+/* A theme's hover and focus fills have to go the same way, or the button
+   reappears the moment it is pointed at or tabbed to. */
+.eind .eind__list .eind__name:hover,
+.eind .eind__list .eind__name:focus,
+.eind .eind__list .eind__name:focus-visible,
+.eind .eind__list .eind__name:active,
+.eind .eind__list .eind__name[ aria-current="true" ] {
+	background: none;
+	background-color: transparent;
+	background-image: none;
+	border: 0;
+	box-shadow: none;
+}
+
+/* Which leaves keyboard users with nothing, so it is given back deliberately
+   as something that belongs here: an offset ring in the accent colour, shown
+   only for keyboard focus and never for a mouse click. */
+.eind .eind__list .eind__name:focus {
+	outline: none;
+}
+
+.eind .eind__list .eind__name:focus-visible {
+	outline: 2px solid var( --eind-accent );
+	outline-offset: 4px;
 }
 
 /* The dot only exists for the current one. Scaled rather than faded so it
    arrives with the name rather than behind it. */
-.eind__name::before {
+.eind .eind__list .eind__name::before {
 	content: "";
 	width: 7px;
 	height: 7px;
@@ -166,16 +224,16 @@
 	transition: transform 0.35s var( --eind-ease );
 }
 
-.eind__name:hover,
-.eind__name:focus-visible {
+.eind .eind__list .eind__name:hover,
+.eind .eind__list .eind__name:focus-visible {
 	color: var( --eind-body );
 }
 
-.eind__name[ aria-current="true" ] {
+.eind .eind__list .eind__name[ aria-current="true" ] {
 	color: var( --eind-ink );
 }
 
-.eind__name[ aria-current="true" ]::before {
+.eind .eind__list .eind__name[ aria-current="true" ]::before {
 	transform: scale( 1 );
 }
 
@@ -386,8 +444,8 @@
 	.eind .eind__frame .eind__shot,
 	.eind__panel,
 	.eind__tick,
-	.eind__name,
-	.eind__name::before {
+	.eind .eind__list .eind__name,
+	.eind .eind__list .eind__name::before {
 		transition: none;
 	}
 

@@ -99,6 +99,40 @@ const STATE = () => {
 			return page.evaluate( STATE );
 		};
 
+		// The names are <button>s inside a theme that styles buttons loudly.
+		// They have to read as text in a list, not as controls.
+		const asText = await page.evaluate( () => {
+			const btn = document.querySelector( '.eind__name' );
+			const li = btn.closest( 'li' );
+			const cs = getComputedStyle( btn );
+			const ls = getComputedStyle( li );
+			return {
+				bgColor: cs.backgroundColor,
+				bgImage: cs.backgroundImage,
+				borderWidth: cs.borderTopWidth,
+				radius: cs.borderTopLeftRadius,
+				shadow: cs.boxShadow,
+				transform: cs.textTransform,
+				padLeft: cs.paddingLeft,
+				minHeight: cs.minHeight,
+				family: cs.fontFamily,
+				listStyle: getComputedStyle( btn.closest( 'ul' ) ).listStyleType,
+				liMargin: ls.marginBottom,
+				ulPadLeft: getComputedStyle( btn.closest( 'ul' ) ).paddingLeft,
+			};
+		} );
+
+		check( 'no theme fill survives', 'rgba(0, 0, 0, 0)', asText.bgColor );
+		check( 'nor a gradient', 'none', asText.bgImage );
+		check( 'nor a border', '0px', asText.borderWidth );
+		check( 'nor a radius', '0px', asText.radius );
+		check( 'nor a shadow', 'none', asText.shadow );
+		check( 'nor uppercasing', 'none', asText.transform );
+		check( 'nor button padding', '0px', asText.padLeft );
+		check( 'nor a minimum height', '0px', asText.minHeight );
+		check( 'the list has no markers', 'none', asText.listStyle );
+		check( 'and no list indent', '0px', asText.ulPadLeft );
+
 		const start = await at( 0 );
 		check( 'it starts on the first industry', 0, start.name );
 		check( 'the panel is pinned', 'sticky', start.pinned );

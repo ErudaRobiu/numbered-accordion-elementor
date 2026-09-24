@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.50.0
+Stable tag: 2.51.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,19 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.51.0 =
+* **Fixed: the industry names were picking up the theme's button styling** — a
+  fill, a border, a radius, uppercase letters. They are buttons, every theme
+  styles buttons, and a single class loses to most of what a theme writes. The
+  reset now carries enough weight to win and puts back every property a button
+  might have been given, not only the ones seen so far.
+* Keyboard focus is given back deliberately, as a ring in the accent colour
+  shown for keyboard focus only, rather than left to whatever the theme did.
+* The list itself no longer inherits markers or an indent.
+* The browser fixture now ships a deliberately loud theme of its own, so the
+  widget is measured against the thing it has to survive rather than in a clean
+  room.
 
 = 2.50.0 =
 * **Industry Showcase: the background can be set on the widget**, under Style →

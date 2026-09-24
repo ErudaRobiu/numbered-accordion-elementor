@@ -150,6 +150,32 @@ namespace {
 	   has to beat it. */
 	.elementor img { height: auto; max-width: 100%; border: none; border-radius: 0; box-shadow: none; }
 
+	/* A deliberately loud theme, standing in for the real one. Every rule here
+	   is something themes actually do to buttons and lists, written at the
+	   specificity a theme reaches for. The widget has to beat all of it: a
+	   name in this list is a line of text, not a control. */
+	body button,
+	.elementor button {
+		background: #c2185b;
+		background-image: linear-gradient( #c2185b, #a01548 );
+		color: #fff;
+		border: 2px solid #fff;
+		border-radius: 8px;
+		box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+		padding: 10px 18px;
+		min-height: 44px;
+		font-family: Georgia, serif;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.12em;
+	}
+	body button:hover, body button:focus, .elementor button:hover {
+		background: #7b1030;
+		border-color: #ff0;
+	}
+	body ul { list-style: disc; padding-left: 40px; }
+	body li { margin: 0 0 8px; }
+
 	/* The widget draws no background of its own, so the fixture supplies the
 	   dark section it is built to sit on. */
 	body { margin: 0; background: #0b1220; color: #fff;
