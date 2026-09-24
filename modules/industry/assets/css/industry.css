@@ -21,8 +21,15 @@
 	--eind-line: rgba( 255, 255, 255, 0.18 );
 	--eind-frame: rgba( 255, 255, 255, 0.06 );
 
-	--eind-dial: rgba( 255, 255, 255, 0.05 );
-	--eind-sweep: 120deg;
+	/* Layout. Every one of these is an Elementor control; the values here are
+	   what it looks like with nothing set. */
+	--eind-frame-w: 400px;
+	--eind-ratio: 3 / 4;
+	--eind-gap: 72px;
+	--eind-pad: 48px;
+	--eind-text-w: 440px;
+	--eind-stack-gap: 16px;
+	--eind-list-gap: 14px;
 
 	--eind-fade: 0.6s;
 	--eind-settle: 1.2s;
@@ -44,10 +51,15 @@
 	min-height: 560px;
 	overflow: hidden;
 	display: grid;
-	grid-template-columns: 1fr minmax( 280px, 400px ) 1fr;
+
+	/* The picture takes the width it is given and the words and names share
+	   what is left, so the panel spans whatever section it is dropped into
+	   rather than sitting in a column of its own. min() keeps it inside a
+	   narrow window when the setting is wider than the screen. */
+	grid-template-columns: 1fr min( var( --eind-frame-w ), 46vw ) 1fr;
 	align-items: center;
-	gap: clamp( 24px, 5vw, 72px );
-	padding: 0 clamp( 20px, 4vw, 48px );
+	gap: var( --eind-gap );
+	padding: 0 var( --eind-pad );
 }
 
 .eind__label {
@@ -74,43 +86,7 @@
 	font-variant-numeric: tabular-nums;
 }
 
-/* ------------------------------------------------------------ the dial --- */
-
-/* Three cut rings that turn as the section is scrolled. It is the only thing
-   here that answers to scroll position continuously rather than in steps, so
-   it is what tells a visitor the section is responding to them between one
-   industry and the next.
-
-   It bleeds off the left edge on purpose: a complete circle sitting in the
-   margin reads as a logo, and a fragment of a much larger one reads as
-   background. */
-.eind__dial {
-	--eind-dial-size: clamp( 420px, 50vw, 760px );
-
-	position: absolute;
-	left: clamp( -260px, -14vw, -120px );
-	top: 50%;
-	width: var( --eind-dial-size );
-	height: var( --eind-dial-size );
-	margin-top: calc( var( --eind-dial-size ) / -2 );
-	color: var( --eind-dial );
-	pointer-events: none;
-
-	/* The multiplication is why --eind-p is written as a bare number: calc
-	   takes a unitless value against an angle, but not a percentage. */
-	transform: rotate( calc( var( --eind-p ) * var( --eind-sweep ) ) );
-
-	/* Short and linear. The script rewrites --eind-p on every scroll frame, so
-	   this is not an animation between two states but a damper on a value that
-	   is already moving: without it the dial judders on a coarse wheel, and
-	   much above a fifth of a second it lags far enough behind the scroll to
-	   look like it belongs to something else. */
-	transition: transform 0.2s linear;
-	z-index: 0;
-}
-
-/* The dial is positioned, so without this it would paint over the content it
-   sits behind. */
+/* Keeps the three columns above anything a section places behind them. */
 .eind__list,
 .eind__media,
 .eind__text {
@@ -124,7 +100,7 @@
 	display: flex;
 	flex-direction: column;
 	align-items: flex-end;
-	gap: clamp( 8px, 1.4vh, 16px );
+	gap: var( --eind-list-gap );
 	margin: 0;
 	padding: 0;
 	list-style: none;
@@ -182,14 +158,18 @@
 .eind__frame {
 	position: relative;
 	flex: 1 1 auto;
-	aspect-ratio: 3 / 4;
-	max-height: 72vh;
+	aspect-ratio: var( --eind-ratio );
+	max-height: 78vh;
 	border-radius: 20px;
 	overflow: hidden;
 	background: var( --eind-frame );
 }
 
-/* Every picture is stacked in the same box and only one is lit. The incoming
+/* The picture fills its frame and is cropped to do it, rather than being
+   fitted inside it with bars down the sides: the frame's proportions are a
+   design decision and the photograph's are an accident of whoever took it.
+
+   Every picture is stacked in the same box and only one is lit. The incoming
    one settles out of a 6% overscale over twice the length of its fade, which
    is what stops the change reading as a blink: the fade is done while the
    movement is still finishing. */
@@ -199,6 +179,7 @@
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	object-position: center;
 	opacity: 0;
 	transform: scale( 1.06 );
 	transition:
@@ -239,7 +220,7 @@
 .eind__text {
 	position: relative;
 	height: 340px;
-	max-width: 440px;
+	max-width: var( --eind-text-w );
 }
 
 .eind__panel {
@@ -249,7 +230,7 @@
 	top: 50%;
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
+	gap: var( --eind-stack-gap );
 	transform: translateY( -44% );
 	opacity: 0;
 	pointer-events: none;
@@ -335,12 +316,15 @@
 
 	.eind__card img {
 		width: 100%;
-		aspect-ratio: 4 / 3;
+		aspect-ratio: var( --eind-ratio );
 		object-fit: cover;
+		object-position: center;
 		border-radius: 16px;
 		margin-bottom: 4px;
 	}
 
+	/* The heading shrinks on a phone only when nothing has been set for it;
+	   a typography control writes its own size and wins on specificity. */
 	.eind__card .eind__heading {
 		font-size: clamp( 24px, 6vw, 32px );
 	}
@@ -356,13 +340,6 @@
 	.eind__tick,
 	.eind__name,
 	.eind__name::before {
-		transition: none;
-	}
-
-	/* The dial stops turning rather than snapping between angles, which is
-	   what removing only its transition would have left. */
-	.eind__dial {
-		transform: none;
 		transition: none;
 	}
 

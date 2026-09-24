@@ -8,6 +8,7 @@
 namespace ErudaToolkit\Modules\Industry\Widgets;
 
 use Elementor\Controls_Manager;
+use Elementor\Group_Control_Typography;
 use Elementor\Repeater;
 use Elementor\Widget_Base;
 use ErudaToolkit\Modules\Industry\Industry_Content;
@@ -103,6 +104,8 @@ class Industry_Showcase_Widget extends Widget_Base {
 		$this->register_content_controls();
 		$this->register_layout_controls();
 		$this->register_colour_controls();
+		$this->register_size_controls();
+		$this->register_type_controls();
 	}
 
 	/**
@@ -251,42 +254,6 @@ class Industry_Showcase_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
-			'show_dial',
-			array(
-				'label'       => esc_html__( 'Turning dial', 'numbered-accordion' ),
-				'type'        => Controls_Manager::SWITCHER,
-				'default'     => 'yes',
-				'separator'   => 'before',
-				'description' => esc_html__( 'Cut rings behind the list that turn as the section is scrolled.', 'numbered-accordion' ),
-			)
-		);
-
-		$this->add_control(
-			'dial_sweep',
-			array(
-				'label'       => esc_html__( 'How far it turns', 'numbered-accordion' ),
-				'type'        => Controls_Manager::SLIDER,
-				'size_units'  => array( 'deg' ),
-				'range'       => array(
-					'deg' => array(
-						'min'  => 0,
-						'max'  => 360,
-						'step' => 5,
-					),
-				),
-				'default'     => array(
-					'unit' => 'deg',
-					'size' => 120,
-				),
-				'condition'   => array( 'show_dial' => 'yes' ),
-				'description' => esc_html__( 'Degrees across the whole section.', 'numbered-accordion' ),
-				'selectors'   => array(
-					'{{WRAPPER}} .eind' => '--eind-sweep: {{SIZE}}deg;',
-				),
-			)
-		);
-
 		$this->end_controls_section();
 	}
 
@@ -318,7 +285,6 @@ class Industry_Showcase_Widget extends Widget_Base {
 			'accent' => array( esc_html__( 'Accent', 'numbered-accordion' ), '#7ab648' ),
 			'line'   => array( esc_html__( 'Ticks', 'numbered-accordion' ), 'rgba(255,255,255,0.18)' ),
 			'frame'  => array( esc_html__( 'Empty frame', 'numbered-accordion' ), 'rgba(255,255,255,0.06)' ),
-			'dial'   => array( esc_html__( 'Dial', 'numbered-accordion' ), 'rgba(255,255,255,0.05)' ),
 		);
 
 		foreach ( $map as $key => $spec ) {
@@ -331,6 +297,169 @@ class Industry_Showcase_Widget extends Widget_Base {
 					'selectors' => array(
 						'{{WRAPPER}} .eind' => '--eind-' . $key . ': {{VALUE}};',
 					),
+				)
+			);
+		}
+
+		$this->end_controls_section();
+	}
+
+	/**
+	 * Widths and spacing.
+	 */
+	private function register_size_controls() {
+		$this->start_controls_section(
+			'section_sizes',
+			array(
+				'label' => esc_html__( 'Width and spacing', 'numbered-accordion' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_responsive_control(
+			'frame_width',
+			array(
+				'label'      => esc_html__( 'Picture width', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'vw' ),
+				'range'      => array(
+					'px' => array( 'min' => 220, 'max' => 1100, 'step' => 10 ),
+					'vw' => array( 'min' => 15, 'max' => 70, 'step' => 1 ),
+				),
+				'default'    => array( 'unit' => 'px', 'size' => 400 ),
+				'selectors'  => array(
+					'{{WRAPPER}} .eind' => '--eind-frame-w: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'frame_ratio',
+			array(
+				'label'     => esc_html__( 'Picture shape', 'numbered-accordion' ),
+				'type'      => Controls_Manager::SELECT,
+				'default'   => '3 / 4',
+				'options'   => array(
+					'3 / 4'  => esc_html__( 'Portrait 3:4', 'numbered-accordion' ),
+					'4 / 5'  => esc_html__( 'Portrait 4:5', 'numbered-accordion' ),
+					'1 / 1'  => esc_html__( 'Square', 'numbered-accordion' ),
+					'4 / 3'  => esc_html__( 'Landscape 4:3', 'numbered-accordion' ),
+					'16 / 9' => esc_html__( 'Landscape 16:9', 'numbered-accordion' ),
+				),
+				'selectors' => array(
+					'{{WRAPPER}} .eind' => '--eind-ratio: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'text_width',
+			array(
+				'label'      => esc_html__( 'Text width', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 260, 'max' => 900, 'step' => 10 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 440 ),
+				'selectors'  => array(
+					'{{WRAPPER}} .eind' => '--eind-text-w: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'columns_gap',
+			array(
+				'label'      => esc_html__( 'Gap between columns', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 200, 'step' => 4 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 72 ),
+				'separator'  => 'before',
+				'selectors'  => array(
+					'{{WRAPPER}} .eind' => '--eind-gap: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'side_padding',
+			array(
+				'label'       => esc_html__( 'Side padding', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 200, 'step' => 4 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 48 ),
+				'description' => esc_html__( 'Set this to zero to let the section\'s own padding do the work.', 'numbered-accordion' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .eind' => '--eind-pad: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'list_gap',
+			array(
+				'label'      => esc_html__( 'Gap between names', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60, 'step' => 2 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 14 ),
+				'selectors'  => array(
+					'{{WRAPPER}} .eind' => '--eind-list-gap: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'stack_gap',
+			array(
+				'label'      => esc_html__( 'Gap inside the text', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 60, 'step' => 2 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 16 ),
+				'selectors'  => array(
+					'{{WRAPPER}} .eind' => '--eind-stack-gap: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+	}
+
+	/**
+	 * Type.
+	 *
+	 * Left unset by default so the theme's own faces and sizes carry through.
+	 * A control that is set wins over the stylesheet, including over the
+	 * smaller heading the phone layout asks for, which is what somebody who
+	 * has bothered to set one expects.
+	 */
+	private function register_type_controls() {
+		$this->start_controls_section(
+			'section_type',
+			array(
+				'label' => esc_html__( 'Type', 'numbered-accordion' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$faces = array(
+			'name'    => array( esc_html__( 'Names', 'numbered-accordion' ), '{{WRAPPER}} .eind__name' ),
+			'heading' => array( esc_html__( 'Heading', 'numbered-accordion' ), '{{WRAPPER}} .eind__heading' ),
+			'body'    => array( esc_html__( 'Description', 'numbered-accordion' ), '{{WRAPPER}} .eind__body' ),
+			'link'    => array( esc_html__( 'Link', 'numbered-accordion' ), '{{WRAPPER}} .eind__link' ),
+			'label'   => array( esc_html__( 'Section label', 'numbered-accordion' ), '{{WRAPPER}} .eind__label' ),
+			'count'   => array( esc_html__( 'Counter', 'numbered-accordion' ), '{{WRAPPER}} .eind__count' ),
+		);
+
+		foreach ( $faces as $key => $spec ) {
+			$this->add_group_control(
+				Group_Control_Typography::get_type(),
+				array(
+					'name'     => 'type_' . $key,
+					'label'    => $spec[0],
+					'selector' => $spec[1],
 				)
 			);
 		}
@@ -373,10 +502,6 @@ class Industry_Showcase_Widget extends Widget_Base {
 	 */
 	private function render_pinned( $settings, $items, $count ) {
 		echo '<div class="eind__pin">';
-
-		if ( empty( $settings['show_dial'] ) || 'yes' === $settings['show_dial'] ) {
-			$this->render_dial();
-		}
 
 		if ( ! empty( $settings['label'] ) ) {
 			printf( '<p class="eind__label">%s</p>', esc_html( $settings['label'] ) );
@@ -452,25 +577,6 @@ class Industry_Showcase_Widget extends Widget_Base {
 		}
 
 		echo '</div>';
-	}
-
-	/**
-	 * The turning dial behind the list.
-	 *
-	 * Drawn rather than uploaded: it is three circles with gaps cut into them,
-	 * and an SVG of that is smaller than the request for an image would be,
-	 * stays sharp at the size it is shown at, and takes its colour from the
-	 * widget's own control rather than from whatever was exported.
-	 *
-	 * @return void
-	 */
-	private function render_dial() {
-		echo '<svg class="eind__dial" viewBox="0 0 600 600" aria-hidden="true" focusable="false">' .
-			'<g fill="none" stroke="currentColor" stroke-linecap="butt">' .
-			'<circle cx="300" cy="300" r="270" stroke-width="70" stroke-dasharray="250 70 140 60 320 90" />' .
-			'<circle cx="300" cy="300" r="170" stroke-width="60" stroke-dasharray="180 50 90 40 220 70" />' .
-			'<circle cx="300" cy="300" r="85" stroke-width="45" stroke-dasharray="110 40 70 50" />' .
-			'</g></svg>';
 	}
 
 	/**

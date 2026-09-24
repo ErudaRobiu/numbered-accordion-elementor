@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.48.0
+Stable tag: 2.49.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,19 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.49.0 =
+* **Industry Showcase: the dial is gone**, and the panel now spans whatever
+  section it is dropped into rather than sitting in a column of its own.
+* **New controls.** Picture width and shape, text width, the gap between the
+  columns, the side padding, the gap between the names and the gap inside the
+  text — all of them responsive. Type for the names, heading, description,
+  link, section label and counter, left unset so the theme carries through
+  until something is chosen.
+* Set the side padding to zero to let the section's own padding do the work.
+* The picture fills its frame and is cropped to do it, rather than being fitted
+  inside it with bars down the sides: the frame's proportions are a decision,
+  the photograph's are an accident.
 
 = 2.48.0 =
 * **Industry Showcase: the turning dial is in.** Three cut rings behind the
