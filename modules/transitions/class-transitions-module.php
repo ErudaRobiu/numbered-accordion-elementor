@@ -256,7 +256,7 @@ final class Transitions_Module implements Module, Configurable {
 		$this->printed = true;
 
 		$options = self::options();
-		$logo    = $options['preloader'] ? $this->logo() : '';
+		$logo    = $options['preloader'] ? $this->logo( $options['logo'] ) : '';
 
 		// The colour has already been refused unless it is a plain hex value,
 		// and the numbers have been clamped to their declared ranges, so
@@ -292,15 +292,44 @@ final class Transitions_Module implements Module, Configurable {
 	}
 
 	/**
-	 * The site logo, as markup, or an empty string.
+	 * The preloader's logo, as markup, or an empty string.
 	 *
-	 * Uses the logo the site already has in the Customizer rather than asking
-	 * for it a second time. The linking wrapper WordPress adds is stripped:
+	 * The one chosen for this module wins; otherwise the site falls back to
+	 * the logo it already has in the Customizer, so a site that only ever
+	 * needs one image never has to pick it twice. Setting one here is for the
+	 * case the fallback cannot cover: a curtain in a dark brand colour usually
+	 * wants a light version of the mark, and the header wants the other.
+	 *
+	 * The linking wrapper WordPress puts around a custom logo is stripped —
 	 * a link inside a curtain that swallows clicks is a trap.
 	 *
+	 * @param int $chosen Attachment id from the settings, or 0.
 	 * @return string
 	 */
-	private function logo() {
+	private function logo( $chosen = 0 ) {
+		$chosen = (int) $chosen;
+
+		if ( $chosen > 0 && wp_attachment_is_image( $chosen ) ) {
+			$markup = wp_get_attachment_image(
+				$chosen,
+				'full',
+				false,
+				array(
+					'class'    => 'etrn__logo-img',
+					'decoding' => 'async',
+
+					// Never lazy: this is the one image on screen, and a
+					// lazily loaded one would not start fetching until after
+					// the curtain it sits on had been drawn.
+					'loading'  => 'eager',
+				)
+			);
+
+			if ( is_string( $markup ) && '' !== $markup ) {
+				return $markup;
+			}
+		}
+
 		if ( ! function_exists( 'get_custom_logo' ) || ! has_custom_logo() ) {
 			return '';
 		}

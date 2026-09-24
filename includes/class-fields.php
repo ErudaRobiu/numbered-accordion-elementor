@@ -116,6 +116,15 @@ final class Fields {
 
 				return $number;
 
+			case 'media':
+				// An attachment id. Zero means nothing chosen, which is a
+				// valid state, so it is the floor rather than an error.
+				if ( is_bool( $value ) || ! is_numeric( $value ) ) {
+					return $field['default'];
+				}
+
+				return max( 0, (int) $value );
+
 			case 'checkbox':
 			default:
 				return ! empty( $value );
@@ -180,7 +189,7 @@ final class Fields {
 				continue;
 			}
 
-			if ( empty( $field['type'] ) || ! in_array( $field['type'], array( 'color', 'number', 'checkbox' ), true ) ) {
+			if ( empty( $field['type'] ) || ! in_array( $field['type'], array( 'color', 'number', 'checkbox', 'media' ), true ) ) {
 				continue;
 			}
 

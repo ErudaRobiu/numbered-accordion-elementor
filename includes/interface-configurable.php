@@ -32,7 +32,8 @@ interface Configurable {
 	 *   id      string  Key within the module's own settings array. Stored, so
 	 *                   it must never change once shipped.
 	 *   label   string  Field label. Translated.
-	 *   type    string  One of color, number, checkbox.
+	 *   type    string  One of color, number, checkbox, media. A media field
+	 *                   stores a WordPress attachment id, or 0 for none.
 	 *   default mixed   Value used when nothing is stored.
 	 *   help    string  Optional one-line explanation. Translated.
 	 *   min     float   Numbers only. Lower clamp.
