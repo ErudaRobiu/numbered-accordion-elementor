@@ -48,6 +48,14 @@
 	--eind-stack-gap: 16px;
 	--eind-list-gap: clamp( 8px, 1.4vh, 16px );
 
+	/* The grid reveal. Block size is in px and the script turns it into a cell
+	   count from the frame's measured size, so the blocks stay square whatever
+	   shape the frame is. */
+	--eind-block: 44px;
+	--eind-wipe: 900ms;
+	--eind-band: var( --eind-accent );
+	--eind-jitter: 0.55;
+
 	--eind-fade: 0.6s;
 	--eind-settle: 1.2s;
 	--eind-ease: cubic-bezier( 0.22, 1, 0.36, 1 );
@@ -336,6 +344,90 @@
 	background: var( --eind-ink );
 }
 
+/* ------------------------------------------------------ the grid wipe --- */
+
+/* How the picture changes. Not a crossfade: a hard edge sweeps across the
+   frame and the new picture appears behind it, while a ragged band of coloured
+   blocks rides the edge. The blocks are what make it read as a pattern rather
+   than as a wipe -- each one is offset by its own number, so the front eats
+   the old picture unevenly.
+ *
+ * The reference does this on the GPU, quantising the image in a fragment
+ * shader. Nothing here needs to: a grid of cells, a position along one axis
+ * and one random number per cell is the whole of it, and this way the
+ * photograph stays a real img that can be selected, saved and read by a screen
+ * reader. */
+.eind__grid {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	display: grid;
+	pointer-events: none;
+}
+
+.eind__cell {
+	background: var( --eind-band );
+	opacity: 0;
+	will-change: opacity;
+
+	/* Each block peaks at its own opacity, not at full. Without it the middle
+	   of the band is a solid slab of colour with a ragged edge either side;
+	   with it the whole band is mottled, which is what the reference's shader
+	   gets by folding its random number into the alpha rather than only into
+	   the position. */
+}
+
+/* The picture being replaced stays put underneath until the front has passed
+   over it. Without this the old one vanishes the moment the new one is marked
+   and the front sweeps across an empty frame. */
+.eind__shot--out {
+	opacity: 1;
+	transform: none;
+	transition: none;
+	z-index: 0;
+}
+
+.eind__frame--wipe .eind__shot--on {
+	z-index: 1;
+	opacity: 1;
+	transform: none;
+	transition: none;
+	animation: eind-reveal var( --eind-wipe ) linear both;
+}
+
+.eind__frame--wipe .eind__cell {
+	animation: eind-block var( --eind-wipe ) linear both;
+
+	/* The stagger has to be wider than the window a cell is lit for, or every
+	   block is lit at the same moment and the band stops being a band. First
+	   attempt spread the delays over 62% of the run while each cell stayed
+	   visible for 63% of it, and the whole grid flashed at once. */
+	animation-delay: calc( var( --eind-wipe ) * var( --d, 0 ) * 0.75 );
+}
+
+/* On, briefly, then off. The lit window is about a fifth of the run against a
+   three-quarter stagger, which puts roughly a quarter of the grid alight at
+   once -- a band crossing the frame rather than the frame flashing. The
+   reference's shader draws a band 20% deep for the same reason. */
+@keyframes eind-block {
+	0% { opacity: 0; }
+	8% { opacity: var( --o, 1 ); }
+	20% { opacity: var( --o, 1 ); }
+	30% { opacity: 0; }
+	100% { opacity: 0; }
+}
+
+/* The hard edge. inset() is clipped from the side the front comes from, and
+   the script writes --eind-reveal-from to match the direction it was given. */
+/* Finishing at 83% rather than at the end keeps the edge under the band: the
+   blocks stop arriving at three quarters plus their own lead-in, and a clip
+   that ran the full duration would trail along behind them uncovered. */
+@keyframes eind-reveal {
+	0% { clip-path: var( --eind-reveal-from, inset( 0 0 100% 0 ) ); }
+	83% { clip-path: inset( 0 0 0 0 ); }
+	100% { clip-path: inset( 0 0 0 0 ); }
+}
+
 /* ----------------------------------------------------------- the words --- */
 
 /* Fixed height with the panels stacked inside it, so the column does not
@@ -544,5 +636,20 @@
 	.eind .eind__frame .eind__shot,
 	.eind .eind__frame .eind__shot--on {
 		transform: none;
+	}
+
+	/* No sweeping front and no blocks. The picture still changes; it just
+	   changes without a performance. */
+	.eind__grid {
+		display: none;
+	}
+
+	.eind__frame--wipe .eind__shot--on,
+	.eind__frame--wipe .eind__cell {
+		animation: none;
+	}
+
+	.eind__shot--out {
+		opacity: 0;
 	}
 }

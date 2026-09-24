@@ -27,6 +27,131 @@
 	}
 
 	/**
+	 * What this showcase was set to, read off its own root.
+	 *
+	 * On the root rather than a global, because a page may carry more than one
+	 * showcase and they do not have to agree.
+	 *
+	 * @param {Element} root Widget root.
+	 * @return {Object}
+	 */
+	function options( root ) {
+		var num = function ( name, fallback ) {
+			var v = parseFloat( root.getAttribute( name ) );
+			return isFinite( v ) ? v : fallback;
+		};
+
+		return {
+			axis: root.getAttribute( 'data-eind-axis' ) === 'x' ? 'x' : 'y',
+			flip: root.getAttribute( 'data-eind-flip' ) === '1',
+			block: num( 'data-eind-block', 44 ),
+			wipe: num( 'data-eind-wipe', 900 ),
+			jitter: num( 'data-eind-jitter', 0.55 )
+		};
+	}
+
+	/**
+	 * The same hash the reference's shader uses, so a cell's number depends on
+	 * where it is and nothing else.
+	 *
+	 * Deterministic on purpose: a cell keeps its number across a rebuild, so
+	 * resizing the window does not reshuffle the pattern mid-sweep.
+	 *
+	 * @param {number} x Column.
+	 * @param {number} y Row.
+	 * @return {number} 0 to 1.
+	 */
+	function noise( x, y ) {
+		var n = Math.sin( x * 12.9898 + y * 78.233 ) * 43758.5453123;
+		return n - Math.floor( n );
+	}
+
+	/**
+	 * Build the grid of blocks over a frame.
+	 *
+	 * Built here rather than in PHP because it depends on the frame's measured
+	 * size: the blocks have to stay square, and the frame changes shape
+	 * between a phone and a desktop.
+	 *
+	 * @param {Element} frame Frame element.
+	 * @param {Object}  opts  Settings.
+	 * @return {void}
+	 */
+	function buildGrid( frame, opts ) {
+		var grid = frame.querySelector( '.eind__grid' );
+
+		if ( ! grid ) {
+			return;
+		}
+
+		var rect = frame.getBoundingClientRect();
+
+		if ( ! rect.width || ! rect.height ) {
+			return;
+		}
+
+		var size = Math.max( 8, opts.block );
+		var cols = Math.max( 3, Math.round( rect.width / size ) );
+		var rows = Math.max( 3, Math.round( rect.height / size ) );
+
+		if ( grid.getAttribute( 'data-eind-grid' ) === cols + 'x' + rows ) {
+			return;
+		}
+
+		grid.setAttribute( 'data-eind-grid', cols + 'x' + rows );
+		grid.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+		grid.style.gridTemplateRows = 'repeat(' + rows + ', 1fr)';
+
+		var along = opts.axis === 'x' ? cols : rows;
+		var html = '';
+		var row;
+		var col;
+		var step;
+		var d;
+		var o;
+
+		for ( row = 0; row < rows; row++ ) {
+			for ( col = 0; col < cols; col++ ) {
+				step = opts.axis === 'x' ? col : row;
+
+				if ( opts.flip ) {
+					step = along - 1 - step;
+				}
+
+				// Position along the sweep, nudged by the cell's own number.
+				// The nudge is what ragged the front: without it the band is a
+				// straight line and the blocks are decoration rather than the
+				// effect.
+				d = ( step + noise( col, row ) * opts.jitter ) / along;
+
+				// A second number, from a different corner of the same hash,
+				// so a cell's brightness is not tied to its position in the
+				// queue.
+				o = 0.45 + noise( row + 7, col + 31 ) * 0.55;
+
+				html += '<span class="eind__cell" style="--d:' + d.toFixed( 4 ) +
+					';--o:' + o.toFixed( 3 ) + '"></span>';
+			}
+		}
+
+		grid.innerHTML = html;
+	}
+
+	/**
+	 * Which way the hard edge clips in from.
+	 *
+	 * @param {Object} opts Settings.
+	 * @return {string} A clip-path inset().
+	 */
+	function revealFrom( opts ) {
+		if ( opts.axis === 'x' ) {
+			return opts.flip ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)';
+		}
+
+		return opts.flip ? 'inset(100% 0 0 0)' : 'inset(0 0 100% 0)';
+	}
+
+	/**
 	 * Set up one showcase.
 	 *
 	 * @param {Element} root Widget root.
@@ -38,14 +163,17 @@
 
 		root.setAttribute( 'data-eind-ready', '' );
 
+		var opts   = options( root );
 		var names  = root.querySelectorAll( '.eind__name' );
 		var shots  = root.querySelectorAll( '.eind__shot' );
 		var ticks  = root.querySelectorAll( '.eind__tick' );
 		var panels = root.querySelectorAll( '.eind__panel' );
 		var count  = root.querySelector( '.eind__count' );
+		var frame  = root.querySelector( '.eind__frame' );
 		var total  = names.length;
 		var current = -1;
 		var queued = false;
+		var wipeTimer = null;
 
 		if ( ! total ) {
 			return;
@@ -61,6 +189,8 @@
 				return;
 			}
 
+			var previous = current;
+
 			current = index;
 
 			var i;
@@ -69,8 +199,31 @@
 				names[ i ].setAttribute( 'aria-current', i === index ? 'true' : 'false' );
 			}
 
+			// The picture leaving stays visible underneath until the front has
+			// passed over it, so the sweep eats a picture rather than an empty
+			// frame.
+			var leaving = previous >= 0 && previous < shots.length ? shots[ previous ] : null;
+
 			for ( i = 0; i < shots.length; i++ ) {
 				shots[ i ].classList.toggle( 'eind__shot--on', i === index );
+				shots[ i ].classList.remove( 'eind__shot--out' );
+			}
+
+			if ( frame && leaving && ! reducedMotion() ) {
+				leaving.classList.add( 'eind__shot--out' );
+
+				// Restarting an animation means taking the class off, forcing
+				// the browser to notice, and putting it back. Without the
+				// reflow the second change in a row does not animate at all.
+				frame.classList.remove( 'eind__frame--wipe' );
+				void frame.offsetWidth;
+				frame.classList.add( 'eind__frame--wipe' );
+
+				window.clearTimeout( wipeTimer );
+				wipeTimer = window.setTimeout( function () {
+					frame.classList.remove( 'eind__frame--wipe' );
+					leaving.classList.remove( 'eind__shot--out' );
+				}, opts.wipe + 120 );
 			}
 
 			for ( i = 0; i < ticks.length; i++ ) {
@@ -191,8 +344,19 @@
 			}( i ) );
 		}
 
+		if ( frame ) {
+			frame.style.setProperty( '--eind-reveal-from', revealFrom( opts ) );
+			buildGrid( frame, opts );
+		}
+
 		window.addEventListener( 'scroll', onScroll, { passive: true } );
-		window.addEventListener( 'resize', onScroll );
+		window.addEventListener( 'resize', function () {
+			onScroll();
+
+			if ( frame ) {
+				buildGrid( frame, opts );
+			}
+		} );
 
 		measure();
 	}

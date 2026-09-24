@@ -304,6 +304,96 @@ class Industry_Showcase_Widget extends Widget_Base {
 		}
 
 		$this->end_controls_section();
+
+		$this->register_reveal_controls();
+	}
+
+	/**
+	 * How the picture changes.
+	 */
+	private function register_reveal_controls() {
+		$this->start_controls_section(
+			'section_reveal',
+			array( 'label' => esc_html__( 'Picture change', 'numbered-accordion' ) )
+		);
+
+		$this->add_control(
+			'reveal_note',
+			array(
+				'type'            => Controls_Manager::RAW_HTML,
+				'raw'             => esc_html__( 'A hard edge sweeps across the frame and the new picture appears behind it, with a ragged band of blocks riding the edge. Visitors who have asked for reduced motion get a plain change instead.', 'numbered-accordion' ),
+				'content_classes' => 'elementor-descriptor',
+			)
+		);
+
+		$this->add_control(
+			'reveal_axis',
+			array(
+				'label'   => esc_html__( 'Direction', 'numbered-accordion' ),
+				'type'    => Controls_Manager::SELECT,
+				'default' => 'y',
+				'options' => array(
+					'y'  => esc_html__( 'Downwards', 'numbered-accordion' ),
+					'yr' => esc_html__( 'Upwards', 'numbered-accordion' ),
+					'x'  => esc_html__( 'Left to right', 'numbered-accordion' ),
+					'xr' => esc_html__( 'Right to left', 'numbered-accordion' ),
+				),
+			)
+		);
+
+		$this->add_control(
+			'reveal_block',
+			array(
+				'label'       => esc_html__( 'Block size', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px' ),
+				'range'       => array( 'px' => array( 'min' => 12, 'max' => 120, 'step' => 2 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 44 ),
+				'description' => esc_html__( 'Smaller blocks read as grain, larger ones as tiles.', 'numbered-accordion' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .eind' => '--eind-block: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'reveal_wipe',
+			array(
+				'label'      => esc_html__( 'How long it takes', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'ms' ),
+				'range'      => array( 'ms' => array( 'min' => 300, 'max' => 2500, 'step' => 50 ) ),
+				'default'    => array( 'unit' => 'ms', 'size' => 900 ),
+				'selectors'  => array(
+					'{{WRAPPER}} .eind' => '--eind-wipe: {{SIZE}}ms;',
+				),
+			)
+		);
+
+		$this->add_control(
+			'reveal_jitter',
+			array(
+				'label'       => esc_html__( 'Raggedness', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 2, 'step' => 0.05 ) ),
+				'default'     => array( 'size' => 0.55 ),
+				'description' => esc_html__( 'Zero gives a straight edge. Higher scatters the blocks further ahead of and behind it.', 'numbered-accordion' ),
+			)
+		);
+
+		$this->add_control(
+			'reveal_band',
+			array(
+				'label'     => esc_html__( 'Block colour', 'numbered-accordion' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => '',
+				'selectors' => array(
+					'{{WRAPPER}} .eind' => '--eind-band: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
 	}
 
 	/**
@@ -510,9 +600,16 @@ class Industry_Showcase_Widget extends Widget_Base {
 
 		$pace = isset( $settings['pace']['size'] ) ? ( (float) $settings['pace']['size'] ) / 100 : 0.85;
 
+		$axis = isset( $settings['reveal_axis'] ) ? (string) $settings['reveal_axis'] : 'y';
+
 		printf(
-			'<div class="eind" style="height:%dvh">',
-			(int) Industry_Content::height( $count, $pace )
+			'<div class="eind" style="height:%dvh" data-eind-axis="%s" data-eind-flip="%s" data-eind-block="%d" data-eind-wipe="%d" data-eind-jitter="%s">',
+			(int) Industry_Content::height( $count, $pace ),
+			esc_attr( 'x' === $axis || 'xr' === $axis ? 'x' : 'y' ),
+			esc_attr( 'yr' === $axis || 'xr' === $axis ? '1' : '0' ),
+			isset( $settings['reveal_block']['size'] ) ? (int) $settings['reveal_block']['size'] : 44,
+			isset( $settings['reveal_wipe']['size'] ) ? (int) $settings['reveal_wipe']['size'] : 900,
+			esc_attr( isset( $settings['reveal_jitter']['size'] ) ? (string) (float) $settings['reveal_jitter']['size'] : '0.55' )
 		);
 
 		$this->render_pinned( $settings, $items, $count );
@@ -585,6 +682,10 @@ class Industry_Showcase_Widget extends Widget_Base {
 				0 === $i ? 'eager' : 'lazy'
 			);
 		}
+
+		// Filled by the script from the frame's measured size, so the blocks
+		// stay square whatever shape the frame is.
+		echo '<div class="eind__grid" aria-hidden="true"></div>';
 
 		echo '</div>';
 
