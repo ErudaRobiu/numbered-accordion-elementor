@@ -109,22 +109,37 @@ html.etrn-preloading .etrn__stage {
 	opacity: 1;
 }
 
-/* The logo fades up as soon as the curtain is there, with no delay in front of
-   it: the preloader is already the pause, and a logo that waits to begin reads
-   as a second one. Half a second rather than longer because the preloader can
-   finish in about 900ms on a page that is already warm, and a fade still
-   running when the curtain leaves never reads as a fade at all. */
+/* The logo fades and wipes in together, from the left.
+
+   It does NOT run on the preloading class. A logo set in WordPress is a media
+   library file, so it is an HTTP request that has usually not arrived yet when
+   the curtain goes up — the wrapper would animate to full opacity while still
+   empty and the image would then appear on its own, with no animation anybody
+   could see. That is exactly what it looked like on a real site while the
+   fixture, whose logo is an inline data URI, looked correct.
+
+   The script adds etrn-logo-in once the image has actually decoded, and holds
+   the reveal open long enough for this to finish. Keep the duration in step
+   with LOGO_IN_MS in transitions.js. */
 .etrn__logo {
 	opacity: 0;
+	clip-path: inset( 0 100% 0 0 );
 }
 
-html.etrn-preloading .etrn__logo {
-	animation: etrn-fade 0.5s ease-out both;
+.etrn.etrn-logo-in .etrn__logo {
+	animation: etrn-logo-in 0.7s cubic-bezier( 0.22, 1, 0.36, 1 ) both;
 }
 
-@keyframes etrn-fade {
-	from { opacity: 0; }
-	to   { opacity: 1; }
+@keyframes etrn-logo-in {
+	from {
+		opacity: 0;
+		clip-path: inset( 0 100% 0 0 );
+	}
+
+	to {
+		opacity: 1;
+		clip-path: inset( 0 0 0 0 );
+	}
 }
 
 .etrn__logo-inner {

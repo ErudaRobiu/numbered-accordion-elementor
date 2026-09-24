@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.44.1
+Stable tag: 2.44.2
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,16 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.44.2 =
+* **Fixed: the logo appeared without animating.** The animation was keyed to
+  the curtain going up, but a logo set in WordPress is a media library file and
+  therefore a request that has usually not arrived by then — so it played out
+  on an empty box and the image then appeared on its own, with nothing to see.
+  It now waits for the image and animates when there is something to animate,
+  and the curtain holds open long enough for it to finish rather than cutting
+  it off half-drawn.
+* The logo fades and wipes in together, from the left.
 
 = 2.44.1 =
 * **Fixed: the curtain swept a second time, seconds after the preloader had

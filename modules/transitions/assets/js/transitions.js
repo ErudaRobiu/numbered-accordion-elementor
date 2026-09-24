@@ -25,6 +25,15 @@
 	var COVERING = 'etrn:covering';
 	var VISITED  = 'etrn:visited';
 
+	/**
+	 * How long the logo takes to fade and wipe in.
+	 *
+	 * Kept in step with the etrn-logo-in duration in transitions.css. The
+	 * reveal is held open for this long after the logo appears, so the one
+	 * piece of branding on the curtain is never cut off half-drawn.
+	 */
+	var LOGO_IN_MS = 700;
+
 	var HTML = document.documentElement;
 
 	/**
@@ -276,6 +285,51 @@
 		var snapAt  = 0;
 		var belt    = null;
 		var opened  = false;
+		var logoAt  = 0;
+
+		/**
+		 * Start the logo animation, once its image is actually there.
+		 *
+		 * An image that is already complete starts it immediately; one still
+		 * in flight starts it on arrival. A logo that fails to load starts it
+		 * anyway rather than holding the curtain: an empty animation costs
+		 * nothing, a curtain that never opens costs everything.
+		 *
+		 * @param {Element} root Curtain root.
+		 */
+		function revealLogo( root ) {
+			var logo = root.querySelector( '.etrn__logo' );
+			var img  = logo ? logo.querySelector( 'img' ) : null;
+			var done = false;
+
+			function show() {
+				if ( done ) {
+					return;
+				}
+
+				done   = true;
+				logoAt = now();
+				root.classList.add( 'etrn-logo-in' );
+			}
+
+			if ( ! logo ) {
+				// No logo on this site. Nothing to wait for and nothing to
+				// hold the reveal open for.
+				return;
+			}
+
+			if ( ! img || img.complete ) {
+				show();
+				return;
+			}
+
+			img.addEventListener( 'load', show, { once: true } );
+			img.addEventListener( 'error', show, { once: true } );
+
+			// However slow the image is, it does not get to hold the logo back
+			// past the point where showing it would be pointless.
+			window.setTimeout( show, Math.max( 0, opts.maximum - LOGO_IN_MS ) );
+		}
 
 		/**
 		 * Open, once and only once.
@@ -331,7 +385,12 @@
 			// and past its minimum. Starting it earlier would leave the
 			// counter sitting on 100% waiting for a clock, which reads as the
 			// page having stalled at the finish line.
-			if ( ready && elapsed >= opts.minimum ) {
+			// A logo that has begun drawing itself gets to finish. Without
+			// this the reveal can land mid-wipe on a page that was already
+			// warm, and the branding reads as a glitch rather than an entrance.
+			var logoSettled = 0 === logoAt || now() - logoAt >= LOGO_IN_MS;
+
+			if ( ready && elapsed >= opts.minimum && logoSettled ) {
 				if ( snapAt === 0 ) {
 					snapAt = now();
 				}
@@ -351,6 +410,8 @@
 
 			frame = window.requestAnimationFrame( tick );
 		}
+
+		revealLogo( curtain );
 
 		whenReady( opts.maximum, function () {
 			ready = true;

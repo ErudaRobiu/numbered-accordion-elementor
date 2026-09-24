@@ -79,17 +79,17 @@ namespace {
 		 * A stand-in wordmark, wrapped the way WordPress wraps the real one so
 		 * the module's unwrapping is exercised rather than bypassed.
 		 *
+		 * Deliberately a file rather than a data URI. A real site's logo is a
+		 * media library file and therefore an HTTP request that has usually
+		 * not arrived when the curtain goes up; a data URI is there instantly
+		 * and hides every bug that depends on the difference. One of them
+		 * shipped.
+		 *
 		 * @return string
 		 */
 		function get_custom_logo() {
-			$svg = rawurlencode(
-				'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48">' .
-				'<text x="0" y="36" font-family="Helvetica,Arial" font-size="38" fill="#fff">Fixture</text>' .
-				'</svg>'
-			);
-
 			return '<a href="/" class="custom-logo-link"><img class="custom-logo" ' .
-				'src="data:image/svg+xml;charset=utf-8,' . $svg . '" width="260" height="48" alt="Fixture" /></a>';
+				'src="logo.svg" width="260" height="48" alt="Fixture" /></a>';
 		}
 	}
 
@@ -135,6 +135,13 @@ namespace {
 	if ( ! is_dir( $out ) ) {
 		mkdir( $out, 0755, true );
 	}
+
+	file_put_contents(
+		$out . '/logo.svg',
+		'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 48">' .
+		'<text x="0" y="36" font-family="Helvetica,Arial" font-size="38" fill="#fff">Fixture</text>' .
+		'</svg>'
+	);
 
 	/**
 	 * Capture a method's echoed output.
