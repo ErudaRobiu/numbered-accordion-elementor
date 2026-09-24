@@ -248,65 +248,103 @@ const STATE = () => {
 		await page.close();
 	}
 
-	/* -------------------------------------------------------- phone --- */
-	{
+	/* ------------------------------------------------ tablet and phone --- */
+	for ( const device of [
+		{ name: 'phone', width: 390, height: 844 },
+		{ name: 'tablet', width: 834, height: 1112 },
+	] ) {
 		const page = await browser.newPage();
-		await page.setViewport( { width: 390, height: 844, isMobile: true, hasTouch: true } );
+		if ( process.env.EIND_TRACE ) { console.log( '-> ' + device.name ); }
+		await page.setViewport( {
+			width: device.width,
+			height: device.height,
+			isMobile: true,
+			hasTouch: true,
+		} );
 		await page.goto( URL, { waitUntil: 'load' } );
 
-		const mobile = await page.evaluate( () => {
+		const geometry = await page.evaluate( () => {
+			const root = document.querySelector( '.eind' );
+			return { h: root.offsetHeight, vh: window.innerHeight, top: root.getBoundingClientRect().top + window.pageYOffset };
+		} );
+
+		const state = await page.evaluate( () => {
 			const root = document.querySelector( '.eind' );
 			const pin = root.querySelector( '.eind__pin' );
 			const stack = root.querySelector( '.eind__stack' );
-			const cards = root.querySelectorAll( '.eind__card' );
+			const list = root.querySelector( '.eind__list' );
+			const frame = root.querySelector( '.eind__frame' );
+			const ticks = root.querySelector( '.eind__ticks' );
+			const panel = root.querySelector( '.eind__panel--on' );
+			const box = ( el ) => {
+				const r = el.getBoundingClientRect();
+				return { top: Math.round( r.top ), bottom: Math.round( r.bottom ), left: Math.round( r.left ), right: Math.round( r.right ), w: Math.round( r.width ), h: Math.round( r.height ) };
+			};
 			return {
-				pinDisplay: getComputedStyle( pin ).display,
-				stackDisplay: getComputedStyle( stack ).display,
-				cards: cards.length,
-				height: root.offsetHeight,
-				vh: window.innerHeight,
+				pinned: getComputedStyle( pin ).position,
+				pinShown: getComputedStyle( pin ).display !== 'none',
+				stackShown: getComputedStyle( stack ).display !== 'none',
+				listShown: getComputedStyle( list ).display !== 'none',
+				frame: box( frame ),
+				ticks: box( ticks ),
+				panel: box( panel ),
+				pin: box( pin ),
 				overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-				firstCardWidth: cards.length ? Math.round( cards[ 0 ].getBoundingClientRect().width ) : 0,
-				headings: [ ...root.querySelectorAll( '.eind__stack .eind__heading' ) ].map( ( h ) => h.textContent.trim().length ),
 			};
 		} );
 
-		check( 'the pinned panel is gone on a phone', 'none', mobile.pinDisplay );
-		check( 'the stack is shown instead', 'flex', mobile.stackDisplay );
-		check( 'every industry is in the stack', 6, mobile.cards );
-		check( 'each one has its words', true, mobile.headings.length === 6 && mobile.headings.every( ( n ) => n > 0 ) );
+		// The point of the whole change: it stays one industry at a time,
+		// driven by scroll. It does not become a list.
+		check( device.name + ': the panel is still there', true, state.pinShown );
+		check( device.name + ': and still pinned', 'sticky', state.pinned );
+		check( device.name + ': it has not become a stack', false, state.stackShown );
+		check( device.name + ': the names are gone', false, state.listShown );
 
-		// The desktop section height is in a style attribute, so the phone
-		// rule has to beat it or the page ends up six screens of nothing.
-		check( 'the six-viewport height is dropped', true, mobile.height < mobile.vh * 6 );
+		// Picture above, words below.
+		check( device.name + ': the words sit under the picture', true, state.panel.top >= state.frame.bottom - 2 );
+		check( device.name + ': and both are inside the panel', true,
+			state.frame.top >= state.pin.top - 2 && state.panel.bottom <= state.pin.bottom + 2 );
 
-		// The thing people actually notice on a phone.
-		check( 'nothing overflows sideways', 0, mobile.overflowX );
-		check( 'the cards fit the screen', true, mobile.firstCardWidth <= 390 );
+		// Ticks against the edge of the screen rather than beside the picture.
+		check( device.name + ': the ticks are at the screen edge', true,
+			device.width - state.ticks.right < 40 );
 
-		// Text hard against the edge of a phone is the thing everybody sees
-		// and nobody writes a test for.
-		const gutters = await page.evaluate( () => {
-			const edges = [];
-			document.querySelectorAll( '.eind__stack .eind__heading, .eind__stack .eind__body, .eind__stack .eind__link' )
-				.forEach( ( el ) => {
-					const r = el.getBoundingClientRect();
-					edges.push( Math.round( r.left ) );
-					edges.push( Math.round( window.innerWidth - r.right ) );
-				} );
-			return { min: Math.min.apply( null, edges ), count: edges.length };
+		check( device.name + ': nothing overflows sideways', 0, state.overflowX );
+
+		// And scrolling still walks the list.
+		const at = async ( progress ) => {
+			await page.evaluate(
+				( t, sp, p ) => window.scrollTo( 0, t + sp * p ),
+				geometry.top,
+				geometry.h - geometry.vh,
+				progress
+			);
+			await page.evaluate( () => new Promise( ( r ) => requestAnimationFrame( () => requestAnimationFrame( r ) ) ) );
+			return page.evaluate( () => {
+				const names = [ ...document.querySelectorAll( '.eind__name' ) ];
+				return names.findIndex( ( n ) => n.getAttribute( 'aria-current' ) === 'true' );
+			} );
+		};
+
+		check( device.name + ': it starts on the first', 0, await at( 0 ) );
+		check( device.name + ': and scrolling reaches the last', 5, await at( 1 ) );
+
+		// Measured against the window, not against the panel. The panel was
+		// sized in vh, which on a phone is the viewport with the toolbars
+		// hidden and therefore taller than what is on screen -- so everything
+		// fitted the panel while the last line of it sat under the address
+		// bar, and a test against the panel said it was fine.
+		const fits = await page.evaluate( () => {
+			const pin = document.querySelector( '.eind__pin' ).getBoundingClientRect();
+			const link = document.querySelector( '.eind__panel--on .eind__link' );
+			const r = link.getBoundingClientRect();
+			return {
+				panelFitsScreen: Math.round( pin.height ) <= window.innerHeight + 1,
+				linkOnScreen: r.bottom <= window.innerHeight + 1 && r.top >= 0,
+			};
 		} );
-
-		check( 'there is text to measure', true, gutters.count > 0 );
-		check( 'nothing sits against the edge of the screen', true, gutters.min >= 12 );
-
-		// Scrolling must not drive anything here: there is no panel to drive.
-		await page.evaluate( () => window.scrollTo( 0, 1200 ) );
-		await page.evaluate( () => new Promise( ( r ) => requestAnimationFrame( r ) ) );
-		const after = await page.evaluate( () => ( {
-			overflowX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-		} ) );
-		check( 'and still nothing overflows after scrolling', 0, after.overflowX );
+		check( device.name + ': the panel fits the screen', true, fits.panelFitsScreen );
+		check( device.name + ': the link is on screen, not under the toolbar', true, fits.linkOnScreen );
 
 		await page.close();
 	}
