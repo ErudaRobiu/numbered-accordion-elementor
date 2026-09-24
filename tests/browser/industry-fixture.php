@@ -113,7 +113,12 @@ namespace {
 
 		$items[] = array(
 			'name'      => $sector[0],
-			'image'     => array( 'url' => 'industry-img/' . $file ),
+
+			// The fifth industry deliberately has no picture. The script
+			// lights a picture by its industry's position, so an item that
+			// renders nothing here used to shift every picture after it onto
+			// the wrong industry.
+			'image'     => 4 === $i ? array() : array( 'url' => 'industry-img/' . $file ),
 			'heading'   => 'Heat from ' . strtolower( $sector[0] ) . ', back into the process',
 			'body'      => 'Exhaust recovered into makeup air, process water or boiler feedwater, through equipment built for what that airstream actually carries.',
 			'link_text' => 'Discover ' . $sector[0],

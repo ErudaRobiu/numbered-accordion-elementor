@@ -139,11 +139,33 @@ const STATE = () => {
 		near( 'and sits at the top of the screen', 0, start.pinTop, 2 );
 		check( 'the counter agrees', '01 / 06', start.counter );
 
-		// Every signal has to move together. A picture showing one industry
-		// beside words describing another is the failure that matters here.
-		const middle = await at( 0.5 );
-		check( 'the name, picture, words and tick agree', true,
-			middle.name === middle.shot && middle.shot === middle.panel && middle.panel === middle.tick );
+		// Every signal has to move together, at every step rather than at one.
+		// A picture showing one industry beside words describing another is
+		// the failure that matters here, and it only appears once an industry
+		// without a picture has been passed.
+		const agreement = [];
+		for ( let i = 0; i < 6; i++ ) {
+			const s = await at( ( i + 0.5 ) / 6 );
+			agreement.push( [ s.name, s.shot, s.panel, s.tick ] );
+		}
+
+		check( 'the name, picture, words and tick agree at every step', true,
+			agreement.every( ( row, i ) => row.every( ( v ) => v === i ) ) );
+
+		// One industry in the fixture has no picture on purpose. It must show
+		// the empty frame rather than its neighbour's photograph.
+		const blank = await page.evaluate( () => {
+			const shots = [ ...document.querySelectorAll( '.eind__shot' ) ];
+			return {
+				count: shots.length,
+				tags: shots.map( ( s ) => s.tagName.toLowerCase() ),
+				lit: shots.findIndex( ( s ) => s.classList.contains( 'eind__shot--on' ) ),
+			};
+		} );
+
+		check( 'there is one picture slot per industry', 6, blank.count );
+		check( 'the one without a picture is a placeholder, not a missing slot',
+			[ 'img', 'img', 'img', 'img', 'span', 'img' ], blank.tags );
 
 		const end = await at( 1 );
 		check( 'the far end is the last industry, not past it', 5, end.name );

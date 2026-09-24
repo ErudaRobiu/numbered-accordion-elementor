@@ -284,6 +284,7 @@
    is what stops the change reading as a blink: the fade is done while the
    movement is still finishing. */
 .eind .eind__frame .eind__shot {
+	display: block;
 	position: absolute;
 	inset: 0;
 
