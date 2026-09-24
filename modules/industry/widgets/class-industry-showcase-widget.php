@@ -558,10 +558,21 @@ class Industry_Showcase_Widget extends Widget_Base {
 		// The picture, with every one stacked in the same frame.
 		echo '<div class="eind__media"><div class="eind__frame">';
 
+		// One element per industry, always, including the ones with no picture
+		// set. The script lights a picture by the industry's own position, so
+		// skipping an item here would shift every picture after it onto the
+		// wrong industry -- and once the position runs past the end of the
+		// shortened list, nothing is lit at all and the frame simply stops
+		// changing. An industry without a picture shows the empty frame, which
+		// is the honest answer and keeps the counting straight.
 		foreach ( $items as $i => $item ) {
 			$url = isset( $item['image']['url'] ) ? $item['image']['url'] : '';
 
 			if ( '' === $url ) {
+				printf(
+					'<span class="eind__shot%s" aria-hidden="true"></span>',
+					0 === $i ? ' eind__shot--on' : ''
+				);
 				continue;
 			}
 

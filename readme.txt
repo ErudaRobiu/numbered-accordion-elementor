@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.52.0
+Stable tag: 2.52.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,13 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.52.1 =
+* **Fixed: an industry with no picture set threw every picture after it onto
+  the wrong industry**, and once the position ran past the end of the shortened
+  list nothing was lit at all and the frame simply stopped changing. Every
+  industry now has a slot whether or not a picture is set; one without shows
+  the empty frame.
 
 = 2.52.0 =
 * **Industry Showcase: tablet and phone now follow the reference rather than
