@@ -21,6 +21,9 @@
 	--eind-line: rgba( 255, 255, 255, 0.18 );
 	--eind-frame: rgba( 255, 255, 255, 0.06 );
 
+	--eind-dial: rgba( 255, 255, 255, 0.05 );
+	--eind-sweep: 120deg;
+
 	--eind-fade: 0.6s;
 	--eind-settle: 1.2s;
 	--eind-ease: cubic-bezier( 0.22, 1, 0.36, 1 );
@@ -69,6 +72,50 @@
 	letter-spacing: 0.1em;
 	color: var( --eind-muted );
 	font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------ the dial --- */
+
+/* Three cut rings that turn as the section is scrolled. It is the only thing
+   here that answers to scroll position continuously rather than in steps, so
+   it is what tells a visitor the section is responding to them between one
+   industry and the next.
+
+   It bleeds off the left edge on purpose: a complete circle sitting in the
+   margin reads as a logo, and a fragment of a much larger one reads as
+   background. */
+.eind__dial {
+	--eind-dial-size: clamp( 420px, 50vw, 760px );
+
+	position: absolute;
+	left: clamp( -260px, -14vw, -120px );
+	top: 50%;
+	width: var( --eind-dial-size );
+	height: var( --eind-dial-size );
+	margin-top: calc( var( --eind-dial-size ) / -2 );
+	color: var( --eind-dial );
+	pointer-events: none;
+
+	/* The multiplication is why --eind-p is written as a bare number: calc
+	   takes a unitless value against an angle, but not a percentage. */
+	transform: rotate( calc( var( --eind-p ) * var( --eind-sweep ) ) );
+
+	/* Short and linear. The script rewrites --eind-p on every scroll frame, so
+	   this is not an animation between two states but a damper on a value that
+	   is already moving: without it the dial judders on a coarse wheel, and
+	   much above a fifth of a second it lags far enough behind the scroll to
+	   look like it belongs to something else. */
+	transition: transform 0.2s linear;
+	z-index: 0;
+}
+
+/* The dial is positioned, so without this it would paint over the content it
+   sits behind. */
+.eind__list,
+.eind__media,
+.eind__text {
+	position: relative;
+	z-index: 1;
 }
 
 /* ------------------------------------------------------------ the list --- */
@@ -309,6 +356,13 @@
 	.eind__tick,
 	.eind__name,
 	.eind__name::before {
+		transition: none;
+	}
+
+	/* The dial stops turning rather than snapping between angles, which is
+	   what removing only its transition would have left. */
+	.eind__dial {
+		transform: none;
 		transition: none;
 	}
 

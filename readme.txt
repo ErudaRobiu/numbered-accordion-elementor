@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.47.0
+Stable tag: 2.48.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,15 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.48.0 =
+* **Industry Showcase: the turning dial is in.** Three cut rings behind the
+  list that turn as the section is scrolled — the one part of the showcase that
+  answers to scroll position continuously rather than in steps, which is what
+  tells a visitor the section is responding to them between one industry and
+  the next. It bleeds off the left edge on purpose; a whole circle in the
+  margin reads as a logo rather than as background.
+* How far it turns, and its colour, are controls. It can be switched off.
 
 = 2.47.0 =
 * **New: Industry Showcase.** A list of industries walked by scrolling. The

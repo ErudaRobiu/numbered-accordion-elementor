@@ -251,6 +251,42 @@ class Industry_Showcase_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'show_dial',
+			array(
+				'label'       => esc_html__( 'Turning dial', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SWITCHER,
+				'default'     => 'yes',
+				'separator'   => 'before',
+				'description' => esc_html__( 'Cut rings behind the list that turn as the section is scrolled.', 'numbered-accordion' ),
+			)
+		);
+
+		$this->add_control(
+			'dial_sweep',
+			array(
+				'label'       => esc_html__( 'How far it turns', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'deg' ),
+				'range'       => array(
+					'deg' => array(
+						'min'  => 0,
+						'max'  => 360,
+						'step' => 5,
+					),
+				),
+				'default'     => array(
+					'unit' => 'deg',
+					'size' => 120,
+				),
+				'condition'   => array( 'show_dial' => 'yes' ),
+				'description' => esc_html__( 'Degrees across the whole section.', 'numbered-accordion' ),
+				'selectors'   => array(
+					'{{WRAPPER}} .eind' => '--eind-sweep: {{SIZE}}deg;',
+				),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
@@ -282,6 +318,7 @@ class Industry_Showcase_Widget extends Widget_Base {
 			'accent' => array( esc_html__( 'Accent', 'numbered-accordion' ), '#7ab648' ),
 			'line'   => array( esc_html__( 'Ticks', 'numbered-accordion' ), 'rgba(255,255,255,0.18)' ),
 			'frame'  => array( esc_html__( 'Empty frame', 'numbered-accordion' ), 'rgba(255,255,255,0.06)' ),
+			'dial'   => array( esc_html__( 'Dial', 'numbered-accordion' ), 'rgba(255,255,255,0.05)' ),
 		);
 
 		foreach ( $map as $key => $spec ) {
@@ -336,6 +373,10 @@ class Industry_Showcase_Widget extends Widget_Base {
 	 */
 	private function render_pinned( $settings, $items, $count ) {
 		echo '<div class="eind__pin">';
+
+		if ( empty( $settings['show_dial'] ) || 'yes' === $settings['show_dial'] ) {
+			$this->render_dial();
+		}
 
 		if ( ! empty( $settings['label'] ) ) {
 			printf( '<p class="eind__label">%s</p>', esc_html( $settings['label'] ) );
@@ -411,6 +452,25 @@ class Industry_Showcase_Widget extends Widget_Base {
 		}
 
 		echo '</div>';
+	}
+
+	/**
+	 * The turning dial behind the list.
+	 *
+	 * Drawn rather than uploaded: it is three circles with gaps cut into them,
+	 * and an SVG of that is smaller than the request for an image would be,
+	 * stays sharp at the size it is shown at, and takes its colour from the
+	 * widget's own control rather than from whatever was exported.
+	 *
+	 * @return void
+	 */
+	private function render_dial() {
+		echo '<svg class="eind__dial" viewBox="0 0 600 600" aria-hidden="true" focusable="false">' .
+			'<g fill="none" stroke="currentColor" stroke-linecap="butt">' .
+			'<circle cx="300" cy="300" r="270" stroke-width="70" stroke-dasharray="250 70 140 60 320 90" />' .
+			'<circle cx="300" cy="300" r="170" stroke-width="60" stroke-dasharray="180 50 90 40 220 70" />' .
+			'<circle cx="300" cy="300" r="85" stroke-width="45" stroke-dasharray="110 40 70 50" />' .
+			'</g></svg>';
 	}
 
 	/**
