@@ -1825,13 +1825,20 @@ check( 'and makes every column move together', 0.18, round( Transitions_Fields::
 
 check( 'every declared field has a value', true,
 	count( array_diff(
-		array( 'color', 'columns', 'travel', 'stagger', 'preloader', 'logo', 'minimum', 'maximum', 'percentage' ),
+		array( 'color', 'columns', 'travel', 'stagger', 'preloader', 'logo', 'logo_scale', 'minimum', 'maximum', 'percentage' ),
 		array_keys( $opts )
 	) ) === 0 );
 
 // No logo chosen is the normal state: the module falls back to the site logo,
 // so zero has to survive rather than being treated as unset.
 check( 'no preloader logo is chosen by default', 0, $opts['logo'] );
+
+// The logo is sized against the bar, as a percentage somebody types.
+check( 'the logo is 70% of the bar by default', 70, $opts['logo_scale'] );
+check( 'a wider setting is kept', 120, Transitions_Fields::options( array( 'logo_scale' => 120 ) )['logo_scale'] );
+check( 'an absurd one is clamped down', 300, Transitions_Fields::options( array( 'logo_scale' => 5000 ) )['logo_scale'] );
+check( 'and a vanishing one is clamped up', 10, Transitions_Fields::options( array( 'logo_scale' => 0 ) )['logo_scale'] );
+check( 'a whole-stepped percentage stays an int', 65, Transitions_Fields::options( array( 'logo_scale' => '65' ) )['logo_scale'] );
 check( 'a chosen one is kept', 91, Transitions_Fields::options( array( 'logo' => '91' ) )['logo'] );
 
 /* ------------------------------------------------------------- report --- */

@@ -109,6 +109,16 @@ final class Transitions_Fields {
 				'help'    => esc_html__( 'Falls back to the site logo. Set one here when the curtain needs a different version of the mark to the header does.', 'numbered-accordion' ),
 			),
 			array(
+				'id'      => 'logo_scale',
+				'label'   => esc_html__( 'Logo width', 'numbered-accordion' ),
+				'type'    => 'number',
+				'default' => 70,
+				'min'     => 10,
+				'max'     => 300,
+				'step'    => 5,
+				'help'    => esc_html__( 'Percentage of the loading bar\'s width. The bar is 320px at its widest, so 70 gives a logo about 224px across.', 'numbered-accordion' ),
+			),
+			array(
 				'id'      => 'minimum',
 				'label'   => esc_html__( 'Minimum preloader time', 'numbered-accordion' ),
 				'type'    => 'number',

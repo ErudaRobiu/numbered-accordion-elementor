@@ -17,10 +17,16 @@
 	a[aria-current] { color: #f4f4f5; text-decoration: none; }
 	.swatch { height: 240px; margin: 32px 0; background: linear-gradient( 120deg, #1a1a20, #26262e ); }
 	.out { color: #9aa0a6; }
+	.sizer { position: fixed; left: 16px; bottom: 16px; z-index: 2147483001;
+		background: #16161c; border: 1px solid #2b2b34; padding: 12px 14px;
+		font: 13px/1.4 system-ui, sans-serif; color: #f4f4f5; }
+	.sizer label { display: block; }
+	.sizer input { vertical-align: middle; width: 200px; }
+	.sizer p { margin: 8px 0 0; color: #9aa0a6; }
 </style>
 </head>
 <body>
-<div class="etrn" aria-hidden="true" style="--etrn-color:#0042ff;--etrn-travel:0.18s;--etrn-stagger:0.05s">
+<div class="etrn" aria-hidden="true" style="--etrn-color:#0042ff;--etrn-travel:0.18s;--etrn-stagger:0.05s;--etrn-logo-scale:0.4">
 	<div class="etrn__cols">
 					<div class="etrn__col" style="--etrn-i:0"></div>
 					<div class="etrn__col" style="--etrn-i:1"></div>
@@ -51,7 +57,48 @@
 	<p>The first page of a session shows the preloader. Clear session storage
 	to see it again.</p>
 </main>
-<script>window.erudaTransitions = { options: {"color":"#0042ff","columns":6,"travel":0.18,"stagger":0.05,"preloader":true,"logo":7,"minimum":600,"maximum":4000,"percentage":true,"mobileColumns":4,"breakpoint":478,"sweep":0.43} };</script>
+<div class="sizer">
+	<label>Logo width
+		<input type="range" min="10" max="300" step="5" value="70" id="scale">
+		<output id="out">70%</output>
+	</label>
+	<p><button type="button" id="again">Replay preloader</button>
+	<span id="px"></span></p>
+</div>
+<script>
+	// Fixture only. Drag the slider to pick a percentage by eye, then type the
+	// number into Settings -> Eruda Toolkit. Nothing here ships.
+	( function () {
+		var curtain = document.querySelector( '.etrn' );
+		var scale = document.getElementById( 'scale' );
+		var out = document.getElementById( 'out' );
+		var px = document.getElementById( 'px' );
+
+		function report() {
+			var logo = document.querySelector( '.etrn__logo' );
+			var bar = document.querySelector( '.etrn__bar' );
+			if ( logo && bar ) {
+				px.textContent = Math.round( logo.getBoundingClientRect().width ) + 'px logo / ' +
+					Math.round( bar.getBoundingClientRect().width ) + 'px bar';
+			}
+		}
+
+		scale.addEventListener( 'input', function () {
+			out.textContent = scale.value + '%';
+			curtain.style.setProperty( '--etrn-logo-scale', scale.value / 100 );
+			report();
+		} );
+
+		document.getElementById( 'again' ).addEventListener( 'click', function () {
+			sessionStorage.removeItem( 'etrn:visited' );
+			sessionStorage.removeItem( 'etrn:covering' );
+			location.reload();
+		} );
+
+		setTimeout( report, 400 );
+	}() );
+</script>
+<script>window.erudaTransitions = { options: {"color":"#0042ff","columns":6,"travel":0.18,"stagger":0.05,"preloader":true,"logo":7,"logo_scale":40,"minimum":600,"maximum":4000,"percentage":true,"mobileColumns":4,"breakpoint":478,"sweep":0.43} };</script>
 <script src="../../../modules/transitions/assets/js/transitions.js"></script>
 </body>
 </html>

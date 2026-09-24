@@ -262,10 +262,14 @@ final class Transitions_Module implements Module, Configurable {
 		// and the numbers have been clamped to their declared ranges, so
 		// nothing here can carry punctuation into the style attribute.
 		$style = sprintf(
-			'--etrn-color:%s;--etrn-travel:%ss;--etrn-stagger:%ss',
+			'--etrn-color:%s;--etrn-travel:%ss;--etrn-stagger:%ss;--etrn-logo-scale:%s',
 			$options['color'],
 			(float) $options['travel'],
-			(float) $options['stagger']
+			(float) $options['stagger'],
+			// Typed as a percentage because that is how somebody thinks about
+			// it; written as a multiplier because that is what calc() wants
+			// against a length.
+			round( $options['logo_scale'] / 100, 4 )
 		);
 
 		?>

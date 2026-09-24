@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.45.0
+Stable tag: 2.46.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,16 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.46.0 =
+* **New: the preloader logo's width is now a setting, given as a percentage of
+  the loading bar.** The two used to be sized on separate scales, which meant
+  one of them was always slightly wrong against the other. The bar is the ruler
+  now: 70 percent is the default and puts a logo about 224px across above a
+  320px bar.
+* The logo is sized from a width rather than a height, so it centres on the bar
+  and keeps the file's own proportions. A square mark at a wide setting is
+  capped so it cannot fill the screen, and nothing runs off a phone.
 
 = 2.45.0 =
 * **New: choose the preloader's logo.** A picker under Settings -> Eruda

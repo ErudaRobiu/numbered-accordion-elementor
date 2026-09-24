@@ -19,6 +19,13 @@
 	--etrn-stagger: 0.05s;
 	--etrn-ease: cubic-bezier( 0.76, 0, 0.24, 1 );
 
+	/* The bar is the ruler. The logo is sized as a multiple of it rather than
+	   on its own scale, so the two always look related — set independently,
+	   one of them is always slightly wrong against the other. The module
+	   writes the multiple from a percentage typed in the settings. */
+	--etrn-bar: clamp( 180px, 26vw, 320px );
+	--etrn-logo-scale: 0.7;
+
 	position: fixed;
 	inset: 0;
 	z-index: 2147483000;
@@ -122,6 +129,11 @@ html.etrn-preloading .etrn__stage {
    the reveal open long enough for this to finish. Keep the duration in step
    with LOGO_IN_MS in transitions.js. */
 .etrn__logo {
+	width: calc( var( --etrn-bar ) * var( --etrn-logo-scale ) );
+
+	/* Whatever the setting says, it never runs off a phone. */
+	max-width: 80vw;
+
 	opacity: 0;
 	clip-path: inset( 0 100% 0 0 );
 }
@@ -146,26 +158,27 @@ html.etrn-preloading .etrn__stage {
 	display: block;
 }
 
-/* Sized from a definite height, never from the file. A site's Customizer logo
-   can be an 80px favicon or a 2400px export, and an intrinsic-size layout gives
-   the first one a logo nobody can read and the second one a logo wider than the
-   screen. It is also the only sizing that works at all for an SVG with no
-   width and height attributes, which otherwise lays out at zero. */
+/* Sized from a definite width, never from the file. A site's logo can be an
+   80px favicon or a 2400px export, and an intrinsic-size layout gives the
+   first one a logo nobody can read and the second one a logo wider than the
+   screen. A definite dimension is also the only sizing that works at all for
+   an SVG with no width and height attributes, which otherwise lays out at
+   zero.
+
+   The height follows from the file's own ratio, capped so that a square mark
+   at a wide setting cannot fill the screen. */
 .etrn__logo-inner img,
 .etrn__logo-inner svg {
 	display: block;
-	width: auto;
-	height: clamp( 28px, 5vw, 64px );
-	max-width: min( 70vw, 420px );
-
-	/* A wide wordmark hits the max-width first; letting it keep its ratio
-	   there stops it being squashed. */
+	width: 100%;
+	height: auto;
+	max-height: 30vh;
 	object-fit: contain;
 }
 
 .etrn__bar {
 	position: relative;
-	width: clamp( 180px, 26vw, 320px );
+	width: var( --etrn-bar );
 	height: 2px;
 	background: rgba( 255, 255, 255, 0.24 );
 	overflow: hidden;
