@@ -7,7 +7,7 @@
 
 namespace ErudaToolkit\Modules\Table;
 
-use ErudaToolkit\Module;
+use ErudaToolkit\Elementor_Module;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Registers assets and the Data Table widget.
  */
-final class Table_Module implements Module {
+final class Table_Module extends Elementor_Module {
 
 	const STYLE_HANDLE = 'etbl-data-table';
 
@@ -45,59 +45,6 @@ final class Table_Module implements Module {
 	 */
 	public static function description() {
 		return esc_html__( 'Adds a "Data Table" widget: a reference table of two or three columns with a filled header row, banded rows and a last column you can set apart. On a phone each row folds into a block with its headings beside the values, rather than scrolling sideways.', 'numbered-accordion' );
-	}
-
-	/**
-	 * Is Elementor present and recent enough?
-	 *
-	 * Do NOT test for \Elementor\Widget_Base here -- it does not exist at
-	 * plugins_loaded. See register_widgets().
-	 *
-	 * @return bool
-	 */
-	public static function is_available() {
-		return self::elementor_loaded() && self::elementor_recent_enough();
-	}
-
-	/**
-	 * The same checks, said out loud.
-	 *
-	 * @return string[]
-	 */
-	public static function requirement_messages() {
-		if ( ! self::elementor_loaded() ) {
-			return array( esc_html__( 'Elementor is not installed or not activated.', 'numbered-accordion' ) );
-		}
-
-		if ( ! self::elementor_recent_enough() ) {
-			return array(
-				sprintf(
-					/* translators: %s: required Elementor version */
-					esc_html__( 'Elementor %s or greater is required.', 'numbered-accordion' ),
-					ERUDA_MIN_ELEMENTOR
-				),
-			);
-		}
-
-		return array();
-	}
-
-	/**
-	 * Has Elementor booted?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_loaded() {
-		return (bool) did_action( 'elementor/loaded' );
-	}
-
-	/**
-	 * Is the Elementor version high enough?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_recent_enough() {
-		return defined( 'ELEMENTOR_VERSION' ) && version_compare( ELEMENTOR_VERSION, ERUDA_MIN_ELEMENTOR, '>=' );
 	}
 
 	/**

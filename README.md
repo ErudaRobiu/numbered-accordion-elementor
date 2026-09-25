@@ -37,7 +37,7 @@ installing an update is always a manual click.
 
 ```
 numbered-accordion-elementor.php   bootstrap, update channel
-includes/                          module registry, settings screen and its media picker
+includes/                          module registry, settings screen, and what every widget module shares
 modules/accordion/                 the accordion widget and its assets
 modules/impact/                    the impact grid widget and its assets
 modules/motion/                    the text animation controls and assets

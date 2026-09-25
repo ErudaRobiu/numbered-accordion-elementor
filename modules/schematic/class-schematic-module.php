@@ -7,7 +7,7 @@
 
 namespace ErudaToolkit\Modules\Schematic;
 
-use ErudaToolkit\Module;
+use ErudaToolkit\Elementor_Module;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Registers the stylesheet and the Flow Schematic widget.
  */
-final class Schematic_Module implements Module {
+final class Schematic_Module extends Elementor_Module {
 
 	const STYLE_HANDLE  = 'efs-flow-schematic';
 	const SCRIPT_HANDLE = 'efs-flow-schematic';
@@ -46,59 +46,6 @@ final class Schematic_Module implements Module {
 	 */
 	public static function description() {
 		return esc_html__( 'Adds a "Flow Schematic" widget: a process diagram drawn in CSS — stages, connectors, a return path, a monitoring bar and a boundary line — so every label stays real text instead of being baked into a picture.', 'numbered-accordion' );
-	}
-
-	/**
-	 * Is Elementor present and recent enough?
-	 *
-	 * Do NOT test for \Elementor\Widget_Base here -- it does not exist at
-	 * plugins_loaded. See register_widgets().
-	 *
-	 * @return bool
-	 */
-	public static function is_available() {
-		return self::elementor_loaded() && self::elementor_recent_enough();
-	}
-
-	/**
-	 * The same checks, said out loud.
-	 *
-	 * @return string[]
-	 */
-	public static function requirement_messages() {
-		if ( ! self::elementor_loaded() ) {
-			return array( esc_html__( 'Elementor is not installed or not activated.', 'numbered-accordion' ) );
-		}
-
-		if ( ! self::elementor_recent_enough() ) {
-			return array(
-				sprintf(
-					/* translators: %s: required Elementor version */
-					esc_html__( 'Elementor %s or greater is required.', 'numbered-accordion' ),
-					ERUDA_MIN_ELEMENTOR
-				),
-			);
-		}
-
-		return array();
-	}
-
-	/**
-	 * Has Elementor booted?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_loaded() {
-		return (bool) did_action( 'elementor/loaded' );
-	}
-
-	/**
-	 * Is the Elementor version high enough?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_recent_enough() {
-		return defined( 'ELEMENTOR_VERSION' ) && version_compare( ELEMENTOR_VERSION, ERUDA_MIN_ELEMENTOR, '>=' );
 	}
 
 	/**

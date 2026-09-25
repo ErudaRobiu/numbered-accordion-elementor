@@ -27,6 +27,10 @@ use ErudaToolkit\Modules\SmoothScroll\SmoothScroll_Module;
 use ErudaToolkit\Fields;
 use ErudaToolkit\Modules\Transitions\Transitions_Fields;
 use ErudaToolkit\Modules\Industry\Industry_Content;
+use ErudaToolkit\Elementor_Module;
+use ErudaToolkit\Module;
+use ErudaToolkit\Modules\Steps\Steps_Module;
+use ErudaToolkit\Modules\Table\Table_Module;
 
 /**
  * Undo wp_slash(), so a round trip can be asserted.
@@ -1912,6 +1916,44 @@ check( 'every anchor resolves to its own item', true, $round_trips );
 check( 'the counter is padded', '04 / 06', Industry_Content::counter( 3, 6 ) );
 check( 'and widens together past ninety-nine', '004 / 100', Industry_Content::counter( 3, 100 ) );
 check( 'an empty showcase has no counter', '', Industry_Content::counter( 0, 0 ) );
+
+/* --------------------------------------------- Elementor_Module --- */
+
+// Thirteen modules carried the same four methods character for character.
+// They come from one place now, and these check the behaviour survived rather
+// than only that the files still parse.
+
+check( 'a widget module still satisfies the contract', true, is_subclass_of( Steps_Module::class, Module::class, true ) );
+check( 'and gets its answers from the shared base', true, is_subclass_of( Steps_Module::class, Elementor_Module::class, true ) );
+check( 'a second one, the same way', true, is_subclass_of( Table_Module::class, Elementor_Module::class, true ) );
+
+// Elementor absent: the module must say so rather than run.
+$GLOBALS['eruda_test_actions'] = array();
+check( 'without Elementor it cannot run', false, Steps_Module::is_available() );
+check( 'and says which of the two reasons it is',
+	array( 'Elementor is not installed or not activated.' ),
+	Steps_Module::requirement_messages() );
+
+// Elementor present but too old. ERUDA_MIN_ELEMENTOR is 3.5.0 here.
+$GLOBALS['eruda_test_actions'] = array( 'elementor/loaded' => 1 );
+define( 'ELEMENTOR_VERSION', '3.0.0' );
+check( 'an old Elementor still cannot run', false, Steps_Module::is_available() );
+check( 'and the message names the version wanted',
+	array( 'Elementor 3.5.0 or greater is required.' ),
+	Steps_Module::requirement_messages() );
+
+// The modules that need nothing but a browser keep their own answer, which is
+// why they were left out of the base class.
+check( 'a standalone module is always available', true, SmoothScroll_Module::is_available() );
+check( 'and reports nothing missing', array(), SmoothScroll_Module::requirement_messages() );
+check( 'it does not inherit the Elementor base', false, is_subclass_of( SmoothScroll_Module::class, Elementor_Module::class, true ) );
+
+// Identity is per module and must survive the refactor: the registry keys on
+// it, and a changed id would silently switch a module off on every site that
+// had ever saved the settings screen.
+check( 'the steps module keeps its id', 'steps', Steps_Module::id() );
+check( 'the table module keeps its id', 'table', Table_Module::id() );
+check( 'their handles are still their own', true, Steps_Module::STYLE_HANDLE !== Table_Module::STYLE_HANDLE );
 
 /* ------------------------------------------------------------- report --- */
 
