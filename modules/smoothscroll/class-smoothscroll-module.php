@@ -129,6 +129,21 @@ final class SmoothScroll_Module implements Module {
 			ERUDA_VERSION
 		);
 
+		// Elementor 3.25 and later put `scroll-behavior: smooth` on the
+		// document, and two things cannot own the same scroll: the browser
+		// animates a jump while Lenis is mid-animation on the same one, and
+		// the result is a scroll that fights itself, most visibly on anchor
+		// links and on Back.
+		//
+		// Scoped to html.lenis, the class Lenis adds when it actually starts.
+		// It declines to start in the editor and for a visitor who has asked
+		// for reduced motion, and in both of those cases the site should keep
+		// whatever smooth behaviour it was given.
+		wp_add_inline_style(
+			self::STYLE_HANDLE,
+			'html.lenis{scroll-behavior:auto !important}'
+		);
+
 		wp_enqueue_script(
 			self::LIBRARY_HANDLE,
 			ERUDA_URL . 'vendor/lenis/lenis.min.js',

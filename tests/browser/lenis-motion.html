@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lenis vs scroll listeners</title>
+<link rel="stylesheet" href="../../vendor/lenis/lenis.css">
+<style>
+	/* What Elementor 3.25+ puts on the page. This is the documented half of
+	   the conflict: it fights a smooth scroller for control of the same
+	   scroll. */
+	html { scroll-behavior: smooth; }
+	/* What the module now adds. Scoped to the class Lenis sets when it runs. */
+	html.lenis { scroll-behavior: auto !important; }
+	body { margin: 0; font: 14px system-ui, sans-serif; }
+	.tall { height: 500vh; background: linear-gradient(#111, #444); }
+	#out { position: fixed; top: 8px; left: 8px; background: #000; color: #0f0;
+		padding: 10px; white-space: pre; z-index: 9; font: 12px ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div id="out">waiting</div>
+<div class="tall"></div>
+<script src="../../vendor/lenis/lenis.min.js"></script>
+<script>
+	// Stand-in for what Elementor's motion effects do: listen for scroll and
+	// read the position. If these never fire, nothing driven by scroll moves.
+	var events = 0, lastY = -1, distinct = 0, rafY = 0;
+	window.addEventListener('scroll', function () {
+		events++;
+		var y = window.scrollY || window.pageYOffset;
+		if (y !== lastY) { distinct++; lastY = y; }
+	}, { passive: true });
+
+	var lenis = new window.Lenis({ duration: 1.1, syncTouch: false, smoothWheel: true, anchors: true });
+	function frame(t) { lenis.raf(t); rafY = Math.round(window.scrollY); requestAnimationFrame(frame); }
+	requestAnimationFrame(frame);
+
+	setInterval(function () {
+		document.getElementById('out').textContent =
+			'scroll events: ' + events + '\ndistinct positions: ' + distinct +
+			'\nwindow.scrollY: ' + Math.round(window.scrollY) +
+			'\nscrollBehavior: ' + getComputedStyle(document.documentElement).scrollBehavior;
+	}, 100);
+	window.__probe = function () { return { events: events, distinct: distinct, y: Math.round(window.scrollY),
+		behavior: getComputedStyle(document.documentElement).scrollBehavior }; };
+</script>
+</body>
+</html>
