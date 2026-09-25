@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.54.0
+Stable tag: 2.54.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,16 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.54.1 =
+* **Smooth Scrolling no longer fights Elementor for the same scroll.**
+  Elementor 3.25 and later put `scroll-behavior: smooth` on the document, so
+  the browser animates a jump while Lenis is mid-animation on the same one —
+  most visible on anchor links and on Back. The rule is scoped to the class
+  Lenis sets when it actually runs, so a site where it stands down (the editor,
+  or a visitor who asked for reduced motion) keeps whatever it had.
+* Added `docs/elementor-scroll-effects-diagnostic.js`, a console script that
+  reports why Elementor's scrolling effects are not running on a given page.
 
 = 2.54.0 =
 * **The grid sweep is off by default.** The picture dissolves again, which is
