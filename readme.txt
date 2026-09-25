@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.54.1
+Stable tag: 2.55.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,15 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.55.0 =
+* **Housekeeping: 695 lines of repeated code removed.** Thirteen of the sixteen
+  modules carried the same four methods character for character — whether
+  Elementor is loaded, whether it is new enough, whether the module can run and
+  what to say when it cannot. They come from one shared base class now.
+* No widget name, CSS class, control ID, script handle or module id changed, so
+  nothing a saved page depends on has moved. Thirteen new tests cover the
+  behaviour that was moved, including Elementor absent and Elementor too old.
 
 = 2.54.1 =
 * **Smooth Scrolling no longer fights Elementor for the same scroll.**

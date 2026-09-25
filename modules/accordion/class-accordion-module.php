@@ -7,7 +7,7 @@
 
 namespace ErudaToolkit\Modules\Accordion;
 
-use ErudaToolkit\Module;
+use ErudaToolkit\Elementor_Module;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Registers assets and the Elementor widget.
  */
-final class Accordion_Module implements Module {
+final class Accordion_Module extends Elementor_Module {
 
 	const STYLE_HANDLE  = 'nacc-numbered-accordion';
 	const SCRIPT_HANDLE = 'nacc-numbered-accordion';
@@ -46,63 +46,6 @@ final class Accordion_Module implements Module {
 	 */
 	public static function description() {
 		return esc_html__( 'Adds a "Numbered Accordion" widget to the Elementor panel.', 'numbered-accordion' );
-	}
-
-	/**
-	 * Is Elementor present and recent enough?
-	 *
-	 * Note: do NOT test for \Elementor\Widget_Base here. Elementor's autoloader
-	 * cannot resolve it (its derived path is ELEMENTOR_PATH/widget-base.php,
-	 * while the file actually lives in includes/base/), so the class only comes
-	 * into existence when the widgets manager requires it -- which happens
-	 * immediately before the elementor/widgets/register hook fires. That check
-	 * belongs in the register callback, and lives in register_widgets().
-	 *
-	 * @return bool
-	 */
-	public static function is_available() {
-		return self::elementor_loaded() && self::elementor_recent_enough();
-	}
-
-	/**
-	 * The same checks, said out loud.
-	 *
-	 * @return string[]
-	 */
-	public static function requirement_messages() {
-		if ( ! self::elementor_loaded() ) {
-			return array( esc_html__( 'Elementor is not installed or not activated.', 'numbered-accordion' ) );
-		}
-
-		if ( ! self::elementor_recent_enough() ) {
-			return array(
-				sprintf(
-					/* translators: %s: required Elementor version */
-					esc_html__( 'Elementor %s or greater is required.', 'numbered-accordion' ),
-					ERUDA_MIN_ELEMENTOR
-				),
-			);
-		}
-
-		return array();
-	}
-
-	/**
-	 * Has Elementor booted?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_loaded() {
-		return (bool) did_action( 'elementor/loaded' );
-	}
-
-	/**
-	 * Is the Elementor version high enough?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_recent_enough() {
-		return defined( 'ELEMENTOR_VERSION' ) && version_compare( ELEMENTOR_VERSION, ERUDA_MIN_ELEMENTOR, '>=' );
 	}
 
 	/**

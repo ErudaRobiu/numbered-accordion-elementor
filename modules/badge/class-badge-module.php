@@ -7,7 +7,7 @@
 
 namespace ErudaToolkit\Modules\Badge;
 
-use ErudaToolkit\Module;
+use ErudaToolkit\Elementor_Module;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Registers the Eruda Spin controls and their assets.
  */
-final class Badge_Module implements Module {
+final class Badge_Module extends Elementor_Module {
 
 	const SPIN_STYLE_HANDLE  = 'espin-spin';
 	const SPIN_SCRIPT_HANDLE = 'espin-spin';
@@ -53,61 +53,6 @@ final class Badge_Module implements Module {
 	 */
 	public static function description() {
 		return esc_html__( 'Adds an "Eruda Spin" section to image, icon and button widgets, which turns what they hold and slows it to a stop under the pointer.', 'numbered-accordion' );
-	}
-
-	/**
-	 * Is Elementor present and recent enough?
-	 *
-	 * As with the accordion module, do NOT test for \Elementor\Widget_Base
-	 * here -- it does not exist at plugins_loaded. This module registers no
-	 * widget, but the rule is the same for the controls it injects: they are
-	 * added from an Elementor hook, never at plugins_loaded.
-	 *
-	 * @return bool
-	 */
-	public static function is_available() {
-		return self::elementor_loaded() && self::elementor_recent_enough();
-	}
-
-	/**
-	 * The same checks, said out loud.
-	 *
-	 * @return string[]
-	 */
-	public static function requirement_messages() {
-		if ( ! self::elementor_loaded() ) {
-			return array( esc_html__( 'Elementor is not installed or not activated.', 'numbered-accordion' ) );
-		}
-
-		if ( ! self::elementor_recent_enough() ) {
-			return array(
-				sprintf(
-					/* translators: %s: required Elementor version */
-					esc_html__( 'Elementor %s or greater is required.', 'numbered-accordion' ),
-					ERUDA_MIN_ELEMENTOR
-				),
-			);
-		}
-
-		return array();
-	}
-
-	/**
-	 * Has Elementor booted?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_loaded() {
-		return (bool) did_action( 'elementor/loaded' );
-	}
-
-	/**
-	 * Is the Elementor version high enough?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_recent_enough() {
-		return defined( 'ELEMENTOR_VERSION' ) && version_compare( ELEMENTOR_VERSION, ERUDA_MIN_ELEMENTOR, '>=' );
 	}
 
 	/**

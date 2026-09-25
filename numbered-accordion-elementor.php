@@ -3,7 +3,7 @@
  * Plugin Name:       Eruda Toolkit
  * Plugin URI:        https://erudarobiu.com/
  * Description:       A small toolkit of site-building modules for Elementor: a numbered accordion, an impact grid, a scroll story, text animations and smooth scrolling, plus a page duplicator.
- * Version:           2.54.1
+ * Version:           2.55.0
  * Author:            Eruda Robiu
  * Author URI:        https://erudarobiu.com/
  * License:           GPL-2.0-or-later
@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'ERUDA_VERSION', '2.54.1' );
+define( 'ERUDA_VERSION', '2.55.0' );
 define( 'ERUDA_FILE', __FILE__ );
 define( 'ERUDA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ERUDA_URL', plugin_dir_url( __FILE__ ) );
@@ -70,6 +70,7 @@ function eruda_bootstrap() {
 
 	require_once ERUDA_PATH . 'includes/interface-module.php';
 	require_once ERUDA_PATH . 'includes/interface-configurable.php';
+	require_once ERUDA_PATH . 'includes/class-elementor-module.php';
 	require_once ERUDA_PATH . 'includes/class-fields.php';
 	require_once ERUDA_PATH . 'includes/class-toolkit.php';
 	require_once ERUDA_PATH . 'includes/class-settings.php';

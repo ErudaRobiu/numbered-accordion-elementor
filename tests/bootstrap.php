@@ -72,8 +72,25 @@ function apply_filters( $hook, $value ) { // phpcs:ignore
 	return $value;
 }
 
+/**
+ * Elementor is absent in these tests, which is the interesting case: it is the
+ * state every widget module has to describe correctly on the settings screen.
+ *
+ * @param string $hook Hook name.
+ * @return int
+ */
+function did_action( $hook ) { // phpcs:ignore
+	return isset( $GLOBALS['eruda_test_actions'][ $hook ] ) ? (int) $GLOBALS['eruda_test_actions'][ $hook ] : 0;
+}
+
+define( 'ERUDA_MIN_ELEMENTOR', '3.5.0' );
+define( 'ERUDA_PATH', dirname( __DIR__ ) . '/' );
+define( 'ERUDA_URL', 'https://example.test/wp-content/plugins/numbered-accordion-elementor/' );
+define( 'ERUDA_VERSION', 'tests' );
+
 require_once dirname( __DIR__ ) . '/includes/interface-module.php';
 require_once dirname( __DIR__ ) . '/includes/interface-configurable.php';
+require_once dirname( __DIR__ ) . '/includes/class-elementor-module.php';
 require_once dirname( __DIR__ ) . '/includes/class-fields.php';
 require_once dirname( __DIR__ ) . '/includes/class-toolkit.php';
 require_once dirname( __DIR__ ) . '/includes/class-panel-category.php';
@@ -89,3 +106,8 @@ require_once dirname( __DIR__ ) . '/modules/smoothscroll/class-smoothscroll-modu
 require_once dirname( __DIR__ ) . '/modules/badge/class-spin-controls.php';
 require_once dirname( __DIR__ ) . '/modules/transitions/class-transitions-fields.php';
 require_once dirname( __DIR__ ) . '/modules/industry/class-industry-content.php';
+
+// One module from each side of the split, so the shared base class and the
+// modules that deliberately do not use it are both exercised.
+require_once dirname( __DIR__ ) . '/modules/steps/class-steps-module.php';
+require_once dirname( __DIR__ ) . '/modules/table/class-table-module.php';

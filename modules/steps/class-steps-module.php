@@ -7,7 +7,7 @@
 
 namespace ErudaToolkit\Modules\Steps;
 
-use ErudaToolkit\Module;
+use ErudaToolkit\Elementor_Module;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Registers assets and the Process Steps widget.
  */
-final class Steps_Module implements Module {
+final class Steps_Module extends Elementor_Module {
 
 	const STYLE_HANDLE  = 'estp-process-steps';
 	const SCRIPT_HANDLE = 'estp-process-steps';
@@ -46,59 +46,6 @@ final class Steps_Module implements Module {
 	 */
 	public static function description() {
 		return esc_html__( 'Adds a "Process Steps" widget: a numbered process read downwards, with the words on the left and a small object standing in space on the right. Scrolling turns the objects rather than fading them in, and pointing at one opens it. It carries no background of its own, so it sits on whatever colour the section is.', 'numbered-accordion' );
-	}
-
-	/**
-	 * Is Elementor present and recent enough?
-	 *
-	 * Do NOT test for \Elementor\Widget_Base here -- it does not exist at
-	 * plugins_loaded. See register_widgets().
-	 *
-	 * @return bool
-	 */
-	public static function is_available() {
-		return self::elementor_loaded() && self::elementor_recent_enough();
-	}
-
-	/**
-	 * The same checks, said out loud.
-	 *
-	 * @return string[]
-	 */
-	public static function requirement_messages() {
-		if ( ! self::elementor_loaded() ) {
-			return array( esc_html__( 'Elementor is not installed or not activated.', 'numbered-accordion' ) );
-		}
-
-		if ( ! self::elementor_recent_enough() ) {
-			return array(
-				sprintf(
-					/* translators: %s: required Elementor version */
-					esc_html__( 'Elementor %s or greater is required.', 'numbered-accordion' ),
-					ERUDA_MIN_ELEMENTOR
-				),
-			);
-		}
-
-		return array();
-	}
-
-	/**
-	 * Has Elementor booted?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_loaded() {
-		return (bool) did_action( 'elementor/loaded' );
-	}
-
-	/**
-	 * Is the Elementor version high enough?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_recent_enough() {
-		return defined( 'ELEMENTOR_VERSION' ) && version_compare( ELEMENTOR_VERSION, ERUDA_MIN_ELEMENTOR, '>=' );
 	}
 
 	/**

@@ -7,7 +7,7 @@
 
 namespace ErudaToolkit\Modules\Compare;
 
-use ErudaToolkit\Module;
+use ErudaToolkit\Elementor_Module;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Registers assets and the Image Compare widget.
  */
-final class Compare_Module implements Module {
+final class Compare_Module extends Elementor_Module {
 
 	const STYLE_HANDLE  = 'ecmp-image-compare';
 	const SCRIPT_HANDLE = 'ecmp-image-compare';
@@ -46,59 +46,6 @@ final class Compare_Module implements Module {
 	 */
 	public static function description() {
 		return esc_html__( 'Adds an "Image Compare" widget: two pictures in one frame with a divider you drag across to swap between them.', 'numbered-accordion' );
-	}
-
-	/**
-	 * Is Elementor present and recent enough?
-	 *
-	 * As with the accordion module, do NOT test for \Elementor\Widget_Base
-	 * here -- it does not exist at plugins_loaded. See register_widgets().
-	 *
-	 * @return bool
-	 */
-	public static function is_available() {
-		return self::elementor_loaded() && self::elementor_recent_enough();
-	}
-
-	/**
-	 * The same checks, said out loud.
-	 *
-	 * @return string[]
-	 */
-	public static function requirement_messages() {
-		if ( ! self::elementor_loaded() ) {
-			return array( esc_html__( 'Elementor is not installed or not activated.', 'numbered-accordion' ) );
-		}
-
-		if ( ! self::elementor_recent_enough() ) {
-			return array(
-				sprintf(
-					/* translators: %s: required Elementor version */
-					esc_html__( 'Elementor %s or greater is required.', 'numbered-accordion' ),
-					ERUDA_MIN_ELEMENTOR
-				),
-			);
-		}
-
-		return array();
-	}
-
-	/**
-	 * Has Elementor booted?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_loaded() {
-		return (bool) did_action( 'elementor/loaded' );
-	}
-
-	/**
-	 * Is the Elementor version high enough?
-	 *
-	 * @return bool
-	 */
-	private static function elementor_recent_enough() {
-		return defined( 'ELEMENTOR_VERSION' ) && version_compare( ELEMENTOR_VERSION, ERUDA_MIN_ELEMENTOR, '>=' );
 	}
 
 	/**
