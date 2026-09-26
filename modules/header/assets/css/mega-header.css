@@ -1108,6 +1108,33 @@
 	transform: scale(var(--ehdr-figure-zoom, 1.05));
 }
 
+/* ------------------------------------------- the picture that changes --- */
+
+/*
+ * A link with a picture of its own swaps the panel's while it is hovered.
+ *
+ * The layers are stacked over the resting picture and only their opacity
+ * moves, so nothing about the panel's height or the list beside it depends on
+ * which one is showing -- and the box they are all fitted to is the resting
+ * one's, which is why a portrait among landscapes crops rather than resizes
+ * the panel under the pointer.
+ *
+ * `!important` for the same reason the rule above it needs one: the theme's
+ * `img:hover { opacity: .75 }` and friends are the thing being beaten, and
+ * that rule already had to shout to hold the picture at full strength. It
+ * costs nothing here -- the fade is a transition either way.
+ */
+.ehdr .ehdr__figure--swap .ehdr__figure-img {
+	opacity: 0 !important;
+	transition:
+		transform var(--ehdr-figure-ms, 900ms) var(--ehdr-geom-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+		opacity var(--ehdr-swap-ms, 260ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.ehdr .ehdr__figure--swap .ehdr__figure-img.is-on {
+	opacity: 1 !important;
+}
+
 /* ------------------------------------------------------------- the scrim --- */
 
 /*

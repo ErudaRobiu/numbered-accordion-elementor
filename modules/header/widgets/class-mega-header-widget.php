@@ -287,6 +287,16 @@ class Mega_Header_Widget extends Widget_Base {
 					'conditions'  => $conditions,
 				)
 			);
+
+			$repeater->add_control(
+				'panel_link_' . $slot . '_image',
+				array(
+					'label'       => esc_html__( 'Picture on hover', 'numbered-accordion' ),
+					'description' => esc_html__( 'Replaces the panel picture while this link is hovered or focused. Leave it empty and the panel picture stays put.', 'numbered-accordion' ),
+					'type'        => Controls_Manager::MEDIA,
+					'conditions'  => $conditions,
+				)
+			);
 		}
 
 		/*
@@ -1168,6 +1178,26 @@ class Mega_Header_Widget extends Widget_Base {
 			)
 		);
 
+		/*
+		 * How long the picture takes to change under a link that carries one.
+		 *
+		 * Faster than the panel opening, on purpose: the panel is arriving from
+		 * nowhere and can afford to ease, while this is answering a pointer that
+		 * is already in the list and has to feel like the same gesture. Nought
+		 * cuts between them.
+		 */
+		$this->add_control(
+			'figure_swap_ms',
+			array(
+				'label'      => esc_html__( 'Picture change on hover', 'numbered-accordion' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'ms', 's' ),
+				'range'      => array( 'ms' => array( 'min' => 0, 'max' => 800 ), 's' => array( 'min' => 0, 'max' => 2, 'step' => 0.05 ) ),
+				'default'    => array( 'unit' => 'ms', 'size' => 260 ),
+				'selectors'  => array( '{{WRAPPER}} .ehdr' => '--ehdr-swap-ms: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
@@ -1539,6 +1569,7 @@ class Mega_Header_Widget extends Widget_Base {
 				'label' => $label,
 				'note'  => $note,
 				'link'  => $link,
+				'image' => isset( $item[ $key . '_image' ]['url'] ) ? trim( (string) $item[ $key . '_image' ]['url'] ) : '',
 			);
 		}
 
@@ -1573,6 +1604,7 @@ class Mega_Header_Widget extends Widget_Base {
 					'is_external' => ! empty( $row['new_tab'] ) ? 'on' : '',
 					'nofollow'    => '',
 				),
+				'image' => '',
 			);
 		}
 
@@ -1913,6 +1945,27 @@ class Mega_Header_Widget extends Widget_Base {
 						$eyebrow  = isset( $item['panel_eyebrow'] ) ? $item['panel_eyebrow'] : '';
 						$figure   = isset( $item['panel_image']['url'] ) ? $item['panel_image']['url'] : '';
 
+						/*
+						 * The pictures a link swaps in, keyed by its place in
+						 * the list, and empty on the panels where no link
+						 * carries one -- which is every panel saved before
+						 * this, so their markup comes out unchanged.
+						 */
+						$swaps = array();
+
+						foreach ( $links as $n => $row ) {
+							if ( '' !== $row['image'] ) {
+								$swaps[ $n + 1 ] = $row['image'];
+							}
+						}
+
+						// A panel can be nothing but links with pictures on
+						// them, in which case the first of those is what the
+						// panel rests on and the aside exists because of them.
+						if ( '' === $figure && $swaps ) {
+							$figure = reset( $swaps );
+						}
+
 						// A panel with nothing in it is not a panel. Without
 						// this an item switched to "opens a panel" and then
 						// left empty gets a caret that opens a white strip.
@@ -1977,9 +2030,10 @@ class Mega_Header_Widget extends Widget_Base {
 									<div class="ehdr__panel-inner<?php echo $split ? '' : ' ehdr__panel-inner--solo'; ?>">
 										<?php if ( $links ) : ?>
 											<ul class="ehdr__links">
-												<?php foreach ( $links as $row ) : ?>
+												<?php foreach ( $links as $row_i => $row ) : ?>
+													<?php $row_n = $row_i + 1; ?>
 													<li>
-														<a class="ehdr__panel-link"<?php $this->link_attrs( $row['link'] ); ?>>
+														<a class="ehdr__panel-link"<?php $this->link_attrs( $row['link'] ); ?><?php echo isset( $swaps[ $row_n ] ) ? ' data-ehdr-swap="' . esc_attr( (string) $row_n ) . '"' : ''; ?>>
 															<span>
 																<?php $this->label( $row['label'], 'scramble' === $anim ? 'scramble' : 'none' ); ?>
 																<?php if ( '' !== $row['note'] ) : ?>
@@ -1996,8 +2050,30 @@ class Mega_Header_Widget extends Widget_Base {
 										<?php if ( $aside ) : ?>
 											<div class="ehdr__panel-aside">
 												<?php if ( '' !== $figure ) : ?>
-													<figure class="ehdr__figure">
-														<img src="<?php echo esc_url( $figure ); ?>" alt="" loading="lazy" decoding="async" />
+													<?php
+													/*
+													 * The picture, and the ones a link swaps in
+													 * stacked over it.
+													 *
+													 * The layers carry `data-ehdr-src` rather than
+													 * `src`, and the script fills them in when the
+													 * panel first opens. A panel is in the page at
+													 * full size with only its opacity down, so a
+													 * lazy image inside one is in the viewport and
+													 * fetched on load like any other -- six photos
+													 * for a menu nobody has touched, on every page
+													 * of the site. Hydrating on open costs one
+													 * fetch at the moment somebody has shown an
+													 * interest, and leaves a visitor with no
+													 * JavaScript the resting picture, which is
+													 * what they had before.
+													 */
+													?>
+													<figure class="ehdr__figure<?php echo $swaps ? ' ehdr__figure--swap' : ''; ?>">
+														<img class="ehdr__figure-img is-on" data-ehdr-rest src="<?php echo esc_url( $figure ); ?>" alt="" loading="lazy" decoding="async" />
+														<?php foreach ( $swaps as $swap_n => $swap_url ) : ?>
+															<img class="ehdr__figure-img" data-ehdr-i="<?php echo esc_attr( (string) $swap_n ); ?>" data-ehdr-src="<?php echo esc_url( $swap_url ); ?>" alt="" decoding="async" />
+														<?php endforeach; ?>
 													</figure>
 												<?php endif; ?>
 

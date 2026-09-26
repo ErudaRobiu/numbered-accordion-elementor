@@ -1062,6 +1062,55 @@ nowhere to edit it, which is the worse of the two. The fields win when a panel
 has both, because a panel with both was mid-move and the fields are where it
 was going.
 
+**The panel picture changes under the link you are pointing at.** Each link slot
+carries an optional picture of its own, and hovering or focusing that link swaps
+it into the panel's picture — which is the move that makes a mega menu feel like
+a menu of places rather than a list of words.
+
+It is done with layers and opacity, which is the only version of this that does
+not disturb the panel. The pictures are stacked in the figure, absolutely
+positioned and all fitted to the same box — the resting picture's — so a
+portrait among landscapes crops instead of resizing the panel while the pointer
+is halfway down the list. Nothing about the height of the figure, the list
+beside it or the panel around it depends on which layer is showing. The fade is
+a CSS transition on `opacity`, so the existing reduced-motion block already
+answers for it: `.ehdr__figure img` is in the list that has its transitions cut
+to a millisecond, which makes the swap a cut rather than a dissolve for anyone
+who asked for less movement.
+
+The `!important` on those two rules is inherited from the problem the rule above
+them already had: `.ehdr .ehdr__figure img` has to shout `opacity: 1 !important`
+because half the themes and kits in existence ship `img:hover { opacity: .75 }`,
+and in a menu panel that reads as a fault. A layer that needs to sit at zero has
+to beat the same rule.
+
+**A link with no picture of its own puts the panel's back**, rather than leaving
+the last one it was shown. A picture that stays behind says the pointer is
+somewhere it is not, and on a list where only some links have pictures that is
+the reading nobody intends. Restoring happens on the list's `mouseleave` rather
+than each link's, because between two rows there is a gap of a pixel or two
+where neither is hovered and restoring there would flick the resting picture in
+and out on the way down.
+
+**The layers carry `data-ehdr-src`, not `src`.** A panel is in the page at full
+size with only its opacity down, so a lazy image inside one is in the viewport
+and fetched on load like any other — six photographs for a menu nobody has
+touched, on every page of the site. The script fills them in when the panel
+first opens, which is always before a link inside it can be hovered. A visitor
+with no JavaScript gets the resting picture and no swapping, which is what they
+had before.
+
+Both halves of that are measured rather than asserted. `tests/browser/header.html`
+carries a panel where the first and third links have pictures and the second
+does not, and the probe checks that nothing is fetched before the panel opens,
+that both layers get a `src` when it does, that the picture follows the pointer
+down the list and back to the panel's own, that the keyboard gets the same menu
+as the pointer, and that the figure's box is the same three measurements
+throughout. The numbering is proven in PHP as well, because the slots are
+numbered one to ten in the panel while the links are numbered by where they land
+in the list, and a link with no picture between two that have one is exactly
+where those two ways of counting come apart.
+
 That parser is in `modules/header/class-header-links.php`, testable without
 WordPress or Elementor, and it is more forgiving than it was: the link may come
 first or second, a slug or `#42` resolves through `get_page_by_path()` on

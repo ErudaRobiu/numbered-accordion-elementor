@@ -1570,6 +1570,69 @@ $only  = header_panel_markup( array( 'links' => true ) );
 $noimg = header_panel_markup( array( 'links' => true, 'blurb' => true ) );
 
 check( 'a panel with both sides is not marked solo', false, (bool) strpos( $both, 'ehdr__panel-inner--solo' ) );
+
+/*
+ * And the pictures a link swaps in.
+ *
+ * The layer's number and the link's have to be the same number, and nothing
+ * either file says on its own can promise that: the slots are numbered one to
+ * ten in the panel, the links are numbered by where they end up in the list,
+ * and a link with no picture between two that have one is exactly where those
+ * two ways of counting come apart.
+ */
+$swap_probe = new Header_Render_Probe();
+$swapped    = $swap_probe->markup(
+	array(
+		'items' => array(
+			array(
+				'label'       => 'Services',
+				'has_panel'   => 'yes',
+				'panel_image' => array( 'url' => 'https://example.test/rest.jpg' ),
+			)
+			+ header_slot( 1, 'First', '/one' )
+			+ array( 'panel_link_1_image' => array( 'url' => 'https://example.test/one.jpg' ) )
+			+ header_slot( 2, 'Second', '/two' )
+			+ header_slot( 3, 'Third', '/three' )
+			+ array( 'panel_link_3_image' => array( 'url' => 'https://example.test/three.jpg' ) ),
+		),
+	)
+);
+
+check( 'a panel with a hover picture says so on its figure', 1, preg_match( '/<figure class="ehdr__figure ehdr__figure--swap">/', $swapped ) );
+check( 'the resting picture is the panel\'s own', 1, preg_match( '/data-ehdr-rest src="https:\/\/example\.test\/rest\.jpg"/', $swapped ) );
+check( 'a layer is added for each link that carries one', 2, preg_match_all( '/class="ehdr__figure-img" data-ehdr-i=/', $swapped ) );
+check( 'the layers are not fetched by the markup', 0, preg_match( '/data-ehdr-i="\d+" src=/', $swapped ) );
+check( 'they carry their source for the script instead', 1, preg_match( '/data-ehdr-i="1" data-ehdr-src="https:\/\/example\.test\/one\.jpg"/', $swapped ) );
+
+// The third link, not the second: the second has no picture, and a layer
+// numbered by slot while its link is numbered by position would put the third
+// link's picture behind the second link.
+check( 'the third link owns the third layer', 1, preg_match( '/data-ehdr-swap="3"[^>]*>(?:(?!<\/a>).)*Third/s', $swapped ) );
+check( 'and the second link owns none', 0, preg_match( '/data-ehdr-swap="2"/', $swapped ) );
+check( 'so exactly two links claim a layer', 2, preg_match_all( '/data-ehdr-swap="/', $swapped ) );
+check( 'and every layer has a link that claims it', true, 1 === preg_match( '/data-ehdr-i="1"/', $swapped ) && 1 === preg_match( '/data-ehdr-swap="1"/', $swapped ) && 1 === preg_match( '/data-ehdr-i="3"/', $swapped ) && 1 === preg_match( '/data-ehdr-swap="3"/', $swapped ) );
+
+// A panel whose only pictures are on its links still gets a side to show them
+// in, resting on the first of them.
+$rest_from_link = $swap_probe->markup(
+	array(
+		'items' => array(
+			array(
+				'label'     => 'Services',
+				'has_panel' => 'yes',
+			)
+			+ header_slot( 1, 'First', '/one' )
+			+ array( 'panel_link_1_image' => array( 'url' => 'https://example.test/one.jpg' ) ),
+		),
+	)
+);
+
+check( 'a panel with no picture of its own rests on the first link\'s', 1, preg_match( '/data-ehdr-rest src="https:\/\/example\.test\/one\.jpg"/', $rest_from_link ) );
+check( 'and that earns it an aside', false, (bool) strpos( $rest_from_link, 'ehdr__panel-inner--solo' ) );
+
+// Nothing swapping, nothing added: this is what every saved header renders.
+check( 'a panel with no hover pictures is not marked as swapping', false, (bool) strpos( $both, 'ehdr__figure--swap' ) );
+check( 'and no link claims a layer', 0, preg_match( '/data-ehdr-swap/', $both ) );
 check( 'and not marked as a short dropdown either', false, (bool) strpos( $both, 'ehdr__item--drop' ) );
 
 // The picture and the caption are one column, so they have to be one element.
