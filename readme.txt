@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.55.0
+Stable tag: 2.56.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,30 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.56.0 =
+* **Mega Header panel links take less typing and break less often.** A panel's
+  line can now name a page by its slug or by `#42` for its ID, and the link is
+  looked up when the page is rendered — so a page moved under a different
+  parent no longer leaves the header pointing at where it used to be. A line
+  with no label takes the page's own title, or the last part of the path when
+  there is no page to ask, so a pasted list of URLs is already a menu. The
+  link may come first or second, `\|` puts a pipe in a label, and a link on
+  somebody else's site opens in a new tab on its own — `^` on the end asks for
+  one anywhere.
+* **Or a panel's links can come from a WordPress menu.** "Links come from" on
+  a menu item chooses between the typed list and a menu built in Appearance >
+  Menus: either its top-level items, or whatever is nested under one of them.
+  That is the only place on a WordPress site with a real link picker and
+  drag-and-drop ordering, its links are stored as page IDs so renaming a page
+  cannot break them, and a client can edit the menu without opening Elementor.
+  A menu item's Description becomes the line of small print under its link.
+* The old `Label | /url | description` line is unchanged and every saved header
+  keeps working: a repeater row with no source set reads its typed list, as
+  before. Menu items that open a panel are now marked with a caret in the
+  repeater, so a twelve-item menu can be read at a glance.
+* Fifty-six new assertions cover the parsing, the menu reading and the choice
+  between them.
 
 = 2.55.0 =
 * **Housekeeping: 695 lines of repeated code removed.** Thirteen of the sixteen

@@ -1015,6 +1015,66 @@ browsers drop the declaration and the tracking silently does nothing. The
 control here is in `em`, and the probe asserts the computed value is a real
 length.
 
+**A panel's links are typed lines or a WordPress menu, and that is a limit of
+Elementor rather than a preference.** There is no nested repeater and there is
+not going to be one: a repeater's value is a flat array and the panel UI has
+nowhere to put a second level. So a panel gets two ways in, and the interesting
+work is in making the cheap one cost less.
+
+The typed list stayed a textarea because it is pasteable — a twelve-item panel
+is one paste rather than twelve clicks of "add item" — but a textarea of
+hand-typed paths is also the one place in the widget that goes stale silently.
+Rename a page and the header keeps pointing at where it used to be, and nothing
+says so. So a line's link may now be a **page slug** or `#42` for a page ID,
+resolved through `get_page_by_path()` or `get_post()` when the page is rendered
+rather than when the line was typed. That is a lookup per link, cached for the
+request, in exchange for links that follow the page.
+
+The rest of the parsing is there to remove the ways a line could be wrong:
+
+* The link may come **first or second**, because a pasted list of URLs arrives
+  URL-first and reordering forty of them by hand is the kind of work that makes
+  people leave the descriptions out.
+* A line with **no label** names itself — the page's own title if the slug
+  resolved, otherwise the last part of the path title-cased, so
+  `/services/waste-heat` reads "Waste Heat". A leading pipe, which is what a
+  deleted label leaves behind, used to drop the row entirely; a dropped row
+  renders as a gap nobody notices.
+* A **single field** is a label, not a slug, unless it is written the way a slug
+  is written — hyphens or slashes, no spaces. `waste-heat-recovery` is a page;
+  `Services` is a heading, even on a site with a page called services. That is
+  the one place guessing would turn somebody's heading into a link, so it does
+  not guess.
+* A pipe inside a label is `\|`, and a link to another host opens in a new tab
+  without being asked, with `^` on the end of any link to force it. `www.` is
+  stripped from both sides of that host comparison: a site reached both ways is
+  one site, and marking its own links as outside ones is the worse mistake.
+
+The second way in is **a menu from Appearance > Menus**, chosen per repeater
+row. Either a whole menu's top level, or whatever is nested under one of its
+items — which is why one "Main navigation" menu with children can feed every
+panel in the header, and why the picker offers `Menu → what is under "Services"`
+as well as the menu itself. Items with no children are not offered, because they
+would make an empty panel. A menu is the only place on a WordPress site with a
+real link picker and drag-and-drop ordering, its items are stored as page IDs so
+renaming a page cannot break them, and it can be edited by someone who has never
+opened Elementor. The item's Description becomes the small print under the link,
+and its own new-tab setting is carried over.
+
+Two things about that picker are deliberate. The options are built **only in the
+admin**: `register_controls()` runs on the front end too — Elementor needs the
+control list to read a widget's saved settings — and a header on every page of
+the site is not the place to go and count the site's menus. The front end needs
+only the saved value, and a SELECT2 renders that whether or not its options are
+present. And **a repeater row with no `panel_source` at all means the typed
+list**, because that is what every header saved before this release contains;
+any other reading of the absent value empties every panel on the site.
+
+The logic lives in `modules/header/class-header-links.php` rather than the
+widget, so it is testable without WordPress or Elementor — the lookup arrives as
+a callable the tests replace with a fake page table. Fifty-six assertions cover
+it.
+
 ### Spin
 
 A section added to widgets that already exist, rather than a widget of its own.

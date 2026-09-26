@@ -106,6 +106,7 @@ require_once dirname( __DIR__ ) . '/modules/smoothscroll/class-smoothscroll-modu
 require_once dirname( __DIR__ ) . '/modules/badge/class-spin-controls.php';
 require_once dirname( __DIR__ ) . '/modules/transitions/class-transitions-fields.php';
 require_once dirname( __DIR__ ) . '/modules/industry/class-industry-content.php';
+require_once dirname( __DIR__ ) . '/modules/header/class-header-links.php';
 
 // One module from each side of the split, so the shared base class and the
 // modules that deliberately do not use it are both exercised.
