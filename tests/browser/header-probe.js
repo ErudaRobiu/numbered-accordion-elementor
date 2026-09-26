@@ -49,6 +49,26 @@ function check(name, ok, detail) {
 
   const clear = c => /rgba\(\s*0,\s*0,\s*0,\s*0\s*\)|transparent/.test(c);
 
+  /*
+   * Before any panel has been opened, the pictures a link swaps in must not
+   * have been fetched. A panel is in the page at full size with only its
+   * opacity down, so a lazy image inside one is in the viewport and loaded like
+   * any other -- which is why these carry data-ehdr-src and nothing else until
+   * the panel they are in is opened.
+   */
+  const cold = await page.evaluate(() => {
+    const layers = [...document.querySelectorAll('.ehdr__figure-img[data-ehdr-i]')];
+    return {
+      count: layers.length,
+      loaded: layers.filter(l => l.getAttribute('src')).length,
+      waiting: layers.filter(l => l.getAttribute('data-ehdr-src')).length,
+    };
+  });
+
+  check('a hover picture is not fetched until its panel is opened',
+    cold.count > 0 && cold.loaded === 0 && cold.waiting === cold.count,
+    cold.loaded + ' of ' + cold.count + ' layers had a src, ' + cold.waiting + ' waiting');
+
   const rest = await bar();
   check('at the top the bar is completely transparent',
     clear(rest.bg) && !rest.stuck && /blur\(0px\)|none/.test(rest.backdrop),
@@ -478,6 +498,91 @@ function check(name, ok, detail) {
 
   check('a panel with nothing but links is one column',
     restOpen.solo === 1, restOpen.solo + ' track');
+
+  /* ------------------------------------------- the picture that changes --- */
+
+  /*
+   * Hovering a link with a picture on it swaps the panel's, and everything
+   * about that is opacity: the box the pictures are fitted to belongs to the
+   * resting one, so the list beside them cannot move as the pointer goes down
+   * it. Measured at the far end of the fade rather than during it -- what
+   * matters is which picture is showing, not the frame it is on.
+   */
+  const swap = await page.evaluate(async () => {
+    const wait = ms => new Promise(x => setTimeout(x, ms));
+    const item = document.querySelectorAll('.ehdr__item')[2];
+    const links = [...item.querySelectorAll('.ehdr__panel-link')];
+    const list = item.querySelector('.ehdr__links');
+    const op = id => +getComputedStyle(document.getElementById(id)).opacity;
+    const box = () => {
+      const r = document.querySelector('.ehdr__figure').getBoundingClientRect();
+      return Math.round(r.width) + 'x' + Math.round(r.height);
+    };
+    const shot = () => ({ rest: op('panelpic'), one: op('swap1'), three: op('swap3'), box: box() });
+
+    const out = { opened: shot(), hydrated: 0 };
+
+    out.hydrated = [...item.querySelectorAll('.ehdr__figure-img[data-ehdr-i]')]
+      .filter(l => l.getAttribute('src')).length;
+
+    links[0].dispatchEvent(new MouseEvent('mouseenter'));
+    await wait(600);
+    out.first = shot();
+
+    // The second link has no picture of its own, so the panel's comes back
+    // rather than the first link's staying behind.
+    links[1].dispatchEvent(new MouseEvent('mouseenter'));
+    await wait(600);
+    out.second = shot();
+
+    links[2].dispatchEvent(new MouseEvent('mouseenter'));
+    await wait(600);
+    out.third = shot();
+
+    // And the keyboard gets the same menu as the pointer.
+    links[0].dispatchEvent(new MouseEvent('mouseleave'));
+    list.dispatchEvent(new MouseEvent('mouseleave'));
+    await wait(600);
+    out.left = shot();
+
+    links[2].focus();
+    await wait(600);
+    out.focused = shot();
+    links[2].blur();
+
+    return out;
+  });
+
+  check('opening the panel fetches its hover pictures',
+    swap.hydrated === 2, swap.hydrated + ' of 2 layers given a src on open');
+
+  check('the panel rests on its own picture',
+    swap.opened.rest > 0.9 && swap.opened.one < 0.1 && swap.opened.three < 0.1,
+    'rest ' + swap.opened.rest + ', layers ' + swap.opened.one + ' / ' + swap.opened.three);
+
+  check('hovering a link swaps the picture for its own',
+    swap.first.one > 0.9 && swap.first.rest < 0.1,
+    'layer one ' + swap.first.one + ', rest ' + swap.first.rest);
+
+  check('a link with no picture of its own puts the panel\'s back',
+    swap.second.rest > 0.9 && swap.second.one < 0.1,
+    'rest ' + swap.second.rest + ', layer one ' + swap.second.one);
+
+  check('and the next link with one takes it over',
+    swap.third.three > 0.9 && swap.third.rest < 0.1 && swap.third.one < 0.1,
+    'layer three ' + swap.third.three + ', rest ' + swap.third.rest);
+
+  check('leaving the list restores the panel picture',
+    swap.left.rest > 0.9 && swap.left.three < 0.1,
+    'rest ' + swap.left.rest + ', layer three ' + swap.left.three);
+
+  check('focusing a link changes the picture the way hovering it does',
+    swap.focused.three > 0.9 && swap.focused.rest < 0.1,
+    'layer three ' + swap.focused.three + ', rest ' + swap.focused.rest);
+
+  check('and the picture box never moves while they change',
+    swap.opened.box === swap.first.box && swap.first.box === swap.third.box,
+    [swap.opened.box, swap.first.box, swap.third.box].join(' -> '));
 
   /*
    * And it is a dropdown rather than a mega panel: four short rows stretched

@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.57.0
+Stable tag: 2.58.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,29 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.58.0 =
+* **The panel picture changes under the link you are pointing at.** Every link
+  slot has a new "Picture on hover" field: hover or tab to that link and its
+  picture fades into the panel's, which is what makes a mega menu read as a
+  menu of places rather than a list of words.
+* A link with no picture of its own puts the panel's picture back, so the
+  picture is never claiming you are somewhere you are not. Taking the pointer
+  out of the list restores it too, and the fade cannot flicker between two rows
+  on the way down.
+* **The panel cannot move while the picture changes.** The pictures are layers
+  fitted to the resting one's box, so a portrait among landscapes crops instead
+  of resizing the panel under your hand.
+* "Picture change on hover" in the Panel style section sets the fade — nought
+  makes it a cut, and a visitor who asked for reduced motion gets the cut
+  whatever it says.
+* The hover pictures are not fetched until the panel is first opened. A panel
+  sits in the page with only its opacity down, so left to itself the browser
+  would load every one of them on every page of the site before anybody touched
+  the menu.
+* Nine new measurements in the browser probe cover the swap in real Chrome, and
+  thirteen in PHP cover the markup — including the case that decides it, a link
+  with no picture sitting between two that have one.
 
 = 2.57.0 =
 * **Mega Header panel links are fields now, not typed text.** Turn on "Opens a

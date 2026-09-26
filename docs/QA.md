@@ -783,6 +783,35 @@ script-blocked fallback, against `tests/browser/header.html`.
 - [ ] Clear that textarea, save, reopen: the control is gone from the item
 - [ ] Fill in Link 1 on a panel that still has a typed list: the fields render
       and the list is ignored
+
+### The picture that changes on hover
+
+- [ ] Each link slot has a **"Picture on hover"** field under its small print
+- [ ] Give two or three links a picture, leave the rest empty, and set a panel
+      picture as usual. **Hovering a link with one swaps the panel's picture for
+      it**, and it fades rather than cutting
+- [ ] **Hovering a link without one puts the panel's picture back** — it must not
+      keep the last picture it was shown
+- [ ] Move the pointer slowly down the list: the picture must not flicker between
+      rows, where neither link is hovered for a pixel or two
+- [ ] **Take the pointer out of the list and the panel's own picture returns**
+- [ ] **Tab into the list**: the picture changes on focus the same way, and goes
+      back when focus leaves
+- [ ] **The panel must not move as the picture changes.** Watch the list beside
+      it, and use a portrait picture among landscapes on purpose — it should crop
+      to the same box, never resize the panel
+- [ ] A panel with pictures **only** on its links and none of its own still shows
+      a picture: the first link's, resting
+- [ ] "Picture change on hover" in the Panel style section sets the fade, and
+      nought makes it a cut
+- [ ] **With reduced motion on** (macOS: System Settings > Accessibility >
+      Display > Reduce motion) the picture still changes, but instantly
+- [ ] **Open the network panel, reload, and do not touch the menu**: none of the
+      hover pictures are fetched. Open the panel and they load then
+- [ ] First hover after opening a panel shows the picture straight away rather
+      than a flash of nothing
+- [ ] A panel with no hover pictures anywhere is unchanged — one picture, no
+      extra requests
 - [ ] "Goes back to full width" set to **Only at the top** keeps it compact
       while you scroll up mid-page, and restores it when you reach the top.
       Set to **Whenever you scroll up** it comes back on any upward scroll

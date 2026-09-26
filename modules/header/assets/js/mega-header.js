@@ -136,6 +136,144 @@
 			}
 		} );
 
+		/*
+		 * The panel picture, changed by the link under the pointer.
+		 *
+		 * The layers are in the markup already, one per link that carries a
+		 * picture, stacked over the resting one and faded by CSS. All this does
+		 * is move a class, which means the fade is the stylesheet's business
+		 * and reduced motion is already answered there.
+		 *
+		 * Their `src` is not in the markup. A panel sits in the page at full
+		 * size with only its opacity down, so a lazy image inside one is in the
+		 * viewport and fetched on load like any other: six photographs for a
+		 * menu nobody has touched, on every page of the site. They are filled
+		 * in when the panel first opens, which is always before a link inside
+		 * it can be hovered.
+		 */
+		var swaps = [];
+
+		owners.forEach( function ( item ) {
+			var figure = item.querySelector( '.ehdr__figure--swap' );
+
+			if ( ! figure ) {
+				return;
+			}
+
+			var layers = toArray( figure.querySelectorAll( '.ehdr__figure-img' ) );
+			var rest = figure.querySelector( '[data-ehdr-rest]' );
+			var links = toArray( item.querySelectorAll( '.ehdr__panel-link' ) );
+			var list = item.querySelector( '.ehdr__links' );
+			var filled = false;
+
+			if ( ! rest || ! links.length ) {
+				return;
+			}
+
+			function wear( layer ) {
+				layers.forEach( function ( one ) {
+					if ( one === layer ) {
+						one.classList.add( 'is-on' );
+					} else {
+						one.classList.remove( 'is-on' );
+					}
+				} );
+			}
+
+			function restore() {
+				wear( rest );
+			}
+
+			function hydrate() {
+				if ( filled ) {
+					return;
+				}
+
+				filled = true;
+
+				layers.forEach( function ( layer ) {
+					var src = layer.getAttribute( 'data-ehdr-src' );
+
+					if ( src && ! layer.getAttribute( 'src' ) ) {
+						layer.setAttribute( 'src', src );
+					}
+				} );
+			}
+
+			/*
+			 * Every link in the list, not only the ones carrying a picture.
+			 *
+			 * A link with none of its own puts the panel's picture back, rather
+			 * than leaving the last one it was shown: a picture that stays
+			 * behind says the pointer is somewhere it is not, and on a list
+			 * where only some links have pictures that is the reading nobody
+			 * intends.
+			 */
+			links.forEach( function ( link ) {
+				var which = link.getAttribute( 'data-ehdr-swap' );
+				var layer = null;
+
+				if ( which ) {
+					layers.forEach( function ( one ) {
+						if ( one.getAttribute( 'data-ehdr-i' ) === which ) {
+							layer = one;
+						}
+					} );
+				}
+
+				function onto() {
+					hydrate();
+					wear( layer || rest );
+				}
+
+				link.addEventListener( 'mouseenter', onto );
+
+				// Keyboard, and on the same terms: tabbing down the list should
+				// change the picture the way reading down it with a pointer
+				// does, or the list is two different menus.
+				link.addEventListener( 'focus', onto );
+			} );
+
+			/*
+			 * Leaving the list puts the picture back, and leaving the list is
+			 * the event rather than leaving a link: between two rows there is a
+			 * gap of a pixel or two where neither is hovered, and restoring
+			 * there would flick the resting picture in and out on the way down.
+			 */
+			if ( list ) {
+				list.addEventListener( 'mouseleave', restore );
+
+				list.addEventListener( 'focusout', function ( event ) {
+					if ( ! event.relatedTarget || ! list.contains( event.relatedTarget ) ) {
+						restore();
+					}
+				} );
+			}
+
+			swaps.push( {
+				item: item,
+				restore: restore,
+				hydrate: hydrate,
+			} );
+		} );
+
+		/**
+		 * Fill in one panel's pictures, and put every other panel back.
+		 *
+		 * @param {Element|null} item The panel being opened, if any.
+		 */
+		function tendSwaps( item ) {
+			swaps.forEach( function ( swap ) {
+				if ( swap.item === item ) {
+					swap.hydrate();
+				} else {
+					// A panel closed mid-hover would otherwise be reopened
+					// showing the last link's picture rather than its own.
+					swap.restore();
+				}
+			} );
+		}
+
 		function clearTimers() {
 			if ( openTimer ) {
 				window.clearTimeout( openTimer );
@@ -159,6 +297,8 @@
 			}
 
 			current = item;
+
+			tendSwaps( item );
 
 			owners.forEach( function ( one ) {
 				var trigger = one.querySelector( '.ehdr__link' );
