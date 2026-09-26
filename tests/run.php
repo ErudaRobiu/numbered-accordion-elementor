@@ -27,6 +27,7 @@ use ErudaToolkit\Modules\SmoothScroll\SmoothScroll_Module;
 use ErudaToolkit\Fields;
 use ErudaToolkit\Modules\Transitions\Transitions_Fields;
 use ErudaToolkit\Modules\Industry\Industry_Content;
+use ErudaToolkit\Modules\Header\Header_Links;
 use ErudaToolkit\Elementor_Module;
 use ErudaToolkit\Module;
 use ErudaToolkit\Modules\Steps\Steps_Module;
@@ -743,21 +744,41 @@ foreach ( $module_files as $relative ) {
 /* ------------------------------------------------ Mega_Header_Widget --- */
 
 /*
- * The panel-links textarea is the only place in the header where someone's
- * typing becomes markup, so it is the only place a stray character can empty
- * a menu. Elementor has no nested repeater, which is why this is a textarea
- * at all -- see the note on the control.
+ * A panel's links are the only place in the header where someone's typing
+ * becomes markup, so it is the only place a stray character can empty a menu.
+ * Elementor has no nested repeater, which is why a panel's links are typed
+ * lines or a WordPress menu rather than a repeater inside a repeater -- see
+ * the note on the control.
  */
 require_once __DIR__ . '/stubs/elementor.php';
 require_once dirname( __DIR__ ) . '/modules/header/widgets/class-mega-header-widget.php';
 
-$header = new \ErudaToolkit\Modules\Header\Widgets\Mega_Header_Widget();
-// No setAccessible(): it has done nothing since PHP 8.1 and is deprecated as
-// of 8.5, which turns a clean run into a wall of notices.
-$parse = new ReflectionMethod( $header, 'parse_links' );
+/**
+ * Stand-in for WordPress's slug and ID lookup.
+ *
+ * @param string $ref Slug path, or `#` and a post ID.
+ * @return array{url: string, label: string}
+ */
+function header_page_lookup( $ref ) {
+	$pages = array(
+		'waste-heat-recovery' => array(
+			'url'   => 'https://thermstar.test/services/waste-heat-recovery/',
+			'label' => 'Waste Heat Recovery',
+		),
+		'#42'                 => array(
+			'url'   => 'https://thermstar.test/about/',
+			'label' => 'About ThermStar',
+		),
+	);
 
-$links = function ( $raw ) use ( $parse, $header ) {
-	return $parse->invoke( $header, $raw );
+	return isset( $pages[ $ref ] ) ? $pages[ $ref ] : array(
+		'url'   => '',
+		'label' => '',
+	);
+}
+
+$links = function ( $raw, $resolver = null, $host = '' ) {
+	return Header_Links::parse( $raw, $resolver, $host );
 };
 
 check( 'no text is no links', array(), $links( '' ) );
@@ -766,7 +787,14 @@ check( 'a non-string is no links', array(), $links( null ) );
 
 check(
 	'label, url and note',
-	array( array( 'label' => 'Feasibility', 'url' => '/f', 'note' => 'What it costs' ) ),
+	array(
+		array(
+			'label'   => 'Feasibility',
+			'url'     => '/f',
+			'note'    => 'What it costs',
+			'new_tab' => false,
+		),
+	),
 	$links( 'Feasibility | /f | What it costs' )
 );
 
@@ -774,7 +802,14 @@ check(
 // reasonable thing to want, and dropping it would silently eat a line.
 check(
 	'a label alone still counts',
-	array( array( 'label' => 'Services', 'url' => '', 'note' => '' ) ),
+	array(
+		array(
+			'label'   => 'Services',
+			'url'     => '',
+			'note'    => '',
+			'new_tab' => false,
+		),
+	),
 	$links( 'Services' )
 );
 
@@ -788,9 +823,6 @@ check(
 check( 'CRLF splits', 2, count( $links( "One | /one\r\nTwo | /two" ) ) );
 check( 'CR splits', 2, count( $links( "One | /one\rTwo | /two" ) ) );
 
-// A row with no label is not a row, however many pipes it has.
-check( 'a leading pipe drops the row', array(), $links( ' | /nowhere | orphaned' ) );
-
 // Trailing pipes are what you get from deleting a description but not the
 // separator, and they must not become an empty note in the markup.
 check( 'a trailing pipe leaves an empty note', '', $links( 'One | /one |' )[0]['note'] );
@@ -799,6 +831,184 @@ check( 'a trailing pipe leaves an empty note', '', $links( 'One | /one |' )[0]['
 check( 'a fourth field is ignored', 'note', $links( 'One | /one | note | extra' )[0]['note'] );
 
 check( 'surrounding spaces are trimmed', 'One', $links( '   One   |   /one   ' )[0]['label'] );
+
+/*
+ * What a line may look like now.
+ *
+ * The old form -- `Label | /url | note`, in that order, with a real URL typed
+ * out -- is the first case above and has to keep working: it is what every
+ * saved header on the site contains. Everything below is a form that used to
+ * be a broken link or a dropped line.
+ */
+
+// A slug or a page ID is looked up on render, so a line can be written the way
+// the page is known rather than the way its URL reads today. Moving the page
+// then cannot leave the header pointing at where it used to be.
+check( 'a slug becomes a permalink', 'https://thermstar.test/services/waste-heat-recovery/', $links( 'Waste heat | waste-heat-recovery', 'header_page_lookup' )[0]['url'] );
+check( 'a typed label wins over the page title', 'Waste heat', $links( 'Waste heat | waste-heat-recovery', 'header_page_lookup' )[0]['label'] );
+check( 'a slug on its own takes the page title', 'Waste Heat Recovery', $links( 'waste-heat-recovery', 'header_page_lookup' )[0]['label'] );
+check( 'a page ID resolves too', 'https://thermstar.test/about/', $links( '#42', 'header_page_lookup' )[0]['url'] );
+check( 'with its title', 'About ThermStar', $links( '#42', 'header_page_lookup' )[0]['label'] );
+check( 'a resolved page on this site stays in this tab', false, $links( 'Waste heat | waste-heat-recovery', 'header_page_lookup', 'thermstar.test' )[0]['new_tab'] );
+
+// An unknown slug becomes the path it reads like rather than vanishing: a
+// dropped link renders as a heading, which looks deliberate and is the harder
+// mistake to spot.
+check( 'an unresolved slug falls back to its path', '/help-centre', $links( 'Support | help-centre', 'header_page_lookup' )[0]['url'] );
+check( 'and does so with no resolver at all', '/help-centre', $links( 'Support | help-centre' )[0]['url'] );
+check( 'an unresolved page ID links nowhere', '', $links( 'Support | #999', 'header_page_lookup' )[0]['url'] );
+
+// Either way round, because a pasted list of URLs is the common case and
+// nobody should have to reorder it by hand.
+check( 'the url may come first', '/services/feasibility', $links( '/services/feasibility | Feasibility | What it costs' )[0]['url'] );
+check( 'with the label second', 'Feasibility', $links( '/services/feasibility | Feasibility | What it costs' )[0]['label'] );
+check( 'and the note still third', 'What it costs', $links( '/services/feasibility | Feasibility | What it costs' )[0]['note'] );
+
+// A link with no label names itself, which is also what a leading pipe -- a
+// description deleted but not its separator -- now produces instead of a
+// silently dropped row.
+check( 'a bare path names itself', 'Waste Heat', $links( '/services/waste-heat' )[0]['label'] );
+check( 'a leading pipe names the link rather than dropping it', 'Nowhere', $links( ' | /nowhere | orphaned' )[0]['label'] );
+check( 'a file extension is not part of the name', 'Brochure', $links( '/files/brochure.pdf' )[0]['label'] );
+check( 'a query string is not either', 'Contact', $links( '/contact?ref=header' )[0]['label'] );
+check( 'an anchor names itself', 'Our System', $links( '#our-system' )[0]['label'] );
+check( 'an anchor is left alone as a url', '#our-system', $links( '#our-system' )[0]['url'] );
+check( 'a mailto names the address', 'hello@thermstar.test', $links( 'mailto:hello@thermstar.test' )[0]['label'] );
+check( 'a bare host gets a scheme', 'https://www.example.com/x', $links( 'Example | www.example.com/x' )[0]['url'] );
+check( 'a line with neither label nor link is not a row', array(), $links( ' |  | ' ) );
+
+// A pipe is the separator, so a label that needs one escapes it.
+check( 'an escaped pipe stays in the label', 'Heat | power', $links( 'Heat \| power | /chp' )[0]['label'] );
+check( 'and does not eat the url', '/chp', $links( 'Heat \| power | /chp' )[0]['url'] );
+
+// Two ways to get a new tab: ask for one, or link to somebody else's site.
+check( 'a caret asks for a new tab', true, $links( 'Datasheet | /files/x.pdf^' )[0]['new_tab'] );
+check( 'and is not part of the url', '/files/x.pdf', $links( 'Datasheet | /files/x.pdf^' )[0]['url'] );
+check( 'another host opens in a new tab', true, $links( 'Standard | https://iso.org/1234', null, 'thermstar.test' )[0]['new_tab'] );
+check( 'our own host does not', false, $links( 'News | https://thermstar.test/news', null, 'thermstar.test' )[0]['new_tab'] );
+check( 'www is the same host', false, $links( 'News | https://www.thermstar.test/news', null, 'thermstar.test' )[0]['new_tab'] );
+check( 'without a host to compare, nothing is outside', false, $links( 'Standard | https://iso.org/1234' )[0]['new_tab'] );
+
+// What tells a label from a link, which is the one judgement the parser makes.
+check( 'a word is a label, not a target', false, Header_Links::is_target( 'Services' ) );
+check( 'a path is a target', true, Header_Links::is_target( '/services' ) );
+check( 'a slug is a reference to look up', true, Header_Links::is_reference( 'services/feasibility' ) );
+check( 'a path is not a reference', false, Header_Links::is_reference( '/services' ) );
+check( 'a full url is not a reference', false, Header_Links::is_reference( 'https://x.test/y' ) );
+check( 'a hyphenated word is slug-shaped', true, Header_Links::is_slug_path( 'waste-heat-recovery' ) );
+check( 'a nested slug is too', true, Header_Links::is_slug_path( 'services/feasibility' ) );
+check( 'a single word is not', false, Header_Links::is_slug_path( 'Services' ) );
+check( 'nor is a phrase', false, Header_Links::is_slug_path( 'Waste heat recovery' ) );
+check( 'so a word on its own is still a heading', '', $links( 'Services' )[0]['url'] );
+check( 'while a slug on its own is a link', '/help-centre', $links( 'help-centre' )[0]['url'] );
+
+/* -------------------------------------- a panel fed by a WordPress menu --- */
+
+/*
+ * The other way in. Appearance > Menus is the only place on a WordPress site
+ * with a real link picker and drag-and-drop ordering, and its links are stored
+ * as page ids, so they survive a page being renamed or moved.
+ */
+$menu_items = array(
+	array(
+		'id'      => 10,
+		'parent'  => 0,
+		'label'   => 'Services',
+		'url'     => 'https://thermstar.test/services/',
+		'note'    => '',
+		'new_tab' => false,
+	),
+	array(
+		'id'      => 11,
+		'parent'  => 10,
+		'label'   => 'Waste heat recovery',
+		'url'     => 'https://thermstar.test/services/waste-heat-recovery/',
+		'note'    => 'Capture what the stack throws away',
+		'new_tab' => false,
+	),
+	array(
+		'id'      => 12,
+		'parent'  => 10,
+		'label'   => '  ',
+		'url'     => 'https://thermstar.test/nowhere/',
+		'note'    => '',
+		'new_tab' => false,
+	),
+	array(
+		'id'      => 13,
+		'parent'  => 10,
+		'label'   => 'Datasheet',
+		'url'     => 'https://example.com/sheet.pdf',
+		'note'    => '',
+		'new_tab' => true,
+	),
+	array(
+		'id'      => 20,
+		'parent'  => 0,
+		'label'   => 'About',
+		'url'     => 'https://thermstar.test/about/',
+		'note'    => '',
+		'new_tab' => false,
+	),
+);
+
+$rows = Header_Links::rows_from_menu_items( $menu_items, 'item:3:10' );
+check( 'a parent reference takes its children', 2, count( $rows ) );
+check( 'in menu order', 'Waste heat recovery', $rows[0]['label'] );
+check( 'with the description as the small print', 'Capture what the stack throws away', $rows[0]['note'] );
+check( 'and the item\'s own new-tab setting', true, $rows[1]['new_tab'] );
+
+$rows = Header_Links::rows_from_menu_items( $menu_items, 'menu:3' );
+check( 'a menu reference takes its top level', 2, count( $rows ) );
+check( 'and nothing nested under it', 'Services', $rows[0]['label'] );
+
+check( 'a reference to nothing yields nothing', array(), Header_Links::rows_from_menu_items( $menu_items, '' ) );
+check( 'so does a malformed one', array(), Header_Links::rows_from_menu_items( $menu_items, 'item:3' ) );
+check( 'and a parent that is not there', array(), Header_Links::rows_from_menu_items( $menu_items, 'item:3:99' ) );
+check( 'items that are not arrays are skipped', array(), Header_Links::rows_from_menu_items( array( 'nonsense' ), 'menu:3' ) );
+
+check( 'the menu id is read back out of a reference', 3, Header_Links::menu_from_ref( 'item:3:10' ) );
+check( 'from a menu reference too', 3, Header_Links::menu_from_ref( 'menu:3' ) );
+check( 'and is zero when there is none', 0, Header_Links::menu_from_ref( 'lines' ) );
+
+/*
+ * And the widget picks between the two per repeater row. An item saved before
+ * this release has no `panel_source` at all, so the absent value has to mean
+ * the typed list -- anything else empties every panel on the site.
+ */
+$header = new \ErudaToolkit\Modules\Header\Widgets\Mega_Header_Widget();
+// No setAccessible(): it has done nothing since PHP 8.1 and is deprecated as
+// of 8.5, which turns a clean run into a wall of notices.
+$panel_rows = new ReflectionMethod( $header, 'panel_rows' );
+
+check(
+	'an item with no source reads its typed lines',
+	'Feasibility',
+	$panel_rows->invoke( $header, array( 'panel_links' => 'Feasibility | /f' ) )[0]['label']
+);
+check(
+	'an item set to a typed list does the same',
+	'Feasibility',
+	$panel_rows->invoke(
+		$header,
+		array(
+			'panel_source' => 'lines',
+			'panel_links'  => 'Feasibility | /f',
+		)
+	)[0]['label']
+);
+check(
+	'an item set to a menu ignores the lines',
+	array(),
+	$panel_rows->invoke(
+		$header,
+		array(
+			'panel_source' => 'wpmenu',
+			'panel_links'  => 'Feasibility | /f',
+		)
+	)
+);
+check( 'an item with nothing in it has no links', array(), $panel_rows->invoke( $header, array() ) );
 
 /*
  * Every slider offers its units, and writes whichever one was picked.

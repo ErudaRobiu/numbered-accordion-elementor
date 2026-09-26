@@ -11,6 +11,7 @@ use Elementor\Controls_Manager;
 use Elementor\Group_Control_Typography;
 use Elementor\Repeater;
 use Elementor\Widget_Base;
+use ErudaToolkit\Modules\Header\Header_Links;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -180,25 +181,63 @@ class Mega_Header_Widget extends Widget_Base {
 		);
 
 		/*
-		 * One link per line, rather than a repeater inside a repeater.
+		 * Where a panel's links come from.
 		 *
 		 * Elementor has no nested repeater and is not going to grow one: the
 		 * control is backed by a flat array and the panel UI has nowhere to
-		 * put a second level. A textarea parsed line by line is what every
-		 * mega menu that works in Elementor does, and it has the side benefit
-		 * of being pasteable -- a twelve-item panel is one paste rather than
-		 * twelve clicks of "add item".
+		 * put a second level. So a panel's links are either typed as lines --
+		 * pasteable, a twelve-item panel in one go rather than twelve clicks
+		 * of "add item" -- or taken from a menu in Appearance > Menus, which
+		 * is the only place on a WordPress site with a real link picker,
+		 * drag-and-drop ordering, and links that survive a page being moved.
 		 */
+		$repeater->add_control(
+			'panel_source',
+			array(
+				'label'     => esc_html__( 'Links come from', 'numbered-accordion' ),
+				'type'      => Controls_Manager::SELECT,
+				'default'   => 'lines',
+				'options'   => array(
+					'lines'  => esc_html__( 'A typed list', 'numbered-accordion' ),
+					'wpmenu' => esc_html__( 'A WordPress menu', 'numbered-accordion' ),
+				),
+				'condition' => array( 'has_panel' => 'yes' ),
+			)
+		);
+
+		$menus = self::menu_options();
+
+		$repeater->add_control(
+			'panel_menu',
+			array(
+				'label'       => esc_html__( 'Which menu', 'numbered-accordion' ),
+				'description' => $menus
+					? esc_html__( 'Edit these links in Appearance > Menus. Whatever you put in a menu item\'s Description shows as its line of small print here.', 'numbered-accordion' )
+					: esc_html__( 'No menus yet. Build one in Appearance > Menus, nest the panel\'s links under a parent item, and it will be offered here.', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT2,
+				'options'     => $menus,
+				'default'     => '',
+				'label_block' => true,
+				'condition'   => array(
+					'has_panel'    => 'yes',
+					'panel_source' => 'wpmenu',
+				),
+			)
+		);
+
 		$repeater->add_control(
 			'panel_links',
 			array(
 				'label'       => esc_html__( 'Panel links', 'numbered-accordion' ),
-				'description' => esc_html__( 'One per line: Label | /url | optional description. The description and the URL can both be left out.', 'numbered-accordion' ),
+				'description' => esc_html__( 'One per line: Label | link | optional small print. The link can be a URL, a path, a page slug or #42 for a page ID, and it can come first instead. A line with no link is a heading; end the link with ^ to open it in a new tab.', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXTAREA,
 				'rows'        => 8,
 				'default'     => '',
-				'placeholder' => "Waste heat recovery | /services/waste-heat | Capture what the stack throws away\nFeasibility assessment | /services/feasibility",
-				'condition'   => array( 'has_panel' => 'yes' ),
+				'placeholder' => "Waste heat recovery | waste-heat-recovery | Capture what the stack throws away\nFeasibility assessment | /services/feasibility\n/contact",
+				'condition'   => array(
+					'has_panel'    => 'yes',
+					'panel_source' => 'lines',
+				),
 			)
 		);
 
@@ -237,7 +276,7 @@ class Mega_Header_Widget extends Widget_Base {
 			array(
 				'type'        => Controls_Manager::REPEATER,
 				'fields'      => $repeater->get_controls(),
-				'title_field' => '{{{ label }}}',
+				'title_field' => '{{{ label }}}<# if ( "yes" === has_panel ) { #> <i class="eicon-caret-down" aria-hidden="true"></i><# } #>',
 				'default'     => array(
 					array( 'label' => esc_html__( 'Home', 'numbered-accordion' ) ),
 					array( 'label' => esc_html__( 'About us', 'numbered-accordion' ) ),
@@ -1386,39 +1425,188 @@ class Mega_Header_Widget extends Widget_Base {
 	}
 
 	/**
-	 * Turn the panel-links textarea into rows.
+	 * A panel's links, from wherever that panel keeps them.
 	 *
-	 * One link per line: `Label | /url | description`. The URL and the
-	 * description are both optional, and a line with neither is still a valid
-	 * row -- a heading in a list of links is a reasonable thing to want.
-	 *
-	 * @param string $raw Textarea contents.
-	 * @return array<int, array{label: string, url: string, note: string}>
+	 * @param array $item One row of the menu repeater.
+	 * @return array<int, array{label: string, url: string, note: string, new_tab: bool}>
 	 */
-	private function parse_links( $raw ) {
-		$rows = array();
+	private function panel_rows( $item ) {
+		$source = isset( $item['panel_source'] ) ? $item['panel_source'] : 'lines';
 
-		if ( ! is_string( $raw ) || '' === trim( $raw ) ) {
-			return $rows;
+		if ( 'wpmenu' === $source ) {
+			$ref = isset( $item['panel_menu'] ) ? (string) $item['panel_menu'] : '';
+
+			return Header_Links::rows_from_menu_items( self::menu_items( $ref ), $ref );
 		}
 
-		foreach ( preg_split( '/\r\n|\r|\n/', $raw ) as $line ) {
-			$line = trim( $line );
+		return Header_Links::parse(
+			isset( $item['panel_links'] ) ? $item['panel_links'] : '',
+			array( $this, 'resolve_reference' ),
+			self::home_host()
+		);
+	}
 
-			if ( '' === $line ) {
-				continue;
+	/**
+	 * Turn a page slug or a `#42` page ID into a permalink and a title.
+	 *
+	 * This is what lets a panel link be written the way the page is known
+	 * rather than the way its URL reads today: the lookup happens on render,
+	 * so moving a page under a different parent does not leave the header
+	 * pointing at where it used to be.
+	 *
+	 * Answers are kept for the request because a header is rendered once per
+	 * page but a panel may name the same page twice, and because a menu of
+	 * five panels is otherwise five sets of the same queries.
+	 *
+	 * @param string $ref A slug path, or `#` followed by a post ID.
+	 * @return array{url: string, label: string}
+	 */
+	public function resolve_reference( $ref ) {
+		static $seen = array();
+
+		$ref = trim( (string) $ref );
+
+		if ( isset( $seen[ $ref ] ) ) {
+			return $seen[ $ref ];
+		}
+
+		$found = array(
+			'url'   => '',
+			'label' => '',
+		);
+		$post  = null;
+
+		if ( preg_match( '/^#(\d+)$/', $ref, $m ) && function_exists( 'get_post' ) ) {
+			$post = get_post( (int) $m[1] );
+		} elseif ( function_exists( 'get_page_by_path' ) ) {
+			$types = function_exists( 'get_post_types' )
+				? array_values( get_post_types( array( 'public' => true ) ) )
+				: array( 'page', 'post' );
+
+			$post = get_page_by_path( trim( $ref, '/' ), OBJECT, $types );
+		}
+
+		if ( $post && ! empty( $post->ID ) && function_exists( 'get_permalink' ) ) {
+			$url = get_permalink( $post->ID );
+
+			if ( is_string( $url ) && '' !== $url ) {
+				$found['url']   = $url;
+				$found['label'] = function_exists( 'get_the_title' ) ? get_the_title( $post->ID ) : '';
+			}
+		}
+
+		$seen[ $ref ] = $found;
+
+		return $found;
+	}
+
+	/**
+	 * The site's own host, for spotting a link that leaves it.
+	 *
+	 * @return string
+	 */
+	private static function home_host() {
+		if ( ! function_exists( 'home_url' ) ) {
+			return '';
+		}
+
+		$host = function_exists( 'wp_parse_url' )
+			? wp_parse_url( home_url( '/' ), PHP_URL_HOST )
+			: parse_url( home_url( '/' ), PHP_URL_HOST ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+
+		return is_string( $host ) ? $host : '';
+	}
+
+	/**
+	 * Every menu, and every menu item with children under it, as something the
+	 * panel picker can offer.
+	 *
+	 * Only built in the admin. `register_controls()` runs on the front end too
+	 * -- Elementor needs the control list to read a widget's saved settings --
+	 * and a header on every page of the site is not the place to go and count
+	 * the site's menus. The front end only ever needs the saved value, and a
+	 * SELECT2 renders that whether or not its options are present.
+	 *
+	 * @return array<string, string>
+	 */
+	private static function menu_options() {
+		$options = array();
+
+		if ( ! function_exists( 'is_admin' ) || ! is_admin() || ! function_exists( 'wp_get_nav_menus' ) ) {
+			return $options;
+		}
+
+		foreach ( wp_get_nav_menus() as $menu ) {
+			$items = wp_get_nav_menu_items( $menu->term_id );
+
+			if ( ! is_array( $items ) ) {
+				$items = array();
 			}
 
-			$parts = array_map( 'trim', explode( '|', $line ) );
+			$options[ 'menu:' . $menu->term_id ] = sprintf(
+				/* translators: %s: the name of a WordPress menu. */
+				esc_html__( '%s — every top-level item', 'numbered-accordion' ),
+				$menu->name
+			);
 
-			if ( '' === $parts[0] ) {
-				continue;
+			$parents = array();
+
+			foreach ( $items as $item ) {
+				$parent = (int) $item->menu_item_parent;
+
+				if ( $parent ) {
+					$parents[ $parent ] = true;
+				}
 			}
 
+			foreach ( $items as $item ) {
+				// An item with nothing under it would make an empty panel, so
+				// it is not offered as one.
+				if ( (int) $item->menu_item_parent || empty( $parents[ (int) $item->ID ] ) ) {
+					continue;
+				}
+
+				$options[ 'item:' . $menu->term_id . ':' . $item->ID ] = sprintf(
+					/* translators: 1: the name of a WordPress menu. 2: the name of an item in it. */
+					esc_html__( '%1$s → what is under "%2$s"', 'numbered-accordion' ),
+					$menu->name,
+					$item->title
+				);
+			}
+		}
+
+		return $options;
+	}
+
+	/**
+	 * A menu's items, normalised into what Header_Links expects.
+	 *
+	 * @param string $ref `menu:<id>` or `item:<menu>:<id>`.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function menu_items( $ref ) {
+		$menu_id = Header_Links::menu_from_ref( $ref );
+
+		if ( ! $menu_id || ! function_exists( 'wp_get_nav_menu_items' ) ) {
+			return array();
+		}
+
+		$items = wp_get_nav_menu_items( $menu_id );
+
+		if ( ! is_array( $items ) ) {
+			return array();
+		}
+
+		$rows = array();
+
+		foreach ( $items as $item ) {
 			$rows[] = array(
-				'label' => $parts[0],
-				'url'   => isset( $parts[1] ) ? $parts[1] : '',
-				'note'  => isset( $parts[2] ) ? $parts[2] : '',
+				'id'      => (int) $item->ID,
+				'parent'  => (int) $item->menu_item_parent,
+				'label'   => isset( $item->title ) ? (string) $item->title : '',
+				'url'     => isset( $item->url ) ? (string) $item->url : '',
+				'note'    => isset( $item->description ) ? (string) $item->description : '',
+				'new_tab' => isset( $item->target ) && '_blank' === $item->target,
 			);
 		}
 
@@ -1654,7 +1842,7 @@ class Mega_Header_Widget extends Widget_Base {
 						}
 
 						$hasPanel = ! empty( $item['has_panel'] ) && 'yes' === $item['has_panel'];
-						$links    = $hasPanel ? $this->parse_links( isset( $item['panel_links'] ) ? $item['panel_links'] : '' ) : array();
+						$links    = $hasPanel ? $this->panel_rows( $item ) : array();
 						$blurb    = isset( $item['panel_blurb'] ) ? $item['panel_blurb'] : '';
 						$eyebrow  = isset( $item['panel_eyebrow'] ) ? $item['panel_eyebrow'] : '';
 						$figure   = isset( $item['panel_image']['url'] ) ? $item['panel_image']['url'] : '';
@@ -1725,7 +1913,7 @@ class Mega_Header_Widget extends Widget_Base {
 											<ul class="ehdr__links">
 												<?php foreach ( $links as $row ) : ?>
 													<li>
-														<a class="ehdr__panel-link"<?php echo '' !== $row['url'] ? ' href="' . esc_url( $row['url'] ) . '"' : ''; ?>>
+														<a class="ehdr__panel-link"<?php echo '' !== $row['url'] ? ' href="' . esc_url( $row['url'] ) . '"' : ''; ?><?php echo ( '' !== $row['url'] && ! empty( $row['new_tab'] ) ) ? ' target="_blank" rel="noopener"' : ''; ?>>
 															<span>
 																<?php $this->label( $row['label'], 'scramble' === $anim ? 'scramble' : 'none' ); ?>
 																<?php if ( '' !== $row['note'] ) : ?>

@@ -87,6 +87,7 @@ if ( ! class_exists( '\Elementor\Controls_Manager' ) ) {
 		const MEDIA      = 'media';
 		const URL        = 'url';
 		const SELECT     = 'select';
+		const SELECT2    = 'select2';
 		const SWITCHER   = 'switcher';
 		const HEADING    = 'heading';
 		const REPEATER   = 'repeater';

@@ -98,6 +98,7 @@ final class Header_Module extends Elementor_Module {
 				return;
 			}
 
+			require_once ERUDA_PATH . 'modules/header/class-header-links.php';
 			require_once ERUDA_PATH . 'modules/header/widgets/class-mega-header-widget.php';
 
 			if ( class_exists( '\ErudaToolkit\Modules\Header\Widgets\Mega_Header_Widget' ) ) {

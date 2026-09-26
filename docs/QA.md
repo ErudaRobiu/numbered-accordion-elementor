@@ -754,6 +754,45 @@ script-blocked fallback, against `tests/browser/header.html`.
 - [ ] The label must lose its green with it, and the rolling label must settle
       back on the word rather than staying on its understudy
 - [ ] An item with no sub-links gets no chevron at all
+
+### Panel links
+
+- [ ] **Existing headers are untouched.** Open a saved header: every panel still
+      lists what it listed before, in the same order, with the same descriptions
+- [ ] "Links come from" is set to **A typed list** on every existing row, and
+      the textarea is where it was
+- [ ] Menu items that open a panel now show a caret beside their name in the
+      repeater list, and the ones that do not, do not
+- [ ] A line of `Label | /path | small print` still renders all three parts
+- [ ] **A page slug links to the page.** Type `Waste heat | waste-heat-recovery`
+      and the rendered link must be that page's real permalink. Then move the
+      page under a different parent and reload the front end — the link must
+      follow it without touching the header
+- [ ] `Some label | #42` links to post 42. A slug or ID that matches nothing
+      falls back to `/the-slug` rather than vanishing
+- [ ] **A line with no label names itself**: `/services/feasibility` alone
+      renders "Feasibility", and a slug that resolves takes the page's own title
+- [ ] A line with just a word — `Services` — is still a heading with no link
+- [ ] Paste a list of URLs, one per line, with nothing else: every one becomes a
+      labelled link
+- [ ] `Heat \| power | /chp` renders "Heat | power" as one label
+- [ ] **A link to another site opens in a new tab** with `rel="noopener"`, and a
+      link to your own site does not — check a `https://` link to your own
+      domain, and the same with `www.` in front of it
+- [ ] `^` on the end of any link opens it in a new tab
+- [ ] Switch "Links come from" to **A WordPress menu**: the picker lists every
+      menu, and every menu item that has children, and nothing else
+- [ ] Picking `Menu → what is under "Services"` lists exactly those children, in
+      the menu's order, with each item's Description as its small print
+- [ ] Picking the menu itself lists its top-level items and nothing nested
+- [ ] A menu item set to open in a new tab does so here
+- [ ] Reorder the children in Appearance > Menus and reload the page: the panel
+      follows, with no Elementor save
+- [ ] **A panel with nothing in it is not a panel**: set a row to a menu and
+      leave the menu unpicked — no caret, and nothing opens
+- [ ] The editor still loads at a normal speed on a site with several long
+      menus, and the front end makes no extra queries counting them (the picker
+      is built in the admin only)
 - [ ] "Goes back to full width" set to **Only at the top** keeps it compact
       while you scroll up mid-page, and restores it when you reach the top.
       Set to **Whenever you scroll up** it comes back on any upward scroll
