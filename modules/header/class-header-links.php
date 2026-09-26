@@ -2,9 +2,10 @@
 /**
  * Mega Header link helpers.
  *
- * The pure logic behind every list of links in the header's panels, kept out
- * of the widget so it can be tested without WordPress or Elementor. See
- * tests/run.php.
+ * The pure logic behind the typed list a panel's links used to be, kept out of
+ * the widget so it can be tested without WordPress or Elementor. Panels write
+ * their links into fields now; this reads the ones written before that, and
+ * names a field's link when the label was left out. See tests/run.php.
  *
  * @package ErudaToolkit
  */
@@ -16,10 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Turns typed lines, or a WordPress menu, into panel link rows.
+ * Reads the typed list the mega header's panels used before their links became
+ * fields, and names a link that was given without a label.
  *
- * A row is always `array( label, url, note, new_tab )`, whichever end it came
- * from, so the markup has one shape to render.
+ * A row is always `array( label, url, note, new_tab )`.
  */
 final class Header_Links {
 
@@ -329,91 +330,5 @@ final class Header_Links {
 		$strip = '/^www\./';
 
 		return preg_replace( $strip, '', $host ) !== preg_replace( $strip, '', $home_host );
-	}
-
-	/**
-	 * Read a panel's links out of a WordPress menu.
-	 *
-	 * The items arrive normalised -- id, parent, label, url, note, new_tab --
-	 * so this stays testable and WordPress's objects stay in the widget.
-	 *
-	 * @param array<int, array<string, mixed>> $items Normalised menu items.
-	 * @param string                           $ref   `menu:<id>` for a whole
-	 *                                                menu's top level, or
-	 *                                                `item:<menu>:<id>` for one
-	 *                                                item's children.
-	 * @return array<int, array{label: string, url: string, note: string, new_tab: bool}>
-	 */
-	public static function rows_from_menu_items( $items, $ref ) {
-		$parent = self::parent_from_ref( $ref );
-		$rows   = array();
-
-		if ( null === $parent || ! is_array( $items ) ) {
-			return $rows;
-		}
-
-		foreach ( $items as $item ) {
-			if ( ! is_array( $item ) ) {
-				continue;
-			}
-
-			$item_parent = isset( $item['parent'] ) ? (int) $item['parent'] : 0;
-
-			if ( $item_parent !== $parent ) {
-				continue;
-			}
-
-			$label = isset( $item['label'] ) ? trim( (string) $item['label'] ) : '';
-
-			if ( '' === $label ) {
-				continue;
-			}
-
-			$rows[] = array(
-				'label'   => $label,
-				'url'     => isset( $item['url'] ) ? trim( (string) $item['url'] ) : '',
-				'note'    => isset( $item['note'] ) ? trim( (string) $item['note'] ) : '',
-				'new_tab' => ! empty( $item['new_tab'] ),
-			);
-		}
-
-		return $rows;
-	}
-
-	/**
-	 * The menu item id whose children a reference asks for. Zero means the
-	 * menu's own top level; null means the reference is not one.
-	 *
-	 * @param string $ref Reference.
-	 * @return int|null
-	 */
-	public static function parent_from_ref( $ref ) {
-		$ref = trim( (string) $ref );
-
-		if ( preg_match( '/^menu:(\d+)$/', $ref ) ) {
-			return 0;
-		}
-
-		if ( preg_match( '/^item:(\d+):(\d+)$/', $ref, $m ) ) {
-			return (int) $m[2];
-		}
-
-		return null;
-	}
-
-	/**
-	 * The menu id a reference belongs to, or 0 when it has none.
-	 *
-	 * @param string $ref Reference.
-	 * @return int
-	 */
-	public static function menu_from_ref( $ref ) {
-		$ref = trim( (string) $ref );
-
-		if ( preg_match( '/^(?:menu|item):(\d+)/', $ref, $m ) ) {
-			return (int) $m[1];
-		}
-
-		return 0;
 	}
 }

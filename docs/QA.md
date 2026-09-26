@@ -757,42 +757,32 @@ script-blocked fallback, against `tests/browser/header.html`.
 
 ### Panel links
 
-- [ ] **Existing headers are untouched.** Open a saved header: every panel still
+- [ ] **Turn on "Opens a panel" and you get "Link 1"**: a label, a "Goes to"
+      link and a "Small print" field. One slot, not ten
+- [ ] Type a label and **"Link 2" appears**. Fill that and "Link 3" appears, and
+      so on up to ten
+- [ ] **Pick a page in "Goes to" without typing a label and the next slot still
+      appears**, and the rendered link takes the page's own title
+- [ ] The "Goes to" field is the real Elementor link control: type three letters
+      and it offers the site's pages, and its cog holds "Open in new window" and
+      "Add nofollow"
+- [ ] "Open in new window" gives the rendered link `target="_blank"` and
+      `rel="noopener"`; nofollow adds `rel="nofollow"`. Both together give both
+- [ ] A dynamic tag can be set on a label, a link and a small print field
+- [ ] **A label with no link renders as a heading** in the list — no `href`, no
+      arrow behaving like a link
+- [ ] **Empty the third of five links, save, and reload the front end**: the
+      fourth and fifth are still on the page. They leave the panel in the editor
+      because the slot above them is empty, and that must not delete them
+- [ ] Fill the tenth slot and it renders
+- [ ] A panel with no links and no picture gets no caret and opens nothing
+- [ ] **A header saved before this release is unchanged.** Open one: every panel
       lists what it listed before, in the same order, with the same descriptions
-- [ ] "Links come from" is set to **A typed list** on every existing row, and
-      the textarea is where it was
-- [ ] Menu items that open a panel now show a caret beside their name in the
-      repeater list, and the ones that do not, do not
-- [ ] A line of `Label | /path | small print` still renders all three parts
-- [ ] **A page slug links to the page.** Type `Waste heat | waste-heat-recovery`
-      and the rendered link must be that page's real permalink. Then move the
-      page under a different parent and reload the front end — the link must
-      follow it without touching the header
-- [ ] `Some label | #42` links to post 42. A slug or ID that matches nothing
-      falls back to `/the-slug` rather than vanishing
-- [ ] **A line with no label names itself**: `/services/feasibility` alone
-      renders "Feasibility", and a slug that resolves takes the page's own title
-- [ ] A line with just a word — `Services` — is still a heading with no link
-- [ ] Paste a list of URLs, one per line, with nothing else: every one becomes a
-      labelled link
-- [ ] `Heat \| power | /chp` renders "Heat | power" as one label
-- [ ] **A link to another site opens in a new tab** with `rel="noopener"`, and a
-      link to your own site does not — check a `https://` link to your own
-      domain, and the same with `www.` in front of it
-- [ ] `^` on the end of any link opens it in a new tab
-- [ ] Switch "Links come from" to **A WordPress menu**: the picker lists every
-      menu, and every menu item that has children, and nothing else
-- [ ] Picking `Menu → what is under "Services"` lists exactly those children, in
-      the menu's order, with each item's Description as its small print
-- [ ] Picking the menu itself lists its top-level items and nothing nested
-- [ ] A menu item set to open in a new tab does so here
-- [ ] Reorder the children in Appearance > Menus and reload the page: the panel
-      follows, with no Elementor save
-- [ ] **A panel with nothing in it is not a panel**: set a row to a menu and
-      leave the menu unpicked — no caret, and nothing opens
-- [ ] The editor still loads at a normal speed on a site with several long
-      menus, and the front end makes no extra queries counting them (the picker
-      is built in the admin only)
+- [ ] Those panels show "The old typed list" at the bottom of the item, holding
+      what they had. A panel that never had one does not show it at all
+- [ ] Clear that textarea, save, reopen: the control is gone from the item
+- [ ] Fill in Link 1 on a panel that still has a typed list: the fields render
+      and the list is ignored
 - [ ] "Goes back to full width" set to **Only at the top** keeps it compact
       while you scroll up mid-page, and restores it when you reach the top.
       Set to **Whenever you scroll up** it comes back on any upward scroll

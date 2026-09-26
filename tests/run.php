@@ -744,11 +744,11 @@ foreach ( $module_files as $relative ) {
 /* ------------------------------------------------ Mega_Header_Widget --- */
 
 /*
- * A panel's links are the only place in the header where someone's typing
- * becomes markup, so it is the only place a stray character can empty a menu.
- * Elementor has no nested repeater, which is why a panel's links are typed
- * lines or a WordPress menu rather than a repeater inside a repeater -- see
- * the note on the control.
+ * A panel's links are fields now -- a label, a URL control and a line of small
+ * print, ten slots of them inside the repeater row, because Elementor cannot
+ * nest a repeater in one. What follows covers the list they used to be, which
+ * still has to render for every header saved before the fields existed, and
+ * which is also where a link left without a label gets named from.
  */
 require_once __DIR__ . '/stubs/elementor.php';
 require_once dirname( __DIR__ ) . '/modules/header/widgets/class-mega-header-widget.php';
@@ -833,12 +833,12 @@ check( 'a fourth field is ignored', 'note', $links( 'One | /one | note | extra' 
 check( 'surrounding spaces are trimmed', 'One', $links( '   One   |   /one   ' )[0]['label'] );
 
 /*
- * What a line may look like now.
+ * What a saved line may look like.
  *
- * The old form -- `Label | /url | note`, in that order, with a real URL typed
+ * The plain form -- `Label | /url | note`, in that order, with a real URL typed
  * out -- is the first case above and has to keep working: it is what every
- * saved header on the site contains. Everything below is a form that used to
- * be a broken link or a dropped line.
+ * header saved before the link fields contains. The rest are forms that used
+ * to be a broken link or a dropped line.
  */
 
 // A slug or a page ID is looked up on render, so a line can be written the way
@@ -902,113 +902,103 @@ check( 'nor is a phrase', false, Header_Links::is_slug_path( 'Waste heat recover
 check( 'so a word on its own is still a heading', '', $links( 'Services' )[0]['url'] );
 check( 'while a slug on its own is a link', '/help-centre', $links( 'help-centre' )[0]['url'] );
 
-/* -------------------------------------- a panel fed by a WordPress menu --- */
+/* ------------------------------------------- a panel's link fields --- */
 
 /*
- * The other way in. Appearance > Menus is the only place on a WordPress site
- * with a real link picker and drag-and-drop ordering, and its links are stored
- * as page ids, so they survive a page being renamed or moved.
- */
-$menu_items = array(
-	array(
-		'id'      => 10,
-		'parent'  => 0,
-		'label'   => 'Services',
-		'url'     => 'https://thermstar.test/services/',
-		'note'    => '',
-		'new_tab' => false,
-	),
-	array(
-		'id'      => 11,
-		'parent'  => 10,
-		'label'   => 'Waste heat recovery',
-		'url'     => 'https://thermstar.test/services/waste-heat-recovery/',
-		'note'    => 'Capture what the stack throws away',
-		'new_tab' => false,
-	),
-	array(
-		'id'      => 12,
-		'parent'  => 10,
-		'label'   => '  ',
-		'url'     => 'https://thermstar.test/nowhere/',
-		'note'    => '',
-		'new_tab' => false,
-	),
-	array(
-		'id'      => 13,
-		'parent'  => 10,
-		'label'   => 'Datasheet',
-		'url'     => 'https://example.com/sheet.pdf',
-		'note'    => '',
-		'new_tab' => true,
-	),
-	array(
-		'id'      => 20,
-		'parent'  => 0,
-		'label'   => 'About',
-		'url'     => 'https://thermstar.test/about/',
-		'note'    => '',
-		'new_tab' => false,
-	),
-);
-
-$rows = Header_Links::rows_from_menu_items( $menu_items, 'item:3:10' );
-check( 'a parent reference takes its children', 2, count( $rows ) );
-check( 'in menu order', 'Waste heat recovery', $rows[0]['label'] );
-check( 'with the description as the small print', 'Capture what the stack throws away', $rows[0]['note'] );
-check( 'and the item\'s own new-tab setting', true, $rows[1]['new_tab'] );
-
-$rows = Header_Links::rows_from_menu_items( $menu_items, 'menu:3' );
-check( 'a menu reference takes its top level', 2, count( $rows ) );
-check( 'and nothing nested under it', 'Services', $rows[0]['label'] );
-
-check( 'a reference to nothing yields nothing', array(), Header_Links::rows_from_menu_items( $menu_items, '' ) );
-check( 'so does a malformed one', array(), Header_Links::rows_from_menu_items( $menu_items, 'item:3' ) );
-check( 'and a parent that is not there', array(), Header_Links::rows_from_menu_items( $menu_items, 'item:3:99' ) );
-check( 'items that are not arrays are skipped', array(), Header_Links::rows_from_menu_items( array( 'nonsense' ), 'menu:3' ) );
-
-check( 'the menu id is read back out of a reference', 3, Header_Links::menu_from_ref( 'item:3:10' ) );
-check( 'from a menu reference too', 3, Header_Links::menu_from_ref( 'menu:3' ) );
-check( 'and is zero when there is none', 0, Header_Links::menu_from_ref( 'lines' ) );
-
-/*
- * And the widget picks between the two per repeater row. An item saved before
- * this release has no `panel_source` at all, so the absent value has to mean
- * the typed list -- anything else empties every panel on the site.
+ * Ten slots inside the repeater row, because Elementor cannot nest a repeater
+ * in one. Each is a label, a real URL control and a line of small print, and
+ * every row the widget builds carries Elementor's own link value so the
+ * new-tab and nofollow switches print themselves.
  */
 $header = new \ErudaToolkit\Modules\Header\Widgets\Mega_Header_Widget();
 // No setAccessible(): it has done nothing since PHP 8.1 and is deprecated as
 // of 8.5, which turns a clean run into a wall of notices.
 $panel_rows = new ReflectionMethod( $header, 'panel_rows' );
 
-check(
-	'an item with no source reads its typed lines',
-	'Feasibility',
-	$panel_rows->invoke( $header, array( 'panel_links' => 'Feasibility | /f' ) )[0]['label']
+/**
+ * One filled link slot, as Elementor saves it.
+ *
+ * @param int    $slot  Which slot.
+ * @param string $label Label.
+ * @param string $url   URL.
+ * @param string $note  Small print.
+ * @param string $blank Whether the link opens in a new tab: 'on' or ''.
+ * @return array<string, mixed>
+ */
+function header_slot( $slot, $label, $url = '', $note = '', $blank = '' ) {
+	return array(
+		'panel_link_' . $slot . '_label' => $label,
+		'panel_link_' . $slot . '_url'   => array(
+			'url'         => $url,
+			'is_external' => $blank,
+			'nofollow'    => '',
+		),
+		'panel_link_' . $slot . '_note'  => $note,
+	);
+}
+
+$rows = $panel_rows->invoke(
+	$header,
+	header_slot( 1, 'Waste heat recovery', '/services/waste-heat', 'Capture the stack' )
+	+ header_slot( 2, 'Feasibility', '/services/feasibility' )
 );
-check(
-	'an item set to a typed list does the same',
-	'Feasibility',
-	$panel_rows->invoke(
-		$header,
-		array(
-			'panel_source' => 'lines',
-			'panel_links'  => 'Feasibility | /f',
-		)
-	)[0]['label']
-);
-check(
-	'an item set to a menu ignores the lines',
-	array(),
-	$panel_rows->invoke(
-		$header,
-		array(
-			'panel_source' => 'wpmenu',
-			'panel_links'  => 'Feasibility | /f',
-		)
-	)
-);
+check( 'the slots are read in order', 2, count( $rows ) );
+check( 'label comes from its field', 'Waste heat recovery', $rows[0]['label'] );
+check( 'small print comes from its field', 'Capture the stack', $rows[0]['note'] );
+check( 'and the link is kept whole for link_attrs', '/services/waste-heat', $rows[0]['link']['url'] );
+check( 'the second slot follows the first', 'Feasibility', $rows[1]['label'] );
+
 check( 'an item with nothing in it has no links', array(), $panel_rows->invoke( $header, array() ) );
+check( 'an empty slot is not a link', array(), $panel_rows->invoke( $header, header_slot( 1, '', '' ) ) );
+
+// Emptying the third of five links hides the fourth and fifth in the panel but
+// does not clear them, so a gap must be stepped over rather than stopped at.
+$gapped = header_slot( 1, 'One', '/one' ) + header_slot( 2, '', '' ) + header_slot( 3, 'Three', '/three' );
+$rows   = $panel_rows->invoke( $header, $gapped );
+check( 'a gap between slots is stepped over', 2, count( $rows ) );
+check( 'and the order is kept', 'Three', $rows[1]['label'] );
+
+// A label on its own is a heading in the middle of a list, which is why an
+// empty URL control is not on its own a reason to drop the row.
+$rows = $panel_rows->invoke( $header, header_slot( 1, 'What we do not do', '' ) );
+check( 'a label with no link is still a row', 1, count( $rows ) );
+check( 'and links nowhere', '', $rows[0]['link']['url'] );
+
+// The other way round: a page picked from the URL control names itself. There
+// is no WordPress here, so this falls through to naming it from the path.
+$rows = $panel_rows->invoke( $header, header_slot( 1, '', '/services/waste-heat' ) );
+check( 'a link with no label names itself', 'Waste Heat', $rows[0]['label'] );
+
+check(
+	'the new-tab switch survives into the row',
+	'on',
+	$panel_rows->invoke( $header, header_slot( 1, 'Datasheet', '/x.pdf', '', 'on' ) )[0]['link']['is_external']
+);
+
+check( 'the last slot is usable', 1, count( $panel_rows->invoke( $header, header_slot( 10, 'Tenth', '/ten' ) ) ) );
+check( 'ten slots are offered', 10, \ErudaToolkit\Modules\Header\Widgets\Mega_Header_Widget::PANEL_LINKS );
+
+/*
+ * And the list a panel used to be still renders, for the headers saved before
+ * the fields existed. Its control is only shown to a panel that already has
+ * one, so this is the path that keeps those panels alive rather than one
+ * anybody is offered.
+ */
+$rows = $panel_rows->invoke( $header, array( 'panel_links' => "Feasibility | /f | What it costs\nStandards | https://iso.org/1234^" ) );
+check( 'a saved typed list still renders', 2, count( $rows ) );
+check( 'with its label', 'Feasibility', $rows[0]['label'] );
+check( 'its link', '/f', $rows[0]['link']['url'] );
+check( 'its small print', 'What it costs', $rows[0]['note'] );
+check( 'and a new tab where the line asked for one', 'on', $rows[1]['link']['is_external'] );
+
+// The fields win, because a panel that has both was mid-move and the fields are
+// where it was going.
+$rows = $panel_rows->invoke(
+	$header,
+	header_slot( 1, 'From a field', '/field' ) + array( 'panel_links' => 'From the list | /list' )
+);
+check( 'a filled slot beats the old list', 1, count( $rows ) );
+check( 'and it is the field that renders', 'From a field', $rows[0]['label'] );
 
 /*
  * Every slider offers its units, and writes whichever one was picked.

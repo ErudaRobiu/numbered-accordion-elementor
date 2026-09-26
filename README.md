@@ -1015,65 +1015,60 @@ browsers drop the declaration and the tracking silently does nothing. The
 control here is in `em`, and the probe asserts the computed value is a real
 length.
 
-**A panel's links are typed lines or a WordPress menu, and that is a limit of
-Elementor rather than a preference.** There is no nested repeater and there is
-not going to be one: a repeater's value is a flat array and the panel UI has
-nowhere to put a second level. So a panel gets two ways in, and the interesting
-work is in making the cheap one cost less.
+**A panel's links are fields, and getting them there was a fight with
+Elementor.** There is no nested repeater and there is not going to be one: a
+repeater's value is a flat array and the panel UI has nowhere to put a second
+level. The first version of this widget took the way out that every mega menu
+for Elementor takes — a textarea, one link per line, `Label | /url | note` —
+and it was wrong for the reason a textarea is always wrong here. Typing a path
+by hand is the one place in the widget that goes stale silently: rename a page
+and the header keeps pointing at where it used to be, with nothing to say so.
+No page picker, no search, no dynamic tags, no new-tab switch, and a stray
+pipe empties a row.
 
-The typed list stayed a textarea because it is pasteable — a twelve-item panel
-is one paste rather than twelve clicks of "add item" — but a textarea of
-hand-typed paths is also the one place in the widget that goes stale silently.
-Rename a page and the header keeps pointing at where it used to be, and nothing
-says so. So a line's link may now be a **page slug** or `#42` for a page ID,
-resolved through `get_page_by_path()` or `get_post()` when the page is rendered
-rather than when the line was typed. That is a lookup per link, cached for the
-request, in exchange for links that follow the page.
+So a panel holds a **fixed run of ten link slots**, each an ordinary control
+inside the repeater row: a label, a real `URL` control, and a line of small
+print. That buys back everything the textarea gave up, because the URL control
+is the same one Elementor puts on a button — type three letters and pick the
+page, and the link is stored as a URL the site resolves rather than a path
+somebody remembered.
 
-The rest of the parsing is there to remove the ways a line could be wrong:
+The cost of a fixed run is thirty controls in a row that usually needs nine, so
+**only the filled slots and the next empty one are ever on screen**. Each slot
+past the first is conditioned on the one above it having either a label or a
+link — `or` across the two, because a page picked from the list can name itself
+and should not need a label typed before the next slot appears.
 
-* The link may come **first or second**, because a pasted list of URLs arrives
-  URL-first and reordering forty of them by hand is the kind of work that makes
-  people leave the descriptions out.
-* A line with **no label** names itself — the page's own title if the slug
-  resolved, otherwise the last part of the path title-cased, so
-  `/services/waste-heat` reads "Waste Heat". A leading pipe, which is what a
-  deleted label leaves behind, used to drop the row entirely; a dropped row
-  renders as a gap nobody notices.
-* A **single field** is a label, not a slug, unless it is written the way a slug
-  is written — hyphens or slashes, no spaces. `waste-heat-recovery` is a page;
-  `Services` is a heading, even on a site with a page called services. That is
-  the one place guessing would turn somebody's heading into a link, so it does
-  not guess.
-* A pipe inside a label is `\|`, and a link to another host opens in a new tab
-  without being asked, with `^` on the end of any link to force it. `www.` is
-  stripped from both sides of that host comparison: a site reached both ways is
-  one site, and marking its own links as outside ones is the worse mistake.
+Which is also why the render walks all ten and **steps over the gaps**. A
+condition hides a control; it does not clear it. Empty the third of five links
+and the fourth and fifth leave the panel with their values still saved, and
+stopping at the first empty slot would drop them from the page — losing
+somebody's work to a condition is worse than a list with a hole in it.
 
-The second way in is **a menu from Appearance > Menus**, chosen per repeater
-row. Either a whole menu's top level, or whatever is nested under one of its
-items — which is why one "Main navigation" menu with children can feed every
-panel in the header, and why the picker offers `Menu → what is under "Services"`
-as well as the menu itself. Items with no children are not offered, because they
-would make an empty panel. A menu is the only place on a WordPress site with a
-real link picker and drag-and-drop ordering, its items are stored as page IDs so
-renaming a page cannot break them, and it can be edited by someone who has never
-opened Elementor. The item's Description becomes the small print under the link,
-and its own new-tab setting is carried over.
+Two smaller decisions follow from the same place. A row with a **label and no
+link** is a heading in the middle of a list, so an empty URL control is not on
+its own a reason to skip the row. And a row with a **link and no label** names
+itself: `url_to_postid()` for one of this site's own permalinks, and the last
+part of the path title-cased for anything else. Every row the widget builds
+carries Elementor's own link value, so `link_attrs()` prints the new-tab and
+nofollow switches for a panel link exactly as it does for the button.
 
-Two things about that picker are deliberate. The options are built **only in the
-admin**: `register_controls()` runs on the front end too — Elementor needs the
-control list to read a widget's saved settings — and a header on every page of
-the site is not the place to go and count the site's menus. The front end needs
-only the saved value, and a SELECT2 renders that whether or not its options are
-present. And **a repeater row with no `panel_source` at all means the typed
-list**, because that is what every header saved before this release contains;
-any other reading of the absent value empties every panel on the site.
+**The typed list still renders, and only shows itself to the panels that have
+one.** Its control is conditioned on its own value being non-empty, so a new
+panel never meets it and a panel is done with it the moment it is cleared —
+while a header saved before this release keeps rendering and stays editable.
+Removing the control outright would have left saved text on the page with
+nowhere to edit it, which is the worse of the two. The fields win when a panel
+has both, because a panel with both was mid-move and the fields are where it
+was going.
 
-The logic lives in `modules/header/class-header-links.php` rather than the
-widget, so it is testable without WordPress or Elementor — the lookup arrives as
-a callable the tests replace with a fake page table. Fifty-six assertions cover
-it.
+That parser is in `modules/header/class-header-links.php`, testable without
+WordPress or Elementor, and it is more forgiving than it was: the link may come
+first or second, a slug or `#42` resolves through `get_page_by_path()` on
+render, `\|` puts a pipe in a label, and a line with no label names itself the
+same way a field does. Worth keeping because it is also the naming used by the
+fields, and because a pasted list is still the fastest way to get forty links
+into a page — but it is no longer what the widget asks for.
 
 ### Spin
 

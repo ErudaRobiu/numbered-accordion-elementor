@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.56.0
+Stable tag: 2.57.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,25 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.57.0 =
+* **Mega Header panel links are fields now, not typed text.** Turn on "Opens a
+  panel" and you get Link 1: a label, a **Goes to** link and a line of small
+  print. The link is Elementor's own link control — type three letters and pick
+  the page, with the site's search, dynamic tags, "Open in new window" and
+  nofollow, none of which a line of text could offer. Fill a slot and the next
+  one appears, up to ten, so an item with three links shows three and one
+  waiting rather than thirty empty fields.
+* Pick a page and leave the label empty and the link takes the page's own
+  title. A label with no link is still a heading in the middle of the list.
+* **The WordPress menu option is gone.** One way in, and it is the fields.
+* Headers saved before this release keep rendering exactly as they did, and
+  their typed list is still editable — it now appears as "The old typed list" at
+  the bottom of the item, only on the panels that have one, and it disappears
+  once you clear it. Where a panel has both, the fields are what render.
+* Emptying a link in the middle of a list no longer risks the ones below it:
+  Elementor hides a control when the slot above it is blank, but the page still
+  renders every slot that has something in it.
 
 = 2.56.0 =
 * **Mega Header panel links take less typing and break less often.** A panel's
