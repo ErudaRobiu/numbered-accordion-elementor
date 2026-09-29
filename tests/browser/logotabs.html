@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer Logo Tabs — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Urbanist:wght@700&display=swap">
+<link rel="stylesheet" href="../../modules/logotabs/assets/css/customer-logo-tabs.css">
+<style>
+body{margin:0;background:#F5F6F7;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;color:#0F3961}
+.host{max-width:1240px;margin:0 auto;padding:60px 40px}
+.marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
+@media(max-width:767px){.host{padding:32px 16px}}
+/* A hostile theme: Hello Elementor's button reset, and the usual image rules. */
+[type=button],button{background-color:transparent;border:1px solid #c36;border-radius:3px;color:#c36;display:inline-block;font-size:1rem;font-weight:400;padding:.5rem 1rem;text-align:center;white-space:nowrap}
+[type=button]:hover,button:hover,[type=button]:focus,button:focus{background-color:#c36;color:#fff;text-decoration:none}
+img{max-width:100%;height:auto}
+img:hover{opacity:.75}
+ul{padding-left:2em}
+li{margin-bottom:.5em}
+</style>
+</head>
+<body>
+<div class="host" id="customers">
+	<p class="marker">Defaults — Industrial opens, All first</p>
+	<div id="a">		<div class="eclt eclt--animate">
+			<div class="eclt__tabs" role="tablist" aria-label="Customers by sector">
+									<button type="button" class="eclt__tab" role="tab"
+						id="eclt-a1-t-ind"
+						aria-controls="eclt-a1-p-ind"
+						aria-selected="true"
+						tabindex="0"
+						data-key="ind">
+						<strong>Industrial</strong>
+													<span>Food processing, manufacturing, laundry</span>
+											</button>
+									<button type="button" class="eclt__tab" role="tab"
+						id="eclt-a1-t-rest"
+						aria-controls="eclt-a1-p-rest"
+						aria-selected="false"
+						tabindex="-1"
+						data-key="rest">
+						<strong>Restaurants &amp; food service</strong>
+													<span>QSR, dining, grocery, schools</span>
+											</button>
+									<button type="button" class="eclt__tab" role="tab"
+						id="eclt-a1-t-hosp"
+						aria-controls="eclt-a1-p-hosp"
+						aria-selected="false"
+						tabindex="-1"
+						data-key="hosp">
+						<strong>Hospitality &amp; hotels</strong>
+													<span>Hotels, venues, catering</span>
+											</button>
+							</div>
+
+											<div class="eclt__panel" role="tabpanel" tabindex="0"
+					id="eclt-a1-p-ind"
+					aria-labelledby="eclt-a1-t-ind"
+					>
+											<div class="eclt__chips" role="group" aria-label="Filter by segment">
+															<button type="button" class="eclt__chip" data-seg="all" aria-pressed="true">All</button>
+																						<button type="button" class="eclt__chip" data-seg="food-processing" aria-pressed="false">Food processing</button>
+															<button type="button" class="eclt__chip" data-seg="manufacturing" aria-pressed="false">Manufacturing</button>
+															<button type="button" class="eclt__chip" data-seg="industrial-laundry" aria-pressed="false">Industrial laundry</button>
+													</div>
+										<ul class="eclt__wall" role="list">
+								<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/schuld.webp" alt="Schuld Bakkerij" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/mondelez.webp" alt="Mondelēz International" loading="lazy" decoding="async" style="width:91px" />					</li>
+				<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/smalands-munken.webp" alt="Smålands Munken" loading="lazy" decoding="async" style="width:76px" />					</li>
+				<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/lantmannen.webp" alt="Lantmännen" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/ekro.webp" alt="Ekro" loading="lazy" decoding="async" style="width:103px" />					</li>
+				<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/fazer.webp" alt="Fazer" loading="lazy" decoding="async" style="width:59px" />					</li>
+				<li class="eclt__tile" data-seg="manufacturing">
+						<span class="eclt__word eclt__word--serif" role="img" aria-label="Volvo">VOLVO</span>					</li>
+				<li class="eclt__tile" data-seg="manufacturing">
+						<span class="eclt__word eclt__word--sans" role="img" aria-label="De Bruyn">DE BRUYN</span>					</li>
+				<li class="eclt__tile" data-seg="manufacturing">
+						<img src="../../modules/logotabs/assets/logos/sports-leisure.webp" alt="Sports &amp; Leisure Group" loading="lazy" decoding="async" style="width:89px" />					</li>
+				<li class="eclt__tile" data-seg="manufacturing">
+						<img src="../../modules/logotabs/assets/logos/bzh.webp" alt="BZH" loading="lazy" decoding="async" style="width:84px" />					</li>
+				<li class="eclt__tile" data-seg="industrial-laundry">
+						<img src="../../modules/logotabs/assets/logos/unifirst.webp" alt="UniFirst" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="industrial-laundry">
+						<img src="../../modules/logotabs/assets/logos/cleanlease.webp" alt="CleanLease" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="industrial-laundry">
+						<img src="../../modules/logotabs/assets/logos/cws.webp" alt="CWS Workwear" loading="lazy" decoding="async" style="width:118px" />					</li>
+							</ul>
+				</div>
+											<div class="eclt__panel" role="tabpanel" tabindex="0"
+					id="eclt-a1-p-rest"
+					aria-labelledby="eclt-a1-t-rest"
+					hidden>
+											<div class="eclt__chips" role="group" aria-label="Filter by segment">
+															<button type="button" class="eclt__chip" data-seg="all" aria-pressed="true">All</button>
+																						<button type="button" class="eclt__chip" data-seg="qsr" aria-pressed="false">QSR</button>
+															<button type="button" class="eclt__chip" data-seg="asian" aria-pressed="false">Asian</button>
+															<button type="button" class="eclt__chip" data-seg="casual-and-fine-dining" aria-pressed="false">Casual &amp; fine dining</button>
+															<button type="button" class="eclt__chip" data-seg="food-courts-and-grocery" aria-pressed="false">Food courts &amp; grocery</button>
+															<button type="button" class="eclt__chip" data-seg="schools-and-golf-clubs" aria-pressed="false">Schools &amp; golf clubs</button>
+													</div>
+										<ul class="eclt__wall" role="list">
+								<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/kfc.webp" alt="KFC" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/burger-king.webp" alt="Burger King" loading="lazy" decoding="async" style="width:52px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/popeyes.webp" alt="Popeyes" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/chipotle.webp" alt="Chipotle" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/five-guys.webp" alt="Five Guys" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/wingstop.webp" alt="Wingstop" loading="lazy" decoding="async" style="width:107px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/max.webp" alt="MAX Premium Burgers" loading="lazy" decoding="async" style="width:70px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/jureskogs.webp" alt="Jureskogs" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/babas.webp" alt="Babas" loading="lazy" decoding="async" style="width:108px" />					</li>
+				<li class="eclt__tile" data-seg="asian">
+						<span class="eclt__word eclt__word--serif" role="img" aria-label="Dishoom">DISHOOM</span>					</li>
+				<li class="eclt__tile" data-seg="asian">
+						<img src="../../modules/logotabs/assets/logos/sen.webp" alt="SEN Street Kitchen" loading="lazy" decoding="async" style="width:68px" />					</li>
+				<li class="eclt__tile" data-seg="asian">
+						<img src="../../modules/logotabs/assets/logos/chopchop.webp" alt="ChopChop Asian Express" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="asian">
+						<img src="../../modules/logotabs/assets/logos/asian-diamond.webp" alt="Asian restaurant" loading="lazy" decoding="async" style="width:80px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/rasta.webp" alt="Rasta" loading="lazy" decoding="async" style="width:100px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/turtle-bay.webp" alt="Turtle Bay" loading="lazy" decoding="async" style="width:107px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/pepes-bodega.webp" alt="Pepes Bodega" loading="lazy" decoding="async" style="width:87px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/de-kas.webp" alt="Restaurant De Kas" loading="lazy" decoding="async" style="width:90px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/l-and-r.webp" alt="L&amp;R" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/beso.webp" alt="Beso" loading="lazy" decoding="async" style="width:57px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/de-haas.webp" alt="De Haas" loading="lazy" decoding="async" style="width:77px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/kott-bar.webp" alt="Kött &amp; Bar" loading="lazy" decoding="async" style="width:73px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/roast.webp" alt="Roast" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/catch.webp" alt="Catch" loading="lazy" decoding="async" style="width:89px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/prime.webp" alt="Prime" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/davys.webp" alt="Davy&#039;s" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/big-mamma.webp" alt="Big Mamma" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining">
+						<img src="../../modules/logotabs/assets/logos/la-gondola.webp" alt="La Gondola" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="food-courts-and-grocery">
+						<img src="../../modules/logotabs/assets/logos/sainsburys.webp" alt="Sainsbury&#039;s" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="food-courts-and-grocery">
+						<img src="../../modules/logotabs/assets/logos/ahold-delhaize.webp" alt="Ahold Delhaize" loading="lazy" decoding="async" style="width:112px" />					</li>
+				<li class="eclt__tile" data-seg="food-courts-and-grocery">
+						<img src="../../modules/logotabs/assets/logos/kaufland.webp" alt="Kaufland" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="food-courts-and-grocery">
+						<img src="../../modules/logotabs/assets/logos/stena.webp" alt="Stena Fastigheter" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs">
+						<img src="../../modules/logotabs/assets/logos/stora-segerstad.webp" alt="Stora Segerstad" loading="lazy" decoding="async" style="width:99px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs">
+						<img src="../../modules/logotabs/assets/logos/karlskrona.webp" alt="Karlskrona" loading="lazy" decoding="async" style="width:114px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs">
+						<img src="../../modules/logotabs/assets/logos/school-crest.webp" alt="School" loading="lazy" decoding="async" style="width:49px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs">
+						<img src="../../modules/logotabs/assets/logos/de-rooi-pannen.webp" alt="De Rooi Pannen" loading="lazy" decoding="async" style="width:115px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs">
+						<img src="../../modules/logotabs/assets/logos/angelholm.webp" alt="Ängelholm" loading="lazy" decoding="async" style="width:93px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs">
+						<img src="../../modules/logotabs/assets/logos/dunbar-golf.webp" alt="Dunbar Golf Club" loading="lazy" decoding="async" style="width:58px" />					</li>
+							</ul>
+				</div>
+											<div class="eclt__panel" role="tabpanel" tabindex="0"
+					id="eclt-a1-p-hosp"
+					aria-labelledby="eclt-a1-t-hosp"
+					hidden>
+										<ul class="eclt__wall" role="list">
+								<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/nordic-choice.webp" alt="Nordic Choice Hotels" loading="lazy" decoding="async" style="width:96px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/sodexo.webp" alt="Sodexo" loading="lazy" decoding="async" style="width:113px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/flight-club.webp" alt="Flight Club" loading="lazy" decoding="async" style="width:99px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/electric-shuffle.webp" alt="Electric Shuffle" loading="lazy" decoding="async" style="width:92px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/playdome.webp" alt="Playdôme" loading="lazy" decoding="async" style="width:110px" />					</li>
+				<li class="eclt__tile eclt__tile--dark" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/battersea.webp" alt="Battersea Power Station" loading="lazy" decoding="async" style="width:76px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/helsingborgs.webp" alt="Helsingborgs Stadsteater" loading="lazy" decoding="async" style="width:95px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/coppa.webp" alt="Coppa Club" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/granen.webp" alt="Granen Hotell &amp; Restaurang" loading="lazy" decoding="async" style="width:94px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/g-hotel.webp" alt="Hotel" loading="lazy" decoding="async" style="width:33px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/gullmarsstrand.webp" alt="Gullmarsstrand" loading="lazy" decoding="async" style="width:118px" />					</li>
+							</ul>
+				</div>
+					</div>
+		</div>
+</div>
+<div class="host">
+	<p class="marker">No "All" chip, opens on tab 2, a linked logo, an SVG sized by the script</p>
+	<div id="b">		<div class="eclt eclt--animate">
+			<div class="eclt__tabs" role="tablist" aria-label="Customers by sector">
+									<button type="button" class="eclt__tab" role="tab"
+						id="eclt-b2-t-ind"
+						aria-controls="eclt-b2-p-ind"
+						aria-selected="false"
+						tabindex="-1"
+						data-key="ind">
+						<strong>Industrial</strong>
+													<span>Food processing, manufacturing, laundry</span>
+											</button>
+									<button type="button" class="eclt__tab" role="tab"
+						id="eclt-b2-t-rest"
+						aria-controls="eclt-b2-p-rest"
+						aria-selected="true"
+						tabindex="0"
+						data-key="rest">
+						<strong>Restaurants &amp; food service</strong>
+													<span>QSR, dining, grocery, schools</span>
+											</button>
+									<button type="button" class="eclt__tab" role="tab"
+						id="eclt-b2-t-hosp"
+						aria-controls="eclt-b2-p-hosp"
+						aria-selected="false"
+						tabindex="-1"
+						data-key="hosp">
+						<strong>Hospitality &amp; hotels</strong>
+													<span>Hotels, venues, catering</span>
+											</button>
+							</div>
+
+											<div class="eclt__panel" role="tabpanel" tabindex="0"
+					id="eclt-b2-p-ind"
+					aria-labelledby="eclt-b2-t-ind"
+					hidden>
+											<div class="eclt__chips" role="group" aria-label="Filter by segment">
+																						<button type="button" class="eclt__chip" data-seg="food-processing" aria-pressed="true">Food processing</button>
+															<button type="button" class="eclt__chip" data-seg="manufacturing" aria-pressed="false">Manufacturing</button>
+															<button type="button" class="eclt__chip" data-seg="industrial-laundry" aria-pressed="false">Industrial laundry</button>
+													</div>
+										<ul class="eclt__wall" role="list">
+								<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/schuld.webp" alt="Schuld Bakkerij" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/mondelez.webp" alt="Mondelēz International" loading="lazy" decoding="async" style="width:91px" />					</li>
+				<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/smalands-munken.webp" alt="Smålands Munken" loading="lazy" decoding="async" style="width:76px" />					</li>
+				<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/lantmannen.webp" alt="Lantmännen" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/ekro.webp" alt="Ekro" loading="lazy" decoding="async" style="width:103px" />					</li>
+				<li class="eclt__tile" data-seg="food-processing">
+						<img src="../../modules/logotabs/assets/logos/fazer.webp" alt="Fazer" loading="lazy" decoding="async" style="width:59px" />					</li>
+				<li class="eclt__tile" data-seg="manufacturing" hidden>
+						<span class="eclt__word eclt__word--serif" role="img" aria-label="Volvo">VOLVO</span>					</li>
+				<li class="eclt__tile" data-seg="manufacturing" hidden>
+						<span class="eclt__word eclt__word--sans" role="img" aria-label="De Bruyn">DE BRUYN</span>					</li>
+				<li class="eclt__tile" data-seg="manufacturing" hidden>
+						<img src="../../modules/logotabs/assets/logos/sports-leisure.webp" alt="Sports &amp; Leisure Group" loading="lazy" decoding="async" style="width:89px" />					</li>
+				<li class="eclt__tile" data-seg="manufacturing" hidden>
+						<img src="../../modules/logotabs/assets/logos/bzh.webp" alt="BZH" loading="lazy" decoding="async" style="width:84px" />					</li>
+				<li class="eclt__tile" data-seg="industrial-laundry" hidden>
+						<img src="../../modules/logotabs/assets/logos/unifirst.webp" alt="UniFirst" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="industrial-laundry" hidden>
+						<img src="../../modules/logotabs/assets/logos/cleanlease.webp" alt="CleanLease" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="industrial-laundry" hidden>
+						<img src="../../modules/logotabs/assets/logos/cws.webp" alt="CWS Workwear" loading="lazy" decoding="async" style="width:118px" />					</li>
+							</ul>
+				</div>
+											<div class="eclt__panel" role="tabpanel" tabindex="0"
+					id="eclt-b2-p-rest"
+					aria-labelledby="eclt-b2-t-rest"
+					>
+											<div class="eclt__chips" role="group" aria-label="Filter by segment">
+																						<button type="button" class="eclt__chip" data-seg="qsr" aria-pressed="true">QSR</button>
+															<button type="button" class="eclt__chip" data-seg="asian" aria-pressed="false">Asian</button>
+															<button type="button" class="eclt__chip" data-seg="casual-and-fine-dining" aria-pressed="false">Casual &amp; fine dining</button>
+															<button type="button" class="eclt__chip" data-seg="food-courts-and-grocery" aria-pressed="false">Food courts &amp; grocery</button>
+															<button type="button" class="eclt__chip" data-seg="schools-and-golf-clubs" aria-pressed="false">Schools &amp; golf clubs</button>
+													</div>
+										<ul class="eclt__wall" role="list">
+								<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/kfc.webp" alt="KFC" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+							<a class="eclt__link" href="#burger-king">
+						<img src="../../modules/logotabs/assets/logos/burger-king.webp" alt="Burger King" loading="lazy" decoding="async" style="width:52px" />							</a>
+					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/popeyes.webp" alt="Popeyes" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/chipotle.webp" alt="Chipotle" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/five-guys.webp" alt="Five Guys" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/wingstop.webp" alt="Wingstop" loading="lazy" decoding="async" style="width:107px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/max.webp" alt="MAX Premium Burgers" loading="lazy" decoding="async" style="width:70px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/jureskogs.webp" alt="Jureskogs" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="qsr">
+						<img src="../../modules/logotabs/assets/logos/babas.webp" alt="Babas" loading="lazy" decoding="async" style="width:108px" />					</li>
+				<li class="eclt__tile" data-seg="asian" hidden>
+						<span class="eclt__word eclt__word--serif" role="img" aria-label="Dishoom">DISHOOM</span>					</li>
+				<li class="eclt__tile" data-seg="asian" hidden>
+						<img src="../../modules/logotabs/assets/logos/sen.webp" alt="SEN Street Kitchen" loading="lazy" decoding="async" style="width:68px" />					</li>
+				<li class="eclt__tile" data-seg="asian" hidden>
+						<img src="../../modules/logotabs/assets/logos/chopchop.webp" alt="ChopChop Asian Express" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="asian" hidden>
+						<img src="../../modules/logotabs/assets/logos/asian-diamond.webp" alt="Asian restaurant" loading="lazy" decoding="async" style="width:80px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/rasta.webp" alt="Rasta" loading="lazy" decoding="async" style="width:100px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/turtle-bay.webp" alt="Turtle Bay" loading="lazy" decoding="async" style="width:107px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/pepes-bodega.webp" alt="Pepes Bodega" loading="lazy" decoding="async" style="width:87px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/de-kas.webp" alt="Restaurant De Kas" loading="lazy" decoding="async" style="width:90px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/l-and-r.webp" alt="L&amp;R" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/beso.webp" alt="Beso" loading="lazy" decoding="async" style="width:57px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/de-haas.webp" alt="De Haas" loading="lazy" decoding="async" style="width:77px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/kott-bar.webp" alt="Kött &amp; Bar" loading="lazy" decoding="async" style="width:73px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/roast.webp" alt="Roast" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/catch.webp" alt="Catch" loading="lazy" decoding="async" style="width:89px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/prime.webp" alt="Prime" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/davys.webp" alt="Davy&#039;s" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/big-mamma.webp" alt="Big Mamma" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="casual-and-fine-dining" hidden>
+						<img src="../../modules/logotabs/assets/logos/la-gondola.webp" alt="La Gondola" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="food-courts-and-grocery" hidden>
+						<img src="../../modules/logotabs/assets/logos/sainsburys.webp" alt="Sainsbury&#039;s" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="food-courts-and-grocery" hidden>
+						<img src="../../modules/logotabs/assets/logos/ahold-delhaize.webp" alt="Ahold Delhaize" loading="lazy" decoding="async" style="width:112px" />					</li>
+				<li class="eclt__tile" data-seg="food-courts-and-grocery" hidden>
+						<img src="../../modules/logotabs/assets/logos/kaufland.webp" alt="Kaufland" loading="lazy" decoding="async" style="width:58px" />					</li>
+				<li class="eclt__tile" data-seg="food-courts-and-grocery" hidden>
+						<img src="../../modules/logotabs/assets/logos/stena.webp" alt="Stena Fastigheter" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs" hidden>
+						<img src="../../modules/logotabs/assets/logos/stora-segerstad.webp" alt="Stora Segerstad" loading="lazy" decoding="async" style="width:99px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs" hidden>
+						<img src="../../modules/logotabs/assets/logos/karlskrona.webp" alt="Karlskrona" loading="lazy" decoding="async" style="width:114px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs" hidden>
+						<img src="../../modules/logotabs/assets/logos/school-crest.webp" alt="School" loading="lazy" decoding="async" style="width:49px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs" hidden>
+						<img src="../../modules/logotabs/assets/logos/de-rooi-pannen.webp" alt="De Rooi Pannen" loading="lazy" decoding="async" style="width:115px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs" hidden>
+						<img src="../../modules/logotabs/assets/logos/angelholm.webp" alt="Ängelholm" loading="lazy" decoding="async" style="width:93px" />					</li>
+				<li class="eclt__tile" data-seg="schools-and-golf-clubs" hidden>
+						<img src="../../modules/logotabs/assets/logos/dunbar-golf.webp" alt="Dunbar Golf Club" loading="lazy" decoding="async" style="width:58px" />					</li>
+							</ul>
+				</div>
+											<div class="eclt__panel" role="tabpanel" tabindex="0"
+					id="eclt-b2-p-hosp"
+					aria-labelledby="eclt-b2-t-hosp"
+					hidden>
+										<ul class="eclt__wall" role="list">
+								<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/nordic-choice.webp" alt="Nordic Choice Hotels" loading="lazy" decoding="async" style="width:96px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/sodexo.webp" alt="Sodexo" loading="lazy" decoding="async" style="width:113px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/flight-club.webp" alt="Flight Club" loading="lazy" decoding="async" style="width:99px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/electric-shuffle.webp" alt="Electric Shuffle" loading="lazy" decoding="async" style="width:92px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/playdome.webp" alt="Playdôme" loading="lazy" decoding="async" style="width:110px" />					</li>
+				<li class="eclt__tile eclt__tile--dark" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/battersea.webp" alt="Battersea Power Station" loading="lazy" decoding="async" style="width:76px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/helsingborgs.webp" alt="Helsingborgs Stadsteater" loading="lazy" decoding="async" style="width:95px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/coppa.webp" alt="Coppa Club" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/granen.webp" alt="Granen Hotell &amp; Restaurang" loading="lazy" decoding="async" style="width:94px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/g-hotel.webp" alt="Hotel" loading="lazy" decoding="async" style="width:33px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/logotabs/assets/logos/gullmarsstrand.webp" alt="Gullmarsstrand" loading="lazy" decoding="async" style="width:118px" />					</li>
+				<li class="eclt__tile" data-seg="hotels-and-venues">
+						<img src="../../modules/partners/assets/img/enjay.svg" alt="Enjay (SVG, measured by the script)" loading="lazy" decoding="async" data-eclt-fit />					</li>
+							</ul>
+				</div>
+					</div>
+		</div>
+</div>
+<script src="../../modules/logotabs/assets/js/customer-logo-tabs.js"></script>
+</body>
+</html>
+	

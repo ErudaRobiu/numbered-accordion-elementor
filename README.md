@@ -54,6 +54,7 @@ modules/smoothscroll/              eases the whole page's scrolling
 modules/industry/                  the Industry Showcase widget and its assets
 modules/transitions/               the page transition curtain and the preloader
 modules/partners/                  the Partner Diagram widget, its assets and bundled logos
+modules/logotabs/                  the Customer Logo Tabs widget, its assets and the page 24 logos
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -101,6 +102,44 @@ because white dashes disappear over the pale half of the photograph.
 stagger, the draw passing through a partial clip, the line's actual pixels, the
 pulse moving, the hover, three widths, 360px without sideways scroll, and
 reduced motion.
+
+**Customer Logo Tabs (`modules/logotabs/`).** The customer wall from page 24:
+audience tabs, segment chips under the open tab, and a wall of logo tiles. It
+ships the page's whole customer base — 58 logos as WebP, 652KB in all, plus
+three typeset wordmarks for the logos with no file yet — so a freshly dropped
+widget is already the wireframe. Industrial opens first by default; that is the
+client's one hard rule for it.
+
+Elementor cannot nest a repeater, so tab › segment › logo is stored flat: a
+repeater of tabs, and one repeater of logos in which each row names its tab by
+position and its segment by label. A tab's chips are the segment labels its
+logos use, in the order they first appear. A tab with one segment shows no
+chips. A logo naming a tab that does not exist is dropped rather than shown
+under the wrong audience.
+
+Logos are sized by shape, not by file: `min(118, √(4000 × aspect), 58 × aspect)`
+pixels wide, which holds the area steady so a square badge and a long wordmark
+read as the same weight. The server knows the aspect for the bundled files (by
+name) and for library images (from their metadata). For anything else — an
+SVG, or an image from outside the library — it marks the image and the script
+applies the same rule from the loaded picture.
+
+Every panel is in the markup, hidden ones too, so all the logos are in the page
+for search engines. The URL hash opens a tab (`#ind`, `#rest`, `#hosp`, or
+whatever link name a tab is given), both on load and on `hashchange`; any other
+hash, such as `#customers`, leaves the default alone. The tabs follow the
+WAI-ARIA pattern: roving tabindex, and arrows, Home and End move and select at
+once. Chips use `aria-pressed`. The tile fade is capped at 10 × 12ms of stagger
+plus a 160ms fade, so a wall of any length is in within 300ms.
+
+The tabs and chips are buttons, and Hello Elementor styles every button pink,
+so their rules restate every property for every state. The fixture carries that
+reset, and the probe checks it does not leak in.
+
+`tests/browser/logotabs-probe.js` covers 44 checks: the defaults, the optical
+sizes, filtering, the fade finishing inside 300ms, the keyboard, both kinds of
+hash, the tab order, the script sizing an SVG, 1024/767/360px layouts (with the
+chip row as the only thing that scrolls sideways), and reduced motion.
 
 ## Notes for future maintenance
 

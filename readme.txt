@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.59.0
+Stable tag: 2.60.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,21 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.60.0 =
+* **New widget: Customer Logo Tabs.** The customer wall from page 24: three
+  audience tabs, segment chips under the open tab that filter it, and a wall of
+  logo tiles. Industrial opens first. It ships the whole page 24 customer base,
+  so a freshly dropped widget already matches the design.
+* Logos are sized by their shape, so a square badge and a long wordmark look the
+  same weight, with none taller than 58px. A logo without a file yet can be set
+  in type, and a white logo gets a dark tile.
+* Tabs are keyboard-friendly (arrows, Home and End) and a link ending in #ind,
+  #rest or #hosp opens that tab. Switching tabs or chips fades the tiles in
+  within 300ms, and hovering a tile lifts it. Visitors who ask for less motion
+  get no fade.
+* On phones the tabs stack, the chips become one row that scrolls sideways, and
+  the wall is three across. No counts are shown anywhere.
 
 = 2.59.0 =
 * **New widget: Partner Diagram.** Who supplies what to whom: three cards
