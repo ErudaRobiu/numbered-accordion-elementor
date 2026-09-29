@@ -648,7 +648,8 @@ check( 'the industry showcase module is registered', true, in_array( 'industry',
 check( 'the partner diagram module is registered', true, in_array( 'partners', Toolkit::instance()->ids(), true ) );
 check( 'the customer logo tabs module is registered', true, in_array( 'logotabs', Toolkit::instance()->ids(), true ) );
 check( 'the case anatomy module is registered', true, in_array( 'anatomy', Toolkit::instance()->ids(), true ) );
-check( 'nineteen modules ship', 19, count( Toolkit::instance()->ids() ) );
+check( 'the case studies module is registered', true, in_array( 'casestudies', Toolkit::instance()->ids(), true ) );
+check( 'twenty modules ship', 20, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -683,6 +684,7 @@ foreach ( array(
 	'modules/partners/widgets/class-partner-diagram-widget.php',
 	'modules/logotabs/widgets/class-customer-logo-tabs-widget.php',
 	'modules/anatomy/widgets/class-case-anatomy-widget.php',
+	'modules/casestudies/widgets/class-case-studies-widget.php',
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -713,6 +715,7 @@ $module_files = array(
 	'modules/partners/class-partners-module.php',
 	'modules/logotabs/class-logotabs-module.php',
 	'modules/anatomy/class-anatomy-module.php',
+	'modules/casestudies/class-casestudies-module.php',
 );
 
 foreach ( $module_files as $relative ) {
@@ -2662,6 +2665,111 @@ check( 'the dark chip is on Bruzaholms', true, false !== strpos( $an_out, 'class
 check( 'numbers are hidden from screen readers, the list numbers itself', 18, substr_count( $an_out, '<b class="ecan__num" aria-hidden="true">' ) );
 check( 'the stagger count is on the root', true, false !== strpos( $an_out, 'style="--ecan-count:3"' ) );
 check( 'no projects, nothing at all', '', trim( $an->markup( array() ) ) );
+
+
+/* --------------------------------------------------- Case Studies --- */
+
+require_once dirname( __DIR__ ) . '/modules/casestudies/class-casestudies-content.php';
+
+use ErudaToolkit\Modules\CaseStudies\CaseStudies_Content;
+
+check( 'the post type', 'case_study', CaseStudies_Content::POST_TYPE );
+check( 'the taxonomy', 'case_sector', CaseStudies_Content::TAXONOMY );
+check( 'sector slugs match the industry pages and the form', array( 'industrial-laundry', 'food-manufacturing', 'pet-food-manufacturing', 'foundries', 'manufacturing', 'restaurants-commercial-kitchens' ), array_keys( CaseStudies_Content::sectors() ) );
+
+// The edit form.
+$cs_group  = CaseStudies_Content::field_group();
+$cs_fields = array();
+foreach ( $cs_group['fields'] as $field ) {
+	$cs_fields[ $field['key'] ] = $field;
+}
+$cs_names = array_values( array_filter( array_column( $cs_group['fields'], 'name' ) ) );
+
+check( 'the form is on case studies only', 'case_study', $cs_group['location'][0][0]['value'] );
+check( 'every field is named cs_*', count( $cs_names ), count( preg_grep( '/^cs_[a-z_]+$/', $cs_names ) ) );
+check( 'field keys are unique', count( $cs_group['fields'] ), count( array_unique( array_column( $cs_group['fields'], 'key' ) ) ) );
+check( 'field names are unique', count( $cs_names ), count( array_unique( $cs_names ) ) );
+check( 'a published result needs its basis', 1, $cs_fields['field_ecs_basis']['required'] );
+check( 'the basis is asked for only when published', 'published', $cs_fields['field_ecs_basis']['conditional_logic'][0][0]['value'] );
+check( 'the figure is required when published', 1, $cs_fields['field_ecs_figure']['required'] );
+check( 'the sector is required and saved as the real term', array( 1, 1, 1 ), array( $cs_fields['field_ecs_sector']['required'], $cs_fields['field_ecs_sector']['save_terms'], $cs_fields['field_ecs_sector']['load_terms'] ) );
+check( 'nobody can invent a sector from the form', 0, $cs_fields['field_ecs_sector']['add_term'] );
+check( 'the PDF field takes PDFs only', 'pdf', $cs_fields['field_ecs_pdf']['mime_types'] );
+check( 'there is no money field', array(), preg_grep( '/cost|price|saving|dollar|money|eur|usd/i', $cs_names ) );
+check( 'every conditional names a real field', true, array_reduce( $cs_group['fields'], function ( $ok, $f ) use ( $cs_fields ) {
+	return $ok && ( empty( $f['conditional_logic'] ) || isset( $cs_fields[ $f['conditional_logic'][0][0]['field'] ] ) );
+}, true ) );
+
+// A saved case becomes a card.
+$cs_sector = array( array( 'slug' => 'industrial-laundry', 'name' => 'Industrial laundry' ) );
+$cs_card   = CaseStudies_Content::card(
+	array(
+		'title'   => ' CWS Workwear ',
+		'meta'    => array(
+			'cs_status'       => 'published',
+			'cs_figure'       => '63%',
+			'cs_figure_label' => 'less gas',
+			'cs_basis'        => 'per kg',
+			'cs_location'     => 'Den Bosch, Netherlands',
+			'cs_logo'         => '12',
+			'cs_logo_dark'    => '1',
+			'cs_link_url'     => '/ignored/',
+		),
+		'sectors' => $cs_sector,
+		'pdf_url' => 'https://x.test/cws.pdf',
+	)
+);
+check( 'the title is trimmed', 'CWS Workwear', $cs_card['title'] );
+check( 'the tag is sector · location', 'Industrial laundry · Den Bosch, Netherlands', $cs_card['tag'] );
+check( 'a PDF wins over the plain link', array( 'https://x.test/cws.pdf', true ), array( $cs_card['link'], $cs_card['link_is_pdf'] ) );
+check( 'an unset link text reads as a PDF', 'Read the case (PDF)', $cs_card['link_text'] );
+check( 'the logo id and dark badge', array( 12, true ), array( $cs_card['logo_id'], $cs_card['logo_dark'] ) );
+check( 'the sector slugs travel with the card', array( 'industrial-laundry' ), $cs_card['sectors'] );
+
+check( 'a published case with no figure is no card', null, CaseStudies_Content::card( array( 'meta' => array( 'cs_status' => 'published' ), 'sectors' => $cs_sector ) ) );
+
+$cs_ongoing = CaseStudies_Content::card(
+	array(
+		'meta'    => array( 'cs_status' => 'ongoing', 'cs_link_url' => '/manufacturing/', 'cs_figure' => '' ),
+		'sectors' => array(),
+		'pdf_url' => 'https://x.test/stale.pdf',
+	)
+);
+check( 'an ongoing case needs no figure', 'ongoing', $cs_ongoing['status'] );
+check( 'an ongoing case uses its plain link, not a leftover PDF', array( '/manufacturing/', false ), array( $cs_ongoing['link'], $cs_ongoing['link_is_pdf'] ) );
+check( 'and says "Learn more" when no text is set', 'Learn more', $cs_ongoing['link_text'] );
+check( 'no sector, no location: no tag', '', $cs_ongoing['tag'] );
+check( 'an unknown status is published', 'published', CaseStudies_Content::card( array( 'meta' => array( 'cs_status' => 'draft', 'cs_figure' => '1%' ) ) )['status'] );
+check( 'garbage is no card', null, CaseStudies_Content::card( 'x' ) );
+
+// Chips follow the cards.
+$cs_cards = array(
+	array( 'sectors' => array( 'foundries' ), 'sector_names' => array( 'Foundries' ) ),
+	array( 'sectors' => array( 'industrial-laundry', 'foundries' ), 'sector_names' => array( 'Industrial laundry', 'Foundries' ) ),
+	array( 'sectors' => array(), 'sector_names' => array() ),
+);
+check( 'chips in the order the cards first use them', array( 'foundries' => 'Foundries', 'industrial-laundry' => 'Industrial laundry' ), CaseStudies_Content::chips( $cs_cards ) );
+
+// The estimate link.
+check( 'the form address gets the sector', '/request-assessment/?sector=foundries', CaseStudies_Content::estimate_url( '/request-assessment/', 'foundries' ) );
+check( 'an existing query is kept', '/form/?a=1&sector=foundries', CaseStudies_Content::estimate_url( '/form/?a=1', 'foundries' ) );
+check( 'a hash stays at the end', '/form/?sector=foundries#start', CaseStudies_Content::estimate_url( '/form/#start', 'foundries' ) );
+check( 'no sector, just the form', '/form/', CaseStudies_Content::estimate_url( '/form/', '' ) );
+check( 'no form, no button', '', CaseStudies_Content::estimate_url( '', 'foundries' ) );
+
+// The seed data holds to the content rules.
+$cs_seed = require dirname( __DIR__ ) . '/tests/browser/casestudies-data.php';
+check( 'five cases', 5, count( $cs_seed ) );
+check( 'the confidential Pancake Factory study is not among them', array(), preg_grep( '/pancake/i', array_column( $cs_seed, 'pdf' ) ) );
+check( 'every case is in a real sector', array(), array_diff( array_column( $cs_seed, 'sector' ), array_keys( CaseStudies_Content::sectors() ) ) );
+check( 'industrial first, restaurants last', array( 10, 20, 30, 40, 90 ), array_column( $cs_seed, 'order' ) );
+foreach ( $cs_seed as $case ) {
+	if ( 'published' === $case['meta']['cs_status'] ) {
+		check( "{$case['title']} has a basis", true, '' !== $case['meta']['cs_basis'] );
+		check( "{$case['title']} has its PDF", true, is_file( '/Users/Robiu/Documents/ThermStar/2-client-material/documents/' . $case['pdf'] ) || ! is_dir( '/Users/Robiu/Documents/ThermStar' ) );
+	}
+	check( "{$case['title']} has its photo", true, is_file( dirname( __DIR__ ) . '/tests/browser/casestudies-img/' . $case['photo'] ) );
+}
 
 /* ------------------------------------------------------------- report --- */
 

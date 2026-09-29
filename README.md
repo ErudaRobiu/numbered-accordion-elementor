@@ -56,6 +56,7 @@ modules/transitions/               the page transition curtain and the preloader
 modules/partners/                  the Partner Diagram widget, its assets and bundled logos
 modules/logotabs/                  the Customer Logo Tabs widget, its assets and the page 24 logos
 modules/anatomy/                   the Case Anatomy widget, its assets and the three case logos
+modules/casestudies/               the Case Studies post type, its ACF form and the Case Studies widget
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -161,6 +162,46 @@ Tabs, with no hash support (nothing links to a case by hash).
 
 `tests/browser/anatomy-probe.js` runs 41 checks, including the wireframe's
 type, colours and sizes read back from the browser.
+
+**Case Studies (`modules/casestudies/`).** The page 25 case study cards, run
+from the dashboard. The module registers a **Case Studies** post type and a
+**Sector** taxonomy, and defines the edit form as an ACF local field group in
+code (`CaseStudies_Content::field_group()`), so the form is identical on every
+install and cannot be broken from the ACF screens. The **Case Studies**
+widget reads the published cases in their Order and prints the chips and
+cards. Nothing is built from Loop Items or Loop Grids, and nothing is typed on
+the page.
+
+It learned from `1-plan/08-CASE-STUDIES-ACF-PLAN.md` but departs from it on
+purpose. That plan had a card widget inside an Elementor Loop Item, a Loop
+Grid, a Taxonomy Filter and five entries typed by hand. Here it is one widget
+and a seeding script. The sector slugs, the field set, the content rules and
+the Order numbers come from the plan.
+
+- The widget reads **post meta**, not `get_field()`, so the cards keep showing
+  if ACF is ever deactivated; only the form needs ACF. The module warns on the
+  Case Studies screens when ACF is missing.
+- The form enforces the content doc's rules. A published result needs a
+  figure and its basis, both hidden and not required for an ongoing study.
+  There is no money field. The sector is picked in the form (saved as the real
+  term) and the taxonomy's own sidebar box is removed, so the two can't
+  disagree.
+- A published case without a figure is skipped instead of shown as a card
+  claiming nothing, and the admin list says so in red. The list also shows
+  photo, sector, what the card says, the link and the Order.
+- No single pages and no archive (`publicly_queryable` false): cards link to
+  their PDFs, and pages holding only a card's own words would be thin.
+- Chips are the sectors the shown cards use, in card order, so an empty sector
+  never gets a chip. "Estimate my site" goes to the form page with
+  `?sector=<slug>`, and the slugs match the industry page URLs.
+- The same widget serves the industry pages (one sector, chips off) and the
+  home page (How many: 3).
+
+`bin/seed-case-studies.php` loads the five cases from
+`tests/browser/casestudies-data.php`, uploading photos, logos and PDFs once
+and reusing them after. The confidential Pancake Factory study is left out.
+The same data file drives the browser fixture, so the test and the site cannot
+drift. `tests/browser/casestudies-probe.js` runs 43 checks.
 
 ## Notes for future maintenance
 
