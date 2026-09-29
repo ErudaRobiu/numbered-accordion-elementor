@@ -2782,40 +2782,79 @@ require_once dirname( __DIR__ ) . '/modules/docshelf/widgets/class-document-shel
 
 use ErudaToolkit\Modules\DocShelf\DocShelf_Content;
 
+check( 'the post type', 'resource_document', DocShelf_Content::POST_TYPE );
+check( 'the taxonomy', 'document_type', DocShelf_Content::TAXONOMY );
+check( 'filter slugs are the #docs- hash keys', array( 'white', 'product', 'industry', 'perf', 'company' ), array_keys( DocShelf_Content::filters() ) );
+
+// The seed.
 $ds_docs = DocShelf_Content::default_docs();
-check( 'twelve documents ship', 12, count( $ds_docs ) );
+check( 'twelve documents seed the site', 12, count( $ds_docs ) );
 check( 'in the page 26 order', array( 'white', 'white', 'product', 'industry', 'industry', 'industry', 'perf', 'perf', 'perf', 'perf', 'perf', 'company' ), array_column( $ds_docs, 'key' ) );
-check( 'every document has a file', array(), array_values( array_column( array_filter( $ds_docs, function ( $d ) { return '' === $d['url']; } ), 'title' ) ) );
-check( 'every file is on this site, root-relative', 12, count( preg_grep( '#^/wp-content/uploads/\d{4}/\d{2}/[^/]+\.pdf$#', array_column( $ds_docs, 'url' ) ) ) );
-check( 'no confidential or internal document ships', array(), preg_grep( '/pancake|preston\.pdf|scott-preston/i', array_column( $ds_docs, 'url' ) ) );
+check( 'every seed document has its file on this site', 12, count( preg_grep( '#^/wp-content/uploads/\d{4}/\d{2}/[^/]+\.pdf$#', array_column( $ds_docs, 'url' ) ) ) );
+check( 'no confidential or internal document is seeded', array(), preg_grep( '/pancake|preston/i', array_column( $ds_docs, 'url' ) ) );
+check( 'every seed filter exists', array(), array_diff( array_column( $ds_docs, 'key' ), array_keys( DocShelf_Content::filters() ) ) );
 foreach ( $ds_docs as $doc ) {
-	check( "the {$doc['cover']} cover ships", true, is_file( dirname( __DIR__ ) . '/' . DocShelf_Content::COVER_DIR . $doc['cover'] ) );
+	check( "the {$doc['cover']} cover ships for seeding", true, is_file( dirname( __DIR__ ) . '/' . DocShelf_Content::COVER_DIR . $doc['cover'] ) );
 }
 
-check( 'the chip map reads', array( 'white' => 'White papers', 'perf' => 'Performance evidence', 'industry' => 'Industry guides', 'product' => 'Product literature', 'company' => 'Company' ), DocShelf_Content::parse_chip_map( DocShelf_Content::default_chip_map() ) );
-check( 'a messy chip map is tidied, bad lines skipped', array( 'press-kit' => 'Press: kit', 'x' => 'Y' ), DocShelf_Content::parse_chip_map( " Press Kit :  Press: kit \r\nno colon here\n: no key\nnolabel:\nx:Y" ) );
-check( 'garbage is an empty map', array(), DocShelf_Content::parse_chip_map( array( 'x' ) ) );
-check( 'a filter key', 'press-kit', DocShelf_Content::key( ' Press  Kit! ' ) );
+// The form.
+$ds_group  = DocShelf_Content::field_group();
+$ds_fields = array();
+foreach ( $ds_group['fields'] as $field ) {
+	$ds_fields[ $field['key'] ] = $field;
+}
+$ds_names = array_values( array_filter( array_column( $ds_group['fields'], 'name' ) ) );
+check( 'the form is on documents only', 'resource_document', $ds_group['location'][0][0]['value'] );
+check( 'every field is named doc_*', count( $ds_names ), count( preg_grep( '/^doc_[a-z_]+$/', $ds_names ) ) );
+check( 'field keys are unique', count( $ds_group['fields'] ), count( array_unique( array_column( $ds_group['fields'], 'key' ) ) ) );
+check( 'no key collides with the case study form', array(), array_intersect( array_column( $ds_group['fields'], 'key' ), array_column( \ErudaToolkit\Modules\CaseStudies\CaseStudies_Content::field_group()['fields'], 'key' ) ) );
+check( 'the filter is required and saved as the real term', array( 1, 1, 1, 0 ), array( $ds_fields['field_edoc_filter']['required'], $ds_fields['field_edoc_filter']['save_terms'], $ds_fields['field_edoc_filter']['load_terms'], $ds_fields['field_edoc_filter']['add_term'] ) );
+check( 'the file field takes PDFs only', 'pdf', $ds_fields['field_edoc_file']['mime_types'] );
+check( 'new tab defaults on, download off', array( 1, 0 ), array( $ds_fields['field_edoc_new_tab']['default_value'], $ds_fields['field_edoc_download']['default_value'] ) );
 
-$ds_built = DocShelf_Content::build(
+// A saved document becomes a card.
+$ds_filter = array( array( 'slug' => 'perf', 'name' => 'Performance evidence' ) );
+$ds_card   = DocShelf_Content::card(
 	array(
-		array( 'title' => 'A', 'key' => 'White', 'link' => array( 'url' => ' https://x.test/a.pdf ', 'nofollow' => 'on' ), 'new_tab' => 'yes', 'download' => 'yes', 'meta' => '3 pages' ),
-		array( 'title' => '' ),
-		array( 'title' => 'B', 'key' => '', 'link' => 'not an array', 'cover' => array( 'url' => 'c.webp', 'id' => '9' ) ),
-		array( 'title' => 'C', 'key' => 'white' ),
+		'title'    => ' CWS ',
+		'meta'     => array( 'doc_type' => 'Case study', 'doc_meta' => '15 pages', 'doc_new_tab' => '1', 'doc_download' => '1' ),
+		'filters'  => $ds_filter,
+		'file_url' => '/wp-content/uploads/cws.pdf',
+		'cover_id' => '7',
 	)
 );
-check( 'a row with no title is left out', array( 'A', 'B', 'C' ), array_column( $ds_built, 'title' ) );
-check( 'keys are normalised', array( 'white', 'other', 'white' ), array_column( $ds_built, 'key' ) );
-check( 'the link is trimmed and read', array( 'https://x.test/a.pdf', true, true, true ), array( $ds_built[0]['url'], $ds_built[0]['new_tab'], $ds_built[0]['download'], $ds_built[0]['nofollow'] ) );
-check( 'a bad link is no link', '', $ds_built[1]['url'] );
-check( 'the cover id is a number', 9, $ds_built[1]['cover_id'] );
-check( 'chips in first-use order, unknown keys capitalised', array( 'white' => 'White papers', 'other' => 'Other' ), DocShelf_Content::chips( $ds_built, DocShelf_Content::parse_chip_map( DocShelf_Content::default_chip_map() ) ) );
-check( 'the link name', 'A, PDF, 3 pages, opens in a new tab', DocShelf_Content::link_label( $ds_built[0] ) );
-check( 'the link name without meta or new tab', 'B, PDF', DocShelf_Content::link_label( $ds_built[1] ) );
+check( 'the title is trimmed', 'CWS', $ds_card['title'] );
+check( 'the filter and its label travel with the card', array( 'perf', 'Performance evidence' ), array( $ds_card['key'], $ds_card['key_name'] ) );
+check( 'the uploaded file is the link', '/wp-content/uploads/cws.pdf', $ds_card['url'] );
+check( 'download works on our own file', true, $ds_card['download'] );
+check( 'the cover id is a number', 7, $ds_card['cover_id'] );
+
+$ds_share = DocShelf_Content::card(
+	array(
+		'title'    => 'Brochure',
+		'meta'     => array( 'doc_url' => 'https://norrel.sharepoint.com/x.pdf', 'doc_download' => '1', 'doc_new_tab' => '0' ),
+		'filters'  => array(),
+		'file_url' => '/wp-content/uploads/old.pdf',
+	)
+);
+check( 'a link wins over an uploaded file', 'https://norrel.sharepoint.com/x.pdf', $ds_share['url'] );
+check( 'download is off for a link elsewhere', false, $ds_share['download'] );
+check( 'new tab can be switched off', false, $ds_share['new_tab'] );
+check( 'no filter is Other', array( 'other', 'Other' ), array( $ds_share['key'], $ds_share['key_name'] ) );
+
+$ds_soon = DocShelf_Content::card( array( 'title' => 'Soon', 'meta' => array() ) );
+check( 'neither file nor link: no url (Coming soon)', '', $ds_soon['url'] );
+check( 'a never-saved new-tab switch is on', true, $ds_soon['new_tab'] );
+check( 'no title, no card', null, DocShelf_Content::card( array( 'title' => '  ' ) ) );
+check( 'garbage is no card', null, DocShelf_Content::card( 'x' ) );
+
+check( 'chips in first-use order with their own labels', array( 'perf' => 'Performance evidence', 'other' => 'Other' ), DocShelf_Content::chips( array( $ds_card, $ds_share, $ds_card ) ) );
+check( 'the link name', 'CWS, PDF, 15 pages, opens in a new tab', DocShelf_Content::link_label( $ds_card ) );
+check( 'the link name without meta or new tab', 'Brochure, PDF', DocShelf_Content::link_label( $ds_share ) );
+check( 'a filter key', 'press-kit', DocShelf_Content::key( ' Press  Kit! ' ) );
 
 /**
- * The widget with a settings array pushed into it.
+ * The widget, handed documents instead of a database.
  */
 class DocShelf_Render_Probe extends \ErudaToolkit\Modules\DocShelf\Widgets\Document_Shelf_Widget {
 
@@ -2825,6 +2864,11 @@ class DocShelf_Render_Probe extends \ErudaToolkit\Modules\DocShelf\Widgets\Docum
 	public $feed = array();
 
 	/**
+	 * @var array
+	 */
+	public $docs = array();
+
+	/**
 	 * @return array
 	 */
 	public function get_settings_for_display() {
@@ -2832,18 +2876,21 @@ class DocShelf_Render_Probe extends \ErudaToolkit\Modules\DocShelf\Widgets\Docum
 	}
 
 	/**
+	 * @param array $settings Settings.
 	 * @return array
 	 */
-	public function shipped() {
-		return ( new ReflectionMethod( $this, 'default_docs' ) )->invoke( $this );
+	protected function get_docs( $settings ) {
+		return $this->docs;
 	}
 
 	/**
 	 * @param array $settings Settings to render with.
+	 * @param array $docs     Cards.
 	 * @return string
 	 */
-	public function markup( $settings ) {
+	public function markup( $settings, $docs ) {
 		$this->feed = $settings;
+		$this->docs = $docs;
 
 		ob_start();
 		( new ReflectionMethod( $this, 'render' ) )->invoke( $this );
@@ -2852,39 +2899,37 @@ class DocShelf_Render_Probe extends \ErudaToolkit\Modules\DocShelf\Widgets\Docum
 	}
 }
 
-$ds     = new DocShelf_Render_Probe();
-$ds_out = $ds->markup(
-	array(
-		'docs'       => $ds->shipped(),
-		'show_chips' => 'yes',
-		'show_all'   => 'yes',
-		'chip_map'   => DocShelf_Content::default_chip_map(),
-	)
-);
+$ds_cards = array();
+foreach ( $ds_docs as $doc ) {
+	$ds_cards[] = DocShelf_Content::card(
+		array(
+			'title'    => $doc['title'],
+			'meta'     => array( 'doc_type' => $doc['type'], 'doc_desc' => $doc['desc'], 'doc_meta' => $doc['meta'] ),
+			'filters'  => array( array( 'slug' => $doc['key'], 'name' => DocShelf_Content::filters()[ $doc['key'] ] ) ),
+			'file_url' => $doc['url'],
+			'cover_url' => 'c.webp',
+		)
+	);
+}
+$ds_cards[2]['url'] = '';
 
-check( 'shipped rows point at the bundled covers', 'https://example.test/wp-content/plugins/numbered-accordion-elementor/modules/docshelf/assets/covers/overview.webp', $ds->shipped()[0]['cover']['url'] );
+$ds     = new DocShelf_Render_Probe();
+$ds_out = $ds->markup( array( 'show_chips' => 'yes', 'show_all' => 'yes' ), $ds_cards );
+
 check( 'twelve cards', 12, substr_count( $ds_out, 'class="edoc__card' ) );
-check( 'all twelve are links', 12, substr_count( $ds_out, '<a class="edoc__card"' ) );
-check( 'none is Coming soon', 0, substr_count( $ds_out, '<div class="edoc__card is-soon"' ) );
+check( 'eleven are links', 11, substr_count( $ds_out, '<a class="edoc__card"' ) );
+check( 'the one without a file is Coming soon, not a link', 1, substr_count( $ds_out, '<div class="edoc__card is-soon"' ) );
 check( 'no dead links', 0, substr_count( $ds_out, 'href=""' ) );
-check( 'links open a new tab safely', 12, substr_count( $ds_out, 'target="_blank" rel="noopener"' ) );
-check( 'no download attribute by default', 0, preg_match( '/\sdownload[\s>]/', $ds_out ) );
+check( 'links open a new tab safely', 11, substr_count( $ds_out, 'target="_blank" rel="noopener"' ) );
 check( 'covers are decorative', 12, substr_count( $ds_out, 'alt=""' ) );
+check( 'chips come from the filters, in order', 'all,white,product,industry,perf,company', implode( ',', ( preg_match_all( '/class="edoc__chip" data-seg="([a-z-]+)"/', $ds_out, $ds_m ) ? $ds_m[1] : array() ) ) );
 check( 'All leads, pressed', 1, substr_count( $ds_out, 'data-seg="all" aria-pressed="true"' ) );
-check( 'no card hidden while All is on', 0, preg_match( '/edoc__card[^>]*\shidden/', $ds_out ) );
 check( 'the hash prefix is on the root', true, false !== strpos( $ds_out, 'data-hash-prefix="docs-"' ) );
 
-$ds_no_all = $ds->markup(
-	array(
-		'docs'       => $ds->shipped(),
-		'show_chips' => 'yes',
-		'show_all'   => '',
-		'chip_map'   => DocShelf_Content::default_chip_map(),
-	)
-);
+$ds_no_all = $ds->markup( array( 'show_chips' => 'yes', 'show_all' => '' ), $ds_cards );
 check( 'without All the first filter is pressed', 1, substr_count( $ds_no_all, 'data-seg="white" aria-pressed="true"' ) );
 check( 'and the other ten cards start hidden', 10, preg_match_all( '/edoc__card[^>]*\shidden/', $ds_no_all ) );
-check( 'no documents, nothing at all', '', trim( $ds->markup( array() ) ) );
+check( 'no documents, nothing on the page', '', trim( $ds->markup( array(), array() ) ) );
 
 /* ------------------------------------------------------------- report --- */
 

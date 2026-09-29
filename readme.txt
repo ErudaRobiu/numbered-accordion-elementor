@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.63.1
+Stable tag: 2.64.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,17 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.64.0 =
+* **Documents are now managed in the dashboard.** A new Documents section has
+  one form per document: filter, type label, description, meta line, cover,
+  and either an uploaded PDF or a link (SharePoint works). Every Document
+  Shelf on the site shows the published documents in their Order, so adding
+  or changing one no longer means editing the page.
+* A shelf already placed on a page switches over by itself. The document list
+  it saved when it was dropped in is no longer used, which is what kept
+  "Coming soon" showing after the files were uploaded.
+* New widget settings: show only some filters, and how many documents.
 
 = 2.63.1 =
 * The Document Shelf's twelve documents now link to copies in this site's

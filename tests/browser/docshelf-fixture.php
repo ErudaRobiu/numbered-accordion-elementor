@@ -76,7 +76,7 @@ namespace {
 	require_once dirname( __DIR__, 2 ) . '/modules/docshelf/widgets/class-document-shelf-widget.php';
 
 	/**
-	 * A widget that renders whatever settings it is handed.
+	 * The widget, handed its documents instead of querying a database.
 	 */
 	class DocShelf_Fixture extends \ErudaToolkit\Modules\DocShelf\Widgets\Document_Shelf_Widget {
 
@@ -86,24 +86,17 @@ namespace {
 		private $fixture = array();
 
 		/**
-		 * @var string
+		 * @var array
 		 */
-		private $fixture_id = '';
+		private $docs = array();
 
 		/**
-		 * @param array  $settings Settings.
-		 * @param string $id       Element id.
+		 * @param array $settings Settings.
+		 * @param array $docs     Cards.
 		 */
-		public function __construct( $settings = array(), $id = 'a1' ) {
-			$this->fixture    = $settings;
-			$this->fixture_id = $id;
-		}
-
-		/**
-		 * @return string
-		 */
-		public function get_id() {
-			return $this->fixture_id;
+		public function __construct( $settings, $docs ) {
+			$this->fixture = $settings;
+			$this->docs    = $docs;
 		}
 
 		/**
@@ -114,14 +107,11 @@ namespace {
 		}
 
 		/**
-		 * The shipped document rows, exactly as the panel would start with them.
-		 *
+		 * @param array $settings Settings.
 		 * @return array
 		 */
-		public function shipped_docs() {
-			$method = new \ReflectionMethod( $this, 'default_docs' );
-
-			return $method->invoke( $this );
+		protected function get_docs( $settings ) {
+			return $this->docs;
 		}
 
 		/**
@@ -135,30 +125,72 @@ namespace {
 		}
 	}
 
-	$probe = new DocShelf_Fixture();
-	$base  = array(
-		'docs'          => $probe->shipped_docs(),
+	/**
+	 * The seed documents as the widget would get them from the database.
+	 *
+	 * @param callable|null $change Adjusts one row before it becomes a card.
+	 * @return array
+	 */
+	function docshelf_cards( $change = null ) {
+		$names = \ErudaToolkit\Modules\DocShelf\DocShelf_Content::filters();
+		$cards = array();
+
+		foreach ( \ErudaToolkit\Modules\DocShelf\DocShelf_Content::default_docs() as $i => $doc ) {
+			$raw = array(
+				'title'     => $doc['title'],
+				'meta'      => array(
+					'doc_type'     => $doc['type'],
+					'doc_desc'     => $doc['desc'],
+					'doc_meta'     => $doc['meta'],
+					'doc_new_tab'  => '1',
+					'doc_download' => '0',
+				),
+				'filters'   => array( array( 'slug' => $doc['key'], 'name' => $names[ $doc['key'] ] ) ),
+				'file_url'  => $doc['url'],
+				'cover_url' => '../../' . \ErudaToolkit\Modules\DocShelf\DocShelf_Content::COVER_DIR . $doc['cover'],
+			);
+
+			if ( $change ) {
+				$raw = $change( $raw, $i );
+			}
+
+			$cards[] = \ErudaToolkit\Modules\DocShelf\DocShelf_Content::card( $raw );
+		}
+
+		return $cards;
+	}
+
+	$base = array(
 		'show_chips'    => 'yes',
 		'show_all'      => 'yes',
 		'all_label'     => 'All',
-		'chip_map'      => \ErudaToolkit\Modules\DocShelf\DocShelf_Content::default_chip_map(),
 		'download_text' => 'Download ↓',
 		'soon_text'     => 'Coming soon',
 		'badge_text'    => 'PDF',
 	);
 
-	// No "All", one link in the same tab with a download attribute, and a
-	// filter key the label map does not know.
-	$other                         = $base;
-	$other['show_all']             = '';
-	$other['docs'][0]['new_tab']   = '';
-	$other['docs'][0]['download']  = 'yes';
-	$other['docs'][11]['key']      = 'press kit';
-	$other['docs'][2]['link']      = array( 'url' => '' );
-	$other['docs'][5]['link']      = array( 'url' => '' );
+	// No "All", one same-tab download link, a filter the defaults do not
+	// know, and two documents with no file yet.
+	$other             = $base;
+	$other['show_all'] = '';
+	$other_docs        = docshelf_cards(
+		function ( $raw, $i ) {
+			if ( 0 === $i ) {
+				$raw['meta']['doc_new_tab']  = '0';
+				$raw['meta']['doc_download'] = '1';
+			}
+			if ( 11 === $i ) {
+				$raw['filters'] = array( array( 'slug' => 'press-kit', 'name' => 'Press kit' ) );
+			}
+			if ( 2 === $i || 5 === $i ) {
+				$raw['file_url'] = '';
+			}
+			return $raw;
+		}
+	);
 
-	$first  = new DocShelf_Fixture( $base, 'a1' );
-	$second = new DocShelf_Fixture( $other, 'b2' );
+	$first  = new DocShelf_Fixture( $base, docshelf_cards() );
+	$second = new DocShelf_Fixture( $other, $other_docs );
 
 	?>
 <!DOCTYPE html>
