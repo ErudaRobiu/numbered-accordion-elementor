@@ -96,6 +96,10 @@ final class Toolkit {
 			'file'  => 'modules/logotabs/class-logotabs-module.php',
 			'class' => '\ErudaToolkit\Modules\LogoTabs\LogoTabs_Module',
 		),
+		'anatomy'    => array(
+			'file'  => 'modules/anatomy/class-anatomy-module.php',
+			'class' => '\ErudaToolkit\Modules\Anatomy\Anatomy_Module',
+		),
 	);
 
 	/**

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case Anatomy — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;600;700&family=Urbanist:wght@700&display=swap">
+<link rel="stylesheet" href="../../modules/anatomy/assets/css/case-anatomy.css">
+<style>
+body{margin:0;background:#fff;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;color:#0F3961}
+.host{max-width:1240px;margin:0 auto;padding:60px 40px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
+@media(max-width:1024px){.host{grid-template-columns:1fr}}
+@media(max-width:767px){.host{padding:32px 16px}}
+/* A hostile theme: Hello Elementor's button reset, and the usual image rules. */
+[type=button],button{background-color:transparent;border:1px solid #c36;border-radius:3px;color:#c36;display:inline-block;font-size:1rem;font-weight:400;padding:.5rem 1rem;text-align:center;white-space:nowrap}
+[type=button]:hover,button:hover,[type=button]:focus,button:focus{background-color:#c36;color:#fff;text-decoration:none}
+img{max-width:100%;height:auto}
+img:hover{opacity:.75}
+ol{padding-left:2em}
+p{margin:0 0 1em}
+</style>
+</head>
+<body>
+<div class="host">
+	<div><p class="marker">Evidence</p><p>Defaults — CWS opens, the result in navy.</p></div>
+	<div id="a">		<div class="ecan ecan--animate" style="--ecan-count:3">
+			<div class="ecan__tabs" role="tablist" aria-label="Choose a project">
+									<button type="button" class="ecan__tab" role="tab"
+						id="ecan-a1-t-0"
+						aria-controls="ecan-a1-p-0"
+						aria-selected="true"
+						tabindex="0">
+						<img class="ecan__logo" src="../../modules/anatomy/assets/logos/cws.webp" alt="CWS Workwear" decoding="async" />					</button>
+									<button type="button" class="ecan__tab" role="tab"
+						id="ecan-a1-t-1"
+						aria-controls="ecan-a1-p-1"
+						aria-selected="false"
+						tabindex="-1">
+						<img class="ecan__logo" src="../../modules/anatomy/assets/logos/lantmannen.webp" alt="Lantmännen" decoding="async" />					</button>
+									<button type="button" class="ecan__tab" role="tab"
+						id="ecan-a1-t-2"
+						aria-controls="ecan-a1-p-2"
+						aria-selected="false"
+						tabindex="-1">
+						<img class="ecan__logo ecan__logo--dark" src="../../modules/anatomy/assets/logos/bruzaholms.svg" alt="Bruzaholms" decoding="async" />					</button>
+							</div>
+
+							<div class="ecan__panel" role="tabpanel" tabindex="0"
+					id="ecan-a1-p-0"
+					aria-labelledby="ecan-a1-t-0"
+					>
+					<ol class="ecan__rows">
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">01</b>
+																	<span class="ecan__label">The challenge</span>
+																<p class="ecan__answer">Hot, very moist finisher exhaust was vented straight outside.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">02</b>
+																	<span class="ecan__label">Source conditions</span>
+																<p class="ecan__answer">Finisher exhaust at about 80°C, heavy with moisture.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">03</b>
+																	<span class="ecan__label">Where the heat goes</span>
+																<p class="ecan__answer">Pre-heats process water for two tunnel washers.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">04</b>
+																	<span class="ecan__label">The solution</span>
+																<p class="ecan__answer">Lepido® added to the finisher exhaust.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">05</b>
+																	<span class="ecan__label">Operating period</span>
+																<p class="ecan__answer">Six-month trial from early summer 2023.</p>
+							</li>
+													<li class="ecan__tile ecan__tile--result">
+								<b class="ecan__num" aria-hidden="true">06</b>
+																	<span class="ecan__label">Approved result</span>
+																<p class="ecan__answer">63% less gas per kg of laundry (0.019 → 0.007 kWh/kg).</p>
+							</li>
+											</ol>
+																	<a class="ecan__link" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-CWS-laundry.pdf">Read the CWS case (PDF) <span aria-hidden="true">→</span></a>
+									</div>
+							<div class="ecan__panel" role="tabpanel" tabindex="0"
+					id="ecan-a1-p-1"
+					aria-labelledby="ecan-a1-t-1"
+					hidden>
+					<ol class="ecan__rows">
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">01</b>
+																	<span class="ecan__label">The challenge</span>
+																<p class="ecan__answer">Clogging risk had ruled out heat recovery on the production line.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">02</b>
+																	<span class="ecan__label">Source conditions</span>
+																<p class="ecan__answer">9.7 m³/s at 40°C with grease, soot and moisture, 20 h a day.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">03</b>
+																	<span class="ecan__label">Where the heat goes</span>
+																<p class="ecan__answer">Supply air for the production hall, through a closed run-around loop.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">04</b>
+																	<span class="ecan__label">The solution</span>
+																<p class="ecan__answer">Two Lepido® L50 units in the exhaust duct.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">05</b>
+																	<span class="ecan__label">Operating period</span>
+																<p class="ecan__answer">A 2022 project in Laholm, Sweden.</p>
+							</li>
+													<li class="ecan__tile ecan__tile--result">
+								<b class="ecan__num" aria-hidden="true">06</b>
+																	<span class="ecan__label">Approved result</span>
+																<p class="ecan__answer">614,900 kWh a year recovered, 99% of the heat demand.</p>
+							</li>
+											</ol>
+																	<a class="ecan__link" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-Laholm-Food-production.pdf">Read the Lantmännen case (PDF) <span aria-hidden="true">→</span></a>
+									</div>
+							<div class="ecan__panel" role="tabpanel" tabindex="0"
+					id="ecan-a1-p-2"
+					aria-labelledby="ecan-a1-t-2"
+					hidden>
+					<ol class="ecan__rows">
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">01</b>
+																	<span class="ecan__label">The challenge</span>
+																<p class="ecan__answer">Conventional exchangers clogged, needed weekly maintenance and were removed.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">02</b>
+																	<span class="ecan__label">Source conditions</span>
+																<p class="ecan__answer">About 4 m³/s at 30°C from the sand cooler, with particles, moisture and binders.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">03</b>
+																	<span class="ecan__label">Where the heat goes</span>
+																<p class="ecan__answer">Heat the site used to get from an oil-fired boiler.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">04</b>
+																	<span class="ecan__label">The solution</span>
+																<p class="ecan__answer">Lepido® in the sand reclamation duct, with no pre-filter.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">05</b>
+																	<span class="ecan__label">Operating period</span>
+																<p class="ecan__answer">Installed spring 2025, results after three months.</p>
+							</li>
+													<li class="ecan__tile ecan__tile--result">
+								<b class="ecan__num" aria-hidden="true">06</b>
+																	<span class="ecan__label">Approved result</span>
+																<p class="ecan__answer">95 kW recovered, 85% of the heating need, about 90 t less fossil CO₂ a year.</p>
+							</li>
+											</ol>
+																	<a class="ecan__link" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-Bruzaholms-Foundry.pdf">Read the Bruzaholms case (PDF) <span aria-hidden="true">→</span></a>
+									</div>
+					</div>
+		</div>
+</div>
+<div class="host">
+	<div><p class="marker">Four projects, opens on the third, no highlight, one answer missing, one project without a logo</p></div>
+	<div id="b">		<div class="ecan ecan--animate" style="--ecan-count:4">
+			<div class="ecan__tabs" role="tablist" aria-label="Choose a project">
+									<button type="button" class="ecan__tab" role="tab"
+						id="ecan-b2-t-0"
+						aria-controls="ecan-b2-p-0"
+						aria-selected="false"
+						tabindex="-1">
+						<img class="ecan__logo" src="../../modules/anatomy/assets/logos/cws.webp" alt="CWS Workwear" decoding="async" />					</button>
+									<button type="button" class="ecan__tab" role="tab"
+						id="ecan-b2-t-1"
+						aria-controls="ecan-b2-p-1"
+						aria-selected="false"
+						tabindex="-1">
+						<img class="ecan__logo" src="../../modules/anatomy/assets/logos/lantmannen.webp" alt="Lantmännen" decoding="async" />					</button>
+									<button type="button" class="ecan__tab" role="tab"
+						id="ecan-b2-t-2"
+						aria-controls="ecan-b2-p-2"
+						aria-selected="true"
+						tabindex="0">
+						<img class="ecan__logo ecan__logo--dark" src="../../modules/anatomy/assets/logos/bruzaholms.svg" alt="Bruzaholms" decoding="async" />					</button>
+									<button type="button" class="ecan__tab" role="tab"
+						id="ecan-b2-t-3"
+						aria-controls="ecan-b2-p-3"
+						aria-selected="false"
+						tabindex="-1">
+						<span class="ecan__name">Burger King</span>					</button>
+							</div>
+
+							<div class="ecan__panel" role="tabpanel" tabindex="0"
+					id="ecan-b2-p-0"
+					aria-labelledby="ecan-b2-t-0"
+					hidden>
+					<ol class="ecan__rows">
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">01</b>
+																	<span class="ecan__label">The challenge</span>
+																<p class="ecan__answer">Hot, very moist finisher exhaust was vented straight outside.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">02</b>
+																	<span class="ecan__label">Source conditions</span>
+																<p class="ecan__answer">Finisher exhaust at about 80°C, heavy with moisture.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">03</b>
+																	<span class="ecan__label">Where the heat goes</span>
+																<p class="ecan__answer">Pre-heats process water for two tunnel washers.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">04</b>
+																	<span class="ecan__label">The solution</span>
+																<p class="ecan__answer">Lepido® added to the finisher exhaust.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">05</b>
+																	<span class="ecan__label">Operating period</span>
+																<p class="ecan__answer">Six-month trial from early summer 2023.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">06</b>
+																	<span class="ecan__label">Approved result</span>
+																<p class="ecan__answer">63% less gas per kg of laundry (0.019 → 0.007 kWh/kg).</p>
+							</li>
+											</ol>
+																	<a class="ecan__link" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-CWS-laundry.pdf">Read the CWS case (PDF) <span aria-hidden="true">→</span></a>
+									</div>
+							<div class="ecan__panel" role="tabpanel" tabindex="0"
+					id="ecan-b2-p-1"
+					aria-labelledby="ecan-b2-t-1"
+					hidden>
+					<ol class="ecan__rows">
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">01</b>
+																	<span class="ecan__label">The challenge</span>
+																<p class="ecan__answer">Clogging risk had ruled out heat recovery on the production line.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">02</b>
+																	<span class="ecan__label">Source conditions</span>
+																<p class="ecan__answer">9.7 m³/s at 40°C with grease, soot and moisture, 20 h a day.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">04</b>
+																	<span class="ecan__label">The solution</span>
+																<p class="ecan__answer">Two Lepido® L50 units in the exhaust duct.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">05</b>
+																	<span class="ecan__label">Operating period</span>
+																<p class="ecan__answer">A 2022 project in Laholm, Sweden.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">06</b>
+																	<span class="ecan__label">Approved result</span>
+																<p class="ecan__answer">614,900 kWh a year recovered, 99% of the heat demand.</p>
+							</li>
+											</ol>
+																	<a class="ecan__link" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-Laholm-Food-production.pdf">Read the Lantmännen case (PDF) <span aria-hidden="true">→</span></a>
+									</div>
+							<div class="ecan__panel" role="tabpanel" tabindex="0"
+					id="ecan-b2-p-2"
+					aria-labelledby="ecan-b2-t-2"
+					>
+					<ol class="ecan__rows">
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">01</b>
+																	<span class="ecan__label">The challenge</span>
+																<p class="ecan__answer">Conventional exchangers clogged, needed weekly maintenance and were removed.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">02</b>
+																	<span class="ecan__label">Source conditions</span>
+																<p class="ecan__answer">About 4 m³/s at 30°C from the sand cooler, with particles, moisture and binders.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">03</b>
+																	<span class="ecan__label">Where the heat goes</span>
+																<p class="ecan__answer">Heat the site used to get from an oil-fired boiler.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">04</b>
+																	<span class="ecan__label">The solution</span>
+																<p class="ecan__answer">Lepido® in the sand reclamation duct, with no pre-filter.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">05</b>
+																	<span class="ecan__label">Operating period</span>
+																<p class="ecan__answer">Installed spring 2025, results after three months.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">06</b>
+																	<span class="ecan__label">Approved result</span>
+																<p class="ecan__answer">95 kW recovered, 85% of the heating need, about 90 t less fossil CO₂ a year.</p>
+							</li>
+											</ol>
+																	<a class="ecan__link" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-Bruzaholms-Foundry.pdf">Read the Bruzaholms case (PDF) <span aria-hidden="true">→</span></a>
+									</div>
+							<div class="ecan__panel" role="tabpanel" tabindex="0"
+					id="ecan-b2-p-3"
+					aria-labelledby="ecan-b2-t-3"
+					hidden>
+					<ol class="ecan__rows">
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">01</b>
+																	<span class="ecan__label">The challenge</span>
+																<p class="ecan__answer">Kitchen exhaust heat was thrown away.</p>
+							</li>
+													<li class="ecan__tile">
+								<b class="ecan__num" aria-hidden="true">06</b>
+																	<span class="ecan__label">Approved result</span>
+																<p class="ecan__answer">11–36% lower electricity bill.</p>
+							</li>
+											</ol>
+									</div>
+					</div>
+		</div>
+</div>
+<script src="../../modules/anatomy/assets/js/case-anatomy.js"></script>
+</body>
+</html>
+	

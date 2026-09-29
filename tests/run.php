@@ -647,7 +647,8 @@ check( 'the page transitions module is registered', true, in_array( 'transitions
 check( 'the industry showcase module is registered', true, in_array( 'industry', Toolkit::instance()->ids(), true ) );
 check( 'the partner diagram module is registered', true, in_array( 'partners', Toolkit::instance()->ids(), true ) );
 check( 'the customer logo tabs module is registered', true, in_array( 'logotabs', Toolkit::instance()->ids(), true ) );
-check( 'eighteen modules ship', 18, count( Toolkit::instance()->ids() ) );
+check( 'the case anatomy module is registered', true, in_array( 'anatomy', Toolkit::instance()->ids(), true ) );
+check( 'nineteen modules ship', 19, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -681,6 +682,7 @@ foreach ( array(
 	'modules/rail/widgets/class-scroll-rail-widget.php',
 	'modules/partners/widgets/class-partner-diagram-widget.php',
 	'modules/logotabs/widgets/class-customer-logo-tabs-widget.php',
+	'modules/anatomy/widgets/class-case-anatomy-widget.php',
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -710,6 +712,7 @@ $module_files = array(
 	'modules/header/class-header-module.php',
 	'modules/partners/class-partners-module.php',
 	'modules/logotabs/class-logotabs-module.php',
+	'modules/anatomy/class-anatomy-module.php',
 );
 
 foreach ( $module_files as $relative ) {
@@ -2539,6 +2542,126 @@ check( 'the first segment is pressed instead', true, false !== strpos( $lt_other
 check( 'the rest are hidden from the server', 7 + 28, preg_match_all( '/<li [^>]*hidden/', $lt_other_out ) );
 check( 'an image the server cannot measure goes to the script', 1, substr_count( $lt_other_out, 'data-eclt-fit' ) );
 check( 'no tabs, nothing at all', '', trim( $lt->markup( array() ) ) );
+
+
+/* --------------------------------------------------- Case Anatomy --- */
+
+require_once dirname( __DIR__ ) . '/modules/anatomy/class-anatomy-content.php';
+require_once dirname( __DIR__ ) . '/modules/anatomy/widgets/class-case-anatomy-widget.php';
+
+use ErudaToolkit\Modules\Anatomy\Anatomy_Content;
+
+check( 'six questions', 6, count( Anatomy_Content::default_labels() ) );
+check( 'the last question is the result', 'Approved result', Anatomy_Content::default_labels()[5] );
+check( 'three projects ship', array( 'CWS Workwear', 'Lantmännen', 'Bruzaholms' ), array_column( Anatomy_Content::default_projects(), 'name' ) );
+
+foreach ( Anatomy_Content::default_projects() as $project ) {
+	check( "{$project['name']} answers all six", 6, count( array_filter( $project['answers'] ) ) );
+	check( "{$project['name']}'s logo ships", true, is_file( dirname( __DIR__ ) . '/' . Anatomy_Content::LOGO_DIR . $project['file'] ) );
+}
+
+check( 'only Bruzaholms is on the dark chip', array( 'Bruzaholms' ), array_values( array_column( array_filter( Anatomy_Content::default_projects(), function ( $p ) { return $p['dark']; } ), 'name' ) ) );
+
+// The approved figures are the part a typo would make untrue.
+$an_results = array_map( function ( $p ) { return $p['answers'][5]; }, Anatomy_Content::default_projects() );
+check( 'CWS result', '63% less gas per kg of laundry (0.019 → 0.007 kWh/kg).', $an_results[0] );
+check( 'Lantmännen result', '614,900 kWh a year recovered, 99% of the heat demand.', $an_results[1] );
+check( 'Bruzaholms result', '95 kW recovered, 85% of the heating need, about 90 t less fossil CO₂ a year.', $an_results[2] );
+
+check( 'unsaved labels fall back', Anatomy_Content::default_labels(), Anatomy_Content::labels( array() ) );
+check( 'an emptied label stays empty', '', Anatomy_Content::labels( array( 'label_2' => '' ) )[1] );
+check( 'an edited label is used', 'Why', Anatomy_Content::labels( array( 'label_1' => ' Why ' ) )[0] );
+
+$an_built = Anatomy_Content::build(
+	array(
+		array( 'name' => 'A', 'answer_1' => 'one', 'answer_4' => 'four', 'answer_6' => 'six', 'dark' => 'yes', 'link' => array( 'url' => '/a.pdf', 'is_external' => 'on' ), 'link_text' => 'Read' ),
+		array( 'answer_1' => 'nothing to put on the tab' ),
+		array( 'logo' => array( 'url' => 'b.png', 'id' => '5' ), 'answer_2' => array( 'no' ) ),
+		array( 'name' => 'C' ),
+		array( 'name' => 'D' ),
+		array( 'name' => 'E, the fifth' ),
+	),
+	Anatomy_Content::default_labels(),
+	true
+);
+check( 'a project with no logo and no name is dropped', array( 'A', '', 'C', 'D' ), array_column( $an_built, 'name' ) );
+check( 'no more than four projects', 4, count( $an_built ) );
+check( 'missing answers keep the rest numbered', array( '01', '04', '06' ), array_column( $an_built[0]['tiles'], 'number' ) );
+check( 'the sixth is the result', array( false, false, true ), array_column( $an_built[0]['tiles'], 'result' ) );
+check( 'each tile carries its label', 'The solution', $an_built[0]['tiles'][1]['label'] );
+check( 'dark is read', true, $an_built[0]['dark'] );
+check( 'the link is read', array( '/a.pdf', 'Read', true ), array( $an_built[0]['link'], $an_built[0]['link_text'], $an_built[0]['external'] ) );
+check( 'a non-text answer is left out', array(), $an_built[1]['tiles'] );
+check( 'the logo id is a number', 5, $an_built[1]['logo_id'] );
+
+$an_plain = Anatomy_Content::build( array( array( 'name' => 'A', 'answer_6' => 'six' ) ), Anatomy_Content::default_labels(), false );
+check( 'highlight off marks nothing', false, $an_plain[0]['tiles'][0]['result'] );
+check( 'nothing saved builds nothing', array(), Anatomy_Content::build( 'x', array(), true ) );
+
+check( 'opens on the project asked for', 2, Anatomy_Content::default_index( 3, 3 ) );
+check( 'out of range opens the first', 0, Anatomy_Content::default_index( 5, 3 ) );
+
+/**
+ * The widget with a settings array pushed into it.
+ */
+class Anatomy_Render_Probe extends \ErudaToolkit\Modules\Anatomy\Widgets\Case_Anatomy_Widget {
+
+	/**
+	 * @var array
+	 */
+	public $feed = array();
+
+	/**
+	 * @return array
+	 */
+	public function get_settings_for_display() {
+		return $this->feed;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function shipped() {
+		return ( new ReflectionMethod( $this, 'default_projects' ) )->invoke( $this );
+	}
+
+	/**
+	 * @param array $settings Settings to render with.
+	 * @return string
+	 */
+	public function markup( $settings ) {
+		$this->feed = $settings;
+
+		ob_start();
+		( new ReflectionMethod( $this, 'render' ) )->invoke( $this );
+
+		return (string) ob_get_clean();
+	}
+}
+
+$an     = new Anatomy_Render_Probe();
+$an_out = $an->markup(
+	array(
+		'projects'      => $an->shipped(),
+		'default_tab'   => 1,
+		'tablist_label' => 'Choose a project',
+		'highlight'     => 'yes',
+		'animate'       => 'yes',
+	)
+);
+
+check( 'shipped rows point at the bundled logos', 'https://example.test/wp-content/plugins/numbered-accordion-elementor/modules/anatomy/assets/logos/bruzaholms.svg', $an->shipped()[2]['logo']['url'] );
+check( 'shipped rows carry the PDF links', 'https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-CWS-laundry.pdf', $an->shipped()[0]['link']['url'] );
+check( 'one tablist, named', 1, substr_count( $an_out, 'role="tablist" aria-label="Choose a project"' ) );
+check( 'three tabs, three panels', array( 3, 3 ), array( substr_count( $an_out, 'role="tab"' ), substr_count( $an_out, 'role="tabpanel"' ) ) );
+check( 'two panels hidden, all in the page', 2, preg_match_all( '/role="tabpanel"[^>]*\shidden/s', $an_out ) );
+check( 'eighteen answers in the page', 18, substr_count( $an_out, 'class="ecan__answer"' ) );
+check( 'three result tiles, one per project', 3, substr_count( $an_out, 'ecan__tile--result' ) );
+check( 'the first project is selected', 1, preg_match( '/aria-selected="true"\s+tabindex="0"/', $an_out ) );
+check( 'the dark chip is on Bruzaholms', true, false !== strpos( $an_out, 'class="ecan__logo ecan__logo--dark" src="https://example.test/wp-content/plugins/numbered-accordion-elementor/modules/anatomy/assets/logos/bruzaholms.svg" alt="Bruzaholms"' ) );
+check( 'numbers are hidden from screen readers, the list numbers itself', 18, substr_count( $an_out, '<b class="ecan__num" aria-hidden="true">' ) );
+check( 'the stagger count is on the root', true, false !== strpos( $an_out, 'style="--ecan-count:3"' ) );
+check( 'no projects, nothing at all', '', trim( $an->markup( array() ) ) );
 
 /* ------------------------------------------------------------- report --- */
 

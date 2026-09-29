@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.60.0
+Stable tag: 2.61.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,19 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.61.0 =
+* **New widget: Case Anatomy.** One tab per project, marked by its logo, and
+  under it the same six questions answered in tiles, with the result in navy.
+  It ships CWS Workwear, Lantmännen and Bruzaholms from their case PDFs, each
+  with a link to its PDF.
+* The six questions are set once for every project. Up to four projects. A
+  question left blank for one project drops its tile, and the others keep
+  their numbers.
+* Keyboard-friendly tabs (arrows, Home and End). The answers rise in turn when
+  another project is picked, all in within 300ms, and not at all for visitors
+  who ask for less motion. On phones the answers stack and the logos stay
+  three across.
 
 = 2.60.0 =
 * **New widget: Customer Logo Tabs.** The customer wall from page 24: three
