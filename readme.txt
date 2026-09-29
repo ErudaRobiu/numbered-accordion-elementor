@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.62.0
+Stable tag: 2.63.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,18 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.63.0 =
+* **New widget: Document Shelf.** A filterable library of PDFs: each card shows
+  page 1 of its document rising out of the card like a sheet of paper, with
+  the type, title, a line of description and the page count. It ships the
+  twelve page 26 documents with their covers.
+* A file link can be any address, SharePoint included, so a file can be
+  updated without touching the page. A document without a link yet shows
+  "Coming soon" instead of a dead link.
+* Chips filter by type; a link ending in #docs-perf opens the shelf on
+  Performance evidence. Cards fade in within 300ms of a change, and lift on
+  hover, except for visitors who ask for less motion.
 
 = 2.62.0 =
 * **New: Case Studies.** A Case Studies section in the dashboard, with one form

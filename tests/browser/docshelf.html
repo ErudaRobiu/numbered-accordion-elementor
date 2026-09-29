@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Document Shelf — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Urbanist:wght@700&display=swap">
+<link rel="stylesheet" href="../../modules/docshelf/assets/css/document-shelf.css">
+<style>
+body{margin:0;background:#fff;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;color:#0F3961}
+.host{max-width:1240px;margin:0 auto;padding:60px 40px}
+.marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
+@media(max-width:760px){.host{padding:32px 16px}}
+/* A hostile theme: Hello Elementor's button and link rules, and the usual image ones. */
+[type=button],button{background-color:transparent;border:1px solid #c36;border-radius:3px;color:#c36;display:inline-block;font-size:1rem;font-weight:400;padding:.5rem 1rem;text-align:center;white-space:nowrap}
+[type=button]:hover,button:hover,[type=button]:focus,button:focus{background-color:#c36;color:#fff;text-decoration:none}
+a{color:#c36;text-decoration:underline}a:hover{color:#336}
+img{max-width:100%;height:auto}
+img:hover{opacity:.75}
+</style>
+</head>
+<body>
+<div class="host" id="docs">
+	<p class="marker">Page 26 — the shipped shelf</p>
+	<div id="a">		<div class="edoc" data-hash-prefix="docs-">
+							<div class="edoc__chips" role="group" aria-label="Filter documents by type">
+											<button type="button" class="edoc__chip" data-seg="all" aria-pressed="true">All</button>
+																<button type="button" class="edoc__chip" data-seg="white" aria-pressed="false">White papers</button>
+											<button type="button" class="edoc__chip" data-seg="product" aria-pressed="false">Product literature</button>
+											<button type="button" class="edoc__chip" data-seg="industry" aria-pressed="false">Industry guides</button>
+											<button type="button" class="edoc__chip" data-seg="perf" aria-pressed="false">Performance evidence</button>
+											<button type="button" class="edoc__chip" data-seg="company" aria-pressed="false">Company</button>
+									</div>
+			
+			<div class="edoc__grid">
+														<a class="edoc__card" data-seg="white" href="https://norrelinc.com/wp-content/uploads/2026/05/ThermStar_White_Paper_FINAL.pdf" aria-label="Waste heat recovery for commercial and industrial facilities, PDF, 12 pages · May 2026, opens in a new tab" target="_blank" rel="noopener">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/overview.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">White paper</span>
+														<strong class="edoc__title">Waste heat recovery for commercial and industrial facilities</strong>
+															<span class="edoc__desc">Fundamentals, dirty-exhaust challenges, PRG and system architecture. By Scott J. Preston, CEM.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">12 pages · May 2026</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<a class="edoc__card" data-seg="white" href="https://norrelinc.com/wp-content/uploads/2026/08/ThermStar-Technical-Whitepaper-Final.pdf" aria-label="ThermStar System technical white paper, PDF, 5 pages, opens in a new tab" target="_blank" rel="noopener">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/technical.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">White paper</span>
+														<strong class="edoc__title">ThermStar System technical white paper</strong>
+															<span class="edoc__desc">Written for mechanical, energy and HVAC design engineers.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">5 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<div class="edoc__card is-soon" data-seg="product">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/brochure.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Product literature</span>
+														<strong class="edoc__title">ThermStar System brochure</strong>
+															<span class="edoc__desc">The turnkey system at a glance: Lepido®, HeatCore™, sensors and controls.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">Brochure</span>
+								<em>Coming soon</em>
+							</span>
+						</span>
+					</div>
+														<div class="edoc__card is-soon" data-seg="industry">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/food.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Industry guide</span>
+														<strong class="edoc__title">ThermStar System for food production</strong>
+															<span class="edoc__desc">Oven, fryer and dryer exhaust, and where that heat can go.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">Industry one-pager</span>
+								<em>Coming soon</em>
+							</span>
+						</span>
+					</div>
+														<div class="edoc__card is-soon" data-seg="industry">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/laundry.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Industry guide</span>
+														<strong class="edoc__title">ThermStar System for industrial laundry</strong>
+															<span class="edoc__desc">Lint-laden dryer, washer and finisher exhaust, plus the CWS result.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">Industry one-pager</span>
+								<em>Coming soon</em>
+							</span>
+						</span>
+					</div>
+														<div class="edoc__card is-soon" data-seg="industry">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/petfood.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Industry guide</span>
+														<strong class="edoc__title">ThermStar System for pet food</strong>
+															<span class="edoc__desc">Dryer, oven and cooker exhaust in pet food plants.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">Industry one-pager</span>
+								<em>Coming soon</em>
+							</span>
+						</span>
+					</div>
+														<a class="edoc__card" data-seg="perf" href="https://norrelinc.com/wp-content/uploads/2026/05/22_Month_Long_Term_Lepido_White_Paper_FINAL.pdf" aria-label="22-month field validation of Lepido®, PDF, 4 pages, opens in a new tab" target="_blank" rel="noopener">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/22month.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Performance study</span>
+														<strong class="edoc__title">22-month field validation of Lepido®</strong>
+															<span class="edoc__desc">Kitchen exhaust, no pre-filter, no cleaning. Effectiveness above 98%.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">4 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<a class="edoc__card" data-seg="perf" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-CWS-laundry.pdf" aria-label="CWS Workwear, industrial laundry, PDF, 15 pages, opens in a new tab" target="_blank" rel="noopener">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/cs-cws.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Case study</span>
+														<strong class="edoc__title">CWS Workwear, industrial laundry</strong>
+															<span class="edoc__desc">63% less gas on the tunnel washers. Den Bosch, Netherlands.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">15 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<a class="edoc__card" data-seg="perf" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-Laholm-Food-production.pdf" aria-label="Lantmännen, food production, PDF, 8 pages, opens in a new tab" target="_blank" rel="noopener">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/cs-laholm.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Case study</span>
+														<strong class="edoc__title">Lantmännen, food production</strong>
+															<span class="edoc__desc">99% of the site&#039;s heat demand covered. Laholm, Sweden.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">8 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<a class="edoc__card" data-seg="perf" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-Bruzaholms-Foundry.pdf" aria-label="Bruzaholms, foundry, PDF, 7 pages, opens in a new tab" target="_blank" rel="noopener">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/cs-bruz.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Case study</span>
+														<strong class="edoc__title">Bruzaholms, foundry</strong>
+															<span class="edoc__desc">85% of the heating need from sand cooler exhaust. Småland, Sweden.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">7 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<a class="edoc__card" data-seg="perf" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Sudy-Burger-King.pdf" aria-label="Burger King UK, restaurants, PDF, 11 pages, opens in a new tab" target="_blank" rel="noopener">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/cs-bk.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Comparative study</span>
+														<strong class="edoc__title">Burger King UK, restaurants</strong>
+															<span class="edoc__desc">11–36% lower electricity bill against a control site.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">11 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<div class="edoc__card is-soon" data-seg="company">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/customers.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Company</span>
+														<strong class="edoc__title">Global installed customer base</strong>
+															<span class="edoc__desc">Customers by sector: restaurants, food, manufacturing, laundry and hotels.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">2 pages</span>
+								<em>Coming soon</em>
+							</span>
+						</span>
+					</div>
+							</div>
+		</div>
+		</div>
+</div>
+<div class="host">
+	<p class="marker">No "All", a same-tab download link, a filter with no label</p>
+	<div id="b">		<div class="edoc" data-hash-prefix="docs-">
+							<div class="edoc__chips" role="group" aria-label="Filter documents by type">
+																<button type="button" class="edoc__chip" data-seg="white" aria-pressed="true">White papers</button>
+											<button type="button" class="edoc__chip" data-seg="product" aria-pressed="false">Product literature</button>
+											<button type="button" class="edoc__chip" data-seg="industry" aria-pressed="false">Industry guides</button>
+											<button type="button" class="edoc__chip" data-seg="perf" aria-pressed="false">Performance evidence</button>
+											<button type="button" class="edoc__chip" data-seg="press-kit" aria-pressed="false">Press kit</button>
+									</div>
+			
+			<div class="edoc__grid">
+														<a class="edoc__card" data-seg="white" href="https://norrelinc.com/wp-content/uploads/2026/05/ThermStar_White_Paper_FINAL.pdf" aria-label="Waste heat recovery for commercial and industrial facilities, PDF, 12 pages · May 2026" download>
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/overview.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">White paper</span>
+														<strong class="edoc__title">Waste heat recovery for commercial and industrial facilities</strong>
+															<span class="edoc__desc">Fundamentals, dirty-exhaust challenges, PRG and system architecture. By Scott J. Preston, CEM.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">12 pages · May 2026</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<a class="edoc__card" data-seg="white" href="https://norrelinc.com/wp-content/uploads/2026/08/ThermStar-Technical-Whitepaper-Final.pdf" aria-label="ThermStar System technical white paper, PDF, 5 pages, opens in a new tab" target="_blank" rel="noopener">
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/technical.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">White paper</span>
+														<strong class="edoc__title">ThermStar System technical white paper</strong>
+															<span class="edoc__desc">Written for mechanical, energy and HVAC design engineers.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">5 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<div class="edoc__card is-soon" data-seg="product" hidden>
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/brochure.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Product literature</span>
+														<strong class="edoc__title">ThermStar System brochure</strong>
+															<span class="edoc__desc">The turnkey system at a glance: Lepido®, HeatCore™, sensors and controls.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">Brochure</span>
+								<em>Coming soon</em>
+							</span>
+						</span>
+					</div>
+														<div class="edoc__card is-soon" data-seg="industry" hidden>
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/food.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Industry guide</span>
+														<strong class="edoc__title">ThermStar System for food production</strong>
+															<span class="edoc__desc">Oven, fryer and dryer exhaust, and where that heat can go.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">Industry one-pager</span>
+								<em>Coming soon</em>
+							</span>
+						</span>
+					</div>
+														<div class="edoc__card is-soon" data-seg="industry" hidden>
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/laundry.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Industry guide</span>
+														<strong class="edoc__title">ThermStar System for industrial laundry</strong>
+															<span class="edoc__desc">Lint-laden dryer, washer and finisher exhaust, plus the CWS result.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">Industry one-pager</span>
+								<em>Coming soon</em>
+							</span>
+						</span>
+					</div>
+														<div class="edoc__card is-soon" data-seg="industry" hidden>
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/petfood.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Industry guide</span>
+														<strong class="edoc__title">ThermStar System for pet food</strong>
+															<span class="edoc__desc">Dryer, oven and cooker exhaust in pet food plants.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">Industry one-pager</span>
+								<em>Coming soon</em>
+							</span>
+						</span>
+					</div>
+														<a class="edoc__card" data-seg="perf" href="https://norrelinc.com/wp-content/uploads/2026/05/22_Month_Long_Term_Lepido_White_Paper_FINAL.pdf" aria-label="22-month field validation of Lepido®, PDF, 4 pages, opens in a new tab" target="_blank" rel="noopener" hidden>
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/22month.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Performance study</span>
+														<strong class="edoc__title">22-month field validation of Lepido®</strong>
+															<span class="edoc__desc">Kitchen exhaust, no pre-filter, no cleaning. Effectiveness above 98%.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">4 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<a class="edoc__card" data-seg="perf" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-CWS-laundry.pdf" aria-label="CWS Workwear, industrial laundry, PDF, 15 pages, opens in a new tab" target="_blank" rel="noopener" hidden>
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/cs-cws.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Case study</span>
+														<strong class="edoc__title">CWS Workwear, industrial laundry</strong>
+															<span class="edoc__desc">63% less gas on the tunnel washers. Den Bosch, Netherlands.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">15 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<a class="edoc__card" data-seg="perf" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-Laholm-Food-production.pdf" aria-label="Lantmännen, food production, PDF, 8 pages, opens in a new tab" target="_blank" rel="noopener" hidden>
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/cs-laholm.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Case study</span>
+														<strong class="edoc__title">Lantmännen, food production</strong>
+															<span class="edoc__desc">99% of the site&#039;s heat demand covered. Laholm, Sweden.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">8 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<a class="edoc__card" data-seg="perf" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Study-Bruzaholms-Foundry.pdf" aria-label="Bruzaholms, foundry, PDF, 7 pages, opens in a new tab" target="_blank" rel="noopener" hidden>
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/cs-bruz.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Case study</span>
+														<strong class="edoc__title">Bruzaholms, foundry</strong>
+															<span class="edoc__desc">85% of the heating need from sand cooler exhaust. Småland, Sweden.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">7 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<a class="edoc__card" data-seg="perf" href="https://norrelinc.com/wp-content/uploads/2026/03/Case-Sudy-Burger-King.pdf" aria-label="Burger King UK, restaurants, PDF, 11 pages, opens in a new tab" target="_blank" rel="noopener" hidden>
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/cs-bk.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Comparative study</span>
+														<strong class="edoc__title">Burger King UK, restaurants</strong>
+															<span class="edoc__desc">11–36% lower electricity bill against a control site.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">11 pages</span>
+								<em>Download ↓</em>
+							</span>
+						</span>
+					</a>
+														<div class="edoc__card is-soon" data-seg="press-kit" hidden>
+						<span class="edoc__cover"><img src="../../modules/docshelf/assets/covers/customers.webp" alt="" loading="lazy" decoding="async" /></span>
+						<span class="edoc__body">
+															<span class="edoc__type">Company</span>
+														<strong class="edoc__title">Global installed customer base</strong>
+															<span class="edoc__desc">Customers by sector: restaurants, food, manufacturing, laundry and hotels.</span>
+														<span class="edoc__meta">
+																	<i>PDF</i>
+																<span class="edoc__size">2 pages</span>
+								<em>Coming soon</em>
+							</span>
+						</span>
+					</div>
+							</div>
+		</div>
+		</div>
+</div>
+<script src="../../modules/docshelf/assets/js/document-shelf.js"></script>
+</body>
+</html>
+	

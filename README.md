@@ -57,6 +57,7 @@ modules/partners/                  the Partner Diagram widget, its assets and bu
 modules/logotabs/                  the Customer Logo Tabs widget, its assets and the page 24 logos
 modules/anatomy/                   the Case Anatomy widget, its assets and the three case logos
 modules/casestudies/               the Case Studies post type, its ACF form and the Case Studies widget
+modules/docshelf/                  the Document Shelf widget, its assets and the twelve PDF covers
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -202,6 +203,31 @@ the Order numbers come from the plan.
 and reusing them after. The confidential Pancake Factory study is left out.
 The same data file drives the browser fixture, so the test and the site cannot
 drift. `tests/browser/casestudies-probe.js` runs 43 checks.
+
+**Document Shelf (`modules/docshelf/`).** The page 26 PDF library: type chips
+and cards, each with page 1 of its PDF rising out of a pale cover area like a
+sheet of paper. It ships the twelve documents, with covers rendered from the
+PDFs at 110 dpi and saved as ~600px WebP, 548KB for all twelve. The Pancake
+Factory case study (confidential footer) and the Scott Preston document
+(internal) are left out.
+
+It is a repeater and not a post type like Case Studies, because it was asked
+for that way and it suits the job. The file link is a URL control, not a
+media picker, so a card can point at SharePoint and the file can change there
+without anyone touching the page. A card with no link is a plain card marked
+"Coming soon", not a dead link. The download attribute is off by default,
+because browsers ignore it across origins, SharePoint included.
+
+The whole card is one link, named for a screen reader as title + "PDF" + the
+meta text + "opens in a new tab"; the card's own text would read the type
+and description too. Covers are decorative (`alt=""`) for the same reason.
+Chips are the filter keys in use, in first-use order, labelled from a
+"key: Label" textarea; an unlabelled key still gets a chip, capitalised.
+`#docs-<key>` in the address opens that filter, on load and on hashchange.
+
+The probe runs 40 checks. Its first draft wanted the sheet's foot visible;
+the design (and the wireframe CSS) cut it off at the cover's bottom edge,
+which is what makes it read as paper rising out of the card.
 
 ## Notes for future maintenance
 

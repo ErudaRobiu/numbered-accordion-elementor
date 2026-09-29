@@ -104,6 +104,10 @@ final class Toolkit {
 			'file'  => 'modules/casestudies/class-casestudies-module.php',
 			'class' => '\ErudaToolkit\Modules\CaseStudies\CaseStudies_Module',
 		),
+		'docshelf'   => array(
+			'file'  => 'modules/docshelf/class-docshelf-module.php',
+			'class' => '\ErudaToolkit\Modules\DocShelf\DocShelf_Module',
+		),
 	);
 
 	/**
