@@ -154,6 +154,8 @@ namespace {
 	$other['docs'][0]['new_tab']   = '';
 	$other['docs'][0]['download']  = 'yes';
 	$other['docs'][11]['key']      = 'press kit';
+	$other['docs'][2]['link']      = array( 'url' => '' );
+	$other['docs'][5]['link']      = array( 'url' => '' );
 
 	$first  = new DocShelf_Fixture( $base, 'a1' );
 	$second = new DocShelf_Fixture( $other, 'b2' );
@@ -187,7 +189,7 @@ img:hover{opacity:.75}
 	<div id="a"><?php echo $first->to_html(); // phpcs:ignore ?></div>
 </div>
 <div class="host">
-	<p class="marker">No "All", a same-tab download link, a filter with no label</p>
+	<p class="marker">No "All", a same-tab download link, a filter with no label, two without a file</p>
 	<div id="b"><?php echo $second->to_html(); // phpcs:ignore ?></div>
 </div>
 <script src="../../modules/docshelf/assets/js/document-shelf.js"></script>

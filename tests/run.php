@@ -2785,7 +2785,8 @@ use ErudaToolkit\Modules\DocShelf\DocShelf_Content;
 $ds_docs = DocShelf_Content::default_docs();
 check( 'twelve documents ship', 12, count( $ds_docs ) );
 check( 'in the page 26 order', array( 'white', 'white', 'product', 'industry', 'industry', 'industry', 'perf', 'perf', 'perf', 'perf', 'perf', 'company' ), array_column( $ds_docs, 'key' ) );
-check( 'five have no file yet', array( 'ThermStar System brochure', 'ThermStar System for food production', 'ThermStar System for industrial laundry', 'ThermStar System for pet food', 'Global installed customer base' ), array_values( array_column( array_filter( $ds_docs, function ( $d ) { return '' === $d['url']; } ), 'title' ) ) );
+check( 'every document has a file', array(), array_values( array_column( array_filter( $ds_docs, function ( $d ) { return '' === $d['url']; } ), 'title' ) ) );
+check( 'every file is on this site, root-relative', 12, count( preg_grep( '#^/wp-content/uploads/\d{4}/\d{2}/[^/]+\.pdf$#', array_column( $ds_docs, 'url' ) ) ) );
 check( 'no confidential or internal document ships', array(), preg_grep( '/pancake|preston\.pdf|scott-preston/i', array_column( $ds_docs, 'url' ) ) );
 foreach ( $ds_docs as $doc ) {
 	check( "the {$doc['cover']} cover ships", true, is_file( dirname( __DIR__ ) . '/' . DocShelf_Content::COVER_DIR . $doc['cover'] ) );
@@ -2863,10 +2864,10 @@ $ds_out = $ds->markup(
 
 check( 'shipped rows point at the bundled covers', 'https://example.test/wp-content/plugins/numbered-accordion-elementor/modules/docshelf/assets/covers/overview.webp', $ds->shipped()[0]['cover']['url'] );
 check( 'twelve cards', 12, substr_count( $ds_out, 'class="edoc__card' ) );
-check( 'seven are links', 7, substr_count( $ds_out, '<a class="edoc__card"' ) );
-check( 'five are Coming soon, not links', 5, substr_count( $ds_out, '<div class="edoc__card is-soon"' ) );
+check( 'all twelve are links', 12, substr_count( $ds_out, '<a class="edoc__card"' ) );
+check( 'none is Coming soon', 0, substr_count( $ds_out, '<div class="edoc__card is-soon"' ) );
 check( 'no dead links', 0, substr_count( $ds_out, 'href=""' ) );
-check( 'links open a new tab safely', 7, substr_count( $ds_out, 'target="_blank" rel="noopener"' ) );
+check( 'links open a new tab safely', 12, substr_count( $ds_out, 'target="_blank" rel="noopener"' ) );
 check( 'no download attribute by default', 0, preg_match( '/\sdownload[\s>]/', $ds_out ) );
 check( 'covers are decorative', 12, substr_count( $ds_out, 'alt=""' ) );
 check( 'All leads, pressed', 1, substr_count( $ds_out, 'data-seg="all" aria-pressed="true"' ) );

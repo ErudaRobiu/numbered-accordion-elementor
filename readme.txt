@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.63.0
+Stable tag: 2.63.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,13 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.63.1 =
+* The Document Shelf's twelve documents now link to copies in this site's
+  media library instead of norrelinc.com, and the five that said "Coming soon"
+  (the brochure, the three industry guides and the customer base) now have
+  their files. The links are site-relative, so they keep working when the
+  site moves to its real domain.
 
 = 2.63.0 =
 * **New widget: Document Shelf.** A filterable library of PDFs: each card shows

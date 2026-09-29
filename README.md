@@ -211,6 +211,10 @@ PDFs at 110 dpi and saved as ~600px WebP, 548KB for all twelve. The Pancake
 Factory case study (confidential footer) and the Scott Preston document
 (internal) are left out.
 
+Since 2.63.1 every default links to a copy in the site's own media library
+(uploaded 29 Sep 2026), root-relative (`/wp-content/uploads/…`) so the links
+survive the move from the staging domain to the real one.
+
 It is a repeater and not a post type like Case Studies, because it was asked
 for that way and it suits the job. The file link is a URL control, not a
 media picker, so a card can point at SharePoint and the file can change there
