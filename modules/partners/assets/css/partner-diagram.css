@@ -1,0 +1,639 @@
+/**
+ * Eruda Toolkit - Partner Diagram
+ *
+ * Three cards joined by arrows, two partners hung off the middle one by a
+ * dashed bracket, all over a blurred photograph. Every colour is a custom
+ * property on the root so the style controls can reach it without a selector
+ * war.
+ *
+ * Motion is layered on in three steps, each of which the diagram reads
+ * correctly without:
+ *
+ *   .epdg--armed   the script is running and will reveal it; only now is
+ *                  anything hidden, so a page whose script never loads still
+ *                  shows the whole diagram.
+ *   .is-in         it has been scrolled to: cards rise in turn, then the lines
+ *                  draw in. Each uses an animation with backwards fill rather
+ *                  than a transition, so once it has finished it holds nothing
+ *                  and the hover lift is free to move the card.
+ *   .is-live       it is on screen, so the heat pulse runs. Off screen it is
+ *                  paused rather than left looping for nobody.
+ */
+
+.epdg {
+	--epdg-navy: #0F3961;
+	--epdg-ink: #0F3961;
+	--epdg-muted: #0F3961B3;
+	--epdg-green: #07864F;
+	--epdg-green-hot: #00A55D;
+	--epdg-green-light: #4DCF8D;
+	--epdg-bracket: #0F396159;
+	--epdg-veil-a: #FFFFFF8C;
+	--epdg-veil-b: #FFFFFF4D;
+	--epdg-radius: 25px;
+	--epdg-blur: 26px;
+	--epdg-gap: 42px;
+	--epdg-ease: cubic-bezier(.2, .7, .2, 1);
+
+	position: relative;
+	isolation: isolate;
+	overflow: hidden;
+	container: epdg / inline-size;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin: 0;
+	padding: 34px 30px 28px;
+	border: 1px solid #FFFFFF80;
+	border-radius: var(--epdg-radius);
+	background: #EAF1F5;
+	font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+	-webkit-font-smoothing: antialiased;
+}
+
+.epdg *,
+.epdg *::before,
+.epdg *::after {
+	box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------ backdrop --- */
+
+.epdg__backdrop {
+	position: absolute;
+	inset: 0;
+	z-index: -2;
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+	pointer-events: none;
+}
+
+/* Blur softens the edge into the frame colour, so the picture is oversized
+   and scaled up until the soft rim is outside the clip. */
+.epdg--blur .epdg__backdrop {
+	inset: -40px;
+	filter: blur(var(--epdg-blur)) saturate(1.1);
+	transform: scale(1.1);
+}
+
+.epdg::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background: linear-gradient(160deg, var(--epdg-veil-a), var(--epdg-veil-b));
+	pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- rows --- */
+
+.epdg__row {
+	display: grid;
+	grid-template-columns: 1fr var(--epdg-gap) 1.15fr var(--epdg-gap) 1fr;
+	align-items: stretch;
+	width: 100%;
+}
+
+.epdg__sup {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 14px;
+	width: 74%;
+}
+
+/* --------------------------------------------------------------- cards --- */
+
+.epdg__card {
+	--epdg-i: 0;
+
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+	padding: 18px 16px;
+	border: 1px solid #FFFFFFB3;
+	border-radius: 16px;
+	background: rgba(255, 255, 255, .78);
+	-webkit-backdrop-filter: blur(10px);
+	backdrop-filter: blur(10px);
+	box-shadow: 0 6px 24px #0F39611A;
+	color: var(--epdg-ink);
+	text-align: center;
+	text-decoration: none;
+	transition: transform .35s var(--epdg-ease), box-shadow .35s var(--epdg-ease);
+}
+
+.epdg a.epdg__card,
+.epdg a.epdg__card:hover,
+.epdg a.epdg__card:focus {
+	color: var(--epdg-ink);
+	text-decoration: none;
+}
+
+.epdg__card--source { --epdg-i: 0; --epdg-logo-w: 104px; }
+.epdg__card--core { --epdg-i: 1; --epdg-logo-w: 128px; }
+.epdg__card--site { --epdg-i: 2; --epdg-logo-w: 46px; background: rgba(255, 255, 255, .65); }
+.epdg__card--partner-one { --epdg-i: 3; --epdg-logo-w: 112px; }
+.epdg__card--partner-two { --epdg-i: 4; --epdg-logo-w: 120px; }
+
+.epdg__card--core,
+.epdg a.epdg__card--core,
+.epdg a.epdg__card--core:hover {
+	border-color: var(--epdg-navy);
+	background: var(--epdg-navy);
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+	box-shadow: 0 10px 30px #0F396133;
+	color: #fff;
+}
+
+.epdg__logo {
+	display: grid;
+	place-items: center;
+	height: 52px;
+	margin-bottom: 10px;
+	border-bottom: 1px solid #0F39611F;
+}
+
+.epdg__card--core .epdg__logo {
+	border-bottom-color: #FFFFFF1C;
+}
+
+/* Themes love img { height: auto } and img:hover { opacity: .8 }; neither
+   belongs on a logo. */
+.epdg .epdg__logo img {
+	display: block;
+	width: var(--epdg-logo-w);
+	max-width: 100%;
+	height: auto;
+	max-height: 40px;
+	object-fit: contain;
+	opacity: 1;
+}
+
+.epdg__icon {
+	display: block;
+	width: var(--epdg-logo-w);
+	max-width: 100%;
+	height: auto;
+	aspect-ratio: 48 / 40;
+	color: var(--epdg-navy);
+}
+
+.epdg__smoke {
+	stroke: var(--epdg-green);
+}
+
+.epdg__title {
+	display: block;
+	font-family: "Urbanist", system-ui, sans-serif;
+	font-size: 15px;
+	font-weight: 700;
+	line-height: 1.25;
+	color: inherit;
+}
+
+.epdg__text {
+	display: block;
+	font-size: 12.5px;
+	line-height: 1.45;
+	color: var(--epdg-muted);
+}
+
+.epdg__card--core .epdg__title {
+	color: #fff;
+}
+
+.epdg__card--core .epdg__text {
+	color: var(--epdg-green-light);
+}
+
+/* Hover and keyboard focus lift the card. Focus only exists on a card with
+   a link, which is the only kind worth tabbing to. */
+.epdg__card:hover,
+.epdg__card:focus-visible {
+	transform: translateY(-3px);
+	box-shadow: 0 14px 34px #0F396129;
+}
+
+.epdg__card--core:hover,
+.epdg__card--core:focus-visible,
+.epdg a.epdg__card--core:hover {
+	box-shadow: 0 18px 42px #0F39614D;
+}
+
+.epdg__card:focus-visible {
+	outline: 2px solid var(--epdg-green);
+	outline-offset: 3px;
+}
+
+/* -------------------------------------------------------------- arrows --- */
+
+.epdg__arrow {
+	--epdg-c: var(--epdg-green);
+	--epdg-glow: transparent;
+
+	position: relative;
+	align-self: center;
+	height: 12px;
+	margin: 0 4px;
+}
+
+.epdg__line {
+	position: absolute;
+	top: 50%;
+	right: 0;
+	left: 0;
+	height: 2px;
+	margin-top: -1px;
+	border-radius: 2px;
+	background: var(--epdg-c);
+	box-shadow: 0 0 10px var(--epdg-glow);
+	transition: background-color .3s, box-shadow .3s;
+}
+
+/* The head is on the arrow, not the line, so it can fade in once the line
+   has arrived rather than being dragged along by the clip. */
+.epdg__arrow::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	right: -2px;
+	margin-top: -6px;
+	border: 6px solid transparent;
+	border-right: 0;
+	border-left: 8px solid var(--epdg-c);
+	transition: border-color .3s;
+}
+
+.epdg__pulse {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	width: 8px;
+	height: 8px;
+	margin: -4px 0 0 -4px;
+	border-radius: 50%;
+	background: var(--epdg-green-light);
+	box-shadow: 0 0 0 3px #4DCF8D40, 0 0 12px #4DCF8DCC;
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* ------------------------------------------------------------- bracket --- */
+
+.epdg__stems {
+	position: relative;
+	width: 74%;
+	height: 36px;
+}
+
+.epdg__stem {
+	--epdg-b: var(--epdg-bracket);
+
+	position: absolute;
+	border: 0 dashed var(--epdg-b);
+	transition: border-color .3s;
+}
+
+.epdg__stem--up {
+	top: 0;
+	left: 50%;
+	height: 50%;
+	margin-left: -1px;
+	border-left-width: 2px;
+}
+
+/* The drops land on the middle of each partner column: half of (width - gap)
+   over two, with the 14px gap from .epdg__sup. */
+.epdg__stem--across {
+	top: 50%;
+	right: calc(25% - 3.5px);
+	left: calc(25% - 3.5px);
+	border-top-width: 2px;
+}
+
+.epdg__stem--left,
+.epdg__stem--right {
+	top: 50%;
+	bottom: 0;
+}
+
+.epdg__stem--left {
+	left: calc(25% - 3.5px);
+	border-left-width: 2px;
+}
+
+.epdg__stem--right {
+	right: calc(25% - 3.5px);
+	border-right-width: 2px;
+}
+
+/* The phone's stand-in for the bracket. */
+.epdg__join {
+	display: none;
+}
+
+/* ----------------------------------------------------------- highlight --- */
+
+.epdg:has(.epdg__card--source:is(:hover, :focus-visible)) .epdg__arrow--in,
+.epdg:has(.epdg__card--site:is(:hover, :focus-visible)) .epdg__arrow--out,
+.epdg:has(.epdg__card--core:is(:hover, :focus-visible)) .epdg__arrow {
+	--epdg-c: var(--epdg-green-hot);
+	--epdg-glow: #00A55D8C;
+}
+
+.epdg:has(.epdg__card--core:is(:hover, :focus-visible)) .epdg__stem,
+.epdg:has(.epdg__card--partner:is(:hover, :focus-visible)) :is(.epdg__stem--up, .epdg__stem--across),
+.epdg:has(.epdg__card--partner-one:is(:hover, :focus-visible)) .epdg__stem--left,
+.epdg:has(.epdg__card--partner-two:is(:hover, :focus-visible)) .epdg__stem--right,
+.epdg:has(.epdg__card--partner:is(:hover, :focus-visible)) .epdg__join {
+	--epdg-b: var(--epdg-green);
+}
+
+/* -------------------------------------------------------------- motion --- */
+
+@keyframes epdg-rise {
+	from {
+		opacity: 0;
+		transform: translateY(16px);
+	}
+}
+
+/* Lines draw by unclipping, not by scaling: a scaled dashed border stretches
+   its dashes on the way. Both ends are spelled out because inset() cannot
+   interpolate to the implicit "none" -- it would jump halfway through.
+
+   The script takes .epdg--armed off once the entrance is over, which drops
+   every rule in this block. Insurance: while testing, captures of a line whose
+   animation had finished showed its first, empty frame although every computed
+   value said it was done, and a line with no animation left on it cannot. */
+@keyframes epdg-draw-x {
+	from { clip-path: inset(0 100% 0 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes epdg-draw-y {
+	from { clip-path: inset(0 0 100% 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes epdg-draw-mid {
+	from { clip-path: inset(0 50% 0 50%); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes epdg-fade {
+	from { opacity: 0; }
+}
+
+@keyframes epdg-flow-x {
+	0% { left: 0; opacity: 0; }
+	8% { opacity: 1; }
+	40% { left: 100%; opacity: 1; }
+	48%, 100% { left: 100%; opacity: 0; }
+}
+
+@keyframes epdg-flow-y {
+	0% { top: 0; opacity: 0; }
+	8% { opacity: 1; }
+	40% { top: 100%; opacity: 1; }
+	48%, 100% { top: 100%; opacity: 0; }
+}
+
+/* Waiting to be scrolled to. Opacity only, so the same rule serves both the
+   row and the column layout. */
+.epdg--armed:not(.is-in) :is(.epdg__card, .epdg__line, .epdg__stem, .epdg__join),
+.epdg--armed:not(.is-in) .epdg__arrow::after {
+	opacity: 0;
+}
+
+.epdg--armed.is-in .epdg__card {
+	animation: epdg-rise .7s var(--epdg-ease) backwards;
+	animation-delay: calc(var(--epdg-i) * 130ms);
+}
+
+.epdg--armed.is-in .epdg__line {
+	animation: epdg-draw-x .45s ease-out .75s backwards;
+}
+
+.epdg--armed.is-in .epdg__arrow--out .epdg__line {
+	animation-delay: .95s;
+}
+
+.epdg--armed.is-in .epdg__arrow::after {
+	animation: epdg-fade .2s ease-out 1.15s backwards;
+}
+
+.epdg--armed.is-in .epdg__arrow--out::after {
+	animation-delay: 1.35s;
+}
+
+.epdg--armed.is-in .epdg__stem--up {
+	animation: epdg-draw-y .3s ease-out 1.1s backwards;
+}
+
+.epdg--armed.is-in .epdg__stem--across {
+	animation: epdg-draw-mid .4s ease-out 1.4s backwards;
+}
+
+.epdg--armed.is-in :is(.epdg__stem--left, .epdg__stem--right) {
+	animation: epdg-draw-y .3s ease-out 1.8s backwards;
+}
+
+.epdg--armed.is-in .epdg__join {
+	animation: epdg-fade .4s ease-out 1.1s backwards;
+}
+
+/* Heat flowing: supplier to system, then system to facility, half a loop
+   apart, starting once the lines have drawn. */
+.epdg--flow.is-in .epdg__pulse {
+	animation: epdg-flow-x 3.6s linear 1.8s infinite;
+}
+
+.epdg--flow.is-in .epdg__arrow--out .epdg__pulse {
+	animation-delay: 3.6s;
+}
+
+.epdg--flow:not(.is-live) .epdg__pulse {
+	animation-play-state: paused;
+}
+
+/* ------------------------------------------------------------- tablet --- */
+
+@media (max-width: 1024px) {
+	.epdg {
+		--epdg-gap: 38px;
+
+		padding: 28px 22px 22px;
+	}
+
+	.epdg__card {
+		padding: 16px 12px;
+	}
+}
+
+/* A desktop column narrower than the diagram was drawn for. */
+@container epdg (max-width: 560px) {
+	.epdg__row {
+		--epdg-gap: 32px;
+	}
+
+	.epdg__card {
+		padding: 14px 10px;
+	}
+
+	.epdg__title {
+		font-size: 13.5px;
+	}
+
+	.epdg__text {
+		font-size: 11.5px;
+	}
+
+	.epdg__sup {
+		width: 86%;
+	}
+
+	.epdg__stems {
+		width: 86%;
+	}
+}
+
+/* -------------------------------------------------------------- phone --- */
+
+@media (max-width: 767px) {
+	.epdg {
+		padding: 22px 16px 20px;
+	}
+
+	.epdg__row,
+	.epdg__sup {
+		grid-template-columns: minmax(0, 1fr);
+		width: 100%;
+		max-width: 440px;
+	}
+
+	.epdg__card {
+		padding: 16px 14px;
+	}
+
+	.epdg .epdg__title {
+		font-size: 15px;
+	}
+
+	.epdg .epdg__text {
+		font-size: 12.5px;
+	}
+
+	.epdg__arrow {
+		justify-self: center;
+		width: 12px;
+		height: 34px;
+		margin: 4px 0;
+	}
+
+	.epdg__line {
+		top: 0;
+		right: auto;
+		bottom: 2px;
+		left: 50%;
+		width: 2px;
+		height: auto;
+		margin: 0 0 0 -1px;
+	}
+
+	.epdg__arrow::after {
+		top: auto;
+		right: auto;
+		bottom: -2px;
+		left: 50%;
+		margin: 0 0 0 -6px;
+		border: 6px solid transparent;
+		border-bottom: 0;
+		border-top: 8px solid var(--epdg-c);
+	}
+
+	.epdg__pulse {
+		top: 0;
+		left: 50%;
+		margin: -4px 0 0 -4px;
+	}
+
+	.epdg--armed.is-in .epdg__line {
+		animation-name: epdg-draw-y;
+	}
+
+	.epdg--flow.is-in .epdg__pulse {
+		animation-name: epdg-flow-y;
+	}
+
+	.epdg__stems {
+		display: none;
+	}
+
+	.epdg__join {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		margin: 4px 0 8px;
+	}
+
+	.epdg__join::before,
+	.epdg__join::after {
+		content: "";
+		height: 16px;
+		border-left: 2px dashed var(--epdg-b, var(--epdg-bracket));
+		transition: border-color .3s;
+	}
+
+	.epdg__join::after {
+		height: 12px;
+	}
+
+	.epdg__join span {
+		padding: 5px 14px;
+		border: 1px solid #FFFFFFB3;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, .7);
+		font-family: "Urbanist", system-ui, sans-serif;
+		font-size: 11px;
+		font-weight: 700;
+		line-height: 1.3;
+		letter-spacing: .08em;
+		text-transform: uppercase;
+		color: var(--epdg-navy);
+	}
+
+	.epdg__sup {
+		gap: 10px;
+	}
+}
+
+/* ------------------------------------------------------- less motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+	.epdg .epdg__card,
+	.epdg .epdg__line,
+	.epdg .epdg__stem,
+	.epdg .epdg__join,
+	.epdg .epdg__arrow::after {
+		animation: none !important;
+		opacity: 1 !important;
+	}
+
+	.epdg .epdg__pulse {
+		display: none;
+	}
+
+	.epdg .epdg__card {
+		transition: box-shadow .2s;
+	}
+
+	.epdg .epdg__card:hover,
+	.epdg .epdg__card:focus-visible {
+		transform: none;
+	}
+}

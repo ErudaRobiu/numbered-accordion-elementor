@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partner Diagram — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&family=Urbanist:wght@600;700&display=swap">
+<link rel="stylesheet" href="../../modules/partners/assets/css/partner-diagram.css">
+<style>
+body{margin:0;background:#F5F6F7;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;color:#0F3961}
+.sec{max-width:1240px;margin:0 auto;padding:80px 40px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.copy h2{font:400 52px/1 "Bebas Neue",Impact,sans-serif;text-transform:uppercase;margin:0 0 16px}
+.spacer{height:110vh;display:grid;place-items:center;color:#8A97A1}
+.marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
+@media(max-width:1024px){.sec{grid-template-columns:1fr;padding:60px 24px}}
+@media(max-width:767px){.sec{padding:40px 16px}}
+/* A hostile theme, the same block the other harnesses carry. */
+img{max-width:100%;height:auto}
+img:hover{opacity:.75}
+a:hover{color:red;text-decoration:underline}
+figure{margin:0 0 40px}
+</style>
+</head>
+<body>
+<div class="spacer">Scroll down — the diagram draws in when it arrives</div>
+<section class="sec">
+	<div class="copy">
+		<p class="marker">Animated, blurred</p>
+		<h2>Trusted organizations</h2>
+		<p>Every ThermStar System is built on proven technology and specialist partners who each own their part of the work.</p>
+	</div>
+	<div id="a">		<figure class="epdg epdg--blur epdg--animate epdg--flow" aria-label="How the partners connect: Enjay supplies Lepido to ThermStar, Engenuity and Edgecom support its monitoring and energy data, ThermStar delivers to your facility">
+			<span class="epdg__backdrop" aria-hidden="true" style="background-image:url(&quot;../../modules/partners/assets/img/facility-backdrop.webp&quot;)"></span>
+
+			<div class="epdg__row">
+						<div class="epdg__card epdg__card--source"
+			>
+			<span class="epdg__logo">		<img src="../../modules/partners/assets/img/enjay.svg" alt="Enjay Systems" loading="lazy" decoding="async" />
+		</span>
+							<b class="epdg__title">Technology</b>
+										<span class="epdg__text">Lepido® heat exchanger · Sweden</span>
+					</div>
+				<span class="epdg__arrow epdg__arrow--in" aria-hidden="true"><span class="epdg__line"></span><span class="epdg__pulse"></span></span>
+				<a class="epdg__card epdg__card--core"
+							href="#system"
+											>
+			<span class="epdg__logo">		<img src="../../modules/partners/assets/img/thermstar-white.png" alt="ThermStar" loading="lazy" decoding="async" />
+		</span>
+							<b class="epdg__title">The ThermStar System</b>
+										<span class="epdg__text">Integration, controls, Power Intelligence</span>
+					</a>
+				<span class="epdg__arrow epdg__arrow--out" aria-hidden="true"><span class="epdg__line"></span><span class="epdg__pulse"></span></span>
+				<div class="epdg__card epdg__card--site"
+			>
+			<span class="epdg__logo"><svg class="epdg__icon" viewBox="0 0 48 40" aria-hidden="true" focusable="false"><path d="M3 37V19l11 7v-7l11 7v-7l11 7V5h8v32z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path class="epdg__smoke" d="M40 5c0-3 3-3 3-5" fill="none" stroke-width="2" stroke-linecap="round"/><rect x="9" y="29" width="5" height="4" fill="currentColor"/><rect x="20" y="29" width="5" height="4" fill="currentColor"/><rect x="31" y="29" width="5" height="4" fill="currentColor"/></svg></span>
+							<b class="epdg__title">Your facility</b>
+										<span class="epdg__text">Recovered heat put back into your process</span>
+					</div>
+					</div>
+
+			<div class="epdg__stems" aria-hidden="true"><i class="epdg__stem epdg__stem--up"></i><i class="epdg__stem epdg__stem--across"></i><i class="epdg__stem epdg__stem--left"></i><i class="epdg__stem epdg__stem--right"></i></div>
+
+							<div class="epdg__join"><span>Partners</span></div>
+			
+			<div class="epdg__sup">
+						<div class="epdg__card epdg__card--partner epdg__card--partner-one"
+			>
+			<span class="epdg__logo">		<img src="../../modules/partners/assets/img/engenuity.png" alt="Engenuity Systems" loading="lazy" decoding="async" />
+		</span>
+							<b class="epdg__title">Monitoring platform</b>
+										<span class="epdg__text">eViewIoT powers ThermStar Power Intelligence</span>
+					</div>
+				<div class="epdg__card epdg__card--partner epdg__card--partner-two"
+			>
+			<span class="epdg__logo">		<img src="../../modules/partners/assets/img/edgecom.svg" alt="Edgecom Energy" loading="lazy" decoding="async" />
+		</span>
+							<b class="epdg__title">Energy management</b>
+										<span class="epdg__text">AI energy optimization for industrial sites</span>
+					</div>
+					</div>
+		</figure>
+		</div>
+</section>
+<section class="sec">
+	<div class="copy">
+		<p class="marker">Still, sharp photograph</p>
+	</div>
+	<div id="b">		<figure class="epdg" aria-label="How the partners connect: Enjay supplies Lepido to ThermStar, Engenuity and Edgecom support its monitoring and energy data, ThermStar delivers to your facility">
+			<span class="epdg__backdrop" aria-hidden="true" style="background-image:url(&quot;../../modules/partners/assets/img/facility-backdrop.webp&quot;)"></span>
+
+			<div class="epdg__row">
+						<div class="epdg__card epdg__card--source"
+			>
+			<span class="epdg__logo">		<img src="../../modules/partners/assets/img/enjay.svg" alt="Enjay Systems" loading="lazy" decoding="async" />
+		</span>
+							<b class="epdg__title">Technology</b>
+										<span class="epdg__text">Lepido® heat exchanger · Sweden</span>
+					</div>
+				<span class="epdg__arrow epdg__arrow--in" aria-hidden="true"><span class="epdg__line"></span><span class="epdg__pulse"></span></span>
+				<a class="epdg__card epdg__card--core"
+							href="#system"
+											>
+			<span class="epdg__logo">		<img src="../../modules/partners/assets/img/thermstar-white.png" alt="ThermStar" loading="lazy" decoding="async" />
+		</span>
+							<b class="epdg__title">The ThermStar System</b>
+										<span class="epdg__text">Integration, controls, Power Intelligence</span>
+					</a>
+				<span class="epdg__arrow epdg__arrow--out" aria-hidden="true"><span class="epdg__line"></span><span class="epdg__pulse"></span></span>
+				<div class="epdg__card epdg__card--site"
+			>
+			<span class="epdg__logo"><svg class="epdg__icon" viewBox="0 0 48 40" aria-hidden="true" focusable="false"><path d="M3 37V19l11 7v-7l11 7v-7l11 7V5h8v32z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path class="epdg__smoke" d="M40 5c0-3 3-3 3-5" fill="none" stroke-width="2" stroke-linecap="round"/><rect x="9" y="29" width="5" height="4" fill="currentColor"/><rect x="20" y="29" width="5" height="4" fill="currentColor"/><rect x="31" y="29" width="5" height="4" fill="currentColor"/></svg></span>
+							<b class="epdg__title">Your facility</b>
+										<span class="epdg__text">Recovered heat put back into your process</span>
+					</div>
+					</div>
+
+			<div class="epdg__stems" aria-hidden="true"><i class="epdg__stem epdg__stem--up"></i><i class="epdg__stem epdg__stem--across"></i><i class="epdg__stem epdg__stem--left"></i><i class="epdg__stem epdg__stem--right"></i></div>
+
+							<div class="epdg__join"><span>Partners</span></div>
+			
+			<div class="epdg__sup">
+						<div class="epdg__card epdg__card--partner epdg__card--partner-one"
+			>
+			<span class="epdg__logo">		<img src="../../modules/partners/assets/img/engenuity.png" alt="Engenuity Systems" loading="lazy" decoding="async" />
+		</span>
+							<b class="epdg__title">Monitoring platform</b>
+										<span class="epdg__text">eViewIoT powers ThermStar Power Intelligence</span>
+					</div>
+				<div class="epdg__card epdg__card--partner epdg__card--partner-two"
+			>
+			<span class="epdg__logo">		<img src="../../modules/partners/assets/img/edgecom.svg" alt="Edgecom Energy" loading="lazy" decoding="async" />
+		</span>
+							<b class="epdg__title">Energy management</b>
+										<span class="epdg__text">AI energy optimization for industrial sites</span>
+					</div>
+					</div>
+		</figure>
+		</div>
+</section>
+<script src="../../modules/partners/assets/js/partner-diagram.js"></script>
+</body>
+</html>
+	
