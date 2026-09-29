@@ -100,6 +100,10 @@ final class Toolkit {
 			'file'  => 'modules/anatomy/class-anatomy-module.php',
 			'class' => '\ErudaToolkit\Modules\Anatomy\Anatomy_Module',
 		),
+		'casestudies' => array(
+			'file'  => 'modules/casestudies/class-casestudies-module.php',
+			'class' => '\ErudaToolkit\Modules\CaseStudies\CaseStudies_Module',
+		),
 	);
 
 	/**

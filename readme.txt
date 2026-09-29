@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.61.0
+Stable tag: 2.62.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,19 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.62.0 =
+* **New: Case Studies.** A Case Studies section in the dashboard, with one form
+  per case: sector, location, headline figure and what it means, basis of
+  measurement, heat from and to, logo, PDF. Needs the free Advanced Custom
+  Fields plugin for the form.
+* **New widget: Case Studies.** Drag it onto a page and it shows every
+  published case study as a card, in the order set in the dashboard, with
+  sector chips to filter them. Nothing to fill in on the page.
+* An ongoing study shows "Now measuring" and a progress track instead of a
+  figure. A published case can't be saved without its basis of measurement.
+* The same widget works on an industry page (pick its sector, switch chips
+  off) and on the home page (show the first three).
 
 = 2.61.0 =
 * **New widget: Case Anatomy.** One tab per project, marked by its logo, and

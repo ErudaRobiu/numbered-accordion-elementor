@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case Studies — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;600;700&family=Urbanist:wght@700&display=swap">
+<link rel="stylesheet" href="../../modules/casestudies/assets/css/case-studies.css">
+<style>
+body{margin:0;background:#F5F6F7;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;color:#0F3961}
+.host{max-width:1240px;margin:0 auto;padding:60px 40px}
+.marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
+@media(max-width:767px){.host{padding:32px 16px}}
+/* A hostile theme: Hello Elementor's button and link rules, and the usual image ones. */
+[type=button],button{background-color:transparent;border:1px solid #c36;border-radius:3px;color:#c36;display:inline-block;font-size:1rem;font-weight:400;padding:.5rem 1rem;text-align:center;white-space:nowrap}
+[type=button]:hover,button:hover,[type=button]:focus,button:focus{background-color:#c36;color:#fff;text-decoration:none}
+a{color:#c36}a:hover{color:#336}
+img{max-width:100%;height:auto}
+img:hover{opacity:.75}
+h3{font-size:2em;margin:1em 0}
+p{margin:0 0 1em}
+</style>
+</head>
+<body>
+<div class="host">
+	<p class="marker">Page 25 — every case, chips on</p>
+	<div id="a">		<div class="ecs">
+							<div class="ecs__chips" role="group" aria-label="Filter case studies by sector">
+					<button type="button" class="ecs__chip" data-seg="all" aria-pressed="true">All</button>
+											<button type="button" class="ecs__chip" data-seg="industrial-laundry" aria-pressed="false">Industrial laundry</button>
+											<button type="button" class="ecs__chip" data-seg="food-manufacturing" aria-pressed="false">Food production</button>
+											<button type="button" class="ecs__chip" data-seg="foundries" aria-pressed="false">Foundries</button>
+											<button type="button" class="ecs__chip" data-seg="manufacturing" aria-pressed="false">Manufacturing</button>
+											<button type="button" class="ecs__chip" data-seg="restaurants-commercial-kitchens" aria-pressed="false">Restaurants</button>
+									</div>
+			
+			<div class="ecs__grid">
+									<article class="ecs__card" data-seg="industrial-laundry">
+						<figure class="ecs__img">
+							<img class="ecs__photo" src="casestudies-img/case-laundry.webp" alt="" loading="lazy" />															<img class="ecs__logo" src="../../modules/logotabs/assets/logos/cws.webp" alt="CWS Workwear" loading="lazy" decoding="async" />
+													</figure>
+
+						<div class="ecs__body">
+							<h3 class="ecs__name">CWS Workwear</h3>
+
+															<span class="ecs__tag">Industrial laundry · Den Bosch, Netherlands</span>
+							
+															<p class="ecs__big">
+									<b>63%</b>
+																			<span>less gas on the tunnel washers</span>
+																												<small>Basis: gas per kg of laundry, before vs after · 6-month trial, 2023</small>
+																	</p>
+							
+															<p class="ecs__flow">Finisher exhaust <i aria-hidden="true">→</i><span class="ecs__sr"> to</span> washer process water</p>
+							
+																						<div class="ecs__acts">
+																			<a class="ecs__go" href="https://example.test/wp-content/uploads/Case-Study-CWS-laundry.pdf" target="_blank" rel="noopener">Read the CWS case (PDF) <span aria-hidden="true">→</span></a>
+																												<a class="ecs__est" href="/request-assessment/?sector=industrial-laundry">Estimate my site</a>
+																	</div>
+													</div>
+					</article>
+									<article class="ecs__card" data-seg="food-manufacturing">
+						<figure class="ecs__img">
+							<img class="ecs__photo" src="casestudies-img/case-food.webp" alt="" loading="lazy" />															<img class="ecs__logo" src="../../modules/logotabs/assets/logos/lantmannen.webp" alt="Lantmännen" loading="lazy" decoding="async" />
+													</figure>
+
+						<div class="ecs__body">
+							<h3 class="ecs__name">Lantmännen</h3>
+
+															<span class="ecs__tag">Food production · Laholm, Sweden</span>
+							
+															<p class="ecs__big">
+									<b>99%</b>
+																			<span>of the site&#039;s heat demand covered</span>
+																												<small>Basis: 614,900 of 616,600 kWh/yr · 2 × Lepido L50 · 2022</small>
+																	</p>
+							
+															<p class="ecs__flow">Production-line exhaust with grease and soot <i aria-hidden="true">→</i><span class="ecs__sr"> to</span> production-hall supply air</p>
+							
+																						<div class="ecs__acts">
+																			<a class="ecs__go" href="https://example.test/wp-content/uploads/Case-Study-Laholm-Food-production.pdf" target="_blank" rel="noopener">Read the Lantmännen case (PDF) <span aria-hidden="true">→</span></a>
+																												<a class="ecs__est" href="/request-assessment/?sector=food-manufacturing">Estimate my site</a>
+																	</div>
+													</div>
+					</article>
+									<article class="ecs__card" data-seg="foundries">
+						<figure class="ecs__img">
+							<img class="ecs__photo" src="casestudies-img/case-foundry.webp" alt="" loading="lazy" />															<img class="ecs__logo ecs__logo--dark" src="../../modules/anatomy/assets/logos/bruzaholms.svg" alt="Bruzaholms" loading="lazy" decoding="async" />
+													</figure>
+
+						<div class="ecs__body">
+							<h3 class="ecs__name">Bruzaholms</h3>
+
+															<span class="ecs__tag">Foundries · Småland, Sweden</span>
+							
+															<p class="ecs__big">
+									<b>85%</b>
+																			<span>of the heating need, once met by an oil boiler</span>
+																												<small>Basis: 95 kW recovered · first 3 months of data, 2025</small>
+																	</p>
+							
+															<p class="ecs__flow">Sand cooler exhaust <i aria-hidden="true">→</i><span class="ecs__sr"> to</span> heat for the site</p>
+							
+																						<div class="ecs__acts">
+																			<a class="ecs__go" href="https://example.test/wp-content/uploads/Case-Study-Bruzaholms-Foundry.pdf" target="_blank" rel="noopener">Read the Bruzaholms case (PDF) <span aria-hidden="true">→</span></a>
+																												<a class="ecs__est" href="/request-assessment/?sector=foundries">Estimate my site</a>
+																	</div>
+													</div>
+					</article>
+									<article class="ecs__card" data-seg="manufacturing">
+						<figure class="ecs__img">
+							<img class="ecs__photo" src="casestudies-img/case-polymer.webp" alt="" loading="lazy" />															<img class="ecs__logo" src="../../modules/logotabs/assets/logos/sports-leisure.webp" alt="Sports &amp; Leisure Group" loading="lazy" decoding="async" />
+													</figure>
+
+						<div class="ecs__body">
+							<h3 class="ecs__name">Sports &amp; Leisure Group</h3>
+
+															<span class="ecs__tag">Manufacturing · Polymer production</span>
+							
+															<div class="ecs__status">
+									<span class="ecs__now"><i aria-hidden="true"></i>Now measuring</span>
+									<ol class="ecs__track">
+										<li class="is-done">Installed</li>
+										<li class="is-now" aria-current="step">Measuring</li>
+										<li>Results</li>
+									</ol>
+																			<small>Results are published when the study closes.</small>
+																	</div>
+							
+							
+																						<div class="ecs__acts">
+																			<a class="ecs__go" href="/manufacturing/">See manufacturing applications <span aria-hidden="true">→</span></a>
+																												<a class="ecs__est" href="/request-assessment/?sector=manufacturing">Estimate my site</a>
+																	</div>
+													</div>
+					</article>
+									<article class="ecs__card" data-seg="restaurants-commercial-kitchens">
+						<figure class="ecs__img">
+							<img class="ecs__photo" src="casestudies-img/case-qsr.webp" alt="" loading="lazy" />															<img class="ecs__logo" src="../../modules/logotabs/assets/logos/burger-king.webp" alt="Burger King UK" loading="lazy" decoding="async" />
+													</figure>
+
+						<div class="ecs__body">
+							<h3 class="ecs__name">Burger King UK</h3>
+
+															<span class="ecs__tag">Restaurants · United Kingdom</span>
+							
+															<p class="ecs__big">
+									<b>11–36%</b>
+																			<span>lower electricity bill</span>
+																												<small>Basis: electric heater use vs a control site without Lepido · 2024</small>
+																	</p>
+							
+															<p class="ecs__flow">Kitchen exhaust <i aria-hidden="true">→</i><span class="ecs__sr"> to</span> make-up air, electric heater off</p>
+							
+																						<div class="ecs__acts">
+																			<a class="ecs__go" href="https://example.test/wp-content/uploads/Case-Sudy-Burger-King.pdf" target="_blank" rel="noopener">Read the Burger King case (PDF) <span aria-hidden="true">→</span></a>
+																												<a class="ecs__est" href="/request-assessment/?sector=restaurants-commercial-kitchens">Estimate my site</a>
+																	</div>
+													</div>
+					</article>
+							</div>
+		</div>
+		</div>
+</div>
+<div class="host">
+	<p class="marker">An industry page — Foundries only, no chips</p>
+	<div id="b">		<div class="ecs">
+			
+			<div class="ecs__grid">
+									<article class="ecs__card" data-seg="foundries">
+						<figure class="ecs__img">
+							<img class="ecs__photo" src="casestudies-img/case-foundry.webp" alt="" loading="lazy" />															<img class="ecs__logo ecs__logo--dark" src="../../modules/anatomy/assets/logos/bruzaholms.svg" alt="Bruzaholms" loading="lazy" decoding="async" />
+													</figure>
+
+						<div class="ecs__body">
+							<h3 class="ecs__name">Bruzaholms</h3>
+
+															<span class="ecs__tag">Foundries · Småland, Sweden</span>
+							
+															<p class="ecs__big">
+									<b>85%</b>
+																			<span>of the heating need, once met by an oil boiler</span>
+																												<small>Basis: 95 kW recovered · first 3 months of data, 2025</small>
+																	</p>
+							
+															<p class="ecs__flow">Sand cooler exhaust <i aria-hidden="true">→</i><span class="ecs__sr"> to</span> heat for the site</p>
+							
+																						<div class="ecs__acts">
+																			<a class="ecs__go" href="https://example.test/wp-content/uploads/Case-Study-Bruzaholms-Foundry.pdf" target="_blank" rel="noopener">Read the Bruzaholms case (PDF) <span aria-hidden="true">→</span></a>
+																												<a class="ecs__est" href="/request-assessment/?sector=foundries">Estimate my site</a>
+																	</div>
+													</div>
+					</article>
+							</div>
+		</div>
+		</div>
+</div>
+<div class="host">
+	<p class="marker">Home page — first three</p>
+	<div id="c">		<div class="ecs">
+			
+			<div class="ecs__grid">
+									<article class="ecs__card" data-seg="industrial-laundry">
+						<figure class="ecs__img">
+							<img class="ecs__photo" src="casestudies-img/case-laundry.webp" alt="" loading="lazy" />															<img class="ecs__logo" src="../../modules/logotabs/assets/logos/cws.webp" alt="CWS Workwear" loading="lazy" decoding="async" />
+													</figure>
+
+						<div class="ecs__body">
+							<h3 class="ecs__name">CWS Workwear</h3>
+
+															<span class="ecs__tag">Industrial laundry · Den Bosch, Netherlands</span>
+							
+															<p class="ecs__big">
+									<b>63%</b>
+																			<span>less gas on the tunnel washers</span>
+																												<small>Basis: gas per kg of laundry, before vs after · 6-month trial, 2023</small>
+																	</p>
+							
+															<p class="ecs__flow">Finisher exhaust <i aria-hidden="true">→</i><span class="ecs__sr"> to</span> washer process water</p>
+							
+																						<div class="ecs__acts">
+																			<a class="ecs__go" href="https://example.test/wp-content/uploads/Case-Study-CWS-laundry.pdf" target="_blank" rel="noopener">Read the CWS case (PDF) <span aria-hidden="true">→</span></a>
+																												<a class="ecs__est" href="/request-assessment/?sector=industrial-laundry">Estimate my site</a>
+																	</div>
+													</div>
+					</article>
+									<article class="ecs__card" data-seg="food-manufacturing">
+						<figure class="ecs__img">
+							<img class="ecs__photo" src="casestudies-img/case-food.webp" alt="" loading="lazy" />															<img class="ecs__logo" src="../../modules/logotabs/assets/logos/lantmannen.webp" alt="Lantmännen" loading="lazy" decoding="async" />
+													</figure>
+
+						<div class="ecs__body">
+							<h3 class="ecs__name">Lantmännen</h3>
+
+															<span class="ecs__tag">Food production · Laholm, Sweden</span>
+							
+															<p class="ecs__big">
+									<b>99%</b>
+																			<span>of the site&#039;s heat demand covered</span>
+																												<small>Basis: 614,900 of 616,600 kWh/yr · 2 × Lepido L50 · 2022</small>
+																	</p>
+							
+															<p class="ecs__flow">Production-line exhaust with grease and soot <i aria-hidden="true">→</i><span class="ecs__sr"> to</span> production-hall supply air</p>
+							
+																						<div class="ecs__acts">
+																			<a class="ecs__go" href="https://example.test/wp-content/uploads/Case-Study-Laholm-Food-production.pdf" target="_blank" rel="noopener">Read the Lantmännen case (PDF) <span aria-hidden="true">→</span></a>
+																												<a class="ecs__est" href="/request-assessment/?sector=food-manufacturing">Estimate my site</a>
+																	</div>
+													</div>
+					</article>
+									<article class="ecs__card" data-seg="foundries">
+						<figure class="ecs__img">
+							<img class="ecs__photo" src="casestudies-img/case-foundry.webp" alt="" loading="lazy" />															<img class="ecs__logo ecs__logo--dark" src="../../modules/anatomy/assets/logos/bruzaholms.svg" alt="Bruzaholms" loading="lazy" decoding="async" />
+													</figure>
+
+						<div class="ecs__body">
+							<h3 class="ecs__name">Bruzaholms</h3>
+
+															<span class="ecs__tag">Foundries · Småland, Sweden</span>
+							
+															<p class="ecs__big">
+									<b>85%</b>
+																			<span>of the heating need, once met by an oil boiler</span>
+																												<small>Basis: 95 kW recovered · first 3 months of data, 2025</small>
+																	</p>
+							
+															<p class="ecs__flow">Sand cooler exhaust <i aria-hidden="true">→</i><span class="ecs__sr"> to</span> heat for the site</p>
+							
+																						<div class="ecs__acts">
+																			<a class="ecs__go" href="https://example.test/wp-content/uploads/Case-Study-Bruzaholms-Foundry.pdf" target="_blank" rel="noopener">Read the Bruzaholms case (PDF) <span aria-hidden="true">→</span></a>
+																												<a class="ecs__est" href="/request-assessment/?sector=foundries">Estimate my site</a>
+																	</div>
+													</div>
+					</article>
+							</div>
+		</div>
+		</div>
+</div>
+<div class="host">
+	<p class="marker">A sector with no cases, and an empty-state line</p>
+	<div id="d"><div class="ecs ecs--empty"><p>Pet food case studies are coming soon.</p></div></div>
+</div>
+<script src="../../modules/casestudies/assets/js/case-studies.js"></script>
+</body>
+</html>
+	
