@@ -92,6 +92,10 @@ final class Toolkit {
 			'file'  => 'modules/partners/class-partners-module.php',
 			'class' => '\ErudaToolkit\Modules\Partners\Partners_Module',
 		),
+		'logotabs'   => array(
+			'file'  => 'modules/logotabs/class-logotabs-module.php',
+			'class' => '\ErudaToolkit\Modules\LogoTabs\LogoTabs_Module',
+		),
 	);
 
 	/**

@@ -19,6 +19,7 @@ node tests/browser/spin-probe.js    # Eruda Spin on an existing widget
 node tests/browser/header-probe.js  # Mega Header
 node tests/browser/slab-probe.js    # Split Slab, stacked and not
 node tests/browser/partners-probe.js # Partner Diagram (regenerate partners.html first)
+node tests/browser/logotabs-probe.js # Customer Logo Tabs (regenerate logotabs.html first)
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
@@ -251,4 +252,11 @@ screen:
 ```sh
 php tests/browser/partners-fixture.php > tests/browser/partners.html
 node tests/browser/partners-probe.js [screenshot-dir]
+```
+
+The customer logo tabs, the same way:
+
+```sh
+php tests/browser/logotabs-fixture.php > tests/browser/logotabs.html
+node tests/browser/logotabs-probe.js [screenshot-dir]
 ```

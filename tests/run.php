@@ -646,7 +646,8 @@ check( 'the process steps module is registered', true, in_array( 'steps', Toolki
 check( 'the page transitions module is registered', true, in_array( 'transitions', Toolkit::instance()->ids(), true ) );
 check( 'the industry showcase module is registered', true, in_array( 'industry', Toolkit::instance()->ids(), true ) );
 check( 'the partner diagram module is registered', true, in_array( 'partners', Toolkit::instance()->ids(), true ) );
-check( 'seventeen modules ship', 17, count( Toolkit::instance()->ids() ) );
+check( 'the customer logo tabs module is registered', true, in_array( 'logotabs', Toolkit::instance()->ids(), true ) );
+check( 'eighteen modules ship', 18, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -679,6 +680,7 @@ foreach ( array(
 	'modules/story/widgets/class-scroll-story-widget.php',
 	'modules/rail/widgets/class-scroll-rail-widget.php',
 	'modules/partners/widgets/class-partner-diagram-widget.php',
+	'modules/logotabs/widgets/class-customer-logo-tabs-widget.php',
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -707,6 +709,7 @@ $module_files = array(
 	'modules/rail/class-rail-module.php',
 	'modules/header/class-header-module.php',
 	'modules/partners/class-partners-module.php',
+	'modules/logotabs/class-logotabs-module.php',
 );
 
 foreach ( $module_files as $relative ) {
@@ -2354,6 +2357,188 @@ check( 'a widget with nothing saved still renders five cards', 5, substr_count( 
 check( 'and no empty aria-label', false, false !== strpos( $pd_bare, 'aria-label' ) );
 check( 'and no phone label', false, false !== strpos( $pd_bare, 'epdg__join' ) );
 check( 'and nothing moves', true, false !== strpos( $pd_bare, 'class="epdg"' ) );
+
+
+/* --------------------------------------------- Customer Logo Tabs --- */
+
+require_once dirname( __DIR__ ) . '/modules/logotabs/class-logotabs-content.php';
+require_once dirname( __DIR__ ) . '/modules/logotabs/widgets/class-customer-logo-tabs-widget.php';
+
+use ErudaToolkit\Modules\LogoTabs\LogoTabs_Content;
+
+if ( ! function_exists( 'esc_attr_e' ) ) {
+	/**
+	 * @param string $text   Text.
+	 * @param string $domain Domain.
+	 */
+	function esc_attr_e( $text, $domain = 'default' ) { // phpcs:ignore
+		echo htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
+// Industrial first: the client's one hard rule for this widget.
+check( 'Industrial is the first tab', 'Industrial', LogoTabs_Content::default_tabs()[0]['title'] );
+check( 'three tabs ship', array( 'ind', 'rest', 'hosp' ), array_column( LogoTabs_Content::default_tabs(), 'key' ) );
+check( 'sixty-one logos ship', 61, count( LogoTabs_Content::default_logos() ) );
+
+$lt_files = array_filter( array_column( LogoTabs_Content::default_logos(), 'file' ) );
+check( 'fifty-eight of them are files', 58, count( $lt_files ) );
+
+$lt_missing = array();
+foreach ( $lt_files as $file ) {
+	if ( ! is_file( dirname( __DIR__ ) . '/' . LogoTabs_Content::LOGO_DIR . $file ) ) {
+		$lt_missing[] = $file;
+	}
+}
+check( 'every shipped logo file is in the plugin', array(), $lt_missing );
+
+$lt_words = array();
+foreach ( LogoTabs_Content::default_logos() as $logo ) {
+	if ( '' !== $logo['word'] ) {
+		$lt_words[] = $logo['word'] . '/' . $logo['word_style'];
+	}
+}
+check( 'three wordmarks stand in for missing files', array( 'VOLVO/serif', 'DE BRUYN/sans', 'DISHOOM/serif' ), $lt_words );
+
+$lt_dark = array();
+foreach ( LogoTabs_Content::default_logos() as $logo ) {
+	if ( $logo['dark'] ) {
+		$lt_dark[] = $logo['name'];
+	}
+}
+check( 'only Battersea is on a dark tile', array( 'Battersea Power Station' ), $lt_dark );
+
+$lt_unsure = array();
+foreach ( LogoTabs_Content::default_logos() as $logo ) {
+	if ( false !== stripos( $logo['name'], 'confirm' ) ) {
+		$lt_unsure[] = $logo['name'];
+	}
+}
+check( 'no "name to confirm" reaches a screen reader', array(), $lt_unsure );
+
+// Optical sizing: min(118, sqrt(4000a), 58a).
+check( 'a square badge is 58 wide', 58, LogoTabs_Content::optical_width( 1 ) );
+check( 'Mondelez by the area rule', 91, LogoTabs_Content::optical_width( 360 / 173 ) );
+check( 'a long wordmark stops at 118', 118, LogoTabs_Content::optical_width( 360 / 33 ) );
+check( 'a tall mark is held to 58 high', 33, LogoTabs_Content::optical_width( 113 / 200 ) );
+check( 'an unknown shape is left to the script', 0, LogoTabs_Content::optical_width( 0 ) );
+check( 'nonsense is left to the script', 0, LogoTabs_Content::optical_width( 'wide' ) );
+
+check( 'a bundled logo is recognised by name', 1.0, LogoTabs_Content::bundled_aspect( 'https://x.test/wp-content/plugins/p/modules/logotabs/assets/logos/schuld.webp?ver=2' ) );
+check( 'a library upload is not', 0.0, LogoTabs_Content::bundled_aspect( 'https://x.test/wp-content/uploads/schuld.webp' ) );
+
+check( 'a slug', 'casual-and-fine-dining', LogoTabs_Content::slug( 'Casual & fine dining' ) );
+check( 'an empty slug falls back', 'tab-2', LogoTabs_Content::slug( '  ', 'tab-2' ) );
+
+// The flat list folds back into tabs and segments.
+$lt_built = LogoTabs_Content::build(
+	array(
+		array( 'title' => 'One', 'subline' => 'a', 'key' => 'ind' ),
+		array( 'title' => 'Two', 'key' => 'ind' ),
+		array( 'title' => 'Food & drink' ),
+	),
+	array(
+		array( 'tab' => '1', 'segment' => 'B', 'image' => array( 'url' => 'b.png' ), 'name' => 'Bee' ),
+		array( 'tab' => '1', 'segment' => 'A', 'word' => 'AY' ),
+		array( 'tab' => '1', 'segment' => 'B', 'image' => array( 'url' => 'b2.png' ) ),
+		array( 'tab' => '9', 'segment' => 'X', 'image' => array( 'url' => 'lost.png' ) ),
+		array( 'tab' => '2', 'segment' => 'C' ),
+		array( 'tab' => '3', 'segment' => '', 'image' => array( 'url' => 'c.png' ), 'dark' => 'yes', 'width' => array( 'size' => 70 ) ),
+	)
+);
+check( 'three tabs built', 3, count( $lt_built ) );
+check( 'a repeated key is made unique', array( 'ind', 'ind-2', 'food-and-drink' ), array_column( $lt_built, 'key' ) );
+check( 'segments in the order they first appear', array( 'b' => 'B', 'a' => 'A' ), $lt_built[0]['segments'] );
+check( 'every logo of a tab is kept', 3, count( $lt_built[0]['logos'] ) );
+check( 'a logo in a tab that does not exist is dropped', 0, count( $lt_built[1]['logos'] ) );
+check( 'a logo with nothing to show is dropped', array(), $lt_built[1]['segments'] );
+check( 'an unnamed segment is Other', array( 'other' => 'Other' ), $lt_built[2]['segments'] );
+check( 'dark is read', true, $lt_built[2]['logos'][0]['dark'] );
+check( 'a width override is read', 70, $lt_built[2]['logos'][0]['width'] );
+check( 'nothing saved builds nothing', array(), LogoTabs_Content::build( null, 'x' ) );
+
+check( 'opens on the tab asked for', 1, LogoTabs_Content::default_index( '2', 3 ) );
+check( 'out of range opens the first', 0, LogoTabs_Content::default_index( 7, 3 ) );
+check( 'zero opens the first', 0, LogoTabs_Content::default_index( 0, 3 ) );
+
+/**
+ * The widget with a settings array pushed into it.
+ */
+class LogoTabs_Render_Probe extends \ErudaToolkit\Modules\LogoTabs\Widgets\Customer_Logo_Tabs_Widget {
+
+	/**
+	 * @var array
+	 */
+	public $feed = array();
+
+	/**
+	 * @return array
+	 */
+	public function get_settings_for_display() {
+		return $this->feed;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function shipped() {
+		return ( new ReflectionMethod( $this, 'default_logos' ) )->invoke( $this );
+	}
+
+	/**
+	 * @param array $settings Settings to render with.
+	 * @return string
+	 */
+	public function markup( $settings ) {
+		$this->feed = $settings;
+
+		ob_start();
+		( new ReflectionMethod( $this, 'render' ) )->invoke( $this );
+
+		return (string) ob_get_clean();
+	}
+}
+
+$lt      = new LogoTabs_Render_Probe();
+$lt_base = array(
+	'tabs'          => LogoTabs_Content::default_tabs(),
+	'logos'         => $lt->shipped(),
+	'default_tab'   => 1,
+	'show_all'      => 'yes',
+	'all_label'     => 'All',
+	'tablist_label' => 'Customers by sector',
+	'animate'       => 'yes',
+);
+$lt_out = $lt->markup( $lt_base );
+
+check( 'shipped rows point at the bundled files', 'https://example.test/wp-content/plugins/numbered-accordion-elementor/modules/logotabs/assets/logos/schuld.webp', $lt->shipped()[0]['image']['url'] );
+check( 'one tablist', 1, substr_count( $lt_out, 'role="tablist"' ) );
+check( 'three tabs', 3, substr_count( $lt_out, 'role="tab"' ) );
+check( 'three panels, all in the page', 3, substr_count( $lt_out, 'role="tabpanel"' ) );
+check( 'two of them hidden', 2, preg_match_all( '/role="tabpanel"[^>]*\shidden/s', $lt_out ) );
+check( 'every logo is in the page', 61, substr_count( $lt_out, 'class="eclt__tile' ) );
+check( 'Industrial is selected', 1, preg_match( '/aria-selected="true"\s+tabindex="0"\s+data-key="ind"/', $lt_out ) );
+check( 'two tabs have chips, hospitality does not', 2, substr_count( $lt_out, 'class="eclt__chips"' ) );
+check( 'All leads, pressed', 2, substr_count( $lt_out, 'data-seg="all" aria-pressed="true">All<' ) );
+check( 'a bundled logo is sized on the server', true, false !== strpos( $lt_out, 'alt="Mondelēz International" loading="lazy" decoding="async" style="width:91px"' ) );
+check( 'no logo is left for the script', false, false !== strpos( $lt_out, 'data-eclt-fit' ) );
+check( 'Volvo is a wordmark', true, false !== strpos( $lt_out, '<span class="eclt__word eclt__word--serif" role="img" aria-label="Volvo">VOLVO</span>' ) );
+check( 'Battersea is dark', true, false !== strpos( $lt_out, 'class="eclt__tile eclt__tile--dark"' ) );
+check( 'no counts in the tabs or chips', 0, preg_match( '/<(strong|button[^>]*eclt__chip[^>]*)>[^<]*\d/', $lt_out ) );
+check( 'no tile is hidden while All is on', 0, preg_match( '/<li [^>]*hidden/', $lt_out ) );
+
+$lt_other                = $lt_base;
+$lt_other['show_all']    = '';
+$lt_other['default_tab'] = 3;
+$lt_other['logos'][0]['image'] = array( 'url' => 'https://x.test/uploads/mark.svg' );
+$lt_other_out = $lt->markup( $lt_other );
+
+check( 'the default tab can be the third', 1, preg_match( '/aria-selected="true"\s+tabindex="0"\s+data-key="hosp"/', $lt_other_out ) );
+check( 'without All there is no All', false, false !== strpos( $lt_other_out, 'data-seg="all"' ) );
+check( 'the first segment is pressed instead', true, false !== strpos( $lt_other_out, 'data-seg="food-processing" aria-pressed="true"' ) );
+check( 'the rest are hidden from the server', 7 + 28, preg_match_all( '/<li [^>]*hidden/', $lt_other_out ) );
+check( 'an image the server cannot measure goes to the script', 1, substr_count( $lt_other_out, 'data-eclt-fit' ) );
+check( 'no tabs, nothing at all', '', trim( $lt->markup( array() ) ) );
 
 /* ------------------------------------------------------------- report --- */
 

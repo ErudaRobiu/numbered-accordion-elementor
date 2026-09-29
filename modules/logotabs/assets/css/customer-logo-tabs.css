@@ -1,0 +1,361 @@
+/**
+ * Eruda Toolkit - Customer Logo Tabs
+ *
+ * Audience tabs, segment chips and a logo wall. The tabs and chips are real
+ * buttons, and themes style buttons hard -- Hello Elementor's reset gives every
+ * button a pink border and a pink hover -- so each state below restates every
+ * property it relies on rather than trusting what it inherits.
+ *
+ * Colours and sizes are custom properties on the root, which is where the
+ * style controls write them.
+ */
+
+.eclt {
+	--eclt-navy: #0F3961;
+	--eclt-muted: #0F3961B3;
+	--eclt-green: #07864F;
+	--eclt-green-light: #4DCF8D;
+	--eclt-hover-line: #07864F4D;
+	--eclt-line: #DDE2E6;
+	--eclt-tab-radius: 20px;
+	--eclt-tile: #fff;
+	--eclt-tile-line: #DDE2E6;
+	--eclt-dark: #1E2A33;
+	--eclt-word: #1B1B1B;
+	--eclt-min: 150px;
+	--eclt-h: 104px;
+	--eclt-gap: 10px;
+	--eclt-radius: 14px;
+
+	container: eclt / inline-size;
+	font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.eclt *,
+.eclt *::before,
+.eclt *::after {
+	box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------- tabs --- */
+
+.eclt__tabs {
+	display: grid;
+	grid-auto-columns: minmax(0, 1fr);
+	grid-auto-flow: column;
+	gap: 10px;
+	margin: 0 0 26px;
+}
+
+.eclt .eclt__tab,
+.eclt .eclt__tab:hover,
+.eclt .eclt__tab:focus {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	width: 100%;
+	min-width: 0;
+	margin: 0;
+	padding: 20px 22px;
+	border: 1px solid var(--eclt-line);
+	border-radius: var(--eclt-tab-radius);
+	background: #fff;
+	box-shadow: none;
+	color: var(--eclt-navy);
+	font: inherit;
+	text-align: left;
+	text-transform: none;
+	white-space: normal;
+	cursor: pointer;
+	transition: border-color .2s, background-color .2s;
+}
+
+.eclt .eclt__tab:hover {
+	border-color: var(--eclt-hover-line);
+}
+
+.eclt .eclt__tab[aria-selected="true"] {
+	border-color: var(--eclt-navy);
+	background: var(--eclt-navy);
+}
+
+.eclt .eclt__tab:focus-visible {
+	outline: 3px solid var(--eclt-green-light);
+	outline-offset: 2px;
+}
+
+.eclt__tab strong {
+	display: block;
+	font-family: "Bebas Neue", Impact, sans-serif;
+	font-size: 26px;
+	font-weight: 400;
+	line-height: 1;
+	letter-spacing: .02em;
+	text-transform: uppercase;
+	color: var(--eclt-navy);
+}
+
+.eclt__tab span {
+	display: block;
+	font-size: 13px;
+	line-height: 1.45;
+	color: var(--eclt-muted);
+}
+
+.eclt__tab[aria-selected="true"] strong {
+	color: #fff;
+}
+
+.eclt__tab[aria-selected="true"] span {
+	color: var(--eclt-green-light);
+}
+
+/* --------------------------------------------------------------- chips --- */
+
+.eclt__panel[hidden] {
+	display: none;
+}
+
+.eclt__panel:focus-visible {
+	outline: 3px solid var(--eclt-green-light);
+	outline-offset: 6px;
+	border-radius: 6px;
+}
+
+.eclt__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0 0 18px;
+}
+
+.eclt .eclt__chip,
+.eclt .eclt__chip:hover,
+.eclt .eclt__chip:focus {
+	flex: none;
+	margin: 0;
+	padding: 9px 16px;
+	border: 1px solid var(--eclt-line);
+	border-radius: 999px;
+	background: #fff;
+	box-shadow: none;
+	color: var(--eclt-navy);
+	font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.2;
+	letter-spacing: 0;
+	text-transform: none;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: border-color .2s, background-color .2s, color .2s;
+}
+
+.eclt .eclt__chip:hover {
+	border-color: var(--eclt-hover-line);
+}
+
+.eclt .eclt__chip[aria-pressed="true"] {
+	border-color: var(--eclt-green);
+	background: var(--eclt-green);
+	color: #fff;
+}
+
+.eclt .eclt__chip:focus-visible {
+	outline: 3px solid var(--eclt-green-light);
+	outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- wall --- */
+
+.eclt .eclt__wall {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(var(--eclt-min), 100%), 1fr));
+	gap: var(--eclt-gap);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.eclt .eclt__tile {
+	position: relative;
+	display: grid;
+	place-items: center;
+	min-width: 0;
+	height: var(--eclt-h);
+	margin: 0;
+	padding: 16px;
+	border: 1px solid var(--eclt-tile-line);
+	border-radius: var(--eclt-radius);
+	background: var(--eclt-tile);
+	transition: transform .25s cubic-bezier(.2, .7, .2, 1), box-shadow .25s;
+}
+
+.eclt .eclt__tile[hidden] {
+	display: none;
+}
+
+.eclt .eclt__tile::before {
+	content: none;
+}
+
+.eclt .eclt__tile:hover,
+.eclt .eclt__tile:focus-within {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 22px #0F396117;
+}
+
+.eclt .eclt__tile--dark {
+	border-color: var(--eclt-dark);
+	background: var(--eclt-dark);
+}
+
+.eclt__link {
+	display: grid;
+	place-items: center;
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+}
+
+.eclt__link:focus-visible {
+	outline: 3px solid var(--eclt-green-light);
+	outline-offset: 2px;
+}
+
+/* Themes set img { height: auto } -- fine -- and img:hover { opacity } --
+   not fine on a logo. */
+.eclt .eclt__tile img,
+.eclt .eclt__tile img:hover {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	max-height: 58px;
+	object-fit: contain;
+	opacity: 1;
+}
+
+/* Waiting for the script to measure it, so it never shows at its file size. */
+.eclt .eclt__tile img[data-eclt-fit] {
+	width: 58px;
+}
+
+.eclt__word {
+	color: var(--eclt-word);
+	font-size: 17px;
+	line-height: 1;
+	letter-spacing: .2em;
+	white-space: nowrap;
+}
+
+.eclt__word--serif {
+	font-family: Georgia, "Times New Roman", serif;
+}
+
+.eclt__word--sans {
+	font-family: "Urbanist", system-ui, sans-serif;
+	font-weight: 700;
+	letter-spacing: .08em;
+}
+
+/* -------------------------------------------------------------- motion --- */
+
+@keyframes eclt-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+}
+
+/* The script sets each tile's delay, capped so the whole wall is in within
+   300ms however long the list. Backwards fill: a finished tile holds nothing,
+   so the hover lift still works. */
+.eclt--animate .eclt__tile.is-fresh {
+	animation: eclt-in .16s ease-out backwards;
+}
+
+/* ------------------------------------------------------------- narrow --- */
+
+/* Three tabs side by side, or one column -- never two and one. */
+@container eclt (max-width: 719px) {
+	.eclt__tabs {
+		grid-auto-flow: row;
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+@media (max-width: 1024px) {
+	.eclt .eclt__tab,
+	.eclt .eclt__tab:hover,
+	.eclt .eclt__tab:focus {
+		padding: 18px 18px;
+	}
+}
+
+@media (max-width: 767px) {
+	.eclt__tabs {
+		grid-auto-flow: row;
+		grid-template-columns: minmax(0, 1fr);
+		gap: 8px;
+		margin-bottom: 20px;
+	}
+
+	.eclt .eclt__tab,
+	.eclt .eclt__tab:hover,
+	.eclt .eclt__tab:focus {
+		padding: 16px 18px;
+	}
+
+	.eclt__tab strong {
+		font-size: 22px;
+	}
+
+	/* The one thing allowed to scroll sideways. */
+	.eclt__chips {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scrollbar-width: none;
+		margin-bottom: 14px;
+		padding-bottom: 2px;
+	}
+
+	.eclt__chips::-webkit-scrollbar {
+		display: none;
+	}
+
+	.eclt .eclt__wall {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 8px;
+	}
+
+	.eclt .eclt__tile {
+		height: 80px;
+		padding: 10px;
+	}
+
+	.eclt .eclt__tile img,
+	.eclt .eclt__tile img:hover {
+		max-height: 44px;
+	}
+
+	.eclt__word {
+		font-size: 13px;
+		letter-spacing: .12em;
+	}
+}
+
+/* ------------------------------------------------------- less motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+	.eclt .eclt__tile,
+	.eclt .eclt__tile.is-fresh {
+		animation: none;
+		transition: box-shadow .2s;
+	}
+
+	.eclt .eclt__tile:hover,
+	.eclt .eclt__tile:focus-within {
+		transform: none;
+	}
+}
