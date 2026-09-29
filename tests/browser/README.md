@@ -22,6 +22,7 @@ node tests/browser/partners-probe.js # Partner Diagram (regenerate partners.html
 node tests/browser/logotabs-probe.js # Customer Logo Tabs (regenerate logotabs.html first)
 node tests/browser/anatomy-probe.js  # Case Anatomy (regenerate anatomy.html first)
 node tests/browser/casestudies-probe.js # Case Studies (regenerate casestudies.html first)
+node tests/browser/docshelf-probe.js # Document Shelf (regenerate docshelf.html first)
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
@@ -276,4 +277,11 @@ And the case studies, whose data file also seeds the site
 ```sh
 php tests/browser/casestudies-fixture.php > tests/browser/casestudies.html
 node tests/browser/casestudies-probe.js [screenshot-dir]
+```
+
+And the document shelf:
+
+```sh
+php tests/browser/docshelf-fixture.php > tests/browser/docshelf.html
+node tests/browser/docshelf-probe.js [screenshot-dir]
 ```
