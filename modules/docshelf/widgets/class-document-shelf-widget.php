@@ -9,7 +9,6 @@ namespace ErudaToolkit\Modules\DocShelf\Widgets;
 
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Typography;
-use Elementor\Repeater;
 use Elementor\Widget_Base;
 use ErudaToolkit\Modules\DocShelf\DocShelf_Content;
 
@@ -18,8 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Downloadable documents as cards with a paper sheet rising out of each,
- * filtered by type.
+ * The published Documents as cards with a paper sheet rising out of each,
+ * filtered by type. Nothing is typed on the page: the list lives in the
+ * dashboard, so every shelf on the site shows the same, current documents.
  */
 class Document_Shelf_Widget extends Widget_Base {
 
@@ -87,15 +87,6 @@ class Document_Shelf_Widget extends Widget_Base {
 	}
 
 	/**
-	 * Where the bundled covers live.
-	 *
-	 * @return string
-	 */
-	private function cover_url() {
-		return ( defined( 'ERUDA_URL' ) ? ERUDA_URL : '' ) . DocShelf_Content::COVER_DIR;
-	}
-
-	/**
 	 * Controls.
 	 */
 	protected function register_controls() {
@@ -106,7 +97,7 @@ class Document_Shelf_Widget extends Widget_Base {
 	}
 
 	/**
-	 * The documents.
+	 * Which documents.
 	 */
 	private function register_document_controls() {
 		$this->start_controls_section(
@@ -114,104 +105,42 @@ class Document_Shelf_Widget extends Widget_Base {
 			array( 'label' => esc_html__( 'Documents', 'numbered-accordion' ) )
 		);
 
-		$docs = new Repeater();
+		$manage = function_exists( 'admin_url' ) ? admin_url( 'edit.php?post_type=' . DocShelf_Content::POST_TYPE ) : '#';
 
-		$docs->add_control(
-			'cover',
+		$this->add_control(
+			'source_note',
 			array(
-				'label'       => esc_html__( 'Cover', 'numbered-accordion' ),
-				'type'        => Controls_Manager::MEDIA,
-				'default'     => array( 'url' => '' ),
-				'description' => esc_html__( 'Page 1 of the document, about 600px wide.', 'numbered-accordion' ),
-			)
-		);
-
-		$docs->add_control(
-			'key',
-			array(
-				'label'       => esc_html__( 'Filter', 'numbered-accordion' ),
-				'type'        => Controls_Manager::TEXT,
-				'default'     => 'white',
-				'description' => esc_html__( 'Which chip shows it: white, perf, industry, product, company — or a new word, which makes a new chip.', 'numbered-accordion' ),
-			)
-		);
-
-		$docs->add_control(
-			'type',
-			array(
-				'label'   => esc_html__( 'Type label', 'numbered-accordion' ),
-				'type'    => Controls_Manager::TEXT,
-				'default' => esc_html__( 'White paper', 'numbered-accordion' ),
-			)
-		);
-
-		$docs->add_control(
-			'title',
-			array(
-				'label'       => esc_html__( 'Title', 'numbered-accordion' ),
-				'type'        => Controls_Manager::TEXT,
-				'label_block' => true,
-			)
-		);
-
-		$docs->add_control(
-			'desc',
-			array(
-				'label' => esc_html__( 'Description', 'numbered-accordion' ),
-				'type'  => Controls_Manager::TEXTAREA,
-				'rows'  => 2,
-			)
-		);
-
-		$docs->add_control(
-			'meta',
-			array(
-				'label'       => esc_html__( 'Meta', 'numbered-accordion' ),
-				'type'        => Controls_Manager::TEXT,
-				'description' => esc_html__( 'After the PDF badge, e.g. "12 pages · May 2026".', 'numbered-accordion' ),
-			)
-		);
-
-		$docs->add_control(
-			'link',
-			array(
-				'label'       => esc_html__( 'File link', 'numbered-accordion' ),
-				'type'        => Controls_Manager::URL,
-				'default'     => array( 'url' => '' ),
-				'options'     => false,
-				'description' => esc_html__( 'Any address: the media library, SharePoint, another site. Empty shows the card as "Coming soon".', 'numbered-accordion' ),
-			)
-		);
-
-		$docs->add_control(
-			'new_tab',
-			array(
-				'label'        => esc_html__( 'Open in a new tab', 'numbered-accordion' ),
-				'type'         => Controls_Manager::SWITCHER,
-				'return_value' => 'yes',
-				'default'      => 'yes',
-			)
-		);
-
-		$docs->add_control(
-			'download',
-			array(
-				'label'        => esc_html__( 'Download instead of open', 'numbered-accordion' ),
-				'type'         => Controls_Manager::SWITCHER,
-				'return_value' => 'yes',
-				'default'      => '',
-				'description'  => esc_html__( 'Only works for files on this site. Leave it off for SharePoint links.', 'numbered-accordion' ),
+				'type'            => Controls_Manager::RAW_HTML,
+				'raw'             => sprintf(
+					/* translators: %s: link to the Documents list */
+					esc_html__( 'The cards are your published documents, in their Order. To add or change one, go to %s in the dashboard.', 'numbered-accordion' ),
+					'<a href="' . esc_url( $manage ) . '" target="_blank">' . esc_html__( 'Documents', 'numbered-accordion' ) . '</a>'
+				),
+				'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
 			)
 		);
 
 		$this->add_control(
-			'docs',
+			'filters',
 			array(
-				'label'       => esc_html__( 'Documents', 'numbered-accordion' ),
-				'type'        => Controls_Manager::REPEATER,
-				'fields'      => $docs->get_controls(),
-				'default'     => $this->default_docs(),
-				'title_field' => '{{{ key }}} · {{{ title }}}',
+				'label'       => esc_html__( 'Only these filters', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SELECT2,
+				'multiple'    => true,
+				'label_block' => true,
+				'options'     => $this->filter_options(),
+				'description' => esc_html__( 'Empty shows every document. On another page, e.g. only Performance evidence.', 'numbered-accordion' ),
+			)
+		);
+
+		$this->add_control(
+			'limit',
+			array(
+				'label'       => esc_html__( 'How many', 'numbered-accordion' ),
+				'type'        => Controls_Manager::NUMBER,
+				'min'         => 0,
+				'max'         => 48,
+				'default'     => 0,
+				'description' => esc_html__( '0 shows them all.', 'numbered-accordion' ),
 			)
 		);
 
@@ -219,28 +148,104 @@ class Document_Shelf_Widget extends Widget_Base {
 	}
 
 	/**
-	 * The page 26 shelf as repeater rows.
+	 * The filters, for the picker.
 	 *
+	 * @return array<string, string>
+	 */
+	private function filter_options() {
+		$options = DocShelf_Content::filters();
+
+		if ( function_exists( 'get_terms' ) ) {
+			$terms = get_terms(
+				array(
+					'taxonomy'   => DocShelf_Content::TAXONOMY,
+					'hide_empty' => false,
+				)
+			);
+
+			if ( is_array( $terms ) ) {
+				foreach ( $terms as $term ) {
+					$options[ $term->slug ] = $term->name;
+				}
+			}
+		}
+
+		return $options;
+	}
+
+	/**
+	 * The published documents, as cards, in their Order.
+	 *
+	 * Protected so the tests can hand the widget documents without a database.
+	 *
+	 * @param array $settings Settings.
 	 * @return array
 	 */
-	private function default_docs() {
-		$rows = array();
+	protected function get_docs( $settings ) {
+		if ( ! class_exists( '\WP_Query' ) ) {
+			return array();
+		}
 
-		foreach ( DocShelf_Content::default_docs() as $doc ) {
-			$rows[] = array(
-				'cover'    => array( 'url' => $this->cover_url() . $doc['cover'] ),
-				'key'      => $doc['key'],
-				'type'     => $doc['type'],
-				'title'    => $doc['title'],
-				'desc'     => $doc['desc'],
-				'meta'     => $doc['meta'],
-				'link'     => array( 'url' => $doc['url'] ),
-				'new_tab'  => 'yes',
-				'download' => '',
+		$limit   = isset( $settings['limit'] ) && is_numeric( $settings['limit'] ) ? max( 0, (int) $settings['limit'] ) : 0;
+		$filters = isset( $settings['filters'] ) && is_array( $settings['filters'] ) ? array_values( array_filter( array_map( 'sanitize_key', $settings['filters'] ) ) ) : array();
+		$args    = array(
+			'post_type'              => DocShelf_Content::POST_TYPE,
+			'post_status'            => 'publish',
+			'orderby'                => array( 'menu_order' => 'ASC', 'title' => 'ASC' ),
+			'posts_per_page'         => $limit > 0 ? $limit : 200,
+			'no_found_rows'          => true,
+			'ignore_sticky_posts'    => true,
+			'update_post_term_cache' => true,
+			'update_post_meta_cache' => true,
+		);
+
+		if ( $filters ) {
+			$args['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				array(
+					'taxonomy' => DocShelf_Content::TAXONOMY,
+					'field'    => 'slug',
+					'terms'    => $filters,
+				),
 			);
 		}
 
-		return $rows;
+		$docs = array();
+
+		foreach ( ( new \WP_Query( $args ) )->posts as $post ) {
+			$meta = array();
+
+			foreach ( get_post_meta( $post->ID ) as $key => $values ) {
+				if ( 0 === strpos( $key, 'doc_' ) ) {
+					$meta[ $key ] = isset( $values[0] ) ? $values[0] : '';
+				}
+			}
+
+			$terms = get_the_terms( $post->ID, DocShelf_Content::TAXONOMY );
+			$found = array();
+
+			if ( is_array( $terms ) ) {
+				foreach ( $terms as $term ) {
+					$found[] = array( 'slug' => $term->slug, 'name' => $term->name );
+				}
+			}
+
+			$file = isset( $meta['doc_file'] ) ? (int) $meta['doc_file'] : 0;
+			$card = DocShelf_Content::card(
+				array(
+					'title'    => get_the_title( $post ),
+					'meta'     => $meta,
+					'filters'  => $found,
+					'file_url' => $file > 0 ? (string) wp_get_attachment_url( $file ) : '',
+					'cover_id' => (int) get_post_thumbnail_id( $post ),
+				)
+			);
+
+			if ( null !== $card ) {
+				$docs[] = $card;
+			}
+		}
+
+		return $docs;
 	}
 
 	/**
@@ -259,7 +264,7 @@ class Document_Shelf_Widget extends Widget_Base {
 				'type'         => Controls_Manager::SWITCHER,
 				'return_value' => 'yes',
 				'default'      => 'yes',
-				'description'  => esc_html__( 'One chip per filter in use, in the order the documents first use them. A link ending in #docs-perf opens with that chip on.', 'numbered-accordion' ),
+				'description'  => esc_html__( 'One chip per filter that has documents, in their Order. Rename a chip under Documents → Filters. A link ending in #docs-perf opens with that chip on.', 'numbered-accordion' ),
 			)
 		);
 
@@ -284,18 +289,6 @@ class Document_Shelf_Widget extends Widget_Base {
 					'show_chips' => 'yes',
 					'show_all'   => 'yes',
 				),
-			)
-		);
-
-		$this->add_control(
-			'chip_map',
-			array(
-				'label'       => esc_html__( 'Chip labels', 'numbered-accordion' ),
-				'type'        => Controls_Manager::TEXTAREA,
-				'rows'        => 6,
-				'default'     => DocShelf_Content::default_chip_map(),
-				'description' => esc_html__( 'One per line: filter: Label.', 'numbered-accordion' ),
-				'condition'   => array( 'show_chips' => 'yes' ),
 			)
 		);
 
@@ -497,13 +490,19 @@ class Document_Shelf_Widget extends Widget_Base {
 	protected function render() {
 		$settings = $this->get_settings_for_display();
 		$settings = is_array( $settings ) ? $settings : array();
-		$docs     = DocShelf_Content::build( isset( $settings['docs'] ) ? $settings['docs'] : array() );
+		$docs     = $this->get_docs( $settings );
 
 		if ( empty( $docs ) ) {
+			$editing = class_exists( '\\Elementor\\Plugin' ) && isset( \Elementor\Plugin::$instance->editor ) && \Elementor\Plugin::$instance->editor->is_edit_mode();
+
+			if ( $editing ) {
+				echo '<div class="edoc edoc--empty"><p>' . esc_html__( 'No published documents match. Add them under Documents in the dashboard, or change "Only these filters".', 'numbered-accordion' ) . '</p></div>';
+			}
+
 			return;
 		}
 
-		$chips     = DocShelf_Content::chips( $docs, DocShelf_Content::parse_chip_map( $this->word( $settings, 'chip_map', DocShelf_Content::default_chip_map() ) ) );
+		$chips     = DocShelf_Content::chips( $docs );
 		$use_chips = isset( $settings['show_chips'] ) && 'yes' === $settings['show_chips'] && count( $chips ) > 1;
 		$show_all  = isset( $settings['show_all'] ) && 'yes' === $settings['show_all'];
 		$all       = $this->word( $settings, 'all_label', __( 'All', 'numbered-accordion' ) );

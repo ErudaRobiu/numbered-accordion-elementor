@@ -15,9 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * The page 26 documents, the chip labels, and how settings become cards.
+ * The Documents post type, its filters and form, the page 26 documents it
+ * was seeded with, and how a saved document becomes a card.
  */
 final class DocShelf_Content {
+
+	const POST_TYPE = 'resource_document';
+	const TAXONOMY  = 'document_type';
 
 	/**
 	 * Where the bundled covers live, relative to the plugin root.
@@ -31,9 +35,9 @@ final class DocShelf_Content {
 	const HASH_PREFIX = 'docs-';
 
 	/**
-	 * The page 26 shelf. Every file is in this site's media library, and the
-	 * links are root-relative, so they survive the move from staging to the
-	 * real domain. An empty link would show "Coming soon".
+	 * The page 26 documents, as they were first entered: the seed for
+	 * bin/seed-documents.php and the browser fixture. The site's own list is
+	 * the Documents post type; this only starts it.
 	 *
 	 * The Pancake Factory case study (confidential footer) and the Scott
 	 * Preston document (internal) are deliberately not here.
@@ -74,12 +78,19 @@ final class DocShelf_Content {
 	}
 
 	/**
-	 * The chip labels, one "key: Label" per line, as the panel holds them.
+	 * The filters, in the order a visitor should meet them. The slugs are the
+	 * URL hash keys (#docs-perf), so links from other pages keep working.
 	 *
-	 * @return string
+	 * @return array<string, string> Slug => chip label.
 	 */
-	public static function default_chip_map() {
-		return "white: White papers\nperf: Performance evidence\nindustry: Industry guides\nproduct: Product literature\ncompany: Company";
+	public static function filters() {
+		return array(
+			'white'    => 'White papers',
+			'product'  => 'Product literature',
+			'industry' => 'Industry guides',
+			'perf'     => 'Performance evidence',
+			'company'  => 'Company',
+		);
 	}
 
 	/**
@@ -95,89 +106,193 @@ final class DocShelf_Content {
 	}
 
 	/**
-	 * Read the "key: Label" lines. A line without a colon, or with an empty
-	 * side, is skipped rather than guessed at.
+	 * The edit form, as an ACF local field group.
 	 *
-	 * @param mixed $text Textarea value.
-	 * @return array<string, string>
-	 */
-	public static function parse_chip_map( $text ) {
-		$map = array();
-
-		foreach ( preg_split( '/\r\n|\r|\n/', is_scalar( $text ) ? (string) $text : '' ) as $line ) {
-			$parts = explode( ':', $line, 2 );
-
-			if ( 2 !== count( $parts ) ) {
-				continue;
-			}
-
-			$key   = self::key( $parts[0] );
-			$label = trim( $parts[1] );
-
-			if ( '' !== $key && '' !== $label ) {
-				$map[ $key ] = $label;
-			}
-		}
-
-		return $map;
-	}
-
-	/**
-	 * Turn the repeater into cards. A row with no title has nothing to show
-	 * and is left out; a row with no link stays, as "Coming soon".
+	 * Defined in code so it is the same on staging and live and cannot be
+	 * broken from the ACF screens. Field names are the post meta keys the
+	 * widget reads, so the front end never needs ACF itself.
 	 *
-	 * @param mixed $items Repeater value.
 	 * @return array
 	 */
-	public static function build( $items ) {
-		$out = array();
-
-		foreach ( is_array( $items ) ? $items : array() as $item ) {
-			$item  = is_array( $item ) ? $item : array();
-			$title = self::text( $item, 'title' );
-
-			if ( '' === $title ) {
-				continue;
-			}
-
-			$cover = isset( $item['cover'] ) && is_array( $item['cover'] ) ? $item['cover'] : array();
-			$link  = isset( $item['link'] ) && is_array( $item['link'] ) ? $item['link'] : array();
-			$url   = isset( $link['url'] ) && is_string( $link['url'] ) ? trim( $link['url'] ) : '';
-			$key   = self::key( self::text( $item, 'key' ) );
-
-			$out[] = array(
-				'key'      => '' === $key ? 'other' : $key,
-				'cover'    => isset( $cover['url'] ) && is_string( $cover['url'] ) ? trim( $cover['url'] ) : '',
-				'cover_id' => isset( $cover['id'] ) ? (int) $cover['id'] : 0,
-				'type'     => self::text( $item, 'type' ),
-				'title'    => $title,
-				'desc'     => self::text( $item, 'desc' ),
-				'meta'     => self::text( $item, 'meta' ),
-				'url'      => $url,
-				'new_tab'  => 'yes' === self::text( $item, 'new_tab' ),
-				'download' => 'yes' === self::text( $item, 'download' ),
-				'nofollow' => ! empty( $link['nofollow'] ),
-			);
-		}
-
-		return $out;
+	public static function field_group() {
+		return array(
+			'key'                   => 'group_edoc_document',
+			'title'                 => 'Document',
+			'position'              => 'acf_after_title',
+			'style'                 => 'default',
+			'label_placement'       => 'top',
+			'instruction_placement' => 'label',
+			'menu_order'            => 0,
+			'active'                => true,
+			'show_in_rest'          => 1,
+			'location'              => array(
+				array(
+					array(
+						'param'    => 'post_type',
+						'operator' => '==',
+						'value'    => self::POST_TYPE,
+					),
+				),
+			),
+			'fields'                => array(
+				array(
+					'key'       => 'field_edoc_help',
+					'label'     => 'How this card works',
+					'name'      => '',
+					'type'      => 'message',
+					'message'   => 'The title above is the card\'s title. The cover is the <strong>Cover</strong> box on the right: page 1 of the document, about 600px wide. Cards appear on the Document Shelf in <strong>Order</strong> (lowest first, also on the right).',
+					'new_lines' => '',
+					'esc_html'  => 0,
+				),
+				array(
+					'key'           => 'field_edoc_filter',
+					'label'         => 'Filter',
+					'name'          => 'doc_filter',
+					'type'          => 'taxonomy',
+					'instructions'  => 'Which chip shows this document.',
+					'required'      => 1,
+					'taxonomy'      => self::TAXONOMY,
+					'field_type'    => 'radio',
+					'add_term'      => 0,
+					'save_terms'    => 1,
+					'load_terms'    => 1,
+					'return_format' => 'id',
+					'allow_null'    => 0,
+				),
+				array(
+					'key'          => 'field_edoc_type',
+					'label'        => 'Type label',
+					'name'         => 'doc_type',
+					'type'         => 'text',
+					'instructions' => 'The small green line above the title, e.g. "White paper" or "Case study".',
+					'maxlength'    => 40,
+					'wrapper'      => array( 'width' => '40' ),
+				),
+				array(
+					'key'          => 'field_edoc_meta',
+					'label'        => 'Meta',
+					'name'         => 'doc_meta',
+					'type'         => 'text',
+					'instructions' => 'After the PDF badge, e.g. "12 pages · May 2026".',
+					'maxlength'    => 40,
+					'wrapper'      => array( 'width' => '60' ),
+				),
+				array(
+					'key'          => 'field_edoc_desc',
+					'label'        => 'Description',
+					'name'         => 'doc_desc',
+					'type'         => 'textarea',
+					'instructions' => 'One or two short sentences.',
+					'rows'         => 2,
+					'maxlength'    => 160,
+					'new_lines'    => '',
+				),
+				array(
+					'key'           => 'field_edoc_file',
+					'label'         => 'PDF',
+					'name'          => 'doc_file',
+					'type'          => 'file',
+					'instructions'  => 'Upload the PDF here, or put a link in the next field instead.',
+					'return_format' => 'id',
+					'library'       => 'all',
+					'mime_types'    => 'pdf',
+					'wrapper'       => array( 'width' => '50' ),
+				),
+				array(
+					'key'          => 'field_edoc_url',
+					'label'        => 'Or a link',
+					'name'         => 'doc_url',
+					'type'         => 'url',
+					'instructions' => 'e.g. a SharePoint link, so the file can be updated there. Used instead of the PDF when filled. With neither, the card shows "Coming soon".',
+					'wrapper'      => array( 'width' => '50' ),
+				),
+				array(
+					'key'           => 'field_edoc_new_tab',
+					'label'         => 'Open in a new tab',
+					'name'          => 'doc_new_tab',
+					'type'          => 'true_false',
+					'ui'            => 1,
+					'default_value' => 1,
+					'wrapper'       => array( 'width' => '50' ),
+				),
+				array(
+					'key'           => 'field_edoc_download',
+					'label'         => 'Download instead of open',
+					'name'          => 'doc_download',
+					'type'          => 'true_false',
+					'instructions'  => 'Only works for an uploaded PDF, not a SharePoint link.',
+					'ui'            => 1,
+					'default_value' => 0,
+					'wrapper'       => array( 'width' => '50' ),
+				),
+			),
+		);
 	}
 
 	/**
-	 * The chips: every key the cards use, in the order they first appear,
-	 * labelled from the map. A key with no label is shown capitalised, so a
-	 * new key still gets a chip instead of vanishing.
+	 * Turn one saved document into a card.
 	 *
-	 * @param array                $docs Built cards.
-	 * @param array<string,string> $map  Key => label.
+	 * @param array $raw {
+	 *     @type string $title     Post title.
+	 *     @type array  $meta      Post meta, key => single value.
+	 *     @type array  $filters   Assigned filters, each array{slug: string, name: string}.
+	 *     @type string $file_url  URL of the uploaded PDF, if any.
+	 *     @type int    $cover_id  Cover attachment id.
+	 *     @type string $cover_url Cover URL, when there is no attachment.
+	 * }
+	 * @return array|null Null when there is no title to show.
+	 */
+	public static function card( $raw ) {
+		$raw     = is_array( $raw ) ? $raw : array();
+		$meta    = isset( $raw['meta'] ) && is_array( $raw['meta'] ) ? $raw['meta'] : array();
+		$filters = isset( $raw['filters'] ) && is_array( $raw['filters'] ) ? array_values( $raw['filters'] ) : array();
+		$get     = function ( $key ) use ( $meta ) {
+			return isset( $meta[ $key ] ) && is_scalar( $meta[ $key ] ) ? trim( (string) $meta[ $key ] ) : '';
+		};
+		$title   = isset( $raw['title'] ) && is_scalar( $raw['title'] ) ? trim( (string) $raw['title'] ) : '';
+
+		if ( '' === $title ) {
+			return null;
+		}
+
+		$file   = isset( $raw['file_url'] ) && is_string( $raw['file_url'] ) ? trim( $raw['file_url'] ) : '';
+		$link   = $get( 'doc_url' );
+		$url    = '' !== $link ? $link : $file;
+		$key    = isset( $filters[0]['slug'] ) ? self::key( $filters[0]['slug'] ) : '';
+		$on     = array( '1', 'yes', 'true' );
+
+		return array(
+			'key'      => '' === $key ? 'other' : $key,
+			'key_name' => isset( $filters[0]['name'] ) && '' !== trim( (string) $filters[0]['name'] ) ? trim( (string) $filters[0]['name'] ) : 'Other',
+			'cover'    => isset( $raw['cover_url'] ) && is_string( $raw['cover_url'] ) ? trim( $raw['cover_url'] ) : '',
+			'cover_id' => isset( $raw['cover_id'] ) ? (int) $raw['cover_id'] : 0,
+			'type'     => $get( 'doc_type' ),
+			'title'    => $title,
+			'desc'     => $get( 'doc_desc' ),
+			'meta'     => $get( 'doc_meta' ),
+			'url'      => $url,
+			// A never-saved switch is on: the form's default.
+			'new_tab'  => ! isset( $meta['doc_new_tab'] ) || in_array( $get( 'doc_new_tab' ), $on, true ),
+			// The download attribute only works on this site's own file.
+			'download' => in_array( $get( 'doc_download' ), $on, true ) && '' === $link && '' !== $file,
+			'nofollow' => false,
+		);
+	}
+
+	/**
+	 * The chips: every filter the cards use, in the order they first appear.
+	 * The documents are in Order, so the chips follow it, and a filter with
+	 * no documents never gets a chip.
+	 *
+	 * @param array $docs Built cards.
 	 * @return array<string, string>
 	 */
-	public static function chips( $docs, $map ) {
+	public static function chips( $docs ) {
 		$chips = array();
 
 		foreach ( (array) $docs as $doc ) {
 			if ( ! isset( $chips[ $doc['key'] ] ) ) {
-				$chips[ $doc['key'] ] = isset( $map[ $doc['key'] ] ) ? $map[ $doc['key'] ] : ucfirst( str_replace( '-', ' ', $doc['key'] ) );
+				$chips[ $doc['key'] ] = isset( $doc['key_name'] ) ? $doc['key_name'] : ucfirst( $doc['key'] );
 			}
 		}
 
@@ -201,16 +316,5 @@ final class DocShelf_Content {
 		}
 
 		return implode( ', ', $parts );
-	}
-
-	/**
-	 * A trimmed text setting, or an empty string.
-	 *
-	 * @param array  $row Row.
-	 * @param string $key Key.
-	 * @return string
-	 */
-	private static function text( $row, $key ) {
-		return isset( $row[ $key ] ) && is_scalar( $row[ $key ] ) ? trim( (string) $row[ $key ] ) : '';
 	}
 }
