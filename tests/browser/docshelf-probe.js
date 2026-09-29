@@ -65,8 +65,7 @@ const pressed = sel => [...document.querySelectorAll(sel + ' .edoc__chip')].filt
   check('twelve documents', a.count === 12, String(a.count));
   check('chips: All first and on, then the filters in first-use order', a.chips === 'All*,White papers,Product literature,Industry guides,Performance evidence,Company', a.chips);
   check('four across on desktop, 16px gap', a.perRow === 4 && a.gap === '16px', a.perRow + ' ' + a.gap);
-  check('seven cards link to their files', a.links === 7, String(a.links));
-  check('the five without a file say Coming soon and are not links', a.soon.length === 5 && a.soon.every(s => /\|Coming soon$/.test(s)), a.soon.join(' / '));
+  check('all twelve cards link to their files', a.links === 12 && a.soon.length === 0, a.links + ' ' + a.soon.join(' / '));
   check('a card link is named title + PDF + pages + new tab', a.label === 'Waste heat recovery for commercial and industrial facilities, PDF, 12 pages · May 2026, opens in a new tab', a.label);
   check('new tab on, download off by default', a.target === '_blank|noopener|false', a.target);
   check('the cover area is 200px with 22px padding and the gradient', a.coverBox === '200|22px|true', a.coverBox);
@@ -126,10 +125,12 @@ const pressed = sel => [...document.querySelectorAll(sel + ' .edoc__chip')].filt
       chips: [...r.querySelectorAll('.edoc__chip')].map(c => c.textContent + (c.getAttribute('aria-pressed') === 'true' ? '*' : '')).join(','),
       shown: [...r.querySelectorAll('.edoc__card')].filter(c => !c.hidden).length,
       link: first.target + '|' + first.hasAttribute('download') + '|' + first.getAttribute('aria-label'),
+      soon: [...r.querySelectorAll('.edoc__card')].filter(c => c.tagName === 'DIV').map(c => c.querySelector('.edoc__title').textContent + '|' + c.querySelector('.edoc__meta em').textContent + '|' + !!c.querySelector('a')),
     };
   });
   check('without All, the shelf opens on the first filter', b.chips.startsWith('White papers*') && b.shown === 2, JSON.stringify(b));
   check('a filter with no label still gets a chip', /Press kit/.test(b.chips), b.chips);
+  check('a document without a file is a plain card saying Coming soon', b.soon.join(' / ') === 'ThermStar System brochure|Coming soon|false / ThermStar System for pet food|Coming soon|false', b.soon.join(' / '));
   check('a same-tab download link', b.link === '|true|Waste heat recovery for commercial and industrial facilities, PDF, 12 pages · May 2026', b.link);
 
   if (SHOTS) await (await page.$('#a .edoc')).screenshot({ path: SHOTS + '/doc-desktop.png' });
