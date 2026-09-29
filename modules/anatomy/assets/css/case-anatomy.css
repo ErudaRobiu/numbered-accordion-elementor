@@ -1,0 +1,275 @@
+/**
+ * Eruda Toolkit - Case Anatomy
+ *
+ * One project per logo tab, and under it the same six questions answered in
+ * tiles, the last one -- the result -- in navy. The tabs are buttons, and
+ * themes style buttons hard (Hello Elementor paints them pink), so each tab
+ * state restates every property it relies on.
+ */
+
+.ecan {
+	--ecan-card: #F5F6F7;
+	--ecan-line: #DDE2E6;
+	--ecan-radius: 25px;
+	--ecan-tab: #fff;
+	--ecan-green: #07864F;
+	--ecan-green-light: #4DCF8D;
+	--ecan-chip: #1E2A33;
+	--ecan-tile: #fff;
+	--ecan-number: #07864F;
+	--ecan-label: #0F3961B3;
+	--ecan-answer: #0F3961;
+	--ecan-result: #0F3961;
+	--ecan-result-label: #4DCF8D;
+	--ecan-result-number: #4DCF8D;
+	--ecan-result-answer: #fff;
+	--ecan-count: 3;
+
+	padding: 18px;
+	border: 1px solid var(--ecan-line);
+	border-radius: var(--ecan-radius);
+	background: var(--ecan-card);
+	font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.ecan *,
+.ecan *::before,
+.ecan *::after {
+	box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------- tabs --- */
+
+.ecan__tabs {
+	display: grid;
+	grid-template-columns: repeat(var(--ecan-count), minmax(0, 1fr));
+	gap: 8px;
+	margin: 0 0 14px;
+}
+
+.ecan .ecan__tab,
+.ecan .ecan__tab:hover,
+.ecan .ecan__tab:focus {
+	display: grid;
+	place-items: center;
+	min-width: 0;
+	height: 62px;
+	margin: 0;
+	padding: 10px;
+	border: 1px solid var(--ecan-line);
+	border-radius: 14px;
+	background: var(--ecan-tab);
+	box-shadow: none;
+	color: var(--ecan-answer);
+	font: inherit;
+	cursor: pointer;
+	transition: transform .2s cubic-bezier(.2, .7, .2, 1), box-shadow .2s, border-color .2s;
+}
+
+.ecan .ecan__tab:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 16px #0F396114;
+}
+
+/* 2px ring without the layout shift a 2px border would cause. */
+.ecan .ecan__tab[aria-selected="true"] {
+	border-color: var(--ecan-green);
+	box-shadow: inset 0 0 0 1px var(--ecan-green), 0 6px 18px #07864F22;
+}
+
+.ecan .ecan__tab:focus-visible {
+	outline: 3px solid var(--ecan-green-light);
+	outline-offset: 2px;
+}
+
+.ecan .ecan__logo,
+.ecan .ecan__logo:hover {
+	display: block;
+	width: auto;
+	max-width: min(100px, 100%);
+	height: auto;
+	max-height: 30px;
+	object-fit: contain;
+	opacity: 1;
+}
+
+.ecan .ecan__logo--dark {
+	max-height: 38px;
+	padding: 4px 8px;
+	border-radius: 6px;
+	background: var(--ecan-chip);
+}
+
+.ecan__name {
+	font-family: "Urbanist", system-ui, sans-serif;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1.2;
+	text-align: center;
+}
+
+/* ---------------------------------------------------------------- tiles --- */
+
+.ecan__panel[hidden] {
+	display: none;
+}
+
+.ecan__panel:focus-visible {
+	outline: 3px solid var(--ecan-green-light);
+	outline-offset: 4px;
+	border-radius: 14px;
+}
+
+.ecan .ecan__rows {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.ecan .ecan__tile {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-content: start;
+	gap: 2px 12px;
+	margin: 0;
+	padding: 16px 18px;
+	border: 1px solid var(--ecan-line);
+	border-radius: 14px;
+	background: var(--ecan-tile);
+}
+
+.ecan__num {
+	grid-row: span 2;
+	font-family: "Bebas Neue", Impact, sans-serif;
+	font-size: 28px;
+	font-weight: 400;
+	line-height: 1;
+	color: var(--ecan-number);
+}
+
+.ecan__label {
+	font-family: "Urbanist", system-ui, sans-serif;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.4;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	color: var(--ecan-label);
+}
+
+.ecan .ecan__answer {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: var(--ecan-answer);
+}
+
+.ecan .ecan__tile--result {
+	border-color: var(--ecan-result);
+	background: var(--ecan-result);
+}
+
+.ecan__tile--result .ecan__label {
+	color: var(--ecan-result-label);
+}
+
+/* The wireframe kept 06 in the dark green, which is about 2:1 on navy. */
+.ecan__tile--result .ecan__num {
+	color: var(--ecan-result-number);
+}
+
+.ecan .ecan__tile--result .ecan__answer {
+	color: var(--ecan-result-answer);
+}
+
+.ecan .ecan__link {
+	display: inline-flex;
+	gap: 6px;
+	margin-top: 14px;
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--ecan-green);
+	text-decoration: none;
+}
+
+.ecan .ecan__link:hover {
+	color: var(--ecan-green);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+/* -------------------------------------------------------------- motion --- */
+
+@keyframes ecan-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+}
+
+/* 35ms apart and 120ms each: the sixth tile is in by 295ms. */
+.ecan--animate .ecan__panel.is-fresh .ecan__tile {
+	animation: ecan-in .12s ease-out backwards;
+}
+
+.ecan--animate .ecan__panel.is-fresh .ecan__tile:nth-child(2) { animation-delay: 35ms; }
+.ecan--animate .ecan__panel.is-fresh .ecan__tile:nth-child(3) { animation-delay: 70ms; }
+.ecan--animate .ecan__panel.is-fresh .ecan__tile:nth-child(4) { animation-delay: 105ms; }
+.ecan--animate .ecan__panel.is-fresh .ecan__tile:nth-child(5) { animation-delay: 140ms; }
+.ecan--animate .ecan__panel.is-fresh .ecan__tile:nth-child(6) { animation-delay: 175ms; }
+
+/* -------------------------------------------------------------- phone --- */
+
+@media (max-width: 767px) {
+	.ecan {
+		padding: 12px;
+	}
+
+	.ecan__tabs {
+		gap: 6px;
+		margin-bottom: 10px;
+	}
+
+	.ecan .ecan__tab,
+	.ecan .ecan__tab:hover,
+	.ecan .ecan__tab:focus {
+		height: 54px;
+		padding: 8px;
+	}
+
+	.ecan .ecan__logo,
+	.ecan .ecan__logo:hover {
+		max-height: 24px;
+	}
+
+	.ecan .ecan__logo--dark {
+		max-height: 32px;
+		padding: 3px 6px;
+	}
+
+	.ecan .ecan__rows {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.ecan .ecan__tile {
+		padding: 14px 16px;
+	}
+}
+
+/* ------------------------------------------------------- less motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+	.ecan .ecan__panel .ecan__tile {
+		animation: none;
+	}
+
+	.ecan .ecan__tab,
+	.ecan .ecan__tab:hover {
+		transform: none;
+		transition: box-shadow .2s, border-color .2s;
+	}
+}

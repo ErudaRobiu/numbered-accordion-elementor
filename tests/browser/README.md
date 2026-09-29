@@ -20,6 +20,7 @@ node tests/browser/header-probe.js  # Mega Header
 node tests/browser/slab-probe.js    # Split Slab, stacked and not
 node tests/browser/partners-probe.js # Partner Diagram (regenerate partners.html first)
 node tests/browser/logotabs-probe.js # Customer Logo Tabs (regenerate logotabs.html first)
+node tests/browser/anatomy-probe.js  # Case Anatomy (regenerate anatomy.html first)
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
@@ -259,4 +260,11 @@ The customer logo tabs, the same way:
 ```sh
 php tests/browser/logotabs-fixture.php > tests/browser/logotabs.html
 node tests/browser/logotabs-probe.js [screenshot-dir]
+```
+
+And the case anatomy:
+
+```sh
+php tests/browser/anatomy-fixture.php > tests/browser/anatomy.html
+node tests/browser/anatomy-probe.js [screenshot-dir]
 ```

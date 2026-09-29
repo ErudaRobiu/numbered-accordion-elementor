@@ -55,6 +55,7 @@ modules/industry/                  the Industry Showcase widget and its assets
 modules/transitions/               the page transition curtain and the preloader
 modules/partners/                  the Partner Diagram widget, its assets and bundled logos
 modules/logotabs/                  the Customer Logo Tabs widget, its assets and the page 24 logos
+modules/anatomy/                   the Case Anatomy widget, its assets and the three case logos
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -140,6 +141,26 @@ reset, and the probe checks it does not leak in.
 sizes, filtering, the fade finishing inside 300ms, the keyboard, both kinds of
 hash, the tab order, the script sizing an SVG, 1024/767/360px layouts (with the
 chip row as the only thing that scrolls sideways), and reduced motion.
+
+**Case Anatomy (`modules/anatomy/`).** The Evidence card on page 25: one logo
+tab per project, and under it the same six questions answered in tiles — the
+challenge, the source, where the heat goes, the solution, the period, the
+result — with the result in navy. It ships CWS, Lantmännen and Bruzaholms with
+every answer taken from their case PDFs, and a link to each PDF.
+
+The six questions are shared and set once, at widget level; each project has
+six fixed answer fields, because Elementor cannot nest a repeater. A missing
+answer drops its tile, but the others keep their numbers: 04 is always the
+solution. Projects are capped at four *after* empty rows are dropped, so a
+blank row left in the repeater does not take a real project's tab.
+
+The result number is the light green, not the wireframe's dark green, which
+was about 2:1 on navy. The answers' entrance is 35ms apart and 120ms long, so
+the sixth is in by 295ms. Tabs are the same WAI-ARIA pattern as Customer Logo
+Tabs, with no hash support (nothing links to a case by hash).
+
+`tests/browser/anatomy-probe.js` runs 41 checks, including the wireframe's
+type, colours and sizes read back from the browser.
 
 ## Notes for future maintenance
 
