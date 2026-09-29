@@ -18,6 +18,7 @@ node tests/browser/rail-probe.js    # Scroll Rail
 node tests/browser/spin-probe.js    # Eruda Spin on an existing widget
 node tests/browser/header-probe.js  # Mega Header
 node tests/browser/slab-probe.js    # Split Slab, stacked and not
+node tests/browser/partners-probe.js # Partner Diagram (regenerate partners.html first)
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
@@ -242,3 +243,12 @@ neighbour. It also measures the phone layout: the pinned panel gone, the stack
 shown, no sideways overflow, and no text sitting against the edge of the
 screen. A 1024x620 window is checked separately, since that is the size where
 a pinned panel is most likely to clip its own text.
+
+The partner diagram is generated too, and its probe reads pixels as well as
+computed values, because a drawn line can measure perfectly and still not be on
+screen:
+
+```sh
+php tests/browser/partners-fixture.php > tests/browser/partners.html
+node tests/browser/partners-probe.js [screenshot-dir]
+```

@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.58.0
+Stable tag: 2.59.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,24 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.59.0 =
+* **New widget: Partner Diagram.** Who supplies what to whom: three cards
+  joined by green arrows (supplier, the system, your facility) with two
+  partners hung off the middle card by a dashed bracket, over a blurred
+  photograph under a white wash.
+* Every card has a logo, a title, a subtext and an optional link. The core card
+  is navy, the others frosted glass. Out of the box it carries the ThermStar
+  page 24 wording and logos.
+* Scrolled into view, the cards rise in turn and then the lines draw in. A small
+  green pulse then travels supplier to system to facility on a slow loop, and
+  pauses while the diagram is off screen. Hovering a card lifts it and lights
+  the lines it is joined by.
+* On a phone it becomes one column with downward arrows, and a "Partners" label
+  heads the two partner cards in place of the bracket. Nothing scrolls sideways
+  at 360px.
+* Switches for the blur and for the animation. Visitors whose device asks for
+  less motion always get the diagram still and complete.
 
 = 2.58.0 =
 * **The panel picture changes under the link you are pointing at.** Every link

@@ -88,6 +88,10 @@ final class Toolkit {
 			'file'  => 'modules/transitions/class-transitions-module.php',
 			'class' => '\ErudaToolkit\Modules\Transitions\Transitions_Module',
 		),
+		'partners'   => array(
+			'file'  => 'modules/partners/class-partners-module.php',
+			'class' => '\ErudaToolkit\Modules\Partners\Partners_Module',
+		),
 	);
 
 	/**

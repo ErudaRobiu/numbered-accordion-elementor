@@ -645,7 +645,8 @@ check( 'the data table module is registered', true, in_array( 'table', Toolkit::
 check( 'the process steps module is registered', true, in_array( 'steps', Toolkit::instance()->ids(), true ) );
 check( 'the page transitions module is registered', true, in_array( 'transitions', Toolkit::instance()->ids(), true ) );
 check( 'the industry showcase module is registered', true, in_array( 'industry', Toolkit::instance()->ids(), true ) );
-check( 'sixteen modules ship', 16, count( Toolkit::instance()->ids() ) );
+check( 'the partner diagram module is registered', true, in_array( 'partners', Toolkit::instance()->ids(), true ) );
+check( 'seventeen modules ship', 17, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -677,6 +678,7 @@ foreach ( array(
 	'modules/impact/widgets/class-impact-grid-widget.php',
 	'modules/story/widgets/class-scroll-story-widget.php',
 	'modules/rail/widgets/class-scroll-rail-widget.php',
+	'modules/partners/widgets/class-partner-diagram-widget.php',
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -704,6 +706,7 @@ $module_files = array(
 	'modules/story/class-story-module.php',
 	'modules/rail/class-rail-module.php',
 	'modules/header/class-header-module.php',
+	'modules/partners/class-partners-module.php',
 );
 
 foreach ( $module_files as $relative ) {
@@ -2217,6 +2220,140 @@ check( 'it does not inherit the Elementor base', false, is_subclass_of( SmoothSc
 check( 'the steps module keeps its id', 'steps', Steps_Module::id() );
 check( 'the table module keeps its id', 'table', Table_Module::id() );
 check( 'their handles are still their own', true, Steps_Module::STYLE_HANDLE !== Table_Module::STYLE_HANDLE );
+
+
+/* ------------------------------------------------ Partner Diagram --- */
+
+require_once dirname( __DIR__ ) . '/modules/partners/class-partners-content.php';
+require_once dirname( __DIR__ ) . '/modules/partners/widgets/class-partner-diagram-widget.php';
+
+use ErudaToolkit\Modules\Partners\Partners_Content;
+
+// The layout has exactly five places, and every one has approved wording.
+check( 'five card slots', array( 'source', 'core', 'site', 'partner_one', 'partner_two' ), Partners_Content::SLOTS );
+check( 'every slot has defaults', Partners_Content::SLOTS, array_keys( Partners_Content::defaults() ) );
+check( 'the core card says the system', 'The ThermStar System', Partners_Content::defaults()['core']['title'] );
+check( 'the facility card has no logo file, so it draws the factory', '', Partners_Content::defaults()['site']['logo'] );
+
+foreach ( Partners_Content::defaults() as $slot => $card ) {
+	if ( '' !== $card['logo'] ) {
+		check( "the {$slot} logo ships with the plugin", true, is_file( dirname( __DIR__ ) . '/modules/partners/assets/img/' . $card['logo'] ) );
+	}
+}
+
+check( 'the backdrop ships with the plugin', true, is_file( dirname( __DIR__ ) . '/modules/partners/assets/img/facility-backdrop.webp' ) );
+
+// Both partners look alike but can still be told apart for the bracket.
+check( 'a partner card has the shared class and its own', 'epdg__card epdg__card--partner epdg__card--partner-one', Partners_Content::card_class( 'partner_one' ) );
+check( 'the core card', 'epdg__card epdg__card--core', Partners_Content::card_class( 'core' ) );
+check( 'an unknown slot lands somewhere real', 'epdg__card epdg__card--source', Partners_Content::card_class( 'nonsense' ) );
+
+// Motion: off switches the pulse off too, whatever the pulse switch says.
+check( 'everything on', 'epdg epdg--blur epdg--animate epdg--flow', Partners_Content::root_classes( 'yes', 'yes', 'yes' ) );
+check( 'no motion means no pulse', 'epdg epdg--blur', Partners_Content::root_classes( 'yes', '', 'yes' ) );
+check( 'motion without the pulse', 'epdg epdg--animate', Partners_Content::root_classes( '', 'yes', '' ) );
+check( 'garbage is off', 'epdg', Partners_Content::root_classes( array( 'yes' ), null, 1 ) );
+
+// The photograph lands inside url("...") inside an attribute.
+check( 'a backdrop url', 'background-image:url("https://x.test/a.webp")', Partners_Content::backdrop_style( ' https://x.test/a.webp ' ) );
+check( 'no picture, no style', '', Partners_Content::backdrop_style( '' ) );
+check( 'quotes cannot end the declaration', 'background-image:url("https://x.test/a);color:red.webp")', Partners_Content::backdrop_style( 'https://x.test/a");color:red\'.webp' ) );
+check( 'an array is not a url', '', Partners_Content::backdrop_style( array( 'url' => 'x' ) ) );
+
+// Settings read defensively: a page saved before a control existed has none.
+$pd_empty = Partners_Content::card( array(), 'core' );
+check( 'an unsaved card is empty, not broken', array( '', 0, '', '', '', '', false, false ), array_values( $pd_empty ) );
+
+$pd_card = Partners_Content::card(
+	array(
+		'core_logo'  => array( 'url' => 'https://x.test/l.png', 'id' => '42' ),
+		'core_name'  => ' ThermStar ',
+		'core_title' => 'Title',
+		'core_text'  => array( 'not text' ),
+		'core_link'  => array( 'url' => '/system/', 'is_external' => 'on', 'nofollow' => '' ),
+	),
+	'core'
+);
+check( 'the logo id is a number', 42, $pd_card['logo_id'] );
+check( 'names are trimmed', 'ThermStar', $pd_card['name'] );
+check( 'a non-scalar text is empty', '', $pd_card['text'] );
+check( 'the link is read', '/system/', $pd_card['link'] );
+check( 'external is on', true, $pd_card['external'] );
+check( 'nofollow is off', false, $pd_card['nofollow'] );
+
+/**
+ * The widget with a settings array pushed into it.
+ */
+class Partners_Render_Probe extends \ErudaToolkit\Modules\Partners\Widgets\Partner_Diagram_Widget {
+
+	/**
+	 * @var array
+	 */
+	public $feed = array();
+
+	/**
+	 * @return array
+	 */
+	public function get_settings_for_display() {
+		return $this->feed;
+	}
+
+	/**
+	 * @param array $settings Settings to render with.
+	 * @return string
+	 */
+	public function markup( $settings ) {
+		$this->feed = $settings;
+
+		ob_start();
+		( new ReflectionMethod( $this, 'render' ) )->invoke( $this );
+
+		return (string) ob_get_clean();
+	}
+}
+
+$pd_settings = array(
+	'background_image' => array( 'url' => 'https://x.test/bg.webp' ),
+	'blur'             => 'yes',
+	'animate'          => 'yes',
+	'flow'             => 'yes',
+	'join_label'       => 'Partners',
+	'aria_label'       => 'How the partners connect',
+);
+
+foreach ( Partners_Content::defaults() as $slot => $card ) {
+	$pd_settings[ $slot . '_logo' ]  = array( 'url' => '' === $card['logo'] ? '' : 'https://x.test/' . $card['logo'] );
+	$pd_settings[ $slot . '_name' ]  = $card['name'];
+	$pd_settings[ $slot . '_title' ] = $card['title'];
+	$pd_settings[ $slot . '_text' ]  = $card['text'];
+}
+
+$pd_settings['partner_two_link'] = array( 'url' => 'https://edgecom.ai/', 'is_external' => 'on' );
+
+$pd     = new Partners_Render_Probe();
+$pd_out = $pd->markup( $pd_settings );
+
+check( 'the root carries its classes', true, false !== strpos( $pd_out, 'class="epdg epdg--blur epdg--animate epdg--flow"' ) );
+check( 'the figure is named for a screen reader', true, false !== strpos( $pd_out, 'aria-label="How the partners connect"' ) );
+check( 'five cards render', 5, substr_count( $pd_out, 'class="epdg__card ' ) );
+check( 'two arrows render', 2, substr_count( $pd_out, 'class="epdg__arrow ' ) );
+check( 'arrows are hidden from screen readers', 2, substr_count( $pd_out, 'epdg__arrow--in" aria-hidden="true"' ) + substr_count( $pd_out, 'epdg__arrow--out" aria-hidden="true"' ) );
+check( 'the cards are in reading order', true,
+	strpos( $pd_out, 'epdg__card--source' ) < strpos( $pd_out, 'epdg__card--core' )
+	&& strpos( $pd_out, 'epdg__card--core' ) < strpos( $pd_out, 'epdg__card--site' )
+	&& strpos( $pd_out, 'epdg__card--site' ) < strpos( $pd_out, 'epdg__card--partner-one' ) );
+check( 'a logo is named by its organisation', true, false !== strpos( $pd_out, 'alt="Enjay Systems"' ) );
+check( 'the facility draws its factory', true, false !== strpos( $pd_out, 'class="epdg__icon"' ) );
+check( 'the backdrop is set', true, false !== strpos( $pd_out, 'background-image:url(&quot;https://x.test/bg.webp&quot;)' ) );
+check( 'a linked card is a link', true, 1 === preg_match( '/<a class="epdg__card epdg__card--partner epdg__card--partner-two"\s+href="https:\/\/edgecom.ai\/"\s+target="_blank"\s+rel="noopener"/', $pd_out ) );
+check( 'an unlinked card is not', 1, substr_count( $pd_out, '<a class="epdg__card' ) );
+check( 'the phone label renders', true, false !== strpos( $pd_out, '<div class="epdg__join"><span>Partners</span></div>' ) );
+
+$pd_bare = $pd->markup( array() );
+check( 'a widget with nothing saved still renders five cards', 5, substr_count( $pd_bare, 'class="epdg__card ' ) );
+check( 'and no empty aria-label', false, false !== strpos( $pd_bare, 'aria-label' ) );
+check( 'and no phone label', false, false !== strpos( $pd_bare, 'epdg__join' ) );
+check( 'and nothing moves', true, false !== strpos( $pd_bare, 'class="epdg"' ) );
 
 /* ------------------------------------------------------------- report --- */
 

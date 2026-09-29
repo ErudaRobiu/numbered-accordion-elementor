@@ -53,6 +53,7 @@ modules/compare/                   the Image Compare widget and its assets
 modules/smoothscroll/              eases the whole page's scrolling
 modules/industry/                  the Industry Showcase widget and its assets
 modules/transitions/               the page transition curtain and the preloader
+modules/partners/                  the Partner Diagram widget, its assets and bundled logos
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -65,6 +66,41 @@ module id must never change once shipped — it is the settings option key.
 
 `Toolkit::is_enabled()` treats a missing key as enabled, so a new module ships
 switched on without an upgrade routine to write its key into the stored option.
+
+**Partner Diagram (`modules/partners/`).** Three cards joined by arrows — a
+supplier, the system, the facility — with two partners hung off the middle one
+by a dashed bracket, over a blurred photograph. Built for the Trusted
+Organizations section of ThermStar's page 24, and its defaults are that page's
+approved wording and logos, bundled in `assets/img/`, so a freshly dropped
+widget is already right. The five cards are named slots rather than a repeater,
+because the layout has five places and a sixth card would have nowhere to go.
+
+The motion is three classes, and the diagram reads correctly without each.
+`.epdg--armed` is added by the script and is the only thing that hides
+anything, so a page whose script never loads shows the whole diagram.
+`.is-in` runs the entrance: cards rise in turn, then the arrows and the bracket
+draw in. `.is-live` runs the heat pulse only while the diagram is on screen.
+The entrance uses animations with backwards fill rather than transitions, so a
+finished card holds nothing and the hover lift can move it. Once the entrance
+is over the script takes `--armed` off again, which drops every entrance rule.
+
+Lines draw by unclipping (`clip-path: inset()`), not by scaling: a scaled
+dashed border stretches its dashes on the way. Both keyframes are spelled out,
+because `inset()` cannot interpolate to the implicit `none` and would jump
+halfway through instead of drawing.
+
+Hover and focus highlighting is pure CSS, with `:has()` on the root: the core
+card lights both arrows and the whole bracket, a partner lights only its own
+branch. Only a card with a link can take focus, because a focusable card that
+does nothing is a tab stop that goes nowhere.
+
+The bracket is navy at 35% by default rather than the wireframe's white,
+because white dashes disappear over the pale half of the photograph.
+
+`tests/browser/partners-probe.js` measures all of it in headless Chrome: the
+stagger, the draw passing through a partial clip, the line's actual pixels, the
+pulse moving, the hover, three widths, 360px without sideways scroll, and
+reduced motion.
 
 ## Notes for future maintenance
 
