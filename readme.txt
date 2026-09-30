@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.64.0
+Stable tag: 2.65.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,22 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.65.0 =
+* **News, run from ordinary Posts.** A "News item" box on every post:
+  featured, audio file with a quote and who said it, source name and link,
+  the related page (required), and the card layout.
+* **New widget: News Grid.** The news archive as a bento: the newest featured
+  post as the big first card, podcasts as player cards, the rest as photo
+  cards, with category chips (#news-media opens one) and a Load more button
+  that appears only when there are more posts. The grid never leaves a hole.
+  On a category page it shows only that category.
+* **New widget: News Carousel.** The latest posts as a sideways row, with
+  arrows that can sit beside the section heading.
+* **New widget: Press Quotes.** Quotes from the press as frosted cards for a
+  dark section, starting with the BBC, Forbes and Premier Construction quotes.
+* **New widget: Post Source Box.** For the single post template: where a post
+  was first published, its audio, and the page it leads on to.
 
 = 2.64.0 =
 * **Documents are now managed in the dashboard.** A new Documents section has

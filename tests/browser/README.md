@@ -23,6 +23,7 @@ node tests/browser/logotabs-probe.js # Customer Logo Tabs (regenerate logotabs.h
 node tests/browser/anatomy-probe.js  # Case Anatomy (regenerate anatomy.html first)
 node tests/browser/casestudies-probe.js # Case Studies (regenerate casestudies.html first)
 node tests/browser/docshelf-probe.js # Document Shelf (regenerate docshelf.html first)
+node tests/browser/news-probe.js     # News widgets (regenerate news.html first)
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
@@ -284,4 +285,12 @@ And the document shelf:
 ```sh
 php tests/browser/docshelf-fixture.php > tests/browser/docshelf.html
 node tests/browser/docshelf-probe.js [screenshot-dir]
+```
+
+And the news widgets (the fixture also writes `news-more.json`, which stands in
+for the Load more route):
+
+```sh
+php tests/browser/news-fixture.php > tests/browser/news.html
+node tests/browser/news-probe.js [screenshot-dir]
 ```
