@@ -26,7 +26,7 @@ h3{font-size:2em}
 </head>
 <body>
 <section class="host" id="posts">
-	<p class="marker">News Grid — the four seed posts</p>
+	<p class="marker">News Grid — the four seed posts (podcast without a file: its player opens the BBC)</p>
 	<div id="a">		<div class="enws-grid"
 			data-rest=""
 			data-per="9"
@@ -34,6 +34,7 @@ h3{font-size:2em}
 			data-featured="1"
 			data-cats=""
 			data-tags=""
+			data-listen="Listen on %s"
 			data-hash-prefix="news-">
 							<div class="enws-grid__chips" role="group" aria-label="Filter posts by category">
 					<button type="button" class="enws-chip" data-seg="all" aria-pressed="true">All</button>
@@ -42,31 +43,40 @@ h3{font-size:2em}
 											<button type="button" class="enws-chip" data-seg="media" aria-pressed="false">Media</button>
 									</div>
 			
-			<div class="enws-bento" aria-live="polite">
-							<a class="enws-card enws-card--wide" href="#post-1" data-cat="media">
-				<img src="news-img/p27-bbc-article.webp" alt="" loading="lazy" />				<span class="enws-card__shade" aria-hidden="true"></span>
-				<span class="enws-card__txt"><span class="enws-pill">Media</span><strong>Why there is serious money in kitchen fumes</strong><em><time datetime="2023-05-02">2 May 2023</time> · BBC News</em></span>
-				<span class="enws-card__go" aria-hidden="true">↗</span>
+			<div class="enws-cards" aria-live="polite">
+							<a class="enws-card enws-card--image" href="#post-1" data-cat="media">
+				<span class="enws-card__pic"><img src="news-img/p27-bbc-article.webp" alt="" loading="lazy" /><span class="enws-pill">Media</span></span>
+				<span class="enws-card__body">
+					<strong>Why there is serious money in kitchen fumes</strong>
+											<span class="enws-card__ex">On the windy roof of a Burger King in Malmö Sweden…</span>
+										<em><time datetime="2023-05-02">2 May 2023</time> · BBC News <b aria-hidden="true">↗</b></em>
+				</span>
 			</a>
-						<article class="enws-card enws-card--audio" data-cat="media">
-				<span class="enws-card__top"><span class="enws-pill enws-pill--dk">Media · Podcast</span><em>BBC Business Daily</em></span>
-				<h3 class="enws-card__title"><a href="#post-4">Recycling heat from kitchens to keep restaurants warm</a></h3>
-				<div class="enws-audio" data-audio-src="news-img/silence.mp3" data-audio-title="Recycling heat from kitchens to keep restaurants warm" data-post-id="4" data-context="grid"><audio controls preload="none" src="news-img/silence.mp3" aria-label="Play: Recycling heat from kitchens to keep restaurants warm"></audio></div>									<blockquote>“We were looking at ways in which we could reduce our costs and become more sustainable, and this was at the forefront of what we&#039;d found.”<cite>Matt Manfield, facilities manager, Turtle Bay (UK)</cite></blockquote>
-							</article>
 						<a class="enws-card enws-card--image" href="#post-2" data-cat="insights">
 				<span class="enws-card__pic"><img src="news-img/p27-post-2271.webp" alt="" loading="lazy" /><span class="enws-pill">Insights</span></span>
 				<span class="enws-card__body">
 					<strong>The ROI of Waste Heat Recovery: Proven, Reliable, and Achievable in Three Years or Better</strong>
 											<span class="enws-card__ex">Across North America, industrial facilities lose enormous amounts of heat every day through hot, particulate-laden exhaust.</span>
-										<em><time datetime="2025-11-20">20 Nov 2025</time> · Article <b aria-hidden="true">↗</b></em>				</span>
+										<em><time datetime="2025-11-20">20 Nov 2025</time> · Article <b aria-hidden="true">↗</b></em>
+				</span>
 			</a>
 						<a class="enws-card enws-card--image" href="#post-3" data-cat="updates">
 				<span class="enws-card__pic"><img src="news-img/p27-post-488.webp" alt="" loading="lazy" /><span class="enws-pill">Updates</span></span>
 				<span class="enws-card__body">
 					<strong>Welcome to Norrel™: Reclaim Waste Heat. Energy Savings Delivered.</strong>
 											<span class="enws-card__ex">Is your business wasting valuable energy because traditional heat recovery systems can’t handle your hot, particulate-laden, and humid exhaust?</span>
-										<em><time datetime="2025-10-27">27 Oct 2025</time> · Article <b aria-hidden="true">↗</b></em>				</span>
+										<em><time datetime="2025-10-27">27 Oct 2025</time> · Article <b aria-hidden="true">↗</b></em>
+				</span>
 			</a>
+						<article class="enws-card enws-card--audio" data-cat="media">
+				<span class="enws-card__top"><span class="enws-pill enws-pill--dk">Media · Podcast</span><em>BBC Business Daily</em></span>
+				<h3 class="enws-card__title"><a href="#post-4">Recycling heat from kitchens to keep restaurants warm</a></h3>
+				<a class="enws-player enws-player--link" href="https://www.bbc.com/audio/play/w3ct4n3g" target="_blank" rel="noopener" data-context="grid" aria-label="Listen on BBC Business Daily: Recycling heat from kitchens to keep restaurants warm (opens in a new tab)"><span class="enws-player__btn" aria-hidden="true"><span class="enws-player__icon"></span></span><span class="enws-player__track"><span class="enws-player__wave" aria-hidden="true"><span class="enws-player__bars"><i style="--h:57%"></i><i style="--h:57%"></i><i style="--h:59%"></i><i style="--h:58%"></i><i style="--h:36%"></i><i style="--h:49%"></i><i style="--h:22%"></i><i style="--h:56%"></i><i style="--h:33%"></i><i style="--h:31%"></i><i style="--h:62%"></i><i style="--h:26%"></i><i style="--h:67%"></i><i style="--h:40%"></i><i style="--h:89%"></i><i style="--h:37%"></i><i style="--h:29%"></i><i style="--h:51%"></i><i style="--h:32%"></i><i style="--h:64%"></i><i style="--h:66%"></i><i style="--h:33%"></i><i style="--h:31%"></i><i style="--h:85%"></i><i style="--h:45%"></i><i style="--h:24%"></i><i style="--h:37%"></i><i style="--h:60%"></i><i style="--h:69%"></i><i style="--h:48%"></i><i style="--h:40%"></i><i style="--h:82%"></i><i style="--h:49%"></i><i style="--h:26%"></i><i style="--h:29%"></i><i style="--h:61%"></i></span><span class="enws-player__bars enws-player__bars--on"><i style="--h:57%"></i><i style="--h:57%"></i><i style="--h:59%"></i><i style="--h:58%"></i><i style="--h:36%"></i><i style="--h:49%"></i><i style="--h:22%"></i><i style="--h:56%"></i><i style="--h:33%"></i><i style="--h:31%"></i><i style="--h:62%"></i><i style="--h:26%"></i><i style="--h:67%"></i><i style="--h:40%"></i><i style="--h:89%"></i><i style="--h:37%"></i><i style="--h:29%"></i><i style="--h:51%"></i><i style="--h:32%"></i><i style="--h:64%"></i><i style="--h:66%"></i><i style="--h:33%"></i><i style="--h:31%"></i><i style="--h:85%"></i><i style="--h:45%"></i><i style="--h:24%"></i><i style="--h:37%"></i><i style="--h:60%"></i><i style="--h:69%"></i><i style="--h:48%"></i><i style="--h:40%"></i><i style="--h:82%"></i><i style="--h:49%"></i><i style="--h:26%"></i><i style="--h:29%"></i><i style="--h:61%"></i></span></span></span><span class="enws-player__time" aria-hidden="true">↗</span></a>									<blockquote>“We were looking at ways in which we could reduce our costs and become more sustainable, and this was at the forefront of what we&#039;d found.”<cite>Matt Manfield, facilities manager, Turtle Bay (UK)</cite></blockquote>
+								<span class="enws-card__acts">
+											<a class="enws-listen" href="https://www.bbc.com/audio/play/w3ct4n3g" target="_blank" rel="noopener">Listen on BBC Business Daily <span aria-hidden="true">↗</span></a>
+										<em><time datetime="2023-05-02">2 May 2023</time></em>
+				</span>
+			</article>
 										</div>
 
 			<p class="enws-empty" hidden>Nothing here yet. New posts appear as they&#039;re published.</p>
@@ -75,7 +85,7 @@ h3{font-size:2em}
 		</div>
 </section>
 <section class="host">
-	<p class="marker">News Grid — three per load, Load more, Go deeper tile</p>
+	<p class="marker">News Grid — three per load, a podcast WITH a file, Load more, Go deeper tile</p>
 	<div id="b">		<div class="enws-grid"
 			data-rest="news-more.json"
 			data-per="3"
@@ -83,6 +93,7 @@ h3{font-size:2em}
 			data-featured="1"
 			data-cats=""
 			data-tags=""
+			data-listen="Listen on %s"
 			data-hash-prefix="news-">
 							<div class="enws-grid__chips" role="group" aria-label="Filter posts by category">
 					<button type="button" class="enws-chip" data-seg="all" aria-pressed="true">All</button>
@@ -91,25 +102,31 @@ h3{font-size:2em}
 											<button type="button" class="enws-chip" data-seg="media" aria-pressed="false">Media</button>
 									</div>
 			
-			<div class="enws-bento" aria-live="polite">
-							<a class="enws-card enws-card--wide" href="#post-1" data-cat="media">
-				<img src="news-img/p27-bbc-article.webp" alt="" loading="lazy" />				<span class="enws-card__shade" aria-hidden="true"></span>
-				<span class="enws-card__txt"><span class="enws-pill">Media</span><strong>Why there is serious money in kitchen fumes</strong><em><time datetime="2023-05-02">2 May 2023</time> · BBC News</em></span>
-				<span class="enws-card__go" aria-hidden="true">↗</span>
+			<div class="enws-cards" aria-live="polite">
+							<a class="enws-card enws-card--image" href="#post-1" data-cat="media">
+				<span class="enws-card__pic"><img src="news-img/p27-bbc-article.webp" alt="" loading="lazy" /><span class="enws-pill">Media</span></span>
+				<span class="enws-card__body">
+					<strong>Why there is serious money in kitchen fumes</strong>
+											<span class="enws-card__ex">On the windy roof of a Burger King in Malmö Sweden…</span>
+										<em><time datetime="2023-05-02">2 May 2023</time> · BBC News <b aria-hidden="true">↗</b></em>
+				</span>
 			</a>
+						<article class="enws-card enws-card--audio" data-cat="media">
+				<span class="enws-card__top"><span class="enws-pill enws-pill--dk">Media · Podcast</span><em>BBC Business Daily</em></span>
+				<h3 class="enws-card__title"><a href="#post-4">Recycling heat from kitchens to keep restaurants warm</a></h3>
+				<div class="enws-player" data-audio-src="news-img/tone.mp3" data-audio-title="Recycling heat from kitchens to keep restaurants warm" data-post-id="8" data-context="grid" data-play="Play" data-pause="Pause"><button type="button" class="enws-player__btn" aria-label="Play: Recycling heat from kitchens to keep restaurants warm"><span class="enws-player__icon" aria-hidden="true"></span></button><span class="enws-player__track"><span class="enws-player__wave" aria-hidden="true"><span class="enws-player__bars"><i style="--h:33%"></i><i style="--h:75%"></i><i style="--h:43%"></i><i style="--h:54%"></i><i style="--h:84%"></i><i style="--h:86%"></i><i style="--h:27%"></i><i style="--h:68%"></i><i style="--h:59%"></i><i style="--h:61%"></i><i style="--h:70%"></i><i style="--h:52%"></i><i style="--h:75%"></i><i style="--h:40%"></i><i style="--h:89%"></i><i style="--h:75%"></i><i style="--h:65%"></i><i style="--h:25%"></i><i style="--h:41%"></i><i style="--h:25%"></i><i style="--h:26%"></i><i style="--h:76%"></i><i style="--h:59%"></i><i style="--h:72%"></i><i style="--h:74%"></i><i style="--h:54%"></i><i style="--h:24%"></i><i style="--h:36%"></i><i style="--h:57%"></i><i style="--h:52%"></i><i style="--h:24%"></i><i style="--h:60%"></i><i style="--h:28%"></i><i style="--h:45%"></i><i style="--h:75%"></i><i style="--h:45%"></i></span><span class="enws-player__bars enws-player__bars--on"><i style="--h:33%"></i><i style="--h:75%"></i><i style="--h:43%"></i><i style="--h:54%"></i><i style="--h:84%"></i><i style="--h:86%"></i><i style="--h:27%"></i><i style="--h:68%"></i><i style="--h:59%"></i><i style="--h:61%"></i><i style="--h:70%"></i><i style="--h:52%"></i><i style="--h:75%"></i><i style="--h:40%"></i><i style="--h:89%"></i><i style="--h:75%"></i><i style="--h:65%"></i><i style="--h:25%"></i><i style="--h:41%"></i><i style="--h:25%"></i><i style="--h:26%"></i><i style="--h:76%"></i><i style="--h:59%"></i><i style="--h:72%"></i><i style="--h:74%"></i><i style="--h:54%"></i><i style="--h:24%"></i><i style="--h:36%"></i><i style="--h:57%"></i><i style="--h:52%"></i><i style="--h:24%"></i><i style="--h:60%"></i><i style="--h:28%"></i><i style="--h:45%"></i><i style="--h:75%"></i><i style="--h:45%"></i></span></span><input class="enws-player__seek" type="range" min="0" max="100" step="0.1" value="0" aria-label="Position in Recycling heat from kitchens to keep restaurants warm" /></span><span class="enws-player__time" aria-live="off">0:00</span><audio preload="none" src="news-img/tone.mp3"></audio></div>									<blockquote>“We were looking at ways in which we could reduce our costs and become more sustainable, and this was at the forefront of what we&#039;d found.”<cite>Matt Manfield, facilities manager, Turtle Bay (UK)</cite></blockquote>
+								<span class="enws-card__acts">
+											<a class="enws-listen" href="https://www.bbc.com/audio/play/w3ct4n3g" target="_blank" rel="noopener">Listen on BBC Business Daily <span aria-hidden="true">↗</span></a>
+										<em><time datetime="2023-05-02">2 May 2023</time></em>
+				</span>
+			</article>
 						<a class="enws-card enws-card--image" href="#post-2" data-cat="insights">
 				<span class="enws-card__pic"><img src="news-img/p27-post-2271.webp" alt="" loading="lazy" /><span class="enws-pill">Insights</span></span>
 				<span class="enws-card__body">
 					<strong>The ROI of Waste Heat Recovery: Proven, Reliable, and Achievable in Three Years or Better</strong>
 											<span class="enws-card__ex">Across North America, industrial facilities lose enormous amounts of heat every day through hot, particulate-laden exhaust.</span>
-										<em><time datetime="2025-11-20">20 Nov 2025</time> · Article <b aria-hidden="true">↗</b></em>				</span>
-			</a>
-						<a class="enws-card enws-card--image" href="#post-3" data-cat="updates">
-				<span class="enws-card__pic"><img src="news-img/p27-post-488.webp" alt="" loading="lazy" /><span class="enws-pill">Updates</span></span>
-				<span class="enws-card__body">
-					<strong>Welcome to Norrel™: Reclaim Waste Heat. Energy Savings Delivered.</strong>
-											<span class="enws-card__ex">Is your business wasting valuable energy because traditional heat recovery systems can’t handle your hot, particulate-laden, and humid exhaust?</span>
-										<em><time datetime="2025-10-27">27 Oct 2025</time> · Article <b aria-hidden="true">↗</b></em>				</span>
+										<em><time datetime="2025-11-20">20 Nov 2025</time> · Article <b aria-hidden="true">↗</b></em>
+				</span>
 			</a>
 												<div class="enws-card enws-card--next">
 												<span class="enws-next__chip">Go deeper</span>						<strong>Looking for white papers?</strong>
@@ -298,11 +315,11 @@ h3{font-size:2em}
 	<div id="f" style="max-width:720px">		<aside class="enws-src">
 							<div class="enws-src__from">
 					<p>Originally published by <b>BBC Business Daily</b></p>
-					<a class="enws-src__btn" href="https://www.bbc.co.uk/programmes/w3ct4w8v" target="_blank" rel="noopener">Read on BBC Business Daily <span aria-hidden="true">↗</span></a>
+					<a class="enws-src__btn" href="https://www.bbc.com/audio/play/w3ct4n3g" target="_blank" rel="noopener">Listen on BBC Business Daily <span aria-hidden="true">↗</span></a>
 				</div>
 			
 							<div class="enws-src__listen">
-										<span class="enws-src__eyebrow">Listen</span>					<div class="enws-audio" data-audio-src="news-img/silence.mp3" data-audio-title="Recycling heat from kitchens to keep restaurants warm" data-post-id="4" data-context="source"><audio controls preload="none" src="news-img/silence.mp3" aria-label="Play: Recycling heat from kitchens to keep restaurants warm"></audio></div>				</div>
+										<span class="enws-src__eyebrow">Listen</span>					<a class="enws-player enws-player--link" href="https://www.bbc.com/audio/play/w3ct4n3g" target="_blank" rel="noopener" data-context="source" aria-label="Listen on BBC Business Daily: Recycling heat from kitchens to keep restaurants warm (opens in a new tab)"><span class="enws-player__btn" aria-hidden="true"><span class="enws-player__icon"></span></span><span class="enws-player__track"><span class="enws-player__wave" aria-hidden="true"><span class="enws-player__bars"><i style="--h:57%"></i><i style="--h:57%"></i><i style="--h:59%"></i><i style="--h:58%"></i><i style="--h:36%"></i><i style="--h:49%"></i><i style="--h:22%"></i><i style="--h:56%"></i><i style="--h:33%"></i><i style="--h:31%"></i><i style="--h:62%"></i><i style="--h:26%"></i><i style="--h:67%"></i><i style="--h:40%"></i><i style="--h:89%"></i><i style="--h:37%"></i><i style="--h:29%"></i><i style="--h:51%"></i><i style="--h:32%"></i><i style="--h:64%"></i><i style="--h:66%"></i><i style="--h:33%"></i><i style="--h:31%"></i><i style="--h:85%"></i><i style="--h:45%"></i><i style="--h:24%"></i><i style="--h:37%"></i><i style="--h:60%"></i><i style="--h:69%"></i><i style="--h:48%"></i><i style="--h:40%"></i><i style="--h:82%"></i><i style="--h:49%"></i><i style="--h:26%"></i><i style="--h:29%"></i><i style="--h:61%"></i></span><span class="enws-player__bars enws-player__bars--on"><i style="--h:57%"></i><i style="--h:57%"></i><i style="--h:59%"></i><i style="--h:58%"></i><i style="--h:36%"></i><i style="--h:49%"></i><i style="--h:22%"></i><i style="--h:56%"></i><i style="--h:33%"></i><i style="--h:31%"></i><i style="--h:62%"></i><i style="--h:26%"></i><i style="--h:67%"></i><i style="--h:40%"></i><i style="--h:89%"></i><i style="--h:37%"></i><i style="--h:29%"></i><i style="--h:51%"></i><i style="--h:32%"></i><i style="--h:64%"></i><i style="--h:66%"></i><i style="--h:33%"></i><i style="--h:31%"></i><i style="--h:85%"></i><i style="--h:45%"></i><i style="--h:24%"></i><i style="--h:37%"></i><i style="--h:60%"></i><i style="--h:69%"></i><i style="--h:48%"></i><i style="--h:40%"></i><i style="--h:82%"></i><i style="--h:49%"></i><i style="--h:26%"></i><i style="--h:29%"></i><i style="--h:61%"></i></span></span></span><span class="enws-player__time" aria-hidden="true">↗</span></a>				</div>
 			
 							<a class="enws-src__rel" href="/restaurants-commercial-kitchens/">
 					<span class="enws-src__eyebrow">Related</span>

@@ -2,7 +2,7 @@
  * Eruda Toolkit - News
  *
  * News Grid: category chips, #news-<slug>, Load more, and a short fade as
- * cards arrive. News Carousel: arrow buttons (its own, or any two buttons in
+ * cards arrive. The audio player on podcast cards and in the Post Source Box. News Carousel: arrow buttons (its own, or any two buttons in
  * its section with the classes enws-car-prev / enws-car-next) and arrow keys.
  *
  * Every card is in the markup from the server, so without this script the
@@ -28,63 +28,6 @@
 
 	/* ---------------------------------------------------------- grid --- */
 
-	/**
-	 * Close the gap a short last row leaves.
-	 *
-	 * Dense packing fills every hole but the end of the last row: any count
-	 * of cards that is not a whole number of rows leaves one. The last card
-	 * in that row stretches to the right edge instead, so the bento always
-	 * ends square, at every width and after every filter or load.
-	 *
-	 * @param {Element} bento The grid.
-	 */
-	function fill( bento ) {
-		var cards = toArray( bento.children ).filter( function ( card ) {
-			return ! card.hidden;
-		} );
-
-		cards.forEach( function ( card ) {
-			card.style.gridColumn = '';
-		} );
-
-		if ( ! cards.length ) {
-			return;
-		}
-
-		var box = bento.getBoundingClientRect();
-		var lowest = null;
-
-		cards.forEach( function ( card ) {
-			var r = card.getBoundingClientRect();
-
-			// The card that starts last, and of those the rightmost.
-			if ( ! lowest || r.top > lowest.r.top + 1 || ( Math.abs( r.top - lowest.r.top ) <= 1 && r.left > lowest.r.left ) ) {
-				lowest = { card: card, r: r };
-			}
-		} );
-
-		if ( lowest.r.right >= box.right - 2 ) {
-			return;
-		}
-
-		// Pin the start to the column the card already sits in: an end of -1
-		// with an automatic start would move it to the last column instead.
-		var gap = parseFloat( getComputedStyle( bento ).columnGap ) || 0;
-		var widths = getComputedStyle( bento ).gridTemplateColumns.split( ' ' ).map( parseFloat );
-		var left = box.left;
-		var start = 1;
-
-		for ( var i = 0; i < widths.length; i++ ) {
-			// The last column whose left edge is at or before the card's.
-			if ( lowest.r.left >= left - 1 ) {
-				start = i + 1;
-			}
-			left += widths[ i ] + gap;
-		}
-
-		lowest.card.style.gridColumn = start + ' / -1';
-	}
-
 	function initGrid( root ) {
 		if ( root.getAttribute( 'data-enws-ready' ) ) {
 			return;
@@ -92,7 +35,7 @@
 
 		root.setAttribute( 'data-enws-ready', '1' );
 
-		var bento = root.querySelector( '.enws-bento' );
+		var bento = root.querySelector( '.enws-cards' );
 		var empty = root.querySelector( '.enws-empty' );
 		var chips = toArray( root.querySelectorAll( '.enws-chip' ) );
 		var more = root.querySelector( '.enws-more__btn' );
@@ -152,8 +95,6 @@
 				empty.hidden = shown.length > 0;
 			}
 
-			fill( bento );
-
 			if ( animate ) {
 				fresh( shown );
 			}
@@ -181,24 +122,6 @@
 			}
 		}
 
-		fill( bento );
-
-		var pending = 0;
-		window.addEventListener( 'resize', function () {
-			cancelAnimationFrame( pending );
-			pending = requestAnimationFrame( function () {
-				fill( bento );
-			} );
-		} );
-
-		// Pictures arriving can change a row's height, never its columns,
-		// but a web font arriving late can: settle once they have.
-		if ( document.fonts && document.fonts.ready ) {
-			document.fonts.ready.then( function () {
-				fill( bento );
-			} );
-		}
-
 		if ( chips.length ) {
 			fromHash( false );
 			window.addEventListener( 'hashchange', function () {
@@ -221,7 +144,8 @@
 				'per=' + encodeURIComponent( root.getAttribute( 'data-per' ) || '9' ),
 				'featured=' + encodeURIComponent( root.getAttribute( 'data-featured' ) || '0' ),
 				'cats=' + encodeURIComponent( root.getAttribute( 'data-cats' ) || '' ),
-				'tags=' + encodeURIComponent( root.getAttribute( 'data-tags' ) || '' )
+				'tags=' + encodeURIComponent( root.getAttribute( 'data-tags' ) || '' ),
+				'listen=' + encodeURIComponent( root.getAttribute( 'data-listen' ) || '' )
 			].join( '&' );
 
 			more.setAttribute( 'aria-busy', 'true' );
@@ -250,7 +174,11 @@
 						return ! card.hidden;
 					} ) );
 
-					// A player can take over the new audio slots.
+					added.forEach( function ( card ) {
+						toArray( card.querySelectorAll( '.enws-player[data-audio-src]' ) ).forEach( initPlayer );
+					} );
+
+					// Anything else that decorates cards can hear about new ones.
 					root.dispatchEvent( new CustomEvent( 'eruda:news-cards', { bubbles: true, detail: { cards: added } } ) );
 
 					if ( ! data.more ) {
@@ -263,6 +191,134 @@
 					more.removeAttribute( 'aria-busy' );
 				} );
 		} );
+	}
+
+	/* -------------------------------------------------------- player --- */
+
+	var playing = null;
+
+	function clock( seconds ) {
+		if ( ! isFinite( seconds ) || seconds < 0 ) {
+			return '0:00';
+		}
+
+		var s = Math.floor( seconds % 60 );
+
+		return Math.floor( seconds / 60 ) + ':' + ( s < 10 ? '0' : '' ) + s;
+	}
+
+	/**
+	 * Wire one audio player: the button plays and pauses, the waveform fills
+	 * with the progress, and the invisible range input over it seeks.
+	 *
+	 * @param {Element} player The .enws-player.
+	 */
+	function initPlayer( player ) {
+		if ( player.getAttribute( 'data-enws-ready' ) ) {
+			return;
+		}
+
+		var audio = player.querySelector( 'audio' );
+		var btn = player.querySelector( '.enws-player__btn' );
+		var seek = player.querySelector( '.enws-player__seek' );
+		var time = player.querySelector( '.enws-player__time' );
+		var title = player.getAttribute( 'data-audio-title' ) || '';
+
+		if ( ! audio || ! btn ) {
+			return;
+		}
+
+		player.setAttribute( 'data-enws-ready', '1' );
+
+		function paint() {
+			var pct = audio.duration ? ( audio.currentTime / audio.duration ) * 100 : 0;
+
+			player.style.setProperty( '--p', pct + '%' );
+
+			if ( seek ) {
+				seek.value = String( pct );
+				seek.setAttribute( 'aria-valuetext', clock( audio.currentTime ) + ' of ' + clock( audio.duration ) );
+			}
+
+			if ( time ) {
+				time.textContent = audio.duration && ! audio.paused ? clock( audio.currentTime ) : clock( audio.currentTime || audio.duration );
+			}
+		}
+
+		function state( on ) {
+			player.classList.toggle( 'is-playing', on );
+			btn.setAttribute( 'aria-label', ( on ? player.getAttribute( 'data-pause' ) || 'Pause' : player.getAttribute( 'data-play' ) || 'Play' ) + ': ' + title );
+			btn.setAttribute( 'aria-pressed', on ? 'true' : 'false' );
+		}
+
+		btn.addEventListener( 'click', function () {
+			if ( audio.paused ) {
+				// One voice at a time.
+				if ( playing && playing !== audio ) {
+					playing.pause();
+				}
+
+				var started = audio.play();
+
+				if ( started && started.catch ) {
+					started.catch( function () {
+						state( false );
+					} );
+				}
+			} else {
+				audio.pause();
+			}
+		} );
+
+		audio.addEventListener( 'play', function () {
+			playing = audio;
+			state( true );
+		} );
+		audio.addEventListener( 'pause', function () {
+			state( false );
+			paint();
+		} );
+		audio.addEventListener( 'ended', function () {
+			audio.currentTime = 0;
+			state( false );
+			paint();
+		} );
+		audio.addEventListener( 'timeupdate', paint );
+		audio.addEventListener( 'loadedmetadata', paint );
+
+		if ( seek ) {
+			seek.addEventListener( 'input', function () {
+				var pct = parseFloat( seek.value ) || 0;
+
+				player.style.setProperty( '--p', pct + '%' );
+
+				if ( audio.duration ) {
+					audio.currentTime = ( pct / 100 ) * audio.duration;
+				} else {
+					// Nothing loaded yet: load, then land where asked.
+					audio.preload = 'metadata';
+					audio.addEventListener( 'loadedmetadata', function () {
+						audio.currentTime = ( pct / 100 ) * audio.duration;
+					}, { once: true } );
+					audio.load();
+				}
+			} );
+		}
+
+		// Show the length without downloading the file: metadata only, and
+		// only once the player is near the screen.
+		if ( 'IntersectionObserver' in window ) {
+			var watch = new IntersectionObserver( function ( entries ) {
+				if ( entries[ 0 ].isIntersecting ) {
+					audio.preload = 'metadata';
+					watch.disconnect();
+				}
+			}, { rootMargin: '200px' } );
+
+			watch.observe( player );
+		}
+
+		state( false );
 	}
 
 	/* ------------------------------------------------------ carousel --- */
@@ -345,6 +401,7 @@
 	function initAll( scope ) {
 		var context = scope || document;
 
+		toArray( context.querySelectorAll( '.enws-player[data-audio-src]' ) ).forEach( initPlayer );
 		toArray( context.querySelectorAll( '.enws-grid' ) ).forEach( initGrid );
 		toArray( context.querySelectorAll( '.enws-car-wrap' ) ).forEach( initCarousel );
 
@@ -372,7 +429,7 @@
 				return;
 			}
 
-			[ 'enws-news-grid', 'enws-news-carousel' ].forEach( function ( name ) {
+			[ 'enws-news-grid', 'enws-news-carousel', 'enws-post-source' ].forEach( function ( name ) {
 				window.elementorFrontend.hooks.addAction( 'frontend/element_ready/' + name + '.default', function ( scope ) {
 					var el = scope && scope[0] ? scope[0] : scope;
 

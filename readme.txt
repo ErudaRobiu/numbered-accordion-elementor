@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.65.0
+Stable tag: 2.66.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,17 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.66.0 =
+* **The News Grid is now plain cards:** equal cards, three across on
+  desktop, two on tablets and one on phones, with the featured post first.
+* **Podcast cards get a proper audio player:** a play button, a waveform that
+  fills as it plays and can be clicked to jump, and the time. Under it, a
+  "Listen on BBC Business Daily ↗" button goes to the episode's own page.
+* A podcast no longer needs an audio file. Set a post's card to Podcast and
+  give it a Source link, and its player and button open the episode there.
+  With a file, it plays right on the page.
+* The Post Source Box uses the same player and a Listen button on podcasts.
 
 = 2.65.0 =
 * **News, run from ordinary Posts.** A "News item" box on every post:

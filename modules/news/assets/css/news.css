@@ -1,8 +1,8 @@
 /**
  * Eruda Toolkit - News
  *
- * The News Grid bento, the News Carousel, Press Quotes and the Post Source
- * Box. Chips and buttons restate every property they rely on, because Hello
+ * The News Grid cards and their audio player, the News Carousel, Press
+ * Quotes and the Post Source Box. Chips and buttons restate every property they rely on, because Hello
  * Elementor paints buttons pink.
  */
 
@@ -36,7 +36,7 @@
 /* =============================================================== grid === */
 
 .enws-grid {
-	--enws-wide-h: 560px;
+	--enws-cols: 3;
 }
 
 .enws-grid__chips {
@@ -85,16 +85,17 @@
 	outline-offset: 2px;
 }
 
-/* The bento: dense packing, so a tall card never leaves a hole. */
-.enws-bento {
+/* Plain cards, equal widths, each row as tall as its tallest card. */
+.enws-cards {
 	display: grid;
-	grid-auto-flow: row dense;
-	grid-template-columns: 1.25fr 1fr 1fr;
+	grid-template-columns: repeat(var(--enws-cols), minmax(0, 1fr));
 	gap: var(--enws-gap);
 }
 
 .enws-grid .enws-card {
 	position: relative;
+	display: flex;
+	flex-direction: column;
 	min-width: 0;
 	overflow: hidden;
 	border-radius: var(--enws-radius);
@@ -149,174 +150,9 @@
 	color: var(--enws-green-light);
 }
 
-/* ---------------------------------------------------------- wide card --- */
-
-.enws-card--wide {
-	display: flex;
-	grid-row: span 2;
-	align-items: flex-end;
-	min-height: var(--enws-wide-h);
-	background: var(--enws-ink);
-}
-
-.enws-grid .enws-card--wide > img {
-	position: absolute;
-	inset: 0;
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	transition: transform .5s;
-}
-
-.enws-grid .enws-card--wide:hover > img {
-	transform: scale(1.04);
-}
-
-.enws-card__shade {
-	position: absolute;
-	inset: 0;
-	background: linear-gradient(0deg, #07131Cf0 25%, #07131C22 70%);
-}
-
-.enws-card__txt {
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-	padding: 30px;
-}
-
-.enws-card__txt strong {
-	font-family: "Bebas Neue", Impact, sans-serif;
-	font-size: 38px;
-	font-weight: 400;
-	line-height: 1.02;
-	text-transform: uppercase;
-	color: #fff;
-}
-
-.enws-card__txt em,
-.enws-card--audio .enws-card__top em {
-	font-size: 13px;
-	font-style: normal;
-	color: var(--enws-white-70);
-}
-
-.enws-card__go {
-	position: absolute;
-	top: 22px;
-	right: 22px;
-	display: grid;
-	place-items: center;
-	width: 52px;
-	height: 52px;
-	border-radius: 50%;
-	background: var(--enws-green-light);
-	color: var(--enws-ink);
-	font-size: 20px;
-	font-weight: 700;
-	transition: transform .25s;
-}
-
-.enws-card--wide:hover .enws-card__go,
-.enws-card--wide:focus-visible .enws-card__go {
-	transform: rotate(45deg);
-}
-
-/* --------------------------------------------------------- audio card --- */
-
-.enws-card--audio {
-	display: flex;
-	flex-direction: column;
-	grid-row: span 2;
-	gap: 18px;
-	padding: 28px;
-	background: radial-gradient(80% 60% at 100% 0%, #07864F66, transparent 70%), linear-gradient(160deg, var(--enws-navy), var(--enws-ink));
-	color: #fff;
-}
-
-.enws-card__top {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 10px;
-}
-
-.enws-grid .enws-card__title {
-	margin: 0;
-	font-family: "Bebas Neue", Impact, sans-serif;
-	font-size: 40px;
-	font-weight: 400;
-	line-height: 1.02;
-	text-transform: uppercase;
-}
-
-.enws-grid .enws-card__title a,
-.enws-grid .enws-card__title a:hover {
-	color: #fff;
-	text-decoration: none;
-}
-
-/* The whole card is clickable through its title, player aside. */
-.enws-card--audio .enws-card__title a::after {
-	content: "";
-	position: absolute;
-	inset: 0;
-}
-
-.enws-card--audio .enws-audio,
-.enws-card--audio blockquote {
-	position: relative;
-	z-index: 1;
-}
-
-.enws-grid .enws-card--audio blockquote {
-	margin: auto 0 0;
-	padding: 16px 18px;
-	border: 0;
-	border-left: 3px solid var(--enws-green-light);
-	border-radius: 0 12px 12px 0;
-	background: #ffffff08;
-	color: #fff;
-	font-size: 14px;
-	font-style: normal;
-	line-height: 1.55;
-}
-
-.enws-card--audio cite {
-	display: block;
-	margin-top: 8px;
-	font-size: 12px;
-	font-style: normal;
-	color: var(--enws-white-70);
-}
-
-/* ---------------------------------------------------------- the slot --- */
-
-/* Until a player takes the slot over, the browser's own controls. Once one
-   sets data-player="ready", they step aside. */
-.enws-audio {
-	padding: 12px;
-	border: 1px solid var(--enws-white-11);
-	border-radius: 18px;
-	background: #ffffff0d;
-}
-
-.enws-audio audio {
-	display: block;
-	width: 100%;
-	height: 44px;
-}
-
-.enws-audio[data-player="ready"] > audio {
-	display: none;
-}
-
-/* --------------------------------------------------------- image card --- */
+/* --------------------------------------------------------- photo card --- */
 
 .enws-card--image {
-	display: flex;
-	flex-direction: column;
 	border: 1px solid var(--enws-line);
 	background: #fff;
 }
@@ -383,11 +219,124 @@
 	color: var(--enws-green);
 }
 
-/* ---------------------------------------------------------- next tile --- */
+/* ------------------------------------------------------- podcast card --- */
+
+.enws-card--audio {
+	gap: 16px;
+	padding: 24px;
+	background: radial-gradient(80% 60% at 100% 0%, #07864F66, transparent 70%), linear-gradient(160deg, var(--enws-navy), var(--enws-ink));
+	color: #fff;
+}
+
+.enws-card__top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.enws-card__top em {
+	font-size: 12.5px;
+	font-style: normal;
+	color: var(--enws-white-70);
+	text-align: right;
+}
+
+.enws-grid .enws-card__title {
+	margin: 0;
+	font-family: "Bebas Neue", Impact, sans-serif;
+	font-size: 32px;
+	font-weight: 400;
+	line-height: 1.02;
+	text-transform: uppercase;
+}
+
+.enws-grid .enws-card__title a,
+.enws-grid .enws-card__title a:hover {
+	color: #fff;
+	text-decoration: none;
+}
+
+/* The card opens its post through the title; the player and the Listen
+   button sit above that and do their own thing. */
+.enws-card--audio .enws-card__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+}
+
+.enws-card--audio .enws-player,
+.enws-card--audio .enws-card__acts {
+	position: relative;
+	z-index: 1;
+}
+
+.enws-grid .enws-card--audio blockquote {
+	margin: 0;
+	padding: 12px 14px;
+	border: 0;
+	border-left: 3px solid var(--enws-green-light);
+	border-radius: 0 12px 12px 0;
+	background: #ffffff08;
+	color: #fff;
+	font-size: 13.5px;
+	font-style: normal;
+	line-height: 1.5;
+}
+
+.enws-card--audio cite {
+	display: block;
+	margin-top: 6px;
+	font-size: 12px;
+	font-style: normal;
+	color: var(--enws-white-70);
+}
+
+.enws-card__acts {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px 14px;
+	margin-top: auto;
+}
+
+.enws-card__acts em {
+	font-size: 12.5px;
+	font-style: normal;
+	color: var(--enws-white-70);
+}
+
+.enws-grid .enws-listen,
+.enws-grid .enws-listen:hover,
+.enws-grid .enws-listen:focus {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 10px 16px;
+	border: 1px solid var(--enws-green-light);
+	border-radius: 999px;
+	color: var(--enws-green-light);
+	font-size: 13.5px;
+	font-weight: 600;
+	line-height: 1.2;
+	text-decoration: none;
+	transition: background-color .2s, color .2s;
+}
+
+.enws-grid .enws-listen:hover {
+	background: var(--enws-green-light);
+	color: var(--enws-ink);
+}
+
+.enws-grid .enws-listen:focus-visible {
+	outline: 3px solid var(--enws-green-light);
+	outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------- next card --- */
 
 .enws-card--next {
-	display: flex;
-	flex-direction: column;
 	justify-content: center;
 	gap: 12px;
 	padding: 28px;
@@ -486,38 +435,17 @@
 	animation: enws-in .16s ease-out backwards;
 }
 
-@media (max-width: 1100px) {
-	.enws-bento {
-		grid-template-columns: 1fr 1fr;
-	}
-
-	.enws-card--wide {
-		grid-column: span 2;
-		grid-row: auto;
-		min-height: 420px;
-	}
-
-	.enws-card--audio {
-		grid-row: auto;
+/* Fallbacks for a page without Elementor's generated CSS; the Columns
+   control writes the same property with a more specific selector. */
+@media (max-width: 1024px) {
+	.enws-grid {
+		--enws-cols: 2;
 	}
 }
 
-@media (max-width: 760px) {
-	.enws-bento {
-		grid-template-columns: minmax(0, 1fr);
-	}
-
-	.enws-card--wide {
-		grid-column: auto;
-		min-height: 380px;
-	}
-
-	.enws-card__txt strong {
-		font-size: 32px;
-	}
-
-	.enws-grid .enws-card__title {
-		font-size: 34px;
+@media (max-width: 767px) {
+	.enws-grid {
+		--enws-cols: 1;
 	}
 
 	/* The one thing allowed to scroll sideways. */
@@ -532,6 +460,183 @@
 	.enws-grid__chips::-webkit-scrollbar {
 		display: none;
 	}
+}
+
+/* ============================================================= player === */
+
+/* A play button, a waveform that fills from the left as it plays, and the
+   time. The waveform is two identical rows of bars, the lit one clipped to
+   the progress, so no bar has to be recoloured one by one. */
+.enws-player {
+	--p: 0%;
+
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 12px 14px 12px 12px;
+	border: 1px solid var(--enws-white-11);
+	border-radius: 18px;
+	background: #ffffff0d;
+	color: #fff;
+	text-decoration: none;
+}
+
+a.enws-player:hover,
+a.enws-player:focus {
+	color: #fff;
+	text-decoration: none;
+}
+
+a.enws-player:hover {
+	border-color: #4DCF8D66;
+	background: #ffffff14;
+}
+
+a.enws-player:focus-visible {
+	outline: 3px solid var(--enws-green-light);
+	outline-offset: 2px;
+}
+
+.enws-player .enws-player__btn,
+.enws-player .enws-player__btn:hover,
+.enws-player .enws-player__btn:focus {
+	position: relative;
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: 52px;
+	height: 52px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: var(--enws-green-light);
+	box-shadow: 0 0 0 0 #4DCF8D66;
+	color: var(--enws-ink);
+	cursor: pointer;
+	animation: enws-ping 2.4s infinite;
+}
+
+.enws-player .enws-player__btn:focus-visible {
+	outline: 3px solid #fff;
+	outline-offset: 3px;
+}
+
+@keyframes enws-ping {
+	70% { box-shadow: 0 0 0 12px #4DCF8D00; }
+	100% { box-shadow: 0 0 0 0 #4DCF8D00; }
+}
+
+.enws-player.is-playing .enws-player__btn {
+	animation: none;
+}
+
+/* Play: a triangle. Pause: two bars. */
+.enws-player__icon {
+	width: 0;
+	height: 0;
+	margin-left: 4px;
+	border-top: 9px solid transparent;
+	border-bottom: 9px solid transparent;
+	border-left: 15px solid currentColor;
+}
+
+.enws-player.is-playing .enws-player__icon {
+	width: 14px;
+	height: 16px;
+	margin-left: 0;
+	border: 0;
+	border-right: 5px solid currentColor;
+	border-left: 5px solid currentColor;
+}
+
+.enws-player__track {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+	height: 40px;
+}
+
+.enws-player__wave {
+	position: absolute;
+	inset: 0;
+}
+
+.enws-player__bars {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.enws-player__bars i {
+	flex: 1;
+	height: var(--h);
+	min-width: 2px;
+	border-radius: 2px;
+	background: #4DCF8D4D;
+	transform-origin: center;
+}
+
+.enws-player__bars--on {
+	clip-path: inset(0 calc(100% - var(--p)) 0 0);
+}
+
+.enws-player__bars--on i {
+	background: var(--enws-green-light);
+}
+
+/* A link to the episode: the first few bars lit, as a hint of sound. */
+.enws-player--link .enws-player__bars--on {
+	clip-path: inset(0 72% 0 0);
+}
+
+.enws-player.is-playing .enws-player__bars i {
+	animation: enws-wave 1.2s ease-in-out infinite alternate;
+}
+
+.enws-player.is-playing .enws-player__bars i:nth-child(3n) {
+	animation-delay: .25s;
+}
+
+.enws-player.is-playing .enws-player__bars i:nth-child(3n + 1) {
+	animation-delay: .5s;
+}
+
+@keyframes enws-wave {
+	to { transform: scaleY(.6); }
+}
+
+/* The seek control is a real range input laid over the waveform: it takes
+   the clicks, the drags and the arrow keys, and is invisible. */
+.enws-player .enws-player__seek {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	opacity: 0;
+	cursor: pointer;
+}
+
+.enws-player__track:has(.enws-player__seek:focus-visible) {
+	outline: 3px solid var(--enws-green-light);
+	outline-offset: 4px;
+	border-radius: 6px;
+}
+
+.enws-player__time {
+	flex: none;
+	min-width: 3.2em;
+	font-size: 12.5px;
+	font-variant-numeric: tabular-nums;
+	color: var(--enws-white-70);
+	text-align: right;
+}
+
+.enws-player audio {
+	display: none;
 }
 
 /* =========================================================== carousel === */
@@ -930,8 +1035,7 @@
 	.enws-grid .enws-card,
 	.enws-grid .enws-card.is-fresh,
 	.enws-grid .enws-card img,
-	.enws-car-wrap .enws-car__card,
-	.enws-card__go {
+	.enws-car-wrap .enws-car__card {
 		animation: none;
 		transition: box-shadow .2s;
 	}
@@ -941,12 +1045,16 @@
 	.enws-grid .enws-card--audio:hover,
 	.enws-grid a.enws-card:focus-visible,
 	.enws-grid .enws-card:hover img,
-	.enws-car-wrap .enws-car__card:hover,
-	.enws-card--wide:hover .enws-card__go {
+	.enws-car-wrap .enws-car__card:hover {
 		transform: none;
 	}
 
 	.enws-car {
 		scroll-behavior: auto;
+	}
+
+	.enws-player .enws-player__btn,
+	.enws-player.is-playing .enws-player__bars i {
+		animation: none;
 	}
 }

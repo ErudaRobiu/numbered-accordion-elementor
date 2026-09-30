@@ -288,7 +288,8 @@ node tests/browser/docshelf-probe.js [screenshot-dir]
 ```
 
 And the news widgets (the fixture also writes `news-more.json`, which stands in
-for the Load more route):
+for the Load more route; the probe hands the player its audio as a blob,
+because Python's test server cannot serve the byte ranges seeking needs):
 
 ```sh
 php tests/browser/news-fixture.php > tests/browser/news.html

@@ -174,9 +174,7 @@ foreach ( require $dir . '/news-data.php' as $item ) {
 		update_field( $keys[ $name ], isset( $item['meta'][ $name ] ) ? $item['meta'][ $name ] : ( 'nw_featured' === $name ? 0 : '' ), $id );
 	}
 
-	if ( ! get_post_meta( $id, 'nw_layout', true ) ) {
-		update_field( $keys['nw_layout'], 'auto', $id );
-	}
+	update_field( $keys['nw_layout'], isset( $item['meta']['nw_layout'] ) ? $item['meta']['nw_layout'] : 'auto', $id );
 
 	WP_CLI::log( ( $found ? 'updated ' : 'created ' ) . "#{$id} {$item['title']}" );
 }

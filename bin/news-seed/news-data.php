@@ -34,6 +34,8 @@ return array(
 		'related'  => 'restaurants-commercial-kitchens',
 		'meta'     => array(
 			'nw_source_name'  => 'BBC Business Daily',
+			'nw_source_url'   => 'https://www.bbc.com/audio/play/w3ct4n3g',
+			'nw_layout'       => 'audio',
 			'nw_audio_quote'  => 'We were looking at ways in which we could reduce our costs and become more sustainable, and this was at the forefront of what we\'d found.',
 			'nw_audio_credit' => 'Matt Manfield, facilities manager, Turtle Bay (UK)',
 		),

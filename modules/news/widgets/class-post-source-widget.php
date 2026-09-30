@@ -8,6 +8,7 @@
 namespace ErudaToolkit\Modules\News\Widgets;
 
 use Elementor\Controls_Manager;
+use ErudaToolkit\Modules\News\News_Content;
 use ErudaToolkit\Modules\News\News_Render;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -78,7 +79,8 @@ class Post_Source_Widget extends News_Widget {
 
 		foreach ( array(
 			'by_text'      => array( esc_html__( 'Before the source', 'numbered-accordion' ), esc_html__( 'Originally published by', 'numbered-accordion' ) ),
-			'read_text'    => array( esc_html__( 'Button (%s is the source)', 'numbered-accordion' ), esc_html__( 'Read on %s', 'numbered-accordion' ) ),
+			'read_text'    => array( esc_html__( 'Article button (%s is the source)', 'numbered-accordion' ), esc_html__( 'Read on %s', 'numbered-accordion' ) ),
+			'listen_text'  => array( esc_html__( 'Podcast button (%s is the source)', 'numbered-accordion' ), esc_html__( 'Listen on %s', 'numbered-accordion' ) ),
 			'listen_text'  => array( esc_html__( 'Above the player', 'numbered-accordion' ), esc_html__( 'Listen', 'numbered-accordion' ) ),
 			'related_text' => array( esc_html__( 'Above the related page', 'numbered-accordion' ), esc_html__( 'Related', 'numbered-accordion' ) ),
 		) as $id => $word ) {
@@ -159,29 +161,31 @@ class Post_Source_Widget extends News_Widget {
 		}
 
 		$card    = $box['card'];
+		$labels  = News_Render::labels( array( 'listen' => $this->word( $settings, 'listen_text', '' ) ) );
+		$podcast = 'audio' === News_Content::variants( array( $card ) )[0];
 		$source  = '' !== $card['source'] ? $card['source'] : ( '' !== $box['source_url'] ? (string) wp_parse_url( $box['source_url'], PHP_URL_HOST ) : '' );
 		$has_src = '' !== $box['source_url'];
-		$has_aud = '' !== $card['audio'];
 
-		if ( ! $has_src && ! $has_aud && ! $box['related'] ) {
+		if ( ! $has_src && ! $podcast && ! $box['related'] ) {
 			return;
 		}
 
-		$read = $this->word( $settings, 'read_text', __( 'Read on %s', 'numbered-accordion' ) );
+		$read = $podcast ? News_Render::listen_text( $card, $labels ) : $this->word( $settings, 'read_text', __( 'Read on %s', 'numbered-accordion' ) );
+		$read = false !== strpos( $read, '%s' ) ? sprintf( $read, $source ) : $read;
 		?>
 		<aside class="enws-src">
 			<?php if ( $has_src ) : ?>
 				<div class="enws-src__from">
 					<p><?php echo esc_html( $this->word( $settings, 'by_text', __( 'Originally published by', 'numbered-accordion' ) ) ); ?> <b><?php echo esc_html( $source ); ?></b></p>
-					<a class="enws-src__btn" href="<?php echo esc_url( $box['source_url'] ); ?>" target="_blank" rel="noopener"><?php echo esc_html( false !== strpos( $read, '%s' ) ? sprintf( $read, $source ) : $read ); ?> <span aria-hidden="true">↗</span></a>
+					<a class="enws-src__btn" href="<?php echo esc_url( $box['source_url'] ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $read ); ?> <span aria-hidden="true">↗</span></a>
 				</div>
 			<?php endif; ?>
 
-			<?php if ( $has_aud ) : ?>
+			<?php if ( $podcast ) : ?>
 				<div class="enws-src__listen">
 					<?php $listen = $this->word( $settings, 'listen_text', __( 'Listen', 'numbered-accordion' ) ); ?>
 					<?php echo '' !== $listen ? '<span class="enws-src__eyebrow">' . esc_html( $listen ) . '</span>' : ''; ?>
-					<?php echo News_Render::audio_slot( $card, 'source' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in News_Render ?>
+					<?php echo News_Render::player( $card, 'source', $labels ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in News_Render ?>
 				</div>
 			<?php endif; ?>
 

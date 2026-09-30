@@ -19,8 +19,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/class-news-widget.php';
 
 /**
- * The news archive as a bento: the featured post big, podcasts as player
- * cards, everything else as photo cards, with category chips and Load more.
+ * The news archive as a grid of equal cards: the featured post first,
+ * podcasts as player cards, everything else as photo cards, with category
+ * chips and Load more.
  */
 class News_Grid_Widget extends News_Widget {
 
@@ -57,7 +58,7 @@ class News_Grid_Widget extends News_Widget {
 	 * @return array
 	 */
 	public function get_keywords() {
-		return array( 'news', 'posts', 'blog', 'archive', 'bento', 'grid', 'podcast' );
+		return array( 'news', 'posts', 'blog', 'archive', 'cards', 'grid', 'podcast' );
 	}
 
 	/**
@@ -73,7 +74,7 @@ class News_Grid_Widget extends News_Widget {
 			'source_note',
 			array(
 				'type'            => Controls_Manager::RAW_HTML,
-				'raw'             => esc_html__( 'Shows your published Posts, newest first, with the newest Featured post as the big first tile. Posts with an audio file become podcast cards.', 'numbered-accordion' ),
+				'raw'             => esc_html__( 'Shows your published Posts, newest first, with the newest Featured post leading. A post with an audio file, or with its card set to Podcast, becomes a podcast card with a player.', 'numbered-accordion' ),
 				'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
 			)
 		);
@@ -141,6 +142,7 @@ class News_Grid_Widget extends News_Widget {
 		$words = array(
 			'all_label'  => array( esc_html__( '"All" chip text', 'numbered-accordion' ), esc_html__( 'All', 'numbered-accordion' ) ),
 			'more_text'  => array( esc_html__( 'Load more text', 'numbered-accordion' ), esc_html__( 'Load more', 'numbered-accordion' ) ),
+			'listen_text' => array( esc_html__( 'Podcast button (%s is the source)', 'numbered-accordion' ), esc_html__( 'Listen on %s', 'numbered-accordion' ) ),
 			'empty_text' => array( esc_html__( 'When a chip has no posts', 'numbered-accordion' ), esc_html__( 'Nothing here yet. New posts appear as they\'re published.', 'numbered-accordion' ) ),
 		);
 
@@ -170,7 +172,7 @@ class News_Grid_Widget extends News_Widget {
 				'type'         => Controls_Manager::SWITCHER,
 				'return_value' => 'yes',
 				'default'      => '',
-				'description'  => esc_html__( 'A last tile pointing somewhere else, for when the posts leave a gap.', 'numbered-accordion' ),
+				'description'  => esc_html__( 'A last card pointing somewhere else, such as the Resource Library.', 'numbered-accordion' ),
 			)
 		);
 
@@ -221,10 +223,22 @@ class News_Grid_Widget extends News_Widget {
 			)
 		);
 
+		$this->add_responsive_control(
+			'columns',
+			array(
+				'label'          => esc_html__( 'Columns', 'numbered-accordion' ),
+				'type'           => Controls_Manager::SELECT,
+				'default'        => '3',
+				'tablet_default' => '2',
+				'mobile_default' => '1',
+				'options'        => array( '1' => '1', '2' => '2', '3' => '3', '4' => '4' ),
+				'selectors'      => array( '{{WRAPPER}} .enws-grid' => '--enws-cols: {{VALUE}};' ),
+			)
+		);
+
 		foreach ( array(
 			'gap'    => array( esc_html__( 'Gap', 'numbered-accordion' ), '--enws-gap', 0, 40 ),
 			'radius' => array( esc_html__( 'Corner radius', 'numbered-accordion' ), '--enws-radius', 0, 40 ),
-			'wide_h' => array( esc_html__( 'Big card height', 'numbered-accordion' ), '--enws-wide-h', 280, 900 ),
 		) as $id => $size ) {
 			$this->add_responsive_control(
 				$id,
@@ -242,7 +256,7 @@ class News_Grid_Widget extends News_Widget {
 			'green'       => array( esc_html__( 'Green: chips, links', 'numbered-accordion' ), '--enws-green' ),
 			'green_light' => array( esc_html__( 'Light green: pills, arrow', 'numbered-accordion' ), '--enws-green-light' ),
 			'navy'        => array( esc_html__( 'Text', 'numbered-accordion' ), '--enws-navy' ),
-			'ink'         => array( esc_html__( 'Dark: podcast card, shade', 'numbered-accordion' ), '--enws-ink' ),
+			'ink'         => array( esc_html__( 'Dark: podcast card', 'numbered-accordion' ), '--enws-ink' ),
 		) as $id => $colour ) {
 			$this->add_control(
 				$id,
@@ -255,7 +269,6 @@ class News_Grid_Widget extends News_Widget {
 		}
 
 		foreach ( array(
-			'wide_type'  => array( esc_html__( 'Big card title', 'numbered-accordion' ), '.enws-card--wide strong' ),
 			'audio_type' => array( esc_html__( 'Podcast title', 'numbered-accordion' ), '.enws-card--audio .enws-card__title' ),
 			'image_type' => array( esc_html__( 'Photo card title', 'numbered-accordion' ), '.enws-card--image strong' ),
 		) as $id => $group ) {
@@ -374,6 +387,7 @@ class News_Grid_Widget extends News_Widget {
 		$chips     = News_Content::chips( $this->chip_terms( $scope ) );
 		$use_chips = 'yes' === $this->word( $settings, 'show_chips', 'yes' ) && ! $scope['archive'] && count( $chips ) > 1;
 		$all       = $this->word( $settings, 'all_label', __( 'All', 'numbered-accordion' ) );
+		$labels    = News_Render::labels( array( 'listen' => $this->word( $settings, 'listen_text', '' ) ) );
 		$link      = isset( $settings['next_link'] ) && is_array( $settings['next_link'] ) && isset( $settings['next_link']['url'] ) ? trim( (string) $settings['next_link']['url'] ) : '';
 		?>
 		<div class="enws-grid"
@@ -383,6 +397,7 @@ class News_Grid_Widget extends News_Widget {
 			data-featured="<?php echo (int) $page['featured']; ?>"
 			data-cats="<?php echo esc_attr( implode( ',', $scope['cats'] ) ); ?>"
 			data-tags="<?php echo esc_attr( implode( ',', $scope['tags'] ) ); ?>"
+			data-listen="<?php echo esc_attr( $labels['listen'] ); ?>"
 			data-hash-prefix="news-">
 			<?php if ( $use_chips ) : ?>
 				<div class="enws-grid__chips" role="group" aria-label="<?php esc_attr_e( 'Filter posts by category', 'numbered-accordion' ); ?>">
@@ -393,8 +408,8 @@ class News_Grid_Widget extends News_Widget {
 				</div>
 			<?php endif; ?>
 
-			<div class="enws-bento" aria-live="polite">
-				<?php echo News_Render::grid_cards( $page['cards'], true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in News_Render ?>
+			<div class="enws-cards" aria-live="polite">
+				<?php echo News_Render::grid_cards( $page['cards'], $labels ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in News_Render ?>
 				<?php if ( 'yes' === $this->word( $settings, 'show_next', '' ) ) : ?>
 					<div class="enws-card enws-card--next">
 						<?php $chip = $this->word( $settings, 'next_chip', '' ); ?>
