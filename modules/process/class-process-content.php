@@ -37,14 +37,14 @@ final class Process_Content {
 	 */
 	public static function default_items() {
 		return array(
-			array( 'title' => 'Opportunity screening', 'text' => 'Where heat leaves your facility, and where it could serve a useful load.', 'link' => '/thermal-energy-opportunity-screen/', 'start' => true ),
-			array( 'title' => 'Technical data review', 'text' => 'Exhaust conditions, operating hours and the receiving demand, reviewed together.', 'link' => '/technical-data-review/', 'start' => false ),
+			array( 'title' => 'Opportunity screening', 'text' => 'Where heat leaves your facility, and where it could serve a useful load.', 'link' => '/services/thermal-energy-opportunity-screen/', 'start' => true ),
+			array( 'title' => 'Technical data review', 'text' => 'Exhaust conditions, operating hours and the receiving demand, reviewed together.', 'link' => '/services/technical-data-review/', 'start' => false ),
 			array( 'title' => 'Preliminary assessment', 'text' => 'Recoverable energy, delivery options and early project economics.', 'link' => '', 'start' => false ),
-			array( 'title' => 'Configuration', 'text' => 'A system concept built around your source, your demand and your site.', 'link' => '/configuration-implementation-verification/', 'start' => false ),
+			array( 'title' => 'Configuration', 'text' => 'A system concept built around your source, your demand and your site.', 'link' => '/services/configuration-implementation-verification/', 'start' => false ),
 			array( 'title' => 'Proposal', 'text' => 'ThermStar’s supply and services, and the interfaces your team owns.', 'link' => '', 'start' => false ),
 			array( 'title' => 'Implementation coordination', 'text' => 'Working with your engineers and contractors on delivery and integration.', 'link' => '', 'start' => false ),
 			array( 'title' => 'Commissioning', 'text' => 'Controls, sensors and operating sequences checked and confirmed.', 'link' => '', 'start' => false ),
-			array( 'title' => 'Measurement', 'text' => 'Recovered energy documented after startup, with reporting for incentives.', 'link' => '/thermstar-power-intelligence/', 'start' => false ),
+			array( 'title' => 'Measurement', 'text' => 'Recovered energy documented after startup, with reporting for incentives.', 'link' => '/heat-recovery-systems/thermstar-power-intelligence/', 'start' => false ),
 		);
 	}
 

@@ -3330,7 +3330,7 @@ use ErudaToolkit\Modules\Process\Process_Content;
 $ps = Process_Content::default_items();
 check( 'eight stages ship, in order', array( 'Opportunity screening', 'Technical data review', 'Preliminary assessment', 'Configuration', 'Proposal', 'Implementation coordination', 'Commissioning', 'Measurement' ), array_column( $ps, 'title' ) );
 check( 'only the first is the start', array( true, false, false, false, false, false, false, false ), array_column( $ps, 'start' ) );
-check( 'four stages link to their service pages', array( '/thermal-energy-opportunity-screen/', '/technical-data-review/', '/configuration-implementation-verification/', '/thermstar-power-intelligence/' ), array_values( array_filter( array_column( $ps, 'link' ) ) ) );
+check( 'four stages link to their service pages', array( '/services/thermal-energy-opportunity-screen/', '/services/technical-data-review/', '/services/configuration-implementation-verification/', '/heat-recovery-systems/thermstar-power-intelligence/' ), array_values( array_filter( array_column( $ps, 'link' ) ) ) );
 
 $ps_built = Process_Content::build( array(
 	array( 'title' => 'One' ),
