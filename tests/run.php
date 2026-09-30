@@ -2956,8 +2956,8 @@ foreach ( $nw_group['fields'] as $field ) {
 check( 'the form is on posts', 'post', $nw_group['location'][0][0]['value'] );
 check( 'the eight fields of the plan', array( 'nw_audio', 'nw_audio_credit', 'nw_audio_quote', 'nw_featured', 'nw_layout', 'nw_related', 'nw_source_name', 'nw_source_url' ), ( function ( $n ) { sort( $n ); return $n; } )( array_keys( $nw_fields ) ) );
 check( 'every post needs a related page', array( 1, array( 'page' ) ), array( $nw_fields['nw_related']['required'], $nw_fields['nw_related']['post_type'] ) );
-check( 'the quote and credit show only with audio', array( 'field_enws_audio', 'field_enws_audio' ), array( $nw_fields['nw_audio_quote']['conditional_logic'][0][0]['field'], $nw_fields['nw_audio_credit']['conditional_logic'][0][0]['field'] ) );
-check( 'layout choices', array( 'auto', 'wide', 'image', 'audio' ), array_keys( $nw_fields['nw_layout']['choices'] ) );
+check( 'layout choices', array( 'auto', 'image', 'audio' ), array_keys( $nw_fields['nw_layout']['choices'] ) );
+check( 'the quote shows for an audio file or a Podcast card', array( 'field_enws_audio', 'field_enws_layout' ), array( $nw_fields['nw_audio_quote']['conditional_logic'][0][0]['field'], $nw_fields['nw_audio_quote']['conditional_logic'][1][0]['field'] ) );
 check( 'no key collides with the other forms', array(), array_intersect( array_column( $nw_group['fields'], 'key' ), array_merge( array_column( \ErudaToolkit\Modules\CaseStudies\CaseStudies_Content::field_group()['fields'], 'key' ), array_column( \ErudaToolkit\Modules\DocShelf\DocShelf_Content::field_group()['fields'], 'key' ) ) ) );
 
 // A post becomes a card.
@@ -2988,42 +2988,53 @@ check( 'an unknown layout is automatic', 'auto', $nw_make( 9, 'X', '2020-01-01',
 check( 'no title, no card', null, $nw_make( 9, ' ', '2020-01-01', 'media' ) );
 check( 'no category, no pill', '', $nw_make( 9, 'X', '2020-01-01', '' )['cat_name'] );
 
-// Variants and the arrangement.
-check( 'first page: the first is big, audio is a podcast card', array( 'wide', 'image', 'image', 'audio' ), News_Content::variants( array( $nw_bbc, $nw_roi, $nw_wel, $nw_pod ), true ) );
-check( 'later pages have no big card', array( 'image', 'audio' ), News_Content::variants( array( $nw_roi, $nw_pod ), false ) );
+// Which card each post gets.
+$nw_link = $nw_make( 5, 'Podcast elsewhere', '2023-05-02 07:00:00', 'media', array( 'nw_layout' => 'audio', 'nw_source_url' => 'https://www.bbc.com/audio/play/w3ct4n3g', 'nw_source_name' => 'BBC Business Daily' ) );
+check( 'an audio file makes a podcast card, the rest photo cards', array( 'image', 'image', 'image', 'audio' ), News_Content::variants( array( $nw_bbc, $nw_roi, $nw_wel, $nw_pod ) ) );
+check( 'a Podcast card with only a Source link is a podcast card', array( 'audio' ), News_Content::variants( array( $nw_link ) ) );
+check( 'and says Podcast', 'Podcast', $nw_link['type'] );
+check( 'it keeps the link for the Listen button', 'https://www.bbc.com/audio/play/w3ct4n3g', $nw_link['source_url'] );
 $nw_forced = $nw_roi;
 $nw_forced['layout'] = 'audio';
-check( 'a podcast layout without audio falls back to a photo card', array( 'image' ), News_Content::variants( array( $nw_forced ), false ) );
-$nw_forced['layout'] = 'wide';
-check( 'a chosen big card holds on a later page', array( 'wide' ), News_Content::variants( array( $nw_forced ), false ) );
+check( 'Podcast with nothing to play or open falls back to a photo card', array( 'image' ), News_Content::variants( array( $nw_forced ) ) );
+$nw_forced = $nw_pod;
+$nw_forced['layout'] = 'image';
+check( 'Photo card always wins', array( 'image' ), News_Content::variants( array( $nw_forced ) ) );
+check( 'the old "Big photo" choice reads as a photo card', 'image', $nw_make( 9, 'X', '2020-01-01', 'media', array( 'nw_layout' => 'wide' ) )['layout'] );
 
-$nw_laid = News_Content::arrange( array( $nw_bbc, $nw_roi, $nw_wel, $nw_pod ), true );
-check( 'the launch bento: big, podcast beside it, then photos newest first', array( 'BBC', 'Podcast', 'ROI', 'Welcome' ), array_column( $nw_laid['cards'], 'title' ) );
-check( 'with their variants', array( 'wide', 'audio', 'image', 'image' ), $nw_laid['variants'] );
-check( 'later pages keep date order', array( 'ROI', 'Podcast', 'Welcome' ), array_column( News_Content::arrange( array( $nw_roi, $nw_pod, $nw_wel ), false )['cards'], 'title' ) );
+$nw_wave = News_Content::waveform( 3133 );
+check( 'a waveform of 36 bars', 36, count( $nw_wave ) );
+check( 'bars between 22% and 92%', true, min( $nw_wave ) >= 22 && max( $nw_wave ) <= 92 );
+check( 'the same post gets the same waveform', $nw_wave, News_Content::waveform( 3133 ) );
+check( 'another post gets another', true, $nw_wave !== News_Content::waveform( 3131 ) );
 
 check( 'chips in the plan order, others after, never Uncategorized', array( 'insights' => 'Insights', 'updates' => 'Updates', 'media' => 'Media', 'awards' => 'Awards' ), News_Content::chips( array( array( 'slug' => 'awards', 'name' => 'Awards' ), array( 'slug' => 'media', 'name' => 'Media' ), array( 'slug' => 'uncategorized', 'name' => 'Uncategorized' ), array( 'slug' => 'insights', 'name' => 'Insights' ), array( 'slug' => 'updates', 'name' => 'Updates' ) ) ) );
 check( 'page size clamps', array( 1, 24, 9, 9 ), array( News_Content::per_page( 0 ), News_Content::per_page( 99 ), News_Content::per_page( 'x' ), News_Content::per_page( null ) ) );
 
 // The markup.
-$nw_html = News_Render::grid_cards( array( $nw_bbc, $nw_roi, $nw_wel, $nw_pod ), true );
-check( 'one big, one podcast, two photo cards', array( 1, 1, 2 ), array( substr_count( $nw_html, 'enws-card--wide' ), substr_count( $nw_html, 'enws-card--audio' ), substr_count( $nw_html, 'enws-card--image' ) ) );
-check( 'cards carry their category for the chips', 2, substr_count( $nw_html, 'data-cat="media"' ) );
-check( 'the big card links to the post', true, false !== strpos( $nw_html, '<a class="enws-card enws-card--wide" href="/news/p1/"' ) );
-check( 'date and source on the big card', true, false !== strpos( $nw_html, '<time datetime="2023-05-02">2 May 2023</time> · BBC News' ) );
-check( 'the podcast card is not one big link (it holds a player)', true, false !== strpos( $nw_html, '<article class="enws-card enws-card--audio"' ) );
-check( 'the audio slot: file, title, a plain player', true, false !== strpos( $nw_html, '<div class="enws-audio" data-audio-src="/a.mp3" data-audio-title="Podcast" data-post-id="4" data-context="grid"><audio controls preload="none" src="/a.mp3" aria-label="Play: Podcast"></audio></div>' ) );
+$nw_html = News_Render::grid_cards( array( $nw_bbc, $nw_roi, $nw_wel, $nw_link, $nw_pod ) );
+check( 'three photo cards, two podcast cards, no big card', array( 3, 2, 0 ), array( substr_count( $nw_html, 'enws-card--image' ), substr_count( $nw_html, 'enws-card--audio' ), substr_count( $nw_html, 'enws-card--wide' ) ) );
+check( 'cards carry their category for the chips', 3, substr_count( $nw_html, 'data-cat="media"' ) );
+check( 'a photo card links to its post', true, false !== strpos( $nw_html, '<a class="enws-card enws-card--image" href="/news/p1/"' ) );
+check( 'date and source on a photo card', true, false !== strpos( $nw_html, '<time datetime="2023-05-02">2 May 2023</time> · BBC News' ) );
+check( 'a podcast card is not one big link (it holds a player)', true, false !== strpos( $nw_html, '<article class="enws-card enws-card--audio"' ) );
+check( 'with a file, the player plays it', true, 1 === preg_match( '#<div class="enws-player" data-audio-src="/a\.mp3"[^>]*>.*<button type="button" class="enws-player__btn" aria-label="Play: Podcast">.*<input class="enws-player__seek" type="range"[^>]*aria-label="Position in Podcast" />.*<audio preload="none" src="/a\.mp3"></audio></div>#s', $nw_html ) );
+check( 'without one, the player opens the episode page', true, false !== strpos( $nw_html, '<a class="enws-player enws-player--link" href="https://www.bbc.com/audio/play/w3ct4n3g" target="_blank" rel="noopener" data-context="grid" aria-label="Listen on BBC Business Daily: Podcast elsewhere (opens in a new tab)">' ) );
+check( 'and the Listen button goes there too', true, false !== strpos( $nw_html, '<a class="enws-listen" href="https://www.bbc.com/audio/play/w3ct4n3g" target="_blank" rel="noopener">Listen on BBC Business Daily <span aria-hidden="true">↗</span></a>' ) );
+check( 'no Listen button without a link', 1, substr_count( $nw_html, 'class="enws-listen"' ) );
+check( 'the waveform: lit and unlit rows of 36 bars', 2 * 2 * 36, substr_count( $nw_html, '<i style="--h:' ) );
 check( 'the quote gets one set of curly quotes', true, false !== strpos( $nw_html, '<blockquote>“We were looking…”<cite>Matt Manfield</cite></blockquote>' ) );
-check( 'the podcast pill', true, false !== strpos( $nw_html, '>Media · Podcast</span>' ) );
+check( 'the podcast pill', 2, substr_count( $nw_html, '>Media · Podcast</span>' ) );
+check( 'the Listen wording can change', true, false !== strpos( News_Render::grid_cards( array( $nw_link ), array( 'listen' => 'Hear it on %s' ) ), 'Hear it on BBC Business Daily' ) );
 
 $GLOBALS['eruda_test_filters']['eruda_news_audio_player'] = function ( $html ) {
 	return '<div class="robiu-player"></div>';
 };
-check( 'a player can replace the slot through the filter', true, false !== strpos( News_Render::audio_slot( $nw_pod, 'source' ), 'robiu-player' ) );
+check( 'a player can be replaced through the filter', true, false !== strpos( News_Render::player( $nw_pod, 'source', News_Render::labels() ), 'robiu-player' ) );
 unset( $GLOBALS['eruda_test_filters']['eruda_news_audio_player'] );
 
-$nw_car = News_Render::carousel_card( $nw_pod, 'Read' );
-check( 'a carousel podcast card: a Podcast pill and no player', array( true, false ), array( false !== strpos( $nw_car, '<i>Podcast</i>' ), false !== strpos( $nw_car, 'enws-audio' ) ) );
+$nw_car = News_Render::carousel_card( $nw_link, 'Read' );
+check( 'a carousel podcast card: a Podcast pill and no player', array( true, false ), array( false !== strpos( $nw_car, '<i>Podcast</i>' ), false !== strpos( $nw_car, 'enws-player' ) ) );
 
 check( 'the press defaults are the three old tiles', array( 'BBC News', 'Forbes', 'Premier Construction' ), ( function () {
 	require_once dirname( __DIR__ ) . '/modules/news/widgets/class-press-quotes-widget.php';

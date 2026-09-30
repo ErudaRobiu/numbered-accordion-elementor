@@ -19,26 +19,16 @@ function check(name, ok, detail) {
   (ok ? PASS : FAIL).push(name + (detail ? '  [' + detail + ']' : ''));
 }
 
-// Where each card sits, and whether the grid has a hole.
+// Where each card sits.
 const layout = sel => {
-  const bento = document.querySelector(sel + ' .enws-bento');
-  const b = bento.getBoundingClientRect();
-  const cards = [...bento.children].filter(c => !c.hidden).map(c => {
+  const list = document.querySelector(sel + ' .enws-cards');
+  const b = list.getBoundingClientRect();
+  const cards = [...list.children].filter(c => !c.hidden).map(c => {
     const r = c.getBoundingClientRect();
     const t = (c.querySelector('strong, .enws-card__title') || {}).textContent || '';
     return { v: c.className.match(/enws-card--(\w+)/)[1], t: t.trim().slice(0, 12), x: Math.round(r.left - b.left), y: Math.round(r.top - b.top), w: Math.round(r.width), h: Math.round(r.height) };
   });
-  // Sample the grid area on a lattice; any point inside the bento's height
-  // not covered by a card (allowing for gaps) is a hole.
-  const gap = parseFloat(getComputedStyle(bento).rowGap) || 0;
-  let holes = 0;
-  for (let y = 10; y < b.height - 10; y += 20) {
-    for (let x = 10; x < b.width - 10; x += 20) {
-      const covered = cards.some(c => x >= c.x - gap && x <= c.x + c.w + gap && y >= c.y - gap && y <= c.y + c.h + gap);
-      if (!covered) holes++;
-    }
-  }
-  return { cards, holes, cols: getComputedStyle(bento).gridTemplateColumns.split(' ').length, scroll: document.documentElement.scrollWidth };
+  return { cards, cols: getComputedStyle(list).gridTemplateColumns.split(' ').length, scroll: document.documentElement.scrollWidth };
 };
 
 (async () => {
@@ -52,34 +42,34 @@ const layout = sel => {
   await page.setViewport({ width: 1440, height: 900 });
   await page.goto(URL, { waitUntil: 'networkidle0' });
 
-  /* ------------------------------------------------------ the bento --- */
+  /* ------------------------------------------------------ the cards --- */
 
   let L = await page.evaluate(layout, '#a');
   const order = L.cards.map(c => c.v + ':' + c.t).join(' / ');
-  check('featured first and big, podcast next to it, photo cards newest first', order === 'wide:Why there is / audio:Recycling he / image:The ROI of W / image:Welcome to N', order);
-  const [wide, audio, roi, welcome] = L.cards;
-  check('big card in column 1 over two rows, podcast in column 2 over two rows', wide.x === 0 && audio.x > wide.x && Math.abs(audio.h - wide.h) < 2, JSON.stringify([wide, audio]));
-  check('ROI above Welcome in column 3', roi.x === welcome.x && roi.x > audio.x && welcome.y > roi.y, JSON.stringify([roi, welcome]));
-  check('the four posts fill the 3x2 bento with no hole', L.holes === 0 && L.cols === 3, 'holes ' + L.holes + ', cols ' + L.cols);
+  check('featured first, then newest first, podcast as its own card', order === 'image:Why there is / image:The ROI of W / image:Welcome to N / audio:Recycling he', order);
+  check('three equal columns', L.cols === 3 && new Set(L.cards.slice(0, 3).map(c => c.w)).size === 1, JSON.stringify(L.cards.slice(0, 3)));
+  check('cards in a row are one height', new Set(L.cards.slice(0, 3).map(c => c.h)).size === 1, L.cards.slice(0, 3).map(c => c.h).join(','));
 
   const a = await page.evaluate(() => {
     const r = document.querySelector('#a .enws-grid');
     const cs = (el, p) => getComputedStyle(el)[p];
-    const w = r.querySelector('.enws-card--wide');
     const au = r.querySelector('.enws-card--audio');
-    const im = r.querySelector('.enws-card--image');
-    const slot = au.querySelector('.enws-audio');
+    const im = r.querySelectorAll('.enws-card--image')[1];
+    const pl = au.querySelector('.enws-player');
+    const btn = au.querySelector('.enws-listen');
     return {
       chips: [...r.querySelectorAll('.enws-chip')].map(c => c.textContent + (c.getAttribute('aria-pressed') === 'true' ? '*' : '')).join(','),
-      wideTitle: [cs(w.querySelector('strong'), 'fontFamily').split(',')[0], cs(w.querySelector('strong'), 'textTransform'), cs(w.querySelector('strong'), 'color')].join('|'),
-      wideMeta: w.querySelector('em').textContent.trim(),
-      widePill: w.querySelector('.enws-pill').textContent,
-      go: cs(w.querySelector('.enws-card__go'), 'backgroundColor'),
-      audioPill: au.querySelector('.enws-pill').textContent + '|' + au.querySelector('.enws-card__top em').textContent,
+      audioTop: au.querySelector('.enws-pill').textContent + '|' + au.querySelector('.enws-card__top em').textContent,
       audioBg: cs(au, 'backgroundImage').includes('linear-gradient'),
-      slot: [slot.dataset.audioSrc, slot.dataset.audioTitle, !!slot.querySelector('audio[controls][preload="none"]')].join('|'),
+      player: [pl.tagName, pl.getAttribute('href'), pl.target, pl.getAttribute('aria-label')].join('|'),
+      bars: pl.querySelectorAll('.enws-player__bars:not(.enws-player__bars--on) i').length,
+      lit: cs(pl.querySelector('.enws-player__bars--on'), 'clipPath'),
+      playBtn: cs(pl.querySelector('.enws-player__btn'), 'backgroundColor') + '|' + Math.round(pl.querySelector('.enws-player__btn').getBoundingClientRect().width),
+      listen: btn ? [btn.textContent.replace(/\s+/g, ' ').trim(), btn.getAttribute('href'), btn.target].join('|') : 'none',
+      listenColour: btn ? cs(btn, 'color') + '|' + cs(btn, 'borderTopColor') : '',
       quote: [au.querySelector('blockquote').childNodes[0].textContent.slice(0, 20), au.querySelector('cite').textContent, cs(au.querySelector('blockquote'), 'fontStyle')].join('|'),
-      audioLink: au.querySelector('.enws-card__title a').getAttribute('href'),
+      date: au.querySelector('.enws-card__acts em').textContent.trim(),
+      titleLink: au.querySelector('.enws-card__title a').getAttribute('href'),
       imgMeta: im.querySelector('em').textContent.replace(/\s+/g, ' ').trim(),
       excerptClamp: cs(im.querySelector('.enws-card__ex'), 'webkitLineClamp'),
       imgRatio: cs(im.querySelector('img'), 'aspectRatio'),
@@ -88,43 +78,78 @@ const layout = sel => {
     };
   });
   check('chips: All, then Insights, Updates, Media', a.chips === 'All*,Insights,Updates,Media', a.chips);
-  check('big card title is Bebas, uppercase, white', a.wideTitle === '"Bebas Neue"|uppercase|rgb(255, 255, 255)', a.wideTitle);
-  check('big card: pill, date · source, green arrow', a.widePill === 'Media' && a.wideMeta === '2 May 2023 · BBC News' && a.go === 'rgb(77, 207, 141)', [a.widePill, a.wideMeta, a.go].join(' | '));
-  check('podcast card: "Media · Podcast" pill and source, dark gradient', a.audioPill === 'Media · Podcast|BBC Business Daily' && a.audioBg, a.audioPill);
-  check('the audio slot carries the file and title, with a plain player inside', a.slot === 'news-img/silence.mp3|Recycling heat from kitchens to keep restaurants warm|true', a.slot);
+  check('podcast card: "Media · Podcast" and its source, dark gradient', a.audioTop === 'Media · Podcast|BBC Business Daily' && a.audioBg, a.audioTop);
+  check('without a file, the player itself opens the BBC episode in a new tab', a.player === 'A|https://www.bbc.com/audio/play/w3ct4n3g|_blank|Listen on BBC Business Daily: Recycling heat from kitchens to keep restaurants warm (opens in a new tab)', a.player);
+  check('a waveform of 36 bars, the first part lit', a.bars === 36 && /^inset\(0px 72% 0px 0px\)$/.test(a.lit), a.bars + ' ' + a.lit);
+  check('a round green play button', a.playBtn === 'rgb(77, 207, 141)|52', a.playBtn);
+  check('a "Listen on BBC Business Daily ↗" button to the episode page', a.listen === 'Listen on BBC Business Daily ↗|https://www.bbc.com/audio/play/w3ct4n3g|_blank', a.listen);
+  check('the Listen button is green on the dark card, not the theme\'s pink', a.listenColour === 'rgb(77, 207, 141)|rgb(77, 207, 141)', a.listenColour);
   check('the quote and its credit, not italicised by the theme', a.quote === '“We were looking at |Matt Manfield, facilities manager, Turtle Bay (UK)|normal', a.quote);
-  check('the podcast card still links to its post', a.audioLink === '#post-4', a.audioLink);
-  check('photo card: 16:9, two-line excerpt, date · Article', a.imgRatio === '16 / 9' && a.excerptClamp === '2' && a.imgMeta === '20 Nov 2025 · Article ↗', [a.imgRatio, a.excerptClamp, a.imgMeta].join(' | '));
+  check('the podcast card shows its date and still links to its post', a.date === '2 May 2023' && a.titleLink === '#post-4', a.date + ' ' + a.titleLink);
+  check('photo card: 16:9, two-line excerpt, date · type', a.imgRatio === '16 / 9' && a.excerptClamp === '2' && a.imgMeta === '20 Nov 2025 · Article ↗', [a.imgRatio, a.excerptClamp, a.imgMeta].join(' | '));
   check('chips: green when on, theme reset does not leak', a.chipBtn === 'rgb(7, 134, 79)|rgb(221, 226, 230)', a.chipBtn);
   check('no Load more with four posts', a.noMore);
 
-  // A player taking the slot over hides the plain one.
-  const handover = await page.evaluate(() => {
-    const slot = document.querySelector('#a .enws-audio');
-    slot.setAttribute('data-player', 'ready');
-    const hidden = getComputedStyle(slot.querySelector('audio')).display;
-    slot.removeAttribute('data-player');
-    return hidden;
+  // The player's link and the Listen button sit above the card's own link.
+  const onTop = await page.evaluate(() => {
+    const au = document.querySelector('#a .enws-card--audio');
+    au.scrollIntoView({ block: 'center' });
+    const hit = el => { const r = el.getBoundingClientRect(); const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return el.contains(e); };
+    return hit(au.querySelector('.enws-player')) && hit(au.querySelector('.enws-listen'));
   });
-  check('data-player="ready" hides the plain player', handover === 'none', handover);
+  check('clicking the player or the Listen button hits them, not the card', onTop);
 
-  // Hover.
-  await page.hover('#a .enws-card--wide');
+  await page.hover('#a .enws-card--image');
   await sleep(350);
-  const hov = await page.evaluate(() => {
-    const w = document.querySelector('#a .enws-card--wide');
-    const m = new DOMMatrix(getComputedStyle(w.querySelector('.enws-card__go')).transform);
-    return getComputedStyle(w).transform + '|' + Math.round(Math.atan2(m.b, m.a) * 180 / Math.PI);
-  });
-  check('hover lifts the card 4px and turns the arrow 45°', hov === 'matrix(1, 0, 0, 1, 0, -4)|45', hov);
+  const hov = await page.evaluate(() => getComputedStyle(document.querySelector('#a .enws-card--image')).transform);
+  check('hover lifts a card 4px', hov === 'matrix(1, 0, 0, 1, 0, -4)', hov);
   await page.mouse.move(2, 2);
+
+  /* ----------------------------------------------------- the player --- */
+
+  const P = '#b .enws-player[data-audio-src]';
+  const ps = () => page.evaluate(sel => {
+    const p = document.querySelector(sel);
+    const au = p.querySelector('audio');
+    return { playing: p.classList.contains('is-playing'), paused: au.paused, t: +au.currentTime.toFixed(2), d: +(au.duration || 0).toFixed(1), p: p.style.getPropertyValue('--p'), label: p.querySelector('.enws-player__btn').getAttribute('aria-label'), pressed: p.querySelector('.enws-player__btn').getAttribute('aria-pressed'), time: p.querySelector('.enws-player__time').textContent, seek: p.querySelector('.enws-player__seek').value };
+  }, P);
+  // Python's test server cannot serve byte ranges, and without them Chrome
+  // cannot seek in audio; a real web server can. Hand the player the same
+  // file as a blob, which can.
+  await page.evaluate(async sel => {
+    const au = document.querySelector(sel + ' audio');
+    const blob = await (await fetch(au.getAttribute('src'))).blob();
+    au.src = URL.createObjectURL(blob);
+  }, P);
+  let st = await ps();
+  check('with a file: a play button, not playing yet', !st.playing && st.paused && st.label === 'Play: Recycling heat from kitchens to keep restaurants warm' && st.pressed === 'false', JSON.stringify(st));
+  await page.click(P + ' .enws-player__btn');
+  await sleep(2300);
+  st = await ps();
+  check('play plays: the button turns to pause', st.playing && !st.paused && st.label.startsWith('Pause') && st.pressed === 'true', JSON.stringify(st));
+  check('the waveform fills and the time runs', st.t > 1.5 && parseFloat(st.p) > 20 && /^0:0[1-9]$/.test(st.time), JSON.stringify(st));
+  const bounce = await page.evaluate(sel => getComputedStyle(document.querySelector(sel + ' .enws-player__bars i')).animationName, P);
+  check('the bars move while it plays', bounce === 'enws-wave', bounce);
+  await page.click(P + ' .enws-player__btn');
+  await sleep(200);
+  st = await ps();
+  check('pause pauses', !st.playing && st.paused, JSON.stringify(st));
+  await page.evaluate(sel => { const s = document.querySelector(sel + ' .enws-player__seek'); s.value = '50'; s.dispatchEvent(new Event('input', { bubbles: true })); }, P);
+  await sleep(300);
+  st = await ps();
+  check('the waveform seeks: half way is half the length', Math.abs(st.t - st.d / 2) < 0.4, JSON.stringify(st));
+  await page.focus(P + ' .enws-player__seek');
+  await page.keyboard.press('ArrowRight');
+  await sleep(200);
+  const moved = await ps();
+  check('and arrow keys seek too', moved.t > st.t, st.t + ' -> ' + moved.t);
 
   /* ---------------------------------------------------------- filter --- */
 
   await page.click('#a .enws-chip[data-seg="media"]');
   await sleep(40);
   let vis = await page.evaluate(() => [...document.querySelectorAll('#a .enws-card')].filter(c => !c.hidden).map(c => c.className.match(/--(\w+)/)[1]).join(','));
-  check('Media shows the article and the podcast', vis === 'wide,audio', vis);
+  check('Media shows the article and the podcast', vis === 'image,audio', vis);
   const fading = await page.evaluate(() => [...document.querySelectorAll('#a .enws-card:not([hidden])')].map(c => +(+getComputedStyle(c).opacity).toFixed(2)));
   check('they fade in', fading.some(o => o < 1), fading.join(','));
   await sleep(300);
@@ -140,22 +165,15 @@ const layout = sel => {
 
   /* ------------------------------------------------------ Load more --- */
 
-  let b = await page.evaluate(() => ({ n: document.querySelectorAll('#b .enws-card:not(.enws-card--next)').length, more: !!document.querySelector('#b .enws-more__btn'), last: [...document.querySelectorAll('#b .enws-bento > *')].pop().className }));
+  let b = await page.evaluate(() => ({ n: document.querySelectorAll('#b .enws-card:not(.enws-card--next)').length, more: !!document.querySelector('#b .enws-more__btn'), last: [...document.querySelectorAll('#b .enws-cards > *')].pop().className }));
   check('three per load, Load more showing, Go deeper last', b.n === 3 && b.more && /--next/.test(b.last), JSON.stringify(b));
-  // A short last row whose last tile sits in column 2: it stretches from
-  // column 2 to the edge, not from column 1.
-  const stretch = await page.evaluate(() => { const t = document.querySelector('#b .enws-card--next'); return t.style.gridColumn; });
-  L = await page.evaluate(layout, '#b');
-  check('a short last row: the last tile stretches from where it sits', stretch === '2 / -1' && L.holes === 0, stretch + ', holes ' + L.holes);
   await page.evaluate(() => { window.__newsEvent = 0; document.addEventListener('eruda:news-cards', e => { window.__newsEvent = e.detail.cards.length; }); });
   await page.click('#b .enws-more__btn');
   await sleep(500);
-  b = await page.evaluate(() => ({ n: document.querySelectorAll('#b .enws-card:not(.enws-card--next)').length, more: !!document.querySelector('#b .enws-more__btn'), last: [...document.querySelectorAll('#b .enws-bento > *')].pop().className, next: document.querySelector('#b .enws-grid').dataset.next, ev: window.__newsEvent }));
+  b = await page.evaluate(() => ({ n: document.querySelectorAll('#b .enws-card:not(.enws-card--next)').length, more: !!document.querySelector('#b .enws-more__btn'), last: [...document.querySelectorAll('#b .enws-cards > *')].pop().className, next: document.querySelector('#b .enws-grid').dataset.next, ev: window.__newsEvent }));
   check('Load more adds the next three and then goes away', b.n === 6 && !b.more && b.next === '5', JSON.stringify(b));
-  check('the new cards go before the Go deeper tile', /--next/.test(b.last), b.last);
-  check('a player hears about the new cards', b.ev === 3, String(b.ev));
-  L = await page.evaluate(layout, '#b');
-  check('no hole after loading more', L.holes === 0, 'holes ' + L.holes);
+  check('the new cards go before the Go deeper card', /--next/.test(b.last), b.last);
+  check('anything else can hear about the new cards', b.ev === 3, String(b.ev));
 
   /* ------------------------------------------------------- carousel --- */
 
@@ -220,30 +238,30 @@ const layout = sel => {
     return {
       by: r.querySelector('.enws-src__from p').textContent.replace(/\s+/g, ' ').trim(),
       btn: r.querySelector('.enws-src__btn').textContent.replace(/\s+/g, ' ').trim() + '|' + r.querySelector('.enws-src__btn').target,
-      slot: !!r.querySelector('.enws-audio[data-context="source"] audio'),
+      slot: !!r.querySelector('.enws-player[data-context="source"]'),
       rel: r.querySelector('.enws-src__rel strong').textContent + '|' + r.querySelector('.enws-src__rel').getAttribute('href'),
     };
   });
-  check('source box: originally published by, and a button out', s.by === 'Originally published by BBC Business Daily' && s.btn === 'Read on BBC Business Daily ↗|_blank', s.by + ' / ' + s.btn);
-  check('source box: the audio slot', s.slot);
+  check('source box: originally published by, and a Listen button out', s.by === 'Originally published by BBC Business Daily' && s.btn === 'Listen on BBC Business Daily ↗|_blank', s.by + ' / ' + s.btn);
+  check('source box: the player', s.slot);
   check('source box: the related page', s.rel === 'Restaurants & Commercial Kitchens|/restaurants-commercial-kitchens/', s.rel);
 
   if (SHOTS) {
     await page.goto('about:blank');
     await page.goto(URL, { waitUntil: 'networkidle0' });
     await (await page.$('#a .enws-grid')).screenshot({ path: SHOTS + '/news-desktop.png' });
+    await (await page.$('#b .enws-grid')).screenshot({ path: SHOTS + '/news-playable.png' });
     await (await page.$('#e')).screenshot({ path: SHOTS + '/news-press.png' });
   }
 
   /* ---------------------------------------------------------- sizes --- */
 
-  for (const [w, name, cols] of [[1100, 'tablet-1100', 2], [760, 'phone-760', 1], [360, 'phone-360', 1]]) {
+  for (const [w, name, cols] of [[1024, 'tablet', 2], [767, 'phone-767', 1], [360, 'phone-360', 1]]) {
     await page.setViewport({ width: w, height: 900 });
     await sleep(500);
     const lay = await page.evaluate(layout, '#a');
-    check(`${name}: ${cols} column(s), no hole`, lay.cols === cols && lay.holes === 0, 'cols ' + lay.cols + ', holes ' + lay.holes);
+    check(`${name}: ${cols} column(s)`, lay.cols === cols, 'cols ' + lay.cols);
     check(`${name}: no sideways page scroll`, lay.scroll <= w, lay.scroll + ' > ' + w);
-    if (w === 1100) check('tablet: the big card spans both columns', lay.cards[0].w > lay.cards[1].w * 1.8, JSON.stringify(lay.cards.slice(0, 2)));
     if (SHOTS) await (await page.$('#a .enws-grid')).screenshot({ path: `${SHOTS}/news-${name}.png` });
   }
   const phoneCar = await page.evaluate(() => { const t = document.querySelector('#c .enws-car'); return Math.round(t.clientWidth / t.querySelector('.enws-car__card').getBoundingClientRect().width * 10) / 10; });
@@ -261,6 +279,8 @@ const layout = sel => {
   await sleep(200);
   const rm = await calm.evaluate(() => { const c = document.querySelector('#a .enws-card:not([hidden])'); return getComputedStyle(c).opacity + '/' + getComputedStyle(c).animationName + '/' + getComputedStyle(c).transform + '/' + getComputedStyle(document.querySelector('#c .enws-car')).scrollBehavior; });
   check('reduced motion: no fade, no lift, no smooth scroll', rm === '1/none/none/auto', rm);
+  const ping = await calm.evaluate(() => getComputedStyle(document.querySelector('#a .enws-player__btn')).animationName);
+  check('reduced motion: the play button does not pulse', ping === 'none', ping);
 
   check('no script errors', errs.length === 0, errs.join(' | '));
   await browser.close();

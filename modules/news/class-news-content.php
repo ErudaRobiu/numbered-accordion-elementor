@@ -63,7 +63,12 @@ final class News_Content {
 	 * @return array
 	 */
 	public static function field_group() {
-		$has_audio = array( array( array( 'field' => 'field_enws_audio', 'operator' => '!=empty' ) ) );
+		// Either rule shows the quote: an audio file, or a Podcast card that
+		// sends listeners to the episode page.
+		$has_audio = array(
+			array( array( 'field' => 'field_enws_audio', 'operator' => '!=empty' ) ),
+			array( array( 'field' => 'field_enws_layout', 'operator' => '==', 'value' => 'audio' ) ),
+		);
 
 		return array(
 			'key'                   => 'group_enws_news_item',
@@ -120,14 +125,14 @@ final class News_Content {
 					'label'        => 'Source link',
 					'name'         => 'nw_source_url',
 					'type'         => 'url',
-					'instructions' => 'Shows "Read on …" on the post.',
+					'instructions' => 'The original article, or for a podcast the episode\'s own page (e.g. BBC Audio). A podcast card\'s Listen button goes here.',
 				),
 				array(
 					'key'           => 'field_enws_audio',
 					'label'         => 'Audio file',
 					'name'          => 'nw_audio',
 					'type'          => 'file',
-					'instructions'  => 'An MP3 makes this post a podcast card, with a player.',
+					'instructions'  => 'Optional. With an MP3 the podcast card plays it in the page; without one its player opens the Source link.',
 					'return_format' => 'id',
 					'library'       => 'all',
 					'mime_types'    => 'mp3, m4a',
@@ -156,10 +161,9 @@ final class News_Content {
 					'label'         => 'Card on the News page',
 					'name'          => 'nw_layout',
 					'type'          => 'select',
-					'instructions'  => 'Leave on Automatic unless one card looks wrong.',
+					'instructions'  => 'Automatic makes a post with an audio file a podcast card. Choose Podcast for an episode that lives elsewhere (it needs a Source link).',
 					'choices'       => array(
 						'auto'  => 'Automatic',
-						'wide'  => 'Big photo',
 						'image' => 'Photo card',
 						'audio' => 'Podcast',
 					),
@@ -204,6 +208,10 @@ final class News_Content {
 
 		$audio  = $str( 'audio_url' );
 		$layout = $get( 'nw_layout' );
+		// "Big photo" existed before the grid became plain cards.
+		$layout = 'wide' === $layout ? 'image' : $layout;
+		$listen = $get( 'nw_source_url' );
+		$podcast = '' !== $audio || ( 'audio' === $layout && '' !== $listen );
 		$time   = strtotime( $str( 'date' ) );
 
 		return array(
@@ -219,89 +227,59 @@ final class News_Content {
 				return isset( $c['slug'] ) ? (string) $c['slug'] : '';
 			}, $cats ) ) ),
 			'featured'     => in_array( $get( 'nw_featured' ), array( '1', 'yes', 'true' ), true ),
-			'layout'       => in_array( $layout, array( 'wide', 'image', 'audio' ), true ) ? $layout : 'auto',
+			'layout'       => in_array( $layout, array( 'image', 'audio' ), true ) ? $layout : 'auto',
 			'audio'        => $audio,
 			'quote'        => $get( 'nw_audio_quote' ),
 			'credit'       => $get( 'nw_audio_credit' ),
 			'source'       => $get( 'nw_source_name' ),
-			'type'         => '' !== $audio ? 'Podcast' : ( '' !== $get( 'nw_source_name' ) ? $get( 'nw_source_name' ) : 'Article' ),
+			'source_url'   => $listen,
+			'type'         => $podcast && 'image' !== $layout ? 'Podcast' : ( '' !== $get( 'nw_source_name' ) ? $get( 'nw_source_name' ) : 'Article' ),
 			'image'        => isset( $raw['image'] ) && is_string( $raw['image'] ) ? $raw['image'] : '',
 		);
 	}
 
 	/**
-	 * Which card each post gets.
+	 * Which card each post gets: a podcast card or a photo card.
 	 *
-	 * On the first page the first post is the big one; after that nothing
-	 * is, so a "Load more" never drops a second hero into the middle. A post
-	 * with audio is a podcast card. A chosen layout wins, except that a
-	 * podcast card needs audio to play.
+	 * A post is a podcast when it has an audio file, or when its card is set
+	 * to Podcast and it has a Source link to send listeners to. "Photo card"
+	 * always wins.
 	 *
-	 * @param array $cards      Cards, in order.
-	 * @param bool  $first_page Whether this is the first page of results.
-	 * @return string[] One variant per card: wide, audio or image.
+	 * @param array $cards Cards, in order.
+	 * @return string[] One variant per card: audio or image.
 	 */
-	public static function variants( $cards, $first_page ) {
+	public static function variants( $cards ) {
 		$out = array();
 
-		foreach ( array_values( (array) $cards ) as $i => $card ) {
-			$audio = '' !== $card['audio'];
+		foreach ( array_values( (array) $cards ) as $card ) {
+			$playable = '' !== $card['audio'];
+			$linked   = 'audio' === $card['layout'] && '' !== $card['source_url'];
 
-			if ( 'wide' === $card['layout'] || 'image' === $card['layout'] ) {
-				$out[] = $card['layout'];
-			} elseif ( 'audio' === $card['layout'] ) {
-				$out[] = $audio ? 'audio' : 'image';
-			} elseif ( $first_page && 0 === $i ) {
-				$out[] = 'wide';
-			} else {
-				$out[] = $audio ? 'audio' : 'image';
-			}
+			$out[] = 'image' !== $card['layout'] && ( $playable || $linked ) ? 'audio' : 'image';
 		}
 
 		return $out;
 	}
 
 	/**
-	 * The order the cards are laid in, and each one's variant.
+	 * A waveform for a player: bar heights that look like speech, the same
+	 * every time for the same post, different from post to post.
 	 *
-	 * On the first page the tall cards (podcasts) go straight after the big
-	 * one, so they stand beside it and the photo cards stack in the next
-	 * column, newest first, with no hole. Left in date order, a podcast
-	 * older than the photo cards would drop to the last row and leave a gap
-	 * beside it. Later pages keep date order: dense packing fills them.
-	 *
-	 * @param array $cards      Cards, in query order.
-	 * @param bool  $first_page First page of results.
-	 * @return array{cards: array, variants: string[]}
+	 * @param int $seed Post id.
+	 * @param int $bars How many bars.
+	 * @return int[] Heights in percent, 22 to 92.
 	 */
-	public static function arrange( $cards, $first_page ) {
-		$cards    = array_values( (array) $cards );
-		$variants = self::variants( $cards, $first_page );
+	public static function waveform( $seed, $bars = 36 ) {
+		$out = array();
 
-		if ( ! $first_page ) {
-			return array( 'cards' => $cards, 'variants' => $variants );
+		for ( $i = 0; $i < $bars; $i++ ) {
+			$n     = crc32( $seed . ':' . $i );
+			// Louder in the middle of a phrase, quieter at its ends.
+			$shape = sin( M_PI * ( ( $i % 9 ) + 1 ) / 10 );
+			$out[] = (int) round( 22 + ( ( $n % 70 ) * ( 0.45 + 0.55 * $shape ) ) );
 		}
 
-		$rank  = array( 'wide' => 0, 'audio' => 1, 'image' => 2 );
-		$order = array_keys( $cards );
-
-		usort(
-			$order,
-			function ( $a, $b ) use ( $variants, $rank ) {
-				$diff = $rank[ $variants[ $a ] ] - $rank[ $variants[ $b ] ];
-
-				return 0 !== $diff ? $diff : $a - $b;
-			}
-		);
-
-		return array(
-			'cards'    => array_map( function ( $i ) use ( $cards ) {
-				return $cards[ $i ];
-			}, $order ),
-			'variants' => array_map( function ( $i ) use ( $variants ) {
-				return $variants[ $i ];
-			}, $order ),
-		);
+		return $out;
 	}
 
 	/**

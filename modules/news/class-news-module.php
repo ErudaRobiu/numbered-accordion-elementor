@@ -97,6 +97,7 @@ final class News_Module extends Elementor_Module {
 					'featured' => array( 'type' => 'integer', 'default' => 0, 'minimum' => 0 ),
 					'cats'     => array( 'type' => 'string', 'default' => '' ),
 					'tags'     => array( 'type' => 'string', 'default' => '' ),
+					'listen'   => array( 'type' => 'string', 'default' => '' ),
 				),
 				'callback'            => function ( $request ) {
 					$page = News_Render::query(
@@ -111,7 +112,7 @@ final class News_Module extends Elementor_Module {
 
 					return rest_ensure_response(
 						array(
-							'html' => News_Render::grid_cards( $page['cards'], false ),
+							'html' => News_Render::grid_cards( $page['cards'], array( 'listen' => sanitize_text_field( (string) $request['listen'] ) ) ),
 							'more' => $page['more'],
 							'next' => $page['next'],
 						)

@@ -147,7 +147,7 @@ namespace {
 			array( 1, 'Why there is serious money in kitchen fumes', '2023-05-02 09:00:00', 'media', 'Media', array( 'nw_featured' => '1', 'nw_source_name' => 'BBC News' ), '', 'p27-bbc-article', 'On the windy roof of a Burger King in Malmö Sweden…' ),
 			array( 2, 'The ROI of Waste Heat Recovery: Proven, Reliable, and Achievable in Three Years or Better', '2025-11-20 16:18:06', 'insights', 'Insights', array(), '', 'p27-post-2271', 'Across North America, industrial facilities lose enormous amounts of heat every day through hot, particulate-laden exhaust.' ),
 			array( 3, 'Welcome to Norrel™: Reclaim Waste Heat. Energy Savings Delivered.', '2025-10-27 18:05:33', 'updates', 'Updates', array(), '', 'p27-post-488', 'Is your business wasting valuable energy because traditional heat recovery systems can’t handle your hot, particulate-laden, and humid exhaust?' ),
-			array( 4, 'Recycling heat from kitchens to keep restaurants warm', '2023-05-02 08:00:00', 'media', 'Media', array( 'nw_source_name' => 'BBC Business Daily', 'nw_audio_quote' => 'We were looking at ways in which we could reduce our costs and become more sustainable, and this was at the forefront of what we\'d found.', 'nw_audio_credit' => 'Matt Manfield, facilities manager, Turtle Bay (UK)' ), 'news-img/silence.mp3', 'p27-bbc-podcast', '' ),
+			array( 4, 'Recycling heat from kitchens to keep restaurants warm', '2023-05-02 08:00:00', 'media', 'Media', array( 'nw_source_name' => 'BBC Business Daily', 'nw_source_url' => 'https://www.bbc.com/audio/play/w3ct4n3g', 'nw_layout' => 'audio', 'nw_audio_quote' => 'We were looking at ways in which we could reduce our costs and become more sustainable, and this was at the forefront of what we\'d found.', 'nw_audio_credit' => 'Matt Manfield, facilities manager, Turtle Bay (UK)' ), '', 'p27-bbc-podcast', '' ),
 		);
 		$out  = array();
 
@@ -327,6 +327,11 @@ namespace {
 
 	// A second archive with more posts than one load, to prove Load more:
 	// the first three, then the next three from "the server".
+	// The same podcast with an audio file of our own, to prove the player.
+	$playable          = $seed[3];
+	$playable['id']    = 8;
+	$playable['audio'] = 'news-img/tone.mp3';
+
 	$extra = array();
 	foreach ( array( 5, 6, 7 ) as $n ) {
 		$c           = $seed[2];
@@ -336,14 +341,14 @@ namespace {
 		$c['cat']    = 'updates';
 		$extra[]     = $c;
 	}
-	file_put_contents( __DIR__ . '/news-more.json', json_encode( array( 'html' => News_Render::grid_cards( $extra, false ), 'more' => false, 'next' => 5 ) ) ); // phpcs:ignore
+	file_put_contents( __DIR__ . '/news-more.json', json_encode( array( 'html' => News_Render::grid_cards( $extra ), 'more' => false, 'next' => 5 ) ) ); // phpcs:ignore
 
 	$grid  = new News_Grid_Fixture( array( 'per_page' => 9 ), array( 'cards' => $seed, 'more' => false, 'featured' => 1, 'next' => 3 ) );
-	$paged = new News_Grid_Fixture( array( 'per_page' => 3, 'show_next' => 'yes', 'next_chip' => 'Go deeper', 'next_heading' => 'Looking for white papers?', 'next_text' => 'The Resource Library has them all.', 'next_button' => 'Resource Library', 'next_link' => array( 'url' => '/resources/' ) ), array( 'cards' => array_slice( $seed, 0, 3 ), 'more' => true, 'featured' => 1, 'next' => 2 ), 'news-more.json' );
+	$paged = new News_Grid_Fixture( array( 'per_page' => 3, 'show_next' => 'yes', 'next_chip' => 'Go deeper', 'next_heading' => 'Looking for white papers?', 'next_text' => 'The Resource Library has them all.', 'next_button' => 'Resource Library', 'next_link' => array( 'url' => '/resources/' ) ), array( 'cards' => array( $seed[0], $playable, $seed[1] ), 'more' => true, 'featured' => 1, 'next' => 2 ), 'news-more.json' );
 	$car   = new News_Carousel_Fixture( array( 'arrows' => 'bar', 'all_text' => 'All posts', 'all_url' => array( 'url' => '/news/' ) ), array( $seed[1], $seed[0], $seed[2], $seed[3], $seed[1], $seed[2] ) );
 	$ext   = new News_Carousel_Fixture( array( 'arrows' => 'external' ), array( $seed[1], $seed[0], $seed[2], $seed[3], $seed[1], $seed[2] ) );
 	$press = new Press_Fixture();
-	$src   = new Source_Fixture( array( 'card' => $seed[3], 'source_url' => 'https://www.bbc.co.uk/programmes/w3ct4w8v', 'related' => array( 'title' => 'Restaurants & Commercial Kitchens', 'url' => '/restaurants-commercial-kitchens/', 'excerpt' => 'Grease-laden kitchen exhaust, recovered for make-up air.' ) ) );
+	$src   = new Source_Fixture( array( 'card' => $seed[3], 'source_url' => 'https://www.bbc.com/audio/play/w3ct4n3g', 'related' => array( 'title' => 'Restaurants & Commercial Kitchens', 'url' => '/restaurants-commercial-kitchens/', 'excerpt' => 'Grease-laden kitchen exhaust, recovered for make-up air.' ) ) );
 
 	?>
 <!DOCTYPE html>
@@ -374,11 +379,11 @@ h3{font-size:2em}
 </head>
 <body>
 <section class="host" id="posts">
-	<p class="marker">News Grid — the four seed posts</p>
+	<p class="marker">News Grid — the four seed posts (podcast without a file: its player opens the BBC)</p>
 	<div id="a"><?php echo $grid->html(); // phpcs:ignore ?></div>
 </section>
 <section class="host">
-	<p class="marker">News Grid — three per load, Load more, Go deeper tile</p>
+	<p class="marker">News Grid — three per load, a podcast WITH a file, Load more, Go deeper tile</p>
 	<div id="b"><?php echo $paged->html(); // phpcs:ignore ?></div>
 </section>
 <section class="host" style="background:#fff">

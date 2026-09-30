@@ -178,64 +178,127 @@ final class News_Render {
 	}
 
 	/**
-	 * The audio slot: where Robiu's player goes.
+	 * The words the cards use that are not the post's own.
 	 *
-	 * Out of the box it is a plain <audio controls> inside a container
-	 * carrying the file and the title, so a podcast plays before any player
-	 * exists. A player can take it over two ways:
+	 * @param array $labels Overrides.
+	 * @return array{listen: string, more: string, play: string, pause: string}
+	 */
+	public static function labels( $labels = array() ) {
+		$labels = is_array( $labels ) ? $labels : array();
+
+		return array(
+			'listen' => isset( $labels['listen'] ) && '' !== $labels['listen'] ? (string) $labels['listen'] : __( 'Listen on %s', 'numbered-accordion' ),
+			'more'   => isset( $labels['more'] ) ? (string) $labels['more'] : __( 'Read more', 'numbered-accordion' ),
+			'play'   => __( 'Play', 'numbered-accordion' ),
+			'pause'  => __( 'Pause', 'numbered-accordion' ),
+		);
+	}
+
+	/**
+	 * The "Listen on …" text for a card.
 	 *
-	 * - Server side, the `eruda_news_audio_player` filter returns its own
-	 *   markup for the slot.
-	 * - In the browser, a script finds `.enws-audio[data-audio-src]`, builds
-	 *   its UI inside and sets `data-player="ready"`; the stylesheet then
-	 *   hides the plain <audio>. After "Load more" the grid dispatches
-	 *   `eruda:news-cards` on the widget with the new cards in
-	 *   `event.detail.cards`, so new slots can be taken over too.
+	 * @param array $card   Card.
+	 * @param array $labels See labels().
+	 * @return string
+	 */
+	public static function listen_text( $card, $labels ) {
+		$where = '' !== $card['source'] ? $card['source'] : (string) wp_parse_url( $card['source_url'], PHP_URL_HOST );
+
+		return false !== strpos( $labels['listen'], '%s' ) ? sprintf( $labels['listen'], $where ) : $labels['listen'];
+	}
+
+	/**
+	 * The audio player.
+	 *
+	 * With an audio file it plays in the page: a play button, a waveform that
+	 * fills as it plays and can be clicked or arrowed to seek, and the time.
+	 * Without one it is a link to the episode's own page, drawn the same way,
+	 * so the card looks the same whether or not the file is ours to host.
+	 *
+	 * The markup can be replaced whole through the `eruda_news_audio_player`
+	 * filter ($html, array{src, title, post_id, context, listen_url}).
 	 *
 	 * @param array  $card    Card.
 	 * @param string $context grid or source.
+	 * @param array  $labels  See labels().
 	 * @return string
 	 */
-	public static function audio_slot( $card, $context ) {
-		$html = sprintf(
-			'<div class="enws-audio" data-audio-src="%1$s" data-audio-title="%2$s" data-post-id="%3$d" data-context="%4$s"><audio controls preload="none" src="%1$s" aria-label="%5$s"></audio></div>',
-			esc_url( $card['audio'] ),
-			esc_attr( $card['title'] ),
-			(int) $card['id'],
-			esc_attr( $context ),
-			/* translators: %s: episode title */
-			esc_attr( sprintf( __( 'Play: %s', 'numbered-accordion' ), $card['title'] ) )
-		);
+	public static function player( $card, $context, $labels ) {
+		$wave = '';
+
+		foreach ( News_Content::waveform( (int) $card['id'] ) as $h ) {
+			$wave .= '<i style="--h:' . (int) $h . '%"></i>';
+		}
+
+		$bars = '<span class="enws-player__wave" aria-hidden="true"><span class="enws-player__bars">' . $wave . '</span><span class="enws-player__bars enws-player__bars--on">' . $wave . '</span></span>';
+
+		if ( '' !== $card['audio'] ) {
+			$html = sprintf(
+				'<div class="enws-player" data-audio-src="%1$s" data-audio-title="%2$s" data-post-id="%3$d" data-context="%4$s" data-play="%7$s" data-pause="%8$s">'
+				. '<button type="button" class="enws-player__btn" aria-label="%5$s"><span class="enws-player__icon" aria-hidden="true"></span></button>'
+				. '<span class="enws-player__track">%6$s<input class="enws-player__seek" type="range" min="0" max="100" step="0.1" value="0" aria-label="%9$s" /></span>'
+				. '<span class="enws-player__time" aria-live="off">0:00</span>'
+				. '<audio preload="none" src="%1$s"></audio>'
+				. '</div>',
+				esc_url( $card['audio'] ),
+				esc_attr( $card['title'] ),
+				(int) $card['id'],
+				esc_attr( $context ),
+				/* translators: %s: episode title */
+				esc_attr( sprintf( __( 'Play: %s', 'numbered-accordion' ), $card['title'] ) ),
+				$bars,
+				esc_attr( $labels['play'] ),
+				esc_attr( $labels['pause'] ),
+				/* translators: %s: episode title */
+				esc_attr( sprintf( __( 'Position in %s', 'numbered-accordion' ), $card['title'] ) )
+			);
+		} else {
+			$html = sprintf(
+				'<a class="enws-player enws-player--link" href="%1$s" target="_blank" rel="noopener" data-context="%2$s" aria-label="%3$s">'
+				. '<span class="enws-player__btn" aria-hidden="true"><span class="enws-player__icon"></span></span>'
+				. '<span class="enws-player__track">%4$s</span>'
+				. '<span class="enws-player__time" aria-hidden="true">↗</span>'
+				. '</a>',
+				esc_url( $card['source_url'] ),
+				esc_attr( $context ),
+				/* translators: 1: "Listen on BBC Business Daily", 2: episode title */
+				esc_attr( sprintf( __( '%1$s: %2$s (opens in a new tab)', 'numbered-accordion' ), self::listen_text( $card, $labels ), $card['title'] ) ),
+				$bars
+			);
+		}
 
 		/**
-		 * Replace the audio slot's markup.
+		 * Replace the player's markup.
 		 *
-		 * @param string $html    Default markup.
-		 * @param array  $args    src, title, post_id, context.
+		 * @param string $html Default markup.
+		 * @param array  $args src, title, post_id, context, listen_url.
 		 */
 		return (string) apply_filters(
 			'eruda_news_audio_player',
 			$html,
 			array(
-				'src'     => $card['audio'],
-				'title'   => $card['title'],
-				'post_id' => (int) $card['id'],
-				'context' => $context,
+				'src'        => $card['audio'],
+				'title'      => $card['title'],
+				'post_id'    => (int) $card['id'],
+				'context'    => $context,
+				'listen_url' => $card['source_url'],
 			)
 		);
 	}
 
 	/**
-	 * One bento card.
+	 * One grid card.
 	 *
 	 * @param array  $card    Card.
-	 * @param string $variant wide, audio or image.
+	 * @param string $variant audio or image.
+	 * @param array  $labels  See labels().
 	 * @return string
 	 */
-	public static function grid_card( $card, $variant ) {
-		$data = sprintf( ' data-cat="%s"', esc_attr( implode( ' ', $card['cats'] ) ) );
-		$pill = '' !== $card['cat_name'] ? '<span class="enws-pill">' . esc_html( $card['cat_name'] ) . '</span>' : '';
-		$meta = '<em><time datetime="' . esc_attr( $card['datetime'] ) . '">' . esc_html( $card['date'] ) . '</time> · ' . esc_html( $card['type'] );
+	public static function grid_card( $card, $variant, $labels = array() ) {
+		$labels = self::labels( $labels );
+		$data   = sprintf( ' data-cat="%s"', esc_attr( implode( ' ', $card['cats'] ) ) );
+		$pill   = '' !== $card['cat_name'] ? '<span class="enws-pill">' . esc_html( $card['cat_name'] ) . '</span>' : '';
+		$date   = '<time datetime="' . esc_attr( $card['datetime'] ) . '">' . esc_html( $card['date'] ) . '</time>';
 
 		ob_start();
 
@@ -245,31 +308,28 @@ final class News_Render {
 			<article class="enws-card enws-card--audio"<?php echo $data; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<span class="enws-card__top"><span class="enws-pill enws-pill--dk"><?php echo esc_html( $top ); ?></span><?php echo '' !== $card['source'] ? '<em>' . esc_html( $card['source'] ) . '</em>' : ''; ?></span>
 				<h3 class="enws-card__title"><a href="<?php echo esc_url( $card['url'] ); ?>"><?php echo esc_html( $card['title'] ); ?></a></h3>
-				<?php echo self::audio_slot( $card, 'grid' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo self::player( $card, 'grid', $labels ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php if ( '' !== $card['quote'] ) : ?>
 					<blockquote><?php echo esc_html( '“' . trim( $card['quote'], '“”" ' ) . '”' ); ?><?php echo '' !== $card['credit'] ? '<cite>' . esc_html( $card['credit'] ) . '</cite>' : ''; ?></blockquote>
 				<?php endif; ?>
+				<span class="enws-card__acts">
+					<?php if ( '' !== $card['source_url'] ) : ?>
+						<a class="enws-listen" href="<?php echo esc_url( $card['source_url'] ); ?>" target="_blank" rel="noopener"><?php echo esc_html( self::listen_text( $card, $labels ) ); ?> <span aria-hidden="true">↗</span></a>
+					<?php endif; ?>
+					<em><?php echo $date; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></em>
+				</span>
 			</article>
-			<?php
-		} elseif ( 'wide' === $variant ) {
-			?>
-			<a class="enws-card enws-card--wide" href="<?php echo esc_url( $card['url'] ); ?>"<?php echo $data; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-				<?php echo $card['image']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core markup ?>
-				<span class="enws-card__shade" aria-hidden="true"></span>
-				<span class="enws-card__txt"><?php echo $pill; // phpcs:ignore ?><strong><?php echo esc_html( $card['title'] ); ?></strong><?php echo $meta . '</em>'; // phpcs:ignore ?></span>
-				<span class="enws-card__go" aria-hidden="true">↗</span>
-			</a>
 			<?php
 		} else {
 			?>
 			<a class="enws-card enws-card--image" href="<?php echo esc_url( $card['url'] ); ?>"<?php echo $data; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-				<span class="enws-card__pic"><?php echo $card['image']; // phpcs:ignore ?><?php echo $pill; // phpcs:ignore ?></span>
+				<span class="enws-card__pic"><?php echo $card['image']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core markup ?><?php echo $pill; // phpcs:ignore ?></span>
 				<span class="enws-card__body">
 					<strong><?php echo esc_html( $card['title'] ); ?></strong>
 					<?php if ( '' !== $card['excerpt'] ) : ?>
 						<span class="enws-card__ex"><?php echo esc_html( $card['excerpt'] ); ?></span>
 					<?php endif; ?>
-					<?php echo $meta . ' <b aria-hidden="true">↗</b></em>'; // phpcs:ignore ?>
+					<em><?php echo $date . ' · ' . esc_html( $card['type'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> <b aria-hidden="true">↗</b></em>
 				</span>
 			</a>
 			<?php
@@ -279,26 +339,27 @@ final class News_Render {
 	}
 
 	/**
-	 * A run of bento cards.
+	 * A run of grid cards, in the order given.
 	 *
-	 * @param array $cards      Cards.
-	 * @param bool  $first_page First page of results.
+	 * @param array $cards  Cards.
+	 * @param array $labels See labels().
 	 * @return string
 	 */
-	public static function grid_cards( $cards, $first_page ) {
-		$html = '';
-		$laid = News_Content::arrange( $cards, $first_page );
+	public static function grid_cards( $cards, $labels = array() ) {
+		$html     = '';
+		$cards    = array_values( (array) $cards );
+		$variants = News_Content::variants( $cards );
 
-		foreach ( $laid['cards'] as $i => $card ) {
-			$html .= self::grid_card( $card, $laid['variants'][ $i ] );
+		foreach ( $cards as $i => $card ) {
+			$html .= self::grid_card( $card, $variants[ $i ], $labels );
 		}
 
 		return $html;
 	}
 
 	/**
-	 * One carousel card: always the photo card, with a Podcast pill when the
-	 * post has audio, and no player.
+	 * One carousel card: always the photo card, with a Podcast pill for a
+	 * podcast, and no player.
 	 *
 	 * @param array  $card Card.
 	 * @param string $read "Read" link text.
@@ -312,7 +373,7 @@ final class News_Render {
 			<span class="enws-car__body">
 				<span class="enws-car__meta">
 					<?php echo '' !== $card['cat_name'] ? '<b>' . esc_html( $card['cat_name'] ) . '</b>' : ''; ?>
-					<?php echo '' !== $card['audio'] ? '<i>' . esc_html__( 'Podcast', 'numbered-accordion' ) . '</i>' : ''; ?>
+					<?php echo 'audio' === News_Content::variants( array( $card ) )[0] ? '<i>' . esc_html__( 'Podcast', 'numbered-accordion' ) . '</i>' : ''; ?>
 					<time datetime="<?php echo esc_attr( $card['datetime'] ); ?>"><?php echo esc_html( $card['date'] ); ?></time>
 				</span>
 				<strong><?php echo esc_html( $card['title'] ); ?></strong>
