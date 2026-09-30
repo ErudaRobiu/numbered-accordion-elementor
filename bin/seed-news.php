@@ -159,10 +159,13 @@ foreach ( require $dir . '/news-data.php' as $item ) {
 
 	set_post_thumbnail( $id, enws_seed_media( $dir . '/' . $item['image'], $item['alt'] ) );
 
-	$related = get_page_by_path( $item['related'] );
+	// By slug, not path: most target pages sit under a parent
+	// (/industries/restaurants-commercial-kitchens/), and get_page_by_path()
+	// wants the whole path.
+	$related = get_posts( array( 'post_type' => 'page', 'name' => $item['related'], 'post_status' => 'publish', 'numberposts' => 1 ) );
 
-	if ( $related && 'publish' === $related->post_status ) {
-		update_field( $keys['nw_related'], $related->ID, $id );
+	if ( $related ) {
+		update_field( $keys['nw_related'], $related[0]->ID, $id );
 	} else {
 		WP_CLI::warning( "{$item['title']}: no published page at /{$item['related']}/ for Related — left empty." );
 	}
