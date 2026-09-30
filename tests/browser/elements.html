@@ -14,6 +14,7 @@ body{margin:0;background:#fff;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-s
 .split{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
 .marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
 .narrow{max-width:300px}
+.flexcol{display:flex;flex-direction:column;align-items:flex-start;max-width:680px;outline:1px solid #e3c4f5}
 @media(max-width:1024px){.split{grid-template-columns:1fr}}
 @media(max-width:767px){.host{padding:32px 16px}}
 /* A hostile theme. */
@@ -200,6 +201,38 @@ a{color:#c36;text-decoration:underline}img:hover{opacity:.75}img{max-width:100%}
 							</figure>
 		</div>
 		</div>
+</div>
+<div class="host">
+	<p class="marker">A 680px Elementor-style flex column: the mark fills it</p>
+	<div class="flexcol"><div id="f" class="elementor-widget elementor-widget-eam-annotated-mark"><div class="elementor-widget-container">		<div class="eam-wrap">
+			<figure class="eam eam--rings eam--glow" data-link-group="other" aria-label="The ThermStar mark with its four elements labelled">
+									<svg class="eam__rings" viewBox="0 0 560 520" aria-hidden="true" focusable="false"><circle cx="280" cy="260" r="200"/><circle cx="280" cy="260" r="245"/></svg>
+				
+									<img class="eam__logo" src="../../modules/elements/assets/img/thermstar-mark.webp" alt="ThermStar logo mark" decoding="async" />
+				
+				<svg class="eam__lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+											<path data-key="air" class="eam__line eam__line--l" style="--eam-i:0" d="M16 82.7 L30.3 82.7 L43.9 67.3" vector-effect="non-scaling-stroke"/>
+											<path data-key="fire" class="eam__line eam__line--l" style="--eam-i:1" d="M16 21.2 L30.3 21.2 L42.1 39.6" vector-effect="non-scaling-stroke"/>
+											<path data-key="water" class="eam__line eam__line--r" style="--eam-i:2" d="M84 13.5 L69.7 13.5 L61.8 28.1" vector-effect="non-scaling-stroke"/>
+											<path data-key="earth" class="eam__line eam__line--r" style="--eam-i:3" d="M84 82.7 L69.7 82.7 L51.4 48.8" vector-effect="non-scaling-stroke"/>
+									</svg>
+
+									<span class="eam__dot" data-key="air" style="left:43.9%;top:67.3%;--eam-i:0" aria-hidden="true"></span>
+									<span class="eam__dot" data-key="fire" style="left:42.1%;top:39.6%;--eam-i:1" aria-hidden="true"></span>
+									<span class="eam__dot" data-key="water" style="left:61.8%;top:28.1%;--eam-i:2" aria-hidden="true"></span>
+									<span class="eam__dot" data-key="earth" style="left:51.4%;top:48.8%;--eam-i:3" aria-hidden="true"></span>
+				
+									<span class="eam__tag eam__tag--bl" data-key="air" tabindex="0" style="top:82.7%;--eam-i:0;--eam-c:#7FC4D6">
+						<span class="eam__ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 9h11a3 3 0 1 0-3-3M3 14h15a3 3 0 1 1-3 3M3 19h8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Air					</span>
+									<span class="eam__tag eam__tag--tl" data-key="fire" tabindex="0" style="top:21.2%;--eam-i:1;--eam-c:#E8823F">
+						<span class="eam__ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-5 1-8.5z" fill="currentColor"/></svg></span>Fire					</span>
+									<span class="eam__tag eam__tag--tr" data-key="water" tabindex="0" style="top:13.5%;--eam-i:2;--eam-c:#3C8E9C">
+						<span class="eam__ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 7c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0M3 12c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0M3 17c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>Water					</span>
+									<span class="eam__tag eam__tag--br" data-key="earth" tabindex="0" style="top:82.7%;--eam-i:3;--eam-c:#3E8E4F">
+						<span class="eam__ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21v-8M12 13C12 8 8 6 3 6c0 5 4 7 9 7zM12 11c0-4 3-7 9-7 0 5-4 7-9 7z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Earth					</span>
+							</figure>
+		</div>
+		</div></div></div>
 </div>
 <div class="spacer">End</div>
 <script src="../../modules/elements/assets/js/elements.js"></script>

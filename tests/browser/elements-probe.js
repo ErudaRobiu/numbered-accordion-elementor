@@ -144,6 +144,10 @@ async function linePainted(page, sel) {
     }
   }
 
+  await page.setViewport({ width: 1440, height: 900 });
+  const fill = await page.evaluate(() => [Math.round(document.querySelector('#f .eam').getBoundingClientRect().width), Math.round(document.querySelector('.flexcol').getBoundingClientRect().width)]);
+  check('fills its column, even in a shrink-wrapping flex column', fill[0] === fill[1] && fill[0] === 680, fill.join(' vs '));
+
   /* --------------------------------------------------------- linking --- */
 
   await page.setViewport({ width: 1440, height: 900 });
