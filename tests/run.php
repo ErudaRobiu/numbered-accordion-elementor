@@ -654,7 +654,7 @@ check( 'the news module is registered', true, in_array( 'news', Toolkit::instanc
 check( 'the journey timeline module is registered', true, in_array( 'journey', Toolkit::instance()->ids(), true ) );
 check( 'the company chain module is registered', true, in_array( 'chain', Toolkit::instance()->ids(), true ) );
 check( 'the award wall module is registered', true, in_array( 'awards', Toolkit::instance()->ids(), true ) );
-check( 'twenty-seven modules ship', 27, count( Toolkit::instance()->ids() ) );
+check( 'twenty-eight modules ship', 28, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -697,6 +697,7 @@ foreach ( array(
 	'modules/awards/widgets/class-award-wall-widget.php',
 	'modules/elements/widgets/class-elements-widget.php', // Both widgets inherit it.
 	'modules/process/widgets/class-process-stepper-widget.php',
+	'modules/assess/widgets/class-assessment-form-widget.php',
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -735,6 +736,7 @@ $module_files = array(
 	'modules/awards/class-awards-module.php',
 	'modules/elements/class-elements-module.php',
 	'modules/process/class-process-module.php',
+	'modules/assess/class-assess-module.php',
 );
 
 foreach ( $module_files as $relative ) {
@@ -3395,6 +3397,42 @@ check( 'opens on the typed stage, earlier ones done', array( 1, 2 ), array( subs
 check( 'auto-advance hands its pace to the script', 1, substr_count( $ps_nofb, 'data-auto="6000"' ) );
 check( 'no stages, nothing', '', trim( ( new Process_Render_Probe() )->markup( array() ) ) );
 check( 'one stage: no line', 1, substr_count( ( new Process_Render_Probe() )->markup( array( 'items' => array( $ps_items[0] ) ) ), 'eps--single' ) );
+
+/* -------------------------------------------------- Assessment Form --- */
+
+require_once dirname( __DIR__ ) . '/modules/assess/class-assess-content.php';
+foreach ( array(
+	'wp_strip_all_tags' => 'function wp_strip_all_tags( $s ) { return trim( strip_tags( (string) $s ) ); }',
+	'sanitize_email'    => 'function sanitize_email( $e ) { return filter_var( trim( (string) $e ), FILTER_SANITIZE_EMAIL ); }',
+	'is_email'          => 'function is_email( $e ) { return false !== filter_var( $e, FILTER_VALIDATE_EMAIL ); }',
+	'esc_url_raw'       => 'function esc_url_raw( $u ) { return filter_var( (string) $u, FILTER_SANITIZE_URL ); }',
+) as $fn => $code ) {
+	if ( ! function_exists( $fn ) ) {
+		eval( $code ); // phpcs:ignore Squiz.PHP.Eval
+	}
+}
+
+use ErudaToolkit\Modules\Assess\Assess_Content;
+
+$ae = Assess_Content::estimate( array( 'temp' => 230, 'cfm' => 4000, 'hours' => 16, 'days' => 5, 'uses' => array( 'process-water' ) ), 0.9 );
+check( 'estimate: heat recovered, two significant figures', array( 1200, 1800 ), $ae['mmbtu'] );
+check( 'estimate: dollars a year at the set gas price', array( 14000, 21000 ), $ae['dollars'] );
+check( 'estimate: CO2 avoided', array( 81.0, 121.4 ), $ae['tco2'] );
+check( 'estimate: operating hours over 52 weeks', 4160, $ae['hours'] );
+check( 'space heating alone runs half the year', 2080, Assess_Content::estimate( array( 'temp' => 230, 'cfm' => 4000, 'hours' => 16, 'days' => 5, 'uses' => array( 'space' ) ), 0.9 )['hours'] );
+check( 'space heating with another use runs all year', 4160, Assess_Content::estimate( array( 'temp' => 230, 'cfm' => 4000, 'hours' => 16, 'days' => 5, 'uses' => array( 'space', 'boiler' ) ), 0.9 )['hours'] );
+check( 'inputs are held to the slider ranges', array( 450.0, 500.0, 24.0, 7.0 ), array( Assess_Content::clamp( 9999, Assess_Content::TEMP ), Assess_Content::clamp( 3, Assess_Content::CFM ), Assess_Content::clamp( 99, Assess_Content::HOURS ), Assess_Content::clamp( 'x', array( 1, 7, 1, 7 ) ) ) );
+check( 'a nonsense price falls back to $0.90', 0.9, Assess_Content::estimate( array(), 'free' )['price'] );
+check( 'rounding keeps two significant figures', array( 15000.0, 1200.0, 99.0, 0 ), array( Assess_Content::round2( 14873 ), Assess_Content::round2( 1222.07 ), Assess_Content::round2( 99.4 ), Assess_Content::round2( -5 ) ) );
+
+$ac = Assess_Content::clean( array( 'first' => ' Dana ', 'last' => 'Reyes<script>', 'email' => 'dana@example.com', 'company' => 'Acme', 'industry' => 'foundries', 'contaminants' => array( 'lint', 'bogus' ), 'uses' => 'boiler', 'temp' => '300', 'notes' => '<b>hi</b>' ) );
+check( 'clean: a complete request has no errors', array(), $ac['errors'] );
+check( 'clean: text is trimmed and stripped of tags', array( 'Dana', 'Reyes', 'hi' ), array( $ac['data']['first'], $ac['data']['last'], $ac['data']['notes'] ) );
+check( 'clean: only known choices survive', array( array( 'lint' ), array( 'boiler' ) ), array( $ac['data']['contaminants'], $ac['data']['uses'] ) );
+$ac2 = Assess_Content::clean( array( 'email' => 'not-an-email', 'industry' => 'mining' ) );
+check( 'clean: required fields are reported', array( 'first', 'last', 'email', 'company', 'industry' ), array_keys( $ac2['errors'] ) );
+$as = Assess_Content::summary( $ac['data'], $ae );
+check( 'the team email carries the estimate and the answers', true, false !== strpos( $as, 'Industry: Foundry' ) && false !== strpos( $as, '$14,000–$21,000/yr at $0.90/therm' ) && false !== strpos( $as, 'In the exhaust: Lint' ) );
 
 /* ------------------------------------------------------------- report --- */
 

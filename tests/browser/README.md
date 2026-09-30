@@ -29,6 +29,7 @@ node tests/browser/chain-probe.js    # Company Chain (regenerate chain.html firs
 node tests/browser/awards-probe.js   # Award Wall (regenerate awards.html first)
 node tests/browser/elements-probe.js # Element List and Annotated Mark (regenerate elements.html first)
 node tests/browser/process-probe.js  # Process Stepper (regenerate process.html first)
+node tests/browser/assess-probe.js   # Assessment Form (regenerate assess.html first; fakes the server)
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
@@ -329,4 +330,11 @@ The Process Stepper:
 ```sh
 php tests/browser/process-fixture.php > tests/browser/process.html
 node tests/browser/process-probe.js [screenshot-dir]
+```
+
+The Assessment Form (the probe answers the form's requests itself, so nothing is saved or sent):
+
+```sh
+php tests/browser/assess-fixture.php > tests/browser/assess.html
+node tests/browser/assess-probe.js [screenshot-dir]
 ```
