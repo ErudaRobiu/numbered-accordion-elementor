@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journey Timeline — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../../modules/journey/assets/css/journey-timeline.css">
+<style>
+body{margin:0;background:#fff;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;color:#0F3961}
+.host{max-width:1240px;margin:0 auto;padding:60px 40px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.spacer{height:110vh;display:grid;place-items:center;color:#8A97A1}
+.marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
+@media(max-width:1024px){.host{grid-template-columns:1fr}}
+@media(max-width:767px){.host{padding:32px 16px}}
+/* A hostile theme: list bullets and margins, underlined links. */
+ol{padding-left:2em;margin:1em 0}li{margin-bottom:.5em}
+a{color:#c36;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="spacer">Scroll down — the line draws when the timeline arrives</div>
+<div class="host">
+	<div><p class="marker">Our story</p><h2 style="font:400 52px/1 'Bebas Neue';text-transform:uppercase;margin:0">From a Swedish kitchen roof to North American plants</h2></div>
+	<div id="a">		<ol class="ejny ejny--animate ejny--pulse" style="--ejny-dur:1200ms" aria-label="Timeline">
+											<li class="ejny__item">
+					<div class="ejny__row">
+						<span class="ejny__dot"><span class="ejny__year">2016</span></span>
+						<span class="ejny__body">
+															<strong class="ejny__title">Invented in Sweden</strong>
+																						<span class="ejny__text">Built for restaurant and commercial kitchen exhaust, where grease and moisture beat conventional exchangers.</span>
+													</span>
+					</div>
+				</li>
+											<li class="ejny__item">
+					<div class="ejny__row">
+						<span class="ejny__dot"><span class="ejny__year">2021</span></span>
+						<span class="ejny__body">
+															<strong class="ejny__title">Into industry</strong>
+																						<span class="ejny__text">Food production, industrial laundry, foundries and other high-fouling processes.</span>
+													</span>
+					</div>
+				</li>
+											<li class="ejny__item is-current" aria-current="step">
+					<div class="ejny__row">
+						<span class="ejny__dot"><span class="ejny__year">2025</span></span>
+						<span class="ejny__body">
+															<strong class="ejny__title">North America</strong>
+																						<span class="ejny__text">Norrel Inc. launches the ThermStar System for the United States and Canada.</span>
+													</span>
+					</div>
+				</li>
+					</ol>
+		</div>
+</div>
+<div class="host">
+	<div><p class="marker">Uneven rows, a link, no animation</p></div>
+	<div id="b">		<ol class="ejny ejny--pulse" style="--ejny-dur:1200ms" aria-label="Timeline">
+											<li class="ejny__item">
+					<a class="ejny__row" href="#story">
+						<span class="ejny__dot"><span class="ejny__year">2016</span></span>
+						<span class="ejny__body">
+															<strong class="ejny__title">Invented in Sweden</strong>
+																						<span class="ejny__text">Built for restaurant and commercial kitchen exhaust, where grease and moisture beat conventional exchangers.</span>
+													</span>
+					</a>
+				</li>
+											<li class="ejny__item">
+					<div class="ejny__row">
+						<span class="ejny__dot"><span class="ejny__year">2021</span></span>
+						<span class="ejny__body">
+															<strong class="ejny__title">Into industry</strong>
+																						<span class="ejny__text">Food production, industrial laundry, foundries and other high-fouling processes. A much longer description on this row, so that it wraps onto several lines and the row is far taller than its circle.</span>
+													</span>
+					</div>
+				</li>
+											<li class="ejny__item is-current" aria-current="step">
+					<div class="ejny__row">
+						<span class="ejny__dot"><span class="ejny__year">2025</span></span>
+						<span class="ejny__body">
+															<strong class="ejny__title">North America</strong>
+																						<span class="ejny__text">Norrel Inc. launches the ThermStar System for the United States and Canada.</span>
+													</span>
+					</div>
+				</li>
+					</ol>
+		</div>
+</div>
+<script src="../../modules/journey/assets/js/journey-timeline.js"></script>
+</body>
+</html>
+	

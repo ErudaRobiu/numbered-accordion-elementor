@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Company Chain — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Urbanist:wght@700&display=swap">
+<link rel="stylesheet" href="../../modules/chain/assets/css/company-chain.css">
+<style>
+body{margin:0;background:#F5F6F7;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;color:#0F3961}
+.spacer{height:110vh;display:grid;place-items:center;color:#8A97A1}
+.host{max-width:1240px;margin:0 auto;padding:60px 40px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
+#b{max-width:480px}
+@media(max-width:1024px){.host{grid-template-columns:1fr}}
+@media(max-width:767px){.host{padding:32px 16px}}
+a{color:#c36;text-decoration:underline}
+img:hover{opacity:.75}
+</style>
+</head>
+<body>
+<div class="spacer">Scroll down — the chain builds when it arrives</div>
+<div class="host">
+	<div><p class="marker">The company</p><h2 style="font:700 40px/1.1 system-ui;margin:0">About Norrel Inc</h2></div>
+	<div id="a">		<div class="echn echn--animate" role="list" data-stack-at="520" style="--echn-cols:minmax(0, 1fr) auto minmax(0, 1.15fr) auto minmax(0, 1fr);--echn-n:5" aria-label="How the companies connect">
+											<div class="echn__card" role="listitem" style="--echn-i:0">
+					<span class="echn__logo"></span>
+					<small class="echn__label">Develops &amp; makes</small>
+					<b class="echn__name">Enjay Systems</b>
+					<span class="echn__sub">Lepido® · Sweden</span>
+				</div>
+							<span class="echn__arrow echn__arrow--arrow" style="--echn-i:1" aria-hidden="true"><svg viewBox="0 0 30 16" aria-hidden="true" focusable="false"><path d="M1 8h24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M20 2.5L27 8l-7 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>				<div class="echn__card is-hi" role="listitem" style="--echn-i:2">
+					<span class="echn__logo"></span>
+					<small class="echn__label">Exclusive North American distributor</small>
+					<b class="echn__name">Norrel Inc.</b>
+					<span class="echn__sub">DBA ThermStar System</span>
+				</div>
+							<span class="echn__arrow echn__arrow--arrow" style="--echn-i:3" aria-hidden="true"><svg viewBox="0 0 30 16" aria-hidden="true" focusable="false"><path d="M1 8h24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M20 2.5L27 8l-7 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>				<div class="echn__card" role="listitem" style="--echn-i:4">
+					<span class="echn__logo"></span>
+					<small class="echn__label">Serves</small>
+					<b class="echn__name">Your facility</b>
+					<span class="echn__sub">United States &amp; Canada</span>
+				</div>
+					</div>
+		</div>
+</div>
+<div class="host">
+	<div><p class="marker">A 480px column — stacks</p></div>
+	<div id="b">		<div class="echn echn--animate" role="list" data-stack-at="520" style="--echn-cols:minmax(0, 1fr) auto minmax(0, 1.15fr) auto minmax(0, 1fr);--echn-n:5" aria-label="How the companies connect">
+											<div class="echn__card" role="listitem" style="--echn-i:0">
+					<span class="echn__logo"></span>
+					<small class="echn__label">Develops &amp; makes</small>
+					<b class="echn__name">Enjay Systems</b>
+					<span class="echn__sub">Lepido® · Sweden</span>
+				</div>
+							<span class="echn__arrow echn__arrow--arrow" style="--echn-i:1" aria-hidden="true"><svg viewBox="0 0 30 16" aria-hidden="true" focusable="false"><path d="M1 8h24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M20 2.5L27 8l-7 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>				<div class="echn__card is-hi" role="listitem" style="--echn-i:2">
+					<span class="echn__logo"></span>
+					<small class="echn__label">Exclusive North American distributor</small>
+					<b class="echn__name">Norrel Inc.</b>
+					<span class="echn__sub">DBA ThermStar System</span>
+				</div>
+							<span class="echn__arrow echn__arrow--arrow" style="--echn-i:3" aria-hidden="true"><svg viewBox="0 0 30 16" aria-hidden="true" focusable="false"><path d="M1 8h24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M20 2.5L27 8l-7 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>				<div class="echn__card" role="listitem" style="--echn-i:4">
+					<span class="echn__logo"></span>
+					<small class="echn__label">Serves</small>
+					<b class="echn__name">Your facility</b>
+					<span class="echn__sub">United States &amp; Canada</span>
+				</div>
+					</div>
+		</div>
+</div>
+<div class="host">
+	<div><p class="marker">Logos, a link, glow, chevrons, no animation</p></div>
+	<div id="c">		<div class="echn echn--glow echn--logos" role="list" data-stack-at="520" style="--echn-cols:minmax(0, 1fr) auto minmax(0, 1.15fr) auto minmax(0, 1fr);--echn-n:5" aria-label="How the companies connect">
+											<div class="echn__card" role="listitem" style="--echn-i:0">
+					<span class="echn__logo"><img src="../../modules/partners/assets/img/enjay.svg" alt="" loading="lazy" decoding="async" /></span>
+					<small class="echn__label">Develops &amp; makes</small>
+					<b class="echn__name">Enjay Systems</b>
+					<span class="echn__sub">Lepido® · Sweden</span>
+				</div>
+							<span class="echn__arrow echn__arrow--chevron" style="--echn-i:1" aria-hidden="true"><svg viewBox="0 0 16 24" aria-hidden="true" focusable="false"><path d="M4 3l9 9-9 9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>				<a class="echn__card is-hi" role="listitem" style="--echn-i:2" href="#norrel">
+					<span class="echn__logo"><img src="../../modules/partners/assets/img/thermstar-white.png" alt="" loading="lazy" decoding="async" /></span>
+					<small class="echn__label">Exclusive North American distributor</small>
+					<b class="echn__name">Norrel Inc.</b>
+					<span class="echn__sub">DBA ThermStar System</span>
+				</a>
+							<span class="echn__arrow echn__arrow--chevron" style="--echn-i:3" aria-hidden="true"><svg viewBox="0 0 16 24" aria-hidden="true" focusable="false"><path d="M4 3l9 9-9 9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>				<div class="echn__card" role="listitem" style="--echn-i:4">
+					<span class="echn__logo"></span>
+					<small class="echn__label">Serves</small>
+					<b class="echn__name">Your facility</b>
+					<span class="echn__sub">United States &amp; Canada</span>
+				</div>
+					</div>
+		</div>
+</div>
+<script src="../../modules/chain/assets/js/company-chain.js"></script>
+</body>
+</html>
+	

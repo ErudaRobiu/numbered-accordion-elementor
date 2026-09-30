@@ -1,0 +1,351 @@
+/**
+ * Eruda Toolkit - Company Chain
+ *
+ * Cards joined by arrows. In a row, the cards share the grid's rows through
+ * subgrid, so the label, the name and the sub-line each sit on one line across
+ * every card: a label that wraps to two lines moves all three names down
+ * together instead of pushing only its own out of line.
+ *
+ * Stacked, the cards run down the column and the arrows turn to point down.
+ * The script stacks it when the widget itself is narrower than its "stack
+ * below" width (so a half column stacks sooner than the screen would), and
+ * on phones; the same rules sit under a phone media query for a page whose
+ * script never runs.
+ */
+
+.echn {
+	--echn-card: #fff;
+	--echn-line: #DDE2E6;
+	--echn-ink: #0F3961;
+	--echn-muted: #0F3961B3;
+	--echn-hi: #0F3961;
+	--echn-hi-label: #4DCF8D;
+	--echn-hi-ink: #fff;
+	--echn-hi-sub: #FFFFFFB3;
+	--echn-green: #07864F;
+	--echn-radius: 14px;
+	--echn-pad: 16px;
+	--echn-gap: 8px;
+	--echn-step: 180ms;
+
+	display: grid;
+	grid-template-columns: var(--echn-cols, minmax(0, 1fr) auto minmax(0, 1.15fr) auto minmax(0, 1fr));
+	grid-template-rows: auto auto auto auto;
+	align-items: stretch;
+	gap: 0 var(--echn-gap);
+	font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.echn *,
+.echn *::before,
+.echn *::after {
+	box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------- card --- */
+
+/* Links: only colour and underline here. Layout stays on the rule below, so
+   hovering a linked card can never switch a stacked card back to the row's
+   grid. */
+.echn a.echn__card:hover,
+.echn a.echn__card:focus {
+	color: var(--echn-ink);
+	text-decoration: none;
+}
+
+.echn .echn__card {
+	position: relative;
+	display: grid;
+	grid-row: 1 / span 4;
+	grid-template-rows: subgrid;
+	row-gap: 3px;
+	min-width: 0;
+	padding: var(--echn-pad);
+	border: 1px solid var(--echn-line);
+	border-radius: var(--echn-radius);
+	background: var(--echn-card);
+	color: var(--echn-ink);
+	text-decoration: none;
+	transition: transform .25s cubic-bezier(.2, .7, .2, 1), border-color .25s, box-shadow .25s;
+}
+
+.echn__logo {
+	display: flex;
+	align-items: center;
+	min-height: 0;
+}
+
+.echn--logos .echn__logo {
+	min-height: 30px;
+	margin-bottom: 6px;
+}
+
+.echn .echn__logo img {
+	display: block;
+	width: auto;
+	max-width: 100%;
+	height: auto;
+	max-height: 28px;
+	opacity: 1;
+}
+
+.echn__label {
+	align-self: end;
+	font-family: "Urbanist", system-ui, sans-serif;
+	font-size: 10.5px;
+	font-weight: 700;
+	line-height: 1.35;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	color: var(--echn-muted);
+}
+
+.echn__name {
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1.3;
+	color: var(--echn-ink);
+	overflow-wrap: anywhere;
+}
+
+.echn__sub {
+	font-size: 12.5px;
+	line-height: 1.4;
+	color: var(--echn-muted);
+}
+
+.echn .echn__card.is-hi {
+	border-color: var(--echn-hi);
+	background: var(--echn-hi);
+	box-shadow: 0 12px 30px #0F396133;
+}
+
+.echn .is-hi .echn__label {
+	color: var(--echn-hi-label);
+}
+
+.echn .is-hi .echn__name {
+	color: var(--echn-hi-ink);
+}
+
+.echn .is-hi .echn__sub {
+	color: var(--echn-hi-sub);
+}
+
+.echn .echn__card:hover,
+.echn a.echn__card:focus-visible {
+	transform: translateY(-3px);
+	border-color: var(--echn-green);
+	box-shadow: 0 12px 26px #0F396122;
+}
+
+.echn .echn__card.is-hi:hover,
+.echn a.echn__card.is-hi:focus-visible {
+	border-color: var(--echn-hi-label);
+	box-shadow: 0 16px 36px #0F396144;
+}
+
+.echn a.echn__card:focus-visible {
+	outline: 3px solid var(--echn-hi-label);
+	outline-offset: 2px;
+}
+
+/* A slow green glow on the highlighted card, when switched on. */
+.echn--glow .echn__card.is-hi::after {
+	content: "";
+	position: absolute;
+	inset: -1px;
+	border-radius: inherit;
+	box-shadow: 0 0 0 0 #4DCF8D00, 0 0 24px #4DCF8D55;
+	opacity: 0;
+	animation: echn-glow 3.2s ease-in-out infinite;
+	animation-delay: calc((var(--echn-n) + 2) * var(--echn-step));
+	pointer-events: none;
+}
+
+@keyframes echn-glow {
+	50% { opacity: 1; }
+}
+
+/* --------------------------------------------------------------- arrow --- */
+
+.echn__arrow {
+	display: grid;
+	grid-row: 1 / span 4;
+	place-items: center;
+	align-self: center;
+	width: 26px;
+	color: var(--echn-green);
+}
+
+.echn__arrow svg {
+	display: block;
+	width: 22px;
+	height: auto;
+}
+
+.echn__arrow--chevron svg {
+	width: 12px;
+}
+
+/* ------------------------------------------------------------ entrance --- */
+
+@keyframes echn-card {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+}
+
+@keyframes echn-arrow {
+	from {
+		opacity: 0;
+		transform: translateX(-8px);
+	}
+}
+
+@keyframes echn-arrow-down {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+}
+
+@keyframes echn-draw {
+	from { clip-path: inset(0 100% 0 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes echn-lift {
+	from { box-shadow: 0 0 0 #0F396100; }
+}
+
+.echn--armed:not(.is-in) .echn__card,
+.echn--armed:not(.is-in) .echn__arrow {
+	opacity: 0;
+}
+
+/* Card, arrow, card, arrow, card: one step apart. */
+.echn--armed.is-in .echn__card {
+	animation: echn-card .45s cubic-bezier(.2, .7, .2, 1) backwards;
+	animation-delay: calc(var(--echn-i) * var(--echn-step));
+}
+
+.echn--armed.is-in .echn__arrow {
+	animation: echn-arrow .35s ease-out backwards;
+	animation-delay: calc(var(--echn-i) * var(--echn-step));
+}
+
+.echn--armed.is-in .echn__arrow svg {
+	animation: echn-draw .35s ease-out backwards;
+	animation-delay: calc(var(--echn-i) * var(--echn-step));
+}
+
+/* The highlighted card lands, then lifts once everything is in. */
+.echn--armed.is-in .echn__card.is-hi {
+	animation: echn-card .45s cubic-bezier(.2, .7, .2, 1) backwards, echn-lift .6s ease-out backwards;
+	animation-delay: calc(var(--echn-i) * var(--echn-step)), calc(var(--echn-n) * var(--echn-step));
+}
+
+/* ------------------------------------------------------------ stacked --- */
+
+.echn.is-stacked {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--echn-gap);
+}
+
+.echn.is-stacked .echn__card {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	grid-row: auto;
+}
+
+.echn.is-stacked .echn__label {
+	/* "end" bottom-aligns it in the row; in a column it would mean the right. */
+	align-self: flex-start;
+}
+
+.echn.is-stacked .echn__logo:empty {
+	display: none;
+}
+
+.echn.is-stacked .echn__arrow {
+	grid-row: auto;
+	align-self: center;
+	width: auto;
+	height: 26px;
+}
+
+/* Pointing down: the drawing turns, the box it moves in does not. */
+.echn.is-stacked .echn__arrow svg {
+	transform: rotate(90deg);
+}
+
+.echn.is-stacked.echn--armed.is-in .echn__arrow {
+	animation-name: echn-arrow-down;
+}
+
+/* The same, on phones, for a page whose script never runs. */
+@media (max-width: 767px) {
+	.echn {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: var(--echn-gap);
+	}
+
+	.echn .echn__card {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		grid-row: auto;
+	}
+
+	.echn .echn__label {
+		align-self: flex-start;
+	}
+
+	.echn .echn__logo:empty {
+		display: none;
+	}
+
+	.echn .echn__arrow {
+		grid-row: auto;
+		align-self: center;
+		width: auto;
+		height: 26px;
+	}
+
+	/* Pointing down: the drawing turns, the box it moves in does not. */
+	.echn .echn__arrow svg {
+		transform: rotate(90deg);
+	}
+
+	.echn.echn--armed.is-in .echn__arrow {
+		animation-name: echn-arrow-down;
+	}
+}
+
+/* ------------------------------------------------------- less motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+	.echn .echn__card,
+	.echn .echn__arrow,
+	.echn .echn__arrow svg {
+		animation: none !important;
+		opacity: 1 !important;
+		transition: border-color .2s;
+	}
+
+	.echn .echn__card:hover,
+	.echn a.echn__card:focus-visible {
+		transform: none;
+	}
+
+	.echn--glow .echn__card.is-hi::after {
+		display: none;
+	}
+}

@@ -112,6 +112,14 @@ final class Toolkit {
 			'file'  => 'modules/news/class-news-module.php',
 			'class' => '\ErudaToolkit\Modules\News\News_Module',
 		),
+		'journey'    => array(
+			'file'  => 'modules/journey/class-journey-module.php',
+			'class' => '\ErudaToolkit\Modules\Journey\Journey_Module',
+		),
+		'chain'      => array(
+			'file'  => 'modules/chain/class-chain-module.php',
+			'class' => '\ErudaToolkit\Modules\Chain\Chain_Module',
+		),
 	);
 
 	/**

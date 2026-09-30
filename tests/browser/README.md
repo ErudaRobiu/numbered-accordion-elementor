@@ -24,6 +24,8 @@ node tests/browser/anatomy-probe.js  # Case Anatomy (regenerate anatomy.html fir
 node tests/browser/casestudies-probe.js # Case Studies (regenerate casestudies.html first)
 node tests/browser/docshelf-probe.js # Document Shelf (regenerate docshelf.html first)
 node tests/browser/news-probe.js     # News widgets (regenerate news.html first)
+node tests/browser/journey-probe.js  # Journey Timeline (regenerate journey.html first)
+node tests/browser/chain-probe.js    # Company Chain (regenerate chain.html first)
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
@@ -294,4 +296,13 @@ because Python's test server cannot serve the byte ranges seeking needs):
 ```sh
 php tests/browser/news-fixture.php > tests/browser/news.html
 node tests/browser/news-probe.js [screenshot-dir]
+```
+
+The two About-page widgets:
+
+```sh
+php tests/browser/journey-fixture.php > tests/browser/journey.html
+php tests/browser/chain-fixture.php > tests/browser/chain.html
+node tests/browser/journey-probe.js [screenshot-dir]
+node tests/browser/chain-probe.js [screenshot-dir]
 ```

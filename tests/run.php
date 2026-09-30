@@ -651,7 +651,9 @@ check( 'the case anatomy module is registered', true, in_array( 'anatomy', Toolk
 check( 'the case studies module is registered', true, in_array( 'casestudies', Toolkit::instance()->ids(), true ) );
 check( 'the document shelf module is registered', true, in_array( 'docshelf', Toolkit::instance()->ids(), true ) );
 check( 'the news module is registered', true, in_array( 'news', Toolkit::instance()->ids(), true ) );
-check( 'twenty-two modules ship', 22, count( Toolkit::instance()->ids() ) );
+check( 'the journey timeline module is registered', true, in_array( 'journey', Toolkit::instance()->ids(), true ) );
+check( 'the company chain module is registered', true, in_array( 'chain', Toolkit::instance()->ids(), true ) );
+check( 'twenty-four modules ship', 24, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -689,6 +691,8 @@ foreach ( array(
 	'modules/casestudies/widgets/class-case-studies-widget.php',
 	'modules/docshelf/widgets/class-document-shelf-widget.php',
 	'modules/news/widgets/class-news-widget.php',
+	'modules/journey/widgets/class-journey-timeline-widget.php',
+	'modules/chain/widgets/class-company-chain-widget.php',
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -722,6 +726,8 @@ $module_files = array(
 	'modules/casestudies/class-casestudies-module.php',
 	'modules/docshelf/class-docshelf-module.php',
 	'modules/news/class-news-module.php',
+	'modules/journey/class-journey-module.php',
+	'modules/chain/class-chain-module.php',
 );
 
 foreach ( $module_files as $relative ) {
@@ -3059,6 +3065,104 @@ foreach ( glob( dirname( __DIR__ ) . '/modules/*/widgets/*.php' ) as $nw_file ) 
 	$nw_dups = array_keys( array_filter( array_count_values( $nw_ids ), function ( $n ) { return $n > 1; } ) );
 	check( basename( $nw_file ) . ' declares each control id once', array(), $nw_dups );
 }
+
+
+/* ------------------------------------------ Journey Timeline + Chain --- */
+
+require_once dirname( __DIR__ ) . '/modules/journey/class-journey-content.php';
+require_once dirname( __DIR__ ) . '/modules/chain/class-chain-content.php';
+require_once dirname( __DIR__ ) . '/modules/journey/widgets/class-journey-timeline-widget.php';
+require_once dirname( __DIR__ ) . '/modules/chain/widgets/class-company-chain-widget.php';
+
+use ErudaToolkit\Modules\Journey\Journey_Content;
+use ErudaToolkit\Modules\Chain\Chain_Content;
+
+check( 'three milestones, verbatim', array( '2016 Invented in Sweden', '2021 Into industry', '2025 North America' ), array_map( function ( $i ) { return $i['year'] . ' ' . $i['title']; }, Journey_Content::default_items() ) );
+check( 'only the last is current', array( false, false, true ), array_column( Journey_Content::default_items(), 'current' ) );
+$jn = Journey_Content::build( array(
+	array( 'year' => ' 1999 ', 'title' => 'A', 'text' => 'x', 'current' => 'yes', 'link' => array( 'url' => '/a/', 'is_external' => 'on' ) ),
+	array( 'year' => '', 'title' => '' ),
+	array( 'title' => 'No year' ),
+) );
+check( 'a row needs a year or a title', 2, count( $jn ) );
+check( 'fields are read and trimmed', array( '1999', true, '/a/', true ), array( $jn[0]['year'], $jn[0]['current'], $jn[0]['link'], $jn[0]['external'] ) );
+check( 'draw time from a slider', 900, Journey_Content::duration( array( 'size' => 900 ) ) );
+check( 'draw time is clamped', array( 300, 4000, 1200 ), array( Journey_Content::duration( 10 ), Journey_Content::duration( 99999 ), Journey_Content::duration( 'slow' ) ) );
+
+/**
+ * A widget with settings pushed in.
+ */
+class Journey_Render_Probe extends \ErudaToolkit\Modules\Journey\Widgets\Journey_Timeline_Widget {
+	/** @var array */
+	public $feed = array();
+	/** @return array */
+	public function get_settings_for_display() {
+		return $this->feed;
+	}
+	/**
+	 * @param array $s Settings.
+	 * @return string
+	 */
+	public function markup( $s ) {
+		$this->feed = $s;
+		ob_start();
+		( new ReflectionMethod( $this, 'render' ) )->invoke( $this );
+		return (string) ob_get_clean();
+	}
+}
+$jn_items = array();
+foreach ( Journey_Content::default_items() as $it ) {
+	$jn_items[] = array( 'year' => $it['year'], 'title' => $it['title'], 'text' => $it['text'], 'current' => $it['current'] ? 'yes' : '' );
+}
+$jn_html = ( new Journey_Render_Probe() )->markup( array( 'items' => $jn_items, 'animate' => 'yes', 'pulse' => 'yes', 'duration' => array( 'size' => 1200 ), 'list_label' => 'Timeline' ) );
+check( 'an ordered list of three', array( 1, 3 ), array( substr_count( $jn_html, '<ol class="ejny ejny--animate ejny--pulse" style="--ejny-dur:1200ms" aria-label="Timeline">' ), substr_count( $jn_html, '<li class="ejny__item' ) ) );
+check( 'only list items inside the list', 0, preg_match( '#<ol[^>]*>\s*<(?!li)#', $jn_html ) );
+check( 'the current step is marked', 1, substr_count( $jn_html, 'class="ejny__item is-current" aria-current="step"' ) );
+check( 'no rows, nothing', '', trim( ( new Journey_Render_Probe() )->markup( array() ) ) );
+
+check( 'three chain cards, verbatim', array( 'Enjay Systems', 'Norrel Inc.', 'Your facility' ), array_column( Chain_Content::default_items(), 'name' ) );
+check( 'Norrel is the highlighted one', array( false, true, false ), array_column( Chain_Content::default_items(), 'highlight' ) );
+$ch_cards = Chain_Content::build( array(
+	array( 'label' => 'A', 'name' => ' One ', 'highlight' => '', 'logo' => array( 'url' => 'l.svg' ) ),
+	array( 'label' => 'B' ),
+	array( 'name' => 'Two', 'highlight' => 'yes', 'link' => array( 'url' => '/two/' ) ),
+) );
+check( 'a card needs a name', array( 'One', 'Two' ), array_column( $ch_cards, 'name' ) );
+check( 'columns: cards with an arrow between, the highlight wider', 'minmax(0, 1fr) auto minmax(0, 1.15fr)', Chain_Content::columns( $ch_cards ) );
+check( 'stack width from a slider, clamped', array( 600, 240, 1200, 520 ), array( Chain_Content::stack_at( array( 'size' => 600 ) ), Chain_Content::stack_at( 5 ), Chain_Content::stack_at( 5000 ), Chain_Content::stack_at( null ) ) );
+
+/**
+ * A widget with settings pushed in.
+ */
+class Chain_Render_Probe extends \ErudaToolkit\Modules\Chain\Widgets\Company_Chain_Widget {
+	/** @var array */
+	public $feed = array();
+	/** @return array */
+	public function get_settings_for_display() {
+		return $this->feed;
+	}
+	/**
+	 * @param array $s Settings.
+	 * @return string
+	 */
+	public function markup( $s ) {
+		$this->feed = $s;
+		ob_start();
+		( new ReflectionMethod( $this, 'render' ) )->invoke( $this );
+		return (string) ob_get_clean();
+	}
+}
+$ch_items = array();
+foreach ( Chain_Content::default_items() as $it ) {
+	$ch_items[] = array( 'label' => $it['label'], 'name' => $it['name'], 'sub' => $it['sub'], 'highlight' => $it['highlight'] ? 'yes' : '' );
+}
+$ch_html = ( new Chain_Render_Probe() )->markup( array( 'items' => $ch_items, 'animate' => 'yes', 'stack_at' => array( 'size' => 520 ), 'chain_label' => 'How the companies connect' ) );
+check( 'three cards and two arrows', array( 3, 2 ), array( substr_count( $ch_html, 'role="listitem"' ), substr_count( $ch_html, 'class="echn__arrow' ) ) );
+check( 'the entrance order: card 0, arrow 1, card 2, arrow 3, card 4', array( '0', '1', '2', '3', '4' ), ( preg_match_all( '/--echn-i:(\d)/', $ch_html, $m ) ? $m[1] : array() ) );
+check( 'arrows are hidden from screen readers', 2, substr_count( $ch_html, '" aria-hidden="true"><svg' ) );
+check( 'the stack width travels to the script', 1, substr_count( $ch_html, 'data-stack-at="520"' ) );
+check( 'the highlighted card', 1, substr_count( $ch_html, 'class="echn__card is-hi"' ) );
+check( 'no cards, nothing', '', trim( ( new Chain_Render_Probe() )->markup( array() ) ) );
 
 /* ------------------------------------------------------------- report --- */
 

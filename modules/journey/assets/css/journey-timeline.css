@@ -1,0 +1,298 @@
+/**
+ * Eruda Toolkit - Journey Timeline
+ *
+ * Years in circles down a line that fades from grey to green. Each row is a
+ * circle and one tight text block centred on it; the text never spreads
+ * across the row, which is what let the wireframe's last row drift apart.
+ *
+ * The line is the list's own ::before, running from the first circle's centre
+ * to the last's. Rows differ in height, so the script measures those centres
+ * and writes them to --ejny-top and --ejny-len; without it the line falls
+ * back to an estimate that is right for rows of equal height.
+ *
+ * Motion is layered like the Partner Diagram's: .ejny--armed hides, .is-in
+ * plays, and the armed class comes off once the entrance is over. Every
+ * entrance animation has backwards fill, so nothing is held afterwards.
+ */
+
+.ejny {
+	--ejny-size: 74px;
+	--ejny-gap: 14px;
+	--ejny-pad: 18px;
+	/* Room on the left for the current step's halo (8px, pulsing to 14px),
+	   which would otherwise poke out past the widget's edge. */
+	--ejny-inset: 14px;
+	--ejny-circle: #fff;
+	--ejny-border: #C9D2D8;
+	--ejny-ink: #0F3961;
+	--ejny-muted: #0F3961B3;
+	--ejny-current: #07864F;
+	--ejny-halo: #07864F1F;
+	--ejny-line-a: #C9D2D8;
+	--ejny-line-b: #07864F;
+	--ejny-dur: 1200ms;
+	--ejny-ease: cubic-bezier(.45, .05, .3, 1);
+
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: var(--ejny-gap);
+	margin: 0;
+	padding: 0 0 0 var(--ejny-inset);
+	list-style: none;
+	font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.ejny *,
+.ejny *::before,
+.ejny *::after {
+	box-sizing: border-box;
+}
+
+.ejny::before {
+	content: "";
+	position: absolute;
+	top: var(--ejny-top, calc(var(--ejny-pad) + var(--ejny-size) / 2));
+	left: calc(var(--ejny-inset) + var(--ejny-size) / 2 - 1px);
+	width: 2px;
+	height: var(--ejny-len, calc(100% - 2 * var(--ejny-pad) - var(--ejny-size)));
+	background: linear-gradient(to bottom, var(--ejny-line-a), var(--ejny-line-b));
+}
+
+.ejny .ejny__item {
+	margin: 0;
+	padding: 0;
+}
+
+.ejny .ejny__item::before,
+.ejny .ejny__item::marker {
+	content: none;
+}
+
+.ejny .ejny__row,
+.ejny a.ejny__row:hover,
+.ejny a.ejny__row:focus {
+	display: grid;
+	grid-template-columns: var(--ejny-size) minmax(0, 1fr);
+	align-items: center;
+	column-gap: 18px;
+	padding: var(--ejny-pad) 22px var(--ejny-pad) 0;
+	color: inherit;
+	text-decoration: none;
+}
+
+.ejny a.ejny__row:focus-visible {
+	outline: 3px solid #4DCF8D;
+	outline-offset: 2px;
+	border-radius: 12px;
+}
+
+.ejny__dot {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	place-items: center;
+	width: var(--ejny-size);
+	height: var(--ejny-size);
+	border: 2px solid var(--ejny-border);
+	border-radius: 50%;
+	background: var(--ejny-circle);
+	transition: border-color .25s;
+}
+
+.ejny__year {
+	font-family: "Bebas Neue", Impact, sans-serif;
+	font-size: 26px;
+	font-weight: 400;
+	line-height: 1;
+	letter-spacing: .02em;
+	color: var(--ejny-ink);
+}
+
+/* One tight block, centred on the circle as a whole. */
+.ejny__body {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.ejny__title {
+	font-size: 18px;
+	font-weight: 700;
+	line-height: 1.3;
+	color: var(--ejny-ink);
+	transition: color .25s;
+}
+
+.ejny__text {
+	font-size: 14.5px;
+	line-height: 1.45;
+	color: var(--ejny-muted);
+}
+
+/* ------------------------------------------------------------ current --- */
+
+.ejny .is-current .ejny__dot {
+	border-color: var(--ejny-current);
+	background: var(--ejny-current);
+	box-shadow: 0 0 0 8px var(--ejny-halo);
+}
+
+.ejny .is-current .ejny__year {
+	color: #fff;
+}
+
+/* The pulse is a second ring that grows from the halo and fades. */
+.ejny--pulse .is-current .ejny__dot::after {
+	content: "";
+	position: absolute;
+	inset: -2px;
+	border-radius: 50%;
+	box-shadow: 0 0 0 8px var(--ejny-halo);
+	animation: ejny-pulse 2.4s ease-out infinite;
+	animation-delay: var(--ejny-pulse-delay, 0ms);
+	pointer-events: none;
+}
+
+@keyframes ejny-pulse {
+	0% {
+		box-shadow: 0 0 0 8px var(--ejny-halo);
+		opacity: 1;
+	}
+
+	100% {
+		box-shadow: 0 0 0 14px var(--ejny-halo);
+		opacity: 0;
+	}
+}
+
+/* -------------------------------------------------------------- hover --- */
+
+.ejny__row:hover .ejny__dot {
+	border-color: var(--ejny-current);
+}
+
+.ejny__row:hover .ejny__title {
+	color: var(--ejny-current);
+}
+
+/* ---------------------------------------------------------- entrance --- */
+
+@keyframes ejny-draw {
+	from { clip-path: inset(0 0 100% 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes ejny-pop {
+	from {
+		opacity: 0;
+		transform: scale(.8);
+	}
+}
+
+@keyframes ejny-slide {
+	from {
+		opacity: 0;
+		transform: translateX(12px);
+	}
+}
+
+@keyframes ejny-fill {
+	from {
+		border-color: var(--ejny-border);
+		background: var(--ejny-circle);
+		box-shadow: 0 0 0 0 transparent;
+	}
+}
+
+@keyframes ejny-year {
+	from { color: var(--ejny-ink); }
+}
+
+/* Waiting to be scrolled to. */
+.ejny--armed:not(.is-in)::before {
+	clip-path: inset(0 0 100% 0);
+}
+
+.ejny--armed:not(.is-in) .ejny__dot,
+.ejny--armed:not(.is-in) .ejny__body {
+	opacity: 0;
+}
+
+.ejny--armed:not(.is-in) .ejny__dot::after {
+	animation: none;
+	opacity: 0;
+}
+
+/* The line draws; each row lands as it passes (--ejny-at, set per row). */
+.ejny--armed.is-in::before {
+	animation: ejny-draw var(--ejny-dur) var(--ejny-ease) backwards;
+}
+
+.ejny--armed.is-in .ejny__dot {
+	animation: ejny-pop .45s cubic-bezier(.2, .8, .3, 1.25) backwards;
+	animation-delay: var(--ejny-at, 0ms);
+}
+
+.ejny--armed.is-in .ejny__body {
+	animation: ejny-slide .5s ease-out backwards;
+	animation-delay: calc(var(--ejny-at, 0ms) + 80ms);
+}
+
+/* Then the current step fills green. */
+.ejny--armed.is-in .is-current .ejny__dot {
+	animation: ejny-pop .45s cubic-bezier(.2, .8, .3, 1.25) backwards, ejny-fill .5s ease backwards;
+	animation-delay: var(--ejny-at, 0ms), calc(var(--ejny-dur) + 150ms);
+}
+
+.ejny--armed.is-in .is-current .ejny__year {
+	animation: ejny-year .5s ease backwards;
+	animation-delay: calc(var(--ejny-dur) + 150ms);
+}
+
+/* -------------------------------------------------------------- phone --- */
+
+@media (max-width: 767px) {
+	.ejny {
+		--ejny-size: 56px;
+		--ejny-pad: 14px;
+	}
+
+	.ejny .ejny__row,
+	.ejny a.ejny__row:hover,
+	.ejny a.ejny__row:focus {
+		column-gap: 14px;
+		padding-right: 0;
+	}
+
+	.ejny__year {
+		font-size: 20px;
+	}
+
+	.ejny__title {
+		font-size: 16px;
+	}
+
+	.ejny__text {
+		font-size: 14px;
+	}
+}
+
+/* ------------------------------------------------------- less motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+	.ejny::before,
+	.ejny .ejny__dot,
+	.ejny .ejny__body,
+	.ejny .ejny__year,
+	.ejny .ejny__dot::after {
+		animation: none !important;
+		opacity: 1 !important;
+		clip-path: none !important;
+	}
+
+	.ejny--pulse .is-current .ejny__dot::after {
+		display: none;
+	}
+}

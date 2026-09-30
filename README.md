@@ -59,6 +59,8 @@ modules/anatomy/                   the Case Anatomy widget, its assets and the t
 modules/casestudies/               the Case Studies post type, its ACF form and the Case Studies widget
 modules/docshelf/                  the Documents post type, its ACF form and the Document Shelf widget
 modules/news/                      news fields on Posts and the News Grid, Carousel, Press Quotes and Post Source widgets
+modules/journey/                   the Journey Timeline widget
+modules/chain/                     the Company Chain widget
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -289,6 +291,41 @@ repeated the title removed. The Welcome post's two paragraphs, printed twice
 in the original, are kept once, and its links to norrelinc's contact page
 keep their words and lose the link until the linking pass. The probe runs 61
 checks, including real playback, pausing and seeking in Chrome.
+
+**Journey Timeline (`modules/journey/`) and Company Chain (`modules/chain/`).**
+Two small, animated About-page widgets. Both are repeaters, which suits short,
+fixed lists. Both use the Partner Diagram's three motion states: `--armed`
+hides, `.is-in` plays, and the armed class comes off once the entrance is over.
+Both skip the entrance in the editor, and both are static and final under
+reduced motion.
+
+- **Journey Timeline** (`ejny-journey-timeline`): years in circles down a line
+  that fades from grey to green. Rows differ in height, so the line is the
+  list's own `::before` (an `<ol>` may hold only `<li>`), and the script
+  measures the first and last circle centres and writes them to `--ejny-top`
+  and `--ejny-len`. It also inverts the line's easing curve,
+  `cubic-bezier(.45,.05,.3,1)`, to find the moment the line reaches each
+  circle, and gives that row its delay (`--ejny-at`). So each row lands as the
+  line passes it, whatever the row heights. Each row's title and description
+  are one tight flex block centred on the circle, which fixes the wireframe's
+  last row, where grid row stretch pulled them apart. The current step fills
+  green after the line arrives, and a second ring pulses from its halo.
+- **Company Chain** (`echn-company-chain`): cards joined by arrows. In a row
+  the cards use **subgrid** on the chain's four rows (logo, label, name,
+  sub-line), so a label that wraps moves every name down together and the
+  names stay on one line. It stacks when the *widget* is narrower than "Stack
+  below" (default 520px), measured on the widget's parent by a
+  ResizeObserver, since a half column stacks sooner than the screen does. It
+  always stacks on phones, and the stacked rules are repeated under a phone
+  media query for a page without the script. Stacked arrows rotate their
+  drawing, not their box, so the entrance moves them downward.
+
+Probes: `journey-probe.js` (40 checks: the line meets the centres at every
+width and in a 320px column, each row lands as the line passes, the green fill
+comes after the line, the pulse, hover, 56px phone circles) and
+`chain-probe.js` (35: names aligned under a two-line label, the entrance order,
+stacking by column width and by phone width, a phone with the script off, no
+overflow at 1440/1100/767/360).
 
 ## Notes for future maintenance
 
