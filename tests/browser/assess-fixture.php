@@ -175,6 +175,17 @@ a{color:#c36}
 	<p id="plain-target" style="height:40vh">Plain link target</p>
 </div>
 <div id="modal"><?php echo eas_fixture( array_merge( $base, array( 'mode' => 'modal' ) ), 'mod1' ); // phpcs:ignore ?></div>
+<script>
+/* Stand-in for the page-transition module: takes every link click that is not already handled. */
+window.__navigated = [];
+document.addEventListener('click', function (e) {
+	if (e.defaultPrevented) return;
+	var a = e.target.closest && e.target.closest('a');
+	if (!a || !a.href || a.getAttribute('href').charAt(0) === '#') return;
+	e.preventDefault();
+	window.__navigated.push(a.getAttribute('href'));
+});
+</script>
 <script src="../../modules/assess/assets/js/assessment-form.js"></script>
 </body>
 </html>

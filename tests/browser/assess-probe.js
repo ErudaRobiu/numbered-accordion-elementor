@@ -71,7 +71,8 @@ const state = sel => page => page.evaluate(sel => {
   await page.click('#btn1 a');
   await sleep(350);
   s = await M(page);
-  check('a .ts-assess button opens it instead of navigating', s.open === true && s.locked && page.url() === URL, page.url());
+  const nav = await page.evaluate(() => window.__navigated.length);
+  check('a .ts-assess button opens it instead of navigating, even with a page-transition script taking link clicks', s.open === true && s.locked && page.url() === URL && nav === 0, page.url() + ' navigations:' + nav);
   check('opens on step 1', s.step === 1);
   const look = await page.evaluate(() => {
     const n = document.querySelector('#modal [data-eas-next]');
