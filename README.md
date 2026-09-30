@@ -63,6 +63,7 @@ modules/journey/                   the Journey Timeline widget
 modules/chain/                     the Company Chain widget
 modules/awards/                    the Award Wall widget and the eight award badges
 modules/elements/                  Element List and Annotated Mark, two linked widgets, and the mark
+modules/process/                   the Process Stepper widget
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -370,6 +371,31 @@ Both widgets stretch by default in a flex parent, through `:where()` rules
 Elementor's own width settings override, because a container-query wrapper
 has no width of its own and collapsed to nothing otherwise. The probe runs 76
 checks, touch included.
+
+**Process Stepper (`modules/process/`).** "How ThermStar works" on page 28, and
+reusable on the Services pages: numbered stages on a rail, a green line filled
+to the picked stage, and a panel under the rail whose caret sits under it.
+Hover, focus, click and the arrow keys (roving tabindex, Home and End, wrapping
+at the ends) pick a stage; stages before it are "done". The panel holds one
+slide per stage rendered by PHP, so the script only toggles `hidden`, and it is
+an `aria-live="polite"` region. A stage without a link shows a quieter fallback
+button (default "Request an Assessment") so the card stays balanced, or none,
+letting the text run the full width. The layout comes from the widget's own
+width against two breakpoint settings (900 and 560 by default), written to
+`data-mode`: `h` equal columns; `scroll` the same rail scrolling sideways
+inside itself with snap, edge fades only where there is more to see, the picked
+stage scrolled into view (never on hover, or the rail would slide the next
+stage under the pointer) and the caret measured and clamped inside the card;
+`v` a vertical stepper whose picked row opens in place, accordion style. The
+breakpoints are settings, which container queries cannot read, so a one-line
+inline script after the markup sets the mode before first paint and the main
+script keeps it current. In `v` each row draws its own segment of the line,
+from its circle to the next, which is exactly one row tall because circles are
+pinned to the top of their row; so no measuring. Hover does not pick in `v`.
+Optional auto-advance steps through while on screen and stops for good at the
+first pointer or key. The entrance draws the line and lands the stages 70ms
+apart. Reduced motion: nothing moves, the fill and caret jump. The probe runs
+57 checks, including Hello Elementor's pink buttons and the no-script layout.
 
 ## Notes for future maintenance
 

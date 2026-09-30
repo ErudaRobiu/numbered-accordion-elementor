@@ -1,0 +1,570 @@
+/**
+ * Eruda Toolkit - Process Stepper
+ *
+ * Three layouts, picked by the widget's own width and written to data-mode:
+ * "h" a rail of equal columns with the panel below, "scroll" the same rail
+ * scrolling sideways inside itself, "v" a vertical stepper whose picked row
+ * opens in place. The picked stage is --eps-k of --eps-n; .is-sel marks it
+ * and .is-done every stage before it. Buttons and links restate every
+ * property they rely on, because Hello Elementor paints buttons pink.
+ */
+
+:where(.elementor-widget-eps-process-stepper),
+:where(.elementor-widget-eps-process-stepper > .elementor-widget-container) {
+	align-self: stretch;
+	width: 100%;
+}
+
+.eps-wrap {
+	container: eps / inline-size;
+	width: 100%;
+	min-width: 0;
+}
+
+.eps {
+	--eps-size: 54px;
+	--eps-top: 34px;
+	--eps-col: 112px;
+	--eps-vsize: 44px;
+	--eps-line: #C9D2D8;
+	--eps-fill: #07864F;
+	--eps-border: #C9D2D8;
+	--eps-circle: #fff;
+	--eps-num: #0F3961;
+	--eps-sel: #07864F;
+	--eps-halo: #07864F1f;
+	--eps-label: #0F3961B3;
+	--eps-label-on: #0F3961;
+	--eps-panel: #fff;
+	--eps-panel-line: #DDE2E6;
+	--eps-panel-num: #07864F;
+	--eps-title: #0F3961;
+	--eps-text: #0F3961B3;
+	--eps-button: #07864F;
+	--eps-radius: 18px;
+
+	position: relative;
+	font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.eps *,
+.eps *::before,
+.eps *::after {
+	box-sizing: border-box;
+}
+
+/* ============================================================== rail === */
+
+.eps__scroller {
+	position: relative;
+}
+
+.eps .eps__rail {
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(var(--eps-n), minmax(0, 1fr));
+	margin: 0;
+	padding: var(--eps-top) 0 0;
+	list-style: none;
+}
+
+/* The grey line from the first centre to the last, and the green one over
+   it, filled up to the picked stage. */
+.eps__rail::before,
+.eps__rail::after {
+	content: "";
+	position: absolute;
+	top: calc(var(--eps-top) + var(--eps-size) / 2 - 1px);
+	right: calc(100% / var(--eps-n) / 2);
+	left: calc(100% / var(--eps-n) / 2);
+	height: 2px;
+	background: var(--eps-line);
+}
+
+.eps__rail::after {
+	background: var(--eps-fill);
+	transform: scaleX(calc(var(--eps-k) / max(1, var(--eps-n) - 1)));
+	transform-origin: left;
+	transition: transform .45s ease;
+}
+
+.eps--single .eps__rail::before,
+.eps--single .eps__rail::after {
+	display: none;
+}
+
+.eps .eps__item {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: 0;
+	margin: 0;
+	padding: 0 6px;
+	list-style: none;
+}
+
+.eps .eps__item::marker {
+	content: none;
+}
+
+.eps .eps__stage,
+.eps .eps__stage:hover,
+.eps .eps__stage:focus,
+.eps .eps__stage:active {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	outline: none;
+	background: none;
+	box-shadow: none;
+	color: inherit;
+	font: inherit;
+	letter-spacing: normal;
+	text-align: center;
+	text-decoration: none;
+	text-transform: none;
+	white-space: normal;
+	cursor: pointer;
+}
+
+.eps__dot {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	flex: none;
+	place-items: center;
+	width: var(--eps-size);
+	height: var(--eps-size);
+	border: 2px solid var(--eps-border);
+	border-radius: 50%;
+	background: var(--eps-circle);
+	color: var(--eps-num);
+	font-family: "Bebas Neue", Impact, sans-serif;
+	font-size: calc(var(--eps-size) * .41);
+	font-weight: 400;
+	line-height: 1;
+	transition: background-color .2s, border-color .2s, color .2s, box-shadow .2s;
+}
+
+.eps__name {
+	display: block;
+	width: 100%;
+}
+
+.eps__label {
+	display: block;
+	width: 100%;
+	min-height: 2.6em;
+	color: var(--eps-label);
+	font-size: 13.5px;
+	font-weight: 600;
+	line-height: 1.3;
+	overflow-wrap: break-word;
+	transition: color .2s;
+}
+
+.eps__badge {
+	position: absolute;
+	top: -28px;
+	left: 50%;
+	padding: 4px 10px;
+	border-radius: 999px;
+	background: var(--eps-sel);
+	color: #fff;
+	font-family: "Urbanist", system-ui, sans-serif;
+	font-size: 10px;
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: .07em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	transform: translateX(-50%);
+}
+
+/* The inline body only exists for the vertical stepper. */
+.eps__body {
+	display: none;
+}
+
+/* ---------------------------------------------------------- states --- */
+
+.eps .eps__stage:hover .eps__dot {
+	border-color: var(--eps-sel);
+}
+
+.eps .is-done .eps__dot,
+.eps .eps__item:not(.is-start):not(.is-sel) .eps__stage:hover .eps__dot {
+	border-color: var(--eps-sel);
+	color: var(--eps-sel);
+}
+
+.eps .is-start .eps__dot,
+.eps .is-sel .eps__dot {
+	border-color: var(--eps-sel);
+	background: var(--eps-sel);
+	color: #fff;
+	box-shadow: 0 0 0 6px var(--eps-halo);
+}
+
+.eps .is-sel .eps__label {
+	color: var(--eps-label-on);
+}
+
+.eps .eps__stage:focus-visible .eps__dot {
+	box-shadow: 0 0 0 6px #4DCF8D66;
+}
+
+/* ============================================================= panel === */
+
+.eps__panel {
+	position: relative;
+	margin-top: 22px;
+	border: 1px solid var(--eps-panel-line);
+	border-radius: var(--eps-radius);
+	background: var(--eps-panel);
+	box-shadow: 0 14px 34px #0F396110;
+}
+
+/* The caret sits under the picked circle. Without the script, the column
+   maths puts it there; the script measures, and clamps it inside the card. */
+.eps__panel::before {
+	content: "";
+	position: absolute;
+	top: -9px;
+	left: var(--eps-x, calc((var(--eps-k) + .5) / var(--eps-n) * 100%));
+	width: 16px;
+	height: 16px;
+	margin-left: -8px;
+	border-top: 1px solid var(--eps-panel-line);
+	border-left: 1px solid var(--eps-panel-line);
+	background: var(--eps-panel);
+	transform: rotate(45deg);
+	transition: left .35s ease;
+}
+
+.eps__slide {
+	display: flex;
+	align-items: center;
+	gap: 22px;
+	padding: 22px 28px;
+}
+
+.eps__slide[hidden] {
+	display: none;
+}
+
+.eps .eps__pn {
+	flex: none;
+	min-width: 1.1em;
+	color: var(--eps-panel-num);
+	font-family: "Bebas Neue", Impact, sans-serif;
+	font-size: 44px;
+	font-weight: 400;
+	line-height: 1;
+}
+
+.eps__copy {
+	flex: 1;
+	min-width: 0;
+}
+
+.eps .eps__title {
+	display: block;
+	color: var(--eps-title);
+	font-size: 17px;
+	font-weight: 700;
+	line-height: 1.35;
+}
+
+.eps .eps__desc {
+	margin: 2px 0 0;
+	color: var(--eps-text);
+	font-size: 15px;
+	line-height: 1.55;
+}
+
+.eps .eps__link,
+.eps .eps__link:hover,
+.eps .eps__link:focus,
+.eps .eps__link:visited {
+	display: inline-flex;
+	flex: none;
+	align-items: center;
+	padding: 10px 16px;
+	border: 1px solid color-mix(in srgb, var(--eps-button) 30%, transparent);
+	border-radius: 999px;
+	background: transparent;
+	box-shadow: none;
+	color: var(--eps-button);
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.2;
+	text-decoration: none;
+	white-space: nowrap;
+	transition: background-color .2s, border-color .2s;
+}
+
+.eps .eps__link:hover {
+	border-color: var(--eps-button);
+	background: color-mix(in srgb, var(--eps-button) 6%, transparent);
+}
+
+/* The fallback: there, so the card stays balanced, but quieter. */
+.eps .eps__link--quiet,
+.eps .eps__link--quiet:visited {
+	border-color: var(--eps-panel-line);
+	color: var(--eps-text);
+}
+
+.eps .eps__link--quiet:hover,
+.eps .eps__link--quiet:focus {
+	border-color: color-mix(in srgb, var(--eps-button) 30%, transparent);
+	color: var(--eps-title);
+}
+
+.eps .eps__link:focus-visible {
+	outline: 3px solid #4DCF8D;
+	outline-offset: 2px;
+}
+
+@keyframes eps-swap {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+}
+
+.eps--animate .eps__slide.is-swap > * {
+	animation: eps-swap .3s ease;
+}
+
+/* A narrower card: the button goes under the text, in line with it. */
+@container eps (max-width: 700px) {
+	.eps__slide {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		align-items: start;
+		gap: 12px 18px;
+		padding: 20px 22px;
+	}
+
+	.eps .eps__slide .eps__link {
+		grid-column: 2;
+		justify-self: start;
+	}
+
+	.eps .eps__pn {
+		font-size: 38px;
+	}
+}
+
+/* ========================================================= scrolling === */
+
+.eps[data-mode="scroll"] .eps__scroller {
+	overflow-x: auto;
+	overflow-y: hidden;
+	overscroll-behavior-x: contain;
+	scroll-snap-type: x proximity;
+	scrollbar-width: none;
+	-webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--eps-fl, 0px), #000 calc(100% - var(--eps-fr, 0px)), transparent 100%);
+	mask-image: linear-gradient(90deg, transparent 0, #000 var(--eps-fl, 0px), #000 calc(100% - var(--eps-fr, 0px)), transparent 100%);
+}
+
+.eps[data-mode="scroll"] .eps__scroller::-webkit-scrollbar {
+	display: none;
+}
+
+.eps[data-mode="scroll"] .eps__rail {
+	grid-template-columns: repeat(var(--eps-n), minmax(var(--eps-col), 1fr));
+	width: max-content;
+	min-width: 100%;
+}
+
+.eps[data-mode="scroll"] .eps__item {
+	scroll-snap-align: center;
+}
+
+/* ========================================================== vertical === */
+
+.eps[data-mode="v"] .eps__rail {
+	display: block;
+	padding: 0;
+}
+
+.eps[data-mode="v"] .eps__rail::before,
+.eps[data-mode="v"] .eps__rail::after,
+.eps[data-mode="v"] .eps__panel {
+	display: none;
+}
+
+.eps[data-mode="v"] .eps__item {
+	display: block;
+	padding: 0;
+}
+
+/* Each row draws the line from its own circle down to the next one's: the
+   circles sit at the same height in every row, so that is one row tall. */
+.eps[data-mode="v"] .eps__item:not(:last-child)::before,
+.eps[data-mode="v"] .eps__item:not(:last-child)::after {
+	content: "";
+	position: absolute;
+	top: calc(10px + var(--eps-vsize) / 2);
+	left: calc(var(--eps-vsize) / 2 - 1px);
+	width: 2px;
+	height: 100%;
+	background: var(--eps-line);
+}
+
+.eps[data-mode="v"] .eps__item:not(:last-child)::after {
+	background: var(--eps-fill);
+	transform: scaleY(0);
+	transform-origin: top;
+	transition: transform .45s ease;
+}
+
+.eps[data-mode="v"] .eps__item.is-done::after {
+	transform: scaleY(1);
+}
+
+.eps[data-mode="v"] .eps__stage,
+.eps[data-mode="v"] .eps__stage:hover,
+.eps[data-mode="v"] .eps__stage:focus,
+.eps[data-mode="v"] .eps__stage:active {
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 14px;
+	padding: 10px 0;
+	text-align: left;
+}
+
+.eps[data-mode="v"] .eps__dot {
+	width: var(--eps-vsize);
+	height: var(--eps-vsize);
+	font-size: 18px;
+}
+
+/* Title and badge flow as one line of text, so the badge follows the
+   title's last word wherever it wraps. The circle stays at the top of its
+   row, where the line meets it; a one-line title centres against it. */
+.eps[data-mode="v"] .eps__name {
+	flex: 1;
+	min-width: 0;
+	padding-top: calc((var(--eps-vsize) - 22.5px) / 2);
+	line-height: 22.5px;
+}
+
+.eps[data-mode="v"] .eps__label {
+	display: inline;
+	min-height: 0;
+	font-size: 15px;
+	line-height: inherit;
+}
+
+.eps[data-mode="v"] .is-sel .eps__label {
+	font-weight: 700;
+}
+
+.eps[data-mode="v"] .eps__badge {
+	position: static;
+	display: inline-block;
+	margin-left: 6px;
+	vertical-align: 2px;
+	transform: none;
+}
+
+.eps[data-mode="v"] .eps__body {
+	display: grid;
+	grid-template-rows: 0fr;
+	visibility: hidden;
+	transition: grid-template-rows .3s ease, visibility 0s .3s;
+}
+
+.eps[data-mode="v"] .is-sel .eps__body {
+	grid-template-rows: 1fr;
+	visibility: visible;
+	transition: grid-template-rows .3s ease;
+}
+
+.eps[data-mode="v"] .eps__inner {
+	min-height: 0;
+	overflow: hidden;
+	padding-left: calc(var(--eps-vsize) + 14px);
+}
+
+.eps[data-mode="v"] .eps__inner > :last-child {
+	margin-bottom: 14px;
+}
+
+.eps[data-mode="v"] .eps__desc {
+	margin: 0 0 12px;
+	font-size: 14.5px;
+}
+
+.eps[data-mode="v"] .eps__link,
+.eps[data-mode="v"] .eps__link:hover,
+.eps[data-mode="v"] .eps__link:focus {
+	padding: 9px 14px;
+	font-size: 13.5px;
+	white-space: normal;
+}
+
+/* ========================================================== entrance === */
+
+@keyframes eps-land {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+}
+
+@keyframes eps-draw {
+	from { clip-path: inset(0 100% 0 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+.eps--armed:not(.is-in) :is(.eps__item, .eps__panel),
+.eps--armed:not(.is-in) .eps__rail::before,
+.eps--armed:not(.is-in) .eps__rail::after {
+	opacity: 0;
+}
+
+.eps--armed.is-in .eps__item {
+	animation: eps-land .45s cubic-bezier(.2, .7, .2, 1) backwards;
+	animation-delay: calc(120ms + var(--eps-i) * 70ms);
+}
+
+.eps--armed.is-in .eps__rail::before,
+.eps--armed.is-in .eps__rail::after {
+	animation: eps-draw .8s ease-out backwards;
+	animation-delay: 120ms;
+}
+
+.eps--armed.is-in .eps__panel {
+	animation: eps-land .45s cubic-bezier(.2, .7, .2, 1) backwards;
+	animation-delay: calc(220ms + var(--eps-n) * 70ms);
+}
+
+/* ------------------------------------------------------- less motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+	.eps *,
+	.eps *::before,
+	.eps *::after {
+		transition: none !important;
+		animation: none !important;
+	}
+
+	.eps--armed :is(.eps__item, .eps__panel),
+	.eps--armed .eps__rail::before,
+	.eps--armed .eps__rail::after {
+		opacity: 1;
+	}
+}

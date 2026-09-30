@@ -654,7 +654,7 @@ check( 'the news module is registered', true, in_array( 'news', Toolkit::instanc
 check( 'the journey timeline module is registered', true, in_array( 'journey', Toolkit::instance()->ids(), true ) );
 check( 'the company chain module is registered', true, in_array( 'chain', Toolkit::instance()->ids(), true ) );
 check( 'the award wall module is registered', true, in_array( 'awards', Toolkit::instance()->ids(), true ) );
-check( 'twenty-six modules ship', 26, count( Toolkit::instance()->ids() ) );
+check( 'twenty-seven modules ship', 27, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -696,6 +696,7 @@ foreach ( array(
 	'modules/chain/widgets/class-company-chain-widget.php',
 	'modules/awards/widgets/class-award-wall-widget.php',
 	'modules/elements/widgets/class-elements-widget.php', // Both widgets inherit it.
+	'modules/process/widgets/class-process-stepper-widget.php',
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -733,6 +734,7 @@ $module_files = array(
 	'modules/chain/class-chain-module.php',
 	'modules/awards/class-awards-module.php',
 	'modules/elements/class-elements-module.php',
+	'modules/process/class-process-module.php',
 );
 
 foreach ( $module_files as $relative ) {
@@ -3317,6 +3319,82 @@ check( 'the logo carries its alt', 1, substr_count( $el_mark, 'alt="ThermStar lo
 check( 'no glow, no rings, when switched off', array( 0, 0 ), ( function ( $h ) { return array( substr_count( $h, 'eam--glow' ), substr_count( $h, 'eam__rings' ) ); } )( ( new Annotated_Mark_Probe() )->markup( array( 'items' => $el_mark_items, 'logo' => array( 'url' => 'x' ) ) ) ) );
 check( 'no logo and no labels, nothing', '', trim( ( new Annotated_Mark_Probe() )->markup( array() ) ) );
 check( 'no rows, no list', '', trim( ( new Element_List_Probe() )->markup( array() ) ) );
+
+/* -------------------------------------------------- Process Stepper --- */
+
+require_once dirname( __DIR__ ) . '/modules/process/class-process-content.php';
+require_once dirname( __DIR__ ) . '/modules/process/widgets/class-process-stepper-widget.php';
+
+use ErudaToolkit\Modules\Process\Process_Content;
+
+$ps = Process_Content::default_items();
+check( 'eight stages ship, in order', array( 'Opportunity screening', 'Technical data review', 'Preliminary assessment', 'Configuration', 'Proposal', 'Implementation coordination', 'Commissioning', 'Measurement' ), array_column( $ps, 'title' ) );
+check( 'only the first is the start', array( true, false, false, false, false, false, false, false ), array_column( $ps, 'start' ) );
+check( 'four stages link to their service pages', array( '/thermal-energy-opportunity-screen/', '/technical-data-review/', '/configuration-implementation-verification/', '/thermstar-power-intelligence/' ), array_values( array_filter( array_column( $ps, 'link' ) ) ) );
+
+$ps_built = Process_Content::build( array(
+	array( 'title' => 'One' ),
+	array( 'title' => '' ),
+	array( 'title' => 'Two', 'number' => 'B', 'link' => array( 'url' => '/x/', 'is_external' => 'on' ), 'link_text' => 'Go', 'start' => 'yes' ),
+	array( 'title' => 'Three' ),
+	'junk',
+) );
+check( 'untitled rows and junk are skipped', 3, count( $ps_built ) );
+check( 'numbers count the stages kept; a typed one wins', array( '01', 'B', '03' ), array_column( $ps_built, 'number' ) );
+check( 'links read the URL control', array( '/x/', true, 'Go' ), array( $ps_built[1]['link']['url'], $ps_built[1]['link']['external'], $ps_built[1]['link_text'] ) );
+check( 'link text defaults', 'Learn more →', $ps_built[0]['link_text'] );
+check( 'start reads the switcher', array( false, true, false ), array_column( $ps_built, 'start' ) );
+check( 'initial: the start stage when not typed', 1, Process_Content::initial( '', $ps_built ) );
+check( 'initial: a typed stage, 1-based, clamped', array( 0, 2, 2 ), array( Process_Content::initial( 1, $ps_built ), Process_Content::initial( 3, $ps_built ), Process_Content::initial( 99, $ps_built ) ) );
+check( 'initial: no start, the first', 0, Process_Content::initial( null, Process_Content::build( array( array( 'title' => 'x' ) ) ) ) );
+check( 'interval in ms, kept readable', array( 4000, 2000, 15000, 2500 ), array( Process_Content::interval( null ), Process_Content::interval( 0.5 ), Process_Content::interval( 60 ), Process_Content::interval( array( 'size' => 2.5 ) ) ) );
+check( 'breakpoints default and stay in order', array( array( 900, 560 ), array( 700, 700 ) ), array( Process_Content::breakpoints( null, null ), Process_Content::breakpoints( array( 'size' => 500 ), array( 'size' => 700 ) ) ) );
+
+/**
+ * A widget with settings pushed in.
+ */
+class Process_Render_Probe extends \ErudaToolkit\Modules\Process\Widgets\Process_Stepper_Widget {
+	/** @var array */
+	public $feed = array();
+	/** @return array */
+	public function get_settings_for_display() {
+		return $this->feed;
+	}
+	/** @return string */
+	public function get_id() {
+		return 'ab12';
+	}
+	/**
+	 * @param array $s Settings.
+	 * @return string
+	 */
+	public function markup( $s ) {
+		$this->feed = $s;
+		ob_start();
+		( new ReflectionMethod( $this, 'render' ) )->invoke( $this );
+		return (string) ob_get_clean();
+	}
+}
+$ps_items = array();
+foreach ( $ps as $p ) {
+	$ps_items[] = array( 'title' => $p['title'], 'text' => $p['text'], 'link' => array( 'url' => $p['link'] ), 'start' => $p['start'] ? 'yes' : '' );
+}
+$ps_base = array( 'items' => $ps_items, 'badge' => 'You start here', 'fallback_text' => 'Request an Assessment', 'fallback_link' => array( 'url' => '/request-assessment/' ), 'animate' => 'yes' );
+$ps_html = ( new Process_Render_Probe() )->markup( $ps_base );
+check( 'the stepper carries its count, pick and breakpoints', 1, substr_count( $ps_html, 'class="eps eps--animate" id="eps-ab12" data-mode="h" data-scroll-below="900" data-vertical-below="560" style="--eps-n:8;--eps-k:0"' ) );
+check( 'eight stage buttons, one in the tab order, one current', array( 8, 1, 1 ), array( substr_count( $ps_html, '<button type="button" class="eps__stage"' ), substr_count( $ps_html, 'tabindex="0"' ), substr_count( $ps_html, 'aria-current="step"' ) ) );
+check( 'one slide shown, seven hidden', array( 8, 7 ), array( substr_count( $ps_html, 'class="eps__slide' ), substr_count( $ps_html, ' hidden>' ) ) );
+check( 'the panel is a polite live region', 1, substr_count( $ps_html, '<div class="eps__panel" aria-live="polite">' ) );
+check( 'the badge only on the start stage', 1, substr_count( $ps_html, '<span class="eps__badge">You start here</span>' ) );
+check( 'own links, in the panel and the vertical rows', 8, substr_count( $ps_html, 'class="eps__link" href=' ) );
+check( 'the quiet fallback on the other four, twice each', 8, substr_count( $ps_html, '<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>' ) );
+check( 'the layout is picked before first paint', 1, substr_count( $ps_html, "<script>(function(r){var w=r&&r.clientWidth;" ) );
+$ps_nofb = ( new Process_Render_Probe() )->markup( array_merge( $ps_base, array( 'fallback_text' => '', 'initial' => 3, 'auto' => 'yes', 'interval' => array( 'size' => 6 ) ) ) );
+check( 'no fallback: those slides go wide, no button', array( 4, 0 ), array( substr_count( $ps_nofb, 'eps__slide eps__slide--wide' ), substr_count( $ps_nofb, 'eps__link--quiet' ) ) );
+check( 'opens on the typed stage, earlier ones done', array( 1, 2 ), array( substr_count( $ps_nofb, '--eps-k:2"' ), substr_count( $ps_nofb, ' is-done"' ) ) );
+check( 'auto-advance hands its pace to the script', 1, substr_count( $ps_nofb, 'data-auto="6000"' ) );
+check( 'no stages, nothing', '', trim( ( new Process_Render_Probe() )->markup( array() ) ) );
+check( 'one stage: no line', 1, substr_count( ( new Process_Render_Probe() )->markup( array( 'items' => array( $ps_items[0] ) ) ), 'eps--single' ) );
 
 /* ------------------------------------------------------------- report --- */
 
