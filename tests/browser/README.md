@@ -27,6 +27,7 @@ node tests/browser/news-probe.js     # News widgets (regenerate news.html first)
 node tests/browser/journey-probe.js  # Journey Timeline (regenerate journey.html first)
 node tests/browser/chain-probe.js    # Company Chain (regenerate chain.html first)
 node tests/browser/awards-probe.js   # Award Wall (regenerate awards.html first)
+node tests/browser/elements-probe.js # Element List and Annotated Mark (regenerate elements.html first)
 node tests/browser/bench.js         # what it all costs, with every widget on one page
 ```
 
@@ -313,4 +314,11 @@ The award wall:
 ```sh
 php tests/browser/awards-fixture.php > tests/browser/awards.html
 node tests/browser/awards-probe.js [screenshot-dir]
+```
+
+Element List and Annotated Mark:
+
+```sh
+php tests/browser/elements-fixture.php > tests/browser/elements.html
+node tests/browser/elements-probe.js [screenshot-dir]
 ```

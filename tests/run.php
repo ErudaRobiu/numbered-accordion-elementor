@@ -654,7 +654,7 @@ check( 'the news module is registered', true, in_array( 'news', Toolkit::instanc
 check( 'the journey timeline module is registered', true, in_array( 'journey', Toolkit::instance()->ids(), true ) );
 check( 'the company chain module is registered', true, in_array( 'chain', Toolkit::instance()->ids(), true ) );
 check( 'the award wall module is registered', true, in_array( 'awards', Toolkit::instance()->ids(), true ) );
-check( 'twenty-five modules ship', 25, count( Toolkit::instance()->ids() ) );
+check( 'twenty-six modules ship', 26, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -695,6 +695,7 @@ foreach ( array(
 	'modules/journey/widgets/class-journey-timeline-widget.php',
 	'modules/chain/widgets/class-company-chain-widget.php',
 	'modules/awards/widgets/class-award-wall-widget.php',
+	'modules/elements/widgets/class-elements-widget.php', // Both widgets inherit it.
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -731,6 +732,7 @@ $module_files = array(
 	'modules/journey/class-journey-module.php',
 	'modules/chain/class-chain-module.php',
 	'modules/awards/class-awards-module.php',
+	'modules/elements/class-elements-module.php',
 );
 
 foreach ( $module_files as $relative ) {
@@ -3236,6 +3238,85 @@ check( 'badges carry their award as alt text', 1, substr_count( $aw_html, 'alt="
 $aw_nolead = ( new Awards_Render_Probe() )->markup( array( 'items' => $aw_items, 'show_lead' => '' ) );
 check( 'the number can be switched off', array( 0, 1 ), array( substr_count( $aw_nolead, 'eaw__lead' ), substr_count( $aw_nolead, 'eaw--no-lead' ) ) );
 check( 'no awards, nothing', '', trim( ( new Awards_Render_Probe() )->markup( array() ) ) );
+
+/* ---------------------------------------- Element List, Annotated Mark --- */
+
+require_once dirname( __DIR__ ) . '/modules/elements/class-elements-content.php';
+require_once dirname( __DIR__ ) . '/modules/elements/widgets/class-element-list-widget.php';
+require_once dirname( __DIR__ ) . '/modules/elements/widgets/class-annotated-mark-widget.php';
+
+use ErudaToolkit\Modules\Elements\Elements_Content;
+
+$el = Elements_Content::default_items();
+check( 'four elements ship, in the About order', array( 'air', 'fire', 'water', 'earth' ), array_column( $el, 'key' ) );
+check( 'every default icon exists', true, count( array_intersect( array_column( $el, 'icon' ), array_keys( Elements_Content::icons() ) ) ) === 4 );
+check( 'one label in each corner', array( 'bl', 'br', 'tl', 'tr' ), ( function ( $c ) { sort( $c ); return $c; } )( array_column( $el, 'corner' ) ) );
+check( 'the mark ships', true, is_file( dirname( __DIR__ ) . '/' . Elements_Content::LOGO ) );
+check( 'keys are cleaned', 'fire-heat', Elements_Content::key( ' Fire & Heat ' ) );
+check( 'a key falls back', 'x', Elements_Content::key( '!!', 'x' ) );
+check( 'only hex colours reach a style', array( '#E8823F', '', '' ), array( Elements_Content::colour( '#E8823F' ), Elements_Content::colour( 'red;background:url(x)' ), Elements_Content::colour( array() ) ) );
+check( 'percent reads a slider and clamps', array( 42.5, 100.0, 0.0, 7.0 ), array( Elements_Content::percent( array( 'size' => 42.5 ), 1 ), Elements_Content::percent( 140, 1 ), Elements_Content::percent( -3, 1 ), Elements_Content::percent( array( 'size' => '' ), 7 ) ) );
+
+$el_built = Elements_Content::build( array(
+	array( 'name' => 'Fire', 'key' => 'fire' ),
+	array( 'name' => 'Fire again', 'key' => 'fire' ),
+	array( 'name' => '' ),
+	array( 'name' => 'Wind Power', 'corner' => 'nonsense', 'icon' => 'nope' ),
+	'junk',
+) );
+check( 'nameless and junk rows are skipped', 3, count( $el_built ) );
+check( 'clashing keys are made unique, empty keys come from the name', array( 'fire', 'fire-2', 'wind-power' ), array_column( $el_built, 'key' ) );
+check( 'a bad corner and icon fall back', array( 'tl', '' ), array( $el_built[2]['corner'], $el_built[2]['icon'] ) );
+check( 'the guessed line: tag edge, elbow, dot', 'M16 21.2 L30.3 21.2 L42.1 39.6', Elements_Content::guess_path( Elements_Content::build( array( $el[1] ) )[0] ) );
+check( 'right-hand labels come in from the right', 'M84 13.5 L69.7 13.5 L61.8 28.1', Elements_Content::guess_path( Elements_Content::build( array( $el[2] ) )[0] ) );
+
+/**
+ * Widgets with settings pushed in.
+ */
+trait Elements_Render_Feed {
+	/** @var array */
+	public $feed = array();
+	/** @return array */
+	public function get_settings_for_display() {
+		return $this->feed;
+	}
+	/**
+	 * @param array $s Settings.
+	 * @return string
+	 */
+	public function markup( $s ) {
+		$this->feed = $s;
+		ob_start();
+		( new ReflectionMethod( $this, 'render' ) )->invoke( $this );
+		return (string) ob_get_clean();
+	}
+}
+class Element_List_Probe extends \ErudaToolkit\Modules\Elements\Widgets\Element_List_Widget {
+	use Elements_Render_Feed;
+}
+class Annotated_Mark_Probe extends \ErudaToolkit\Modules\Elements\Widgets\Annotated_Mark_Widget {
+	use Elements_Render_Feed;
+}
+
+$el_list = ( new Element_List_Probe() )->markup( array( 'items' => $el, 'link_group' => 'logo-elements', 'cycle' => 'yes' ) );
+check( 'the list joins its group and cycles when asked', 1, substr_count( $el_list, '<ol class="eel" data-link-group="logo-elements" data-cycle="3000">' ) );
+check( 'four focusable rows, keyed and coloured', 4, preg_match_all( '/<li class="eel__row" data-key="[a-z]+" tabindex="0" style="--eel-c:#[0-9A-F]{6}">/', $el_list ) );
+check( 'descriptions verbatim', 1, substr_count( $el_list, 'recovering waste heat and transforming it into reusable heat energy' ) );
+check( 'no cycling unless asked', 0, substr_count( ( new Element_List_Probe() )->markup( array( 'items' => $el ) ), 'data-cycle' ) );
+check( 'an empty group falls back to the shared one', 1, substr_count( ( new Element_List_Probe() )->markup( array( 'items' => $el, 'link_group' => '  ' ) ), 'data-link-group="logo-elements"' ) );
+
+$el_mark_items = array();
+foreach ( $el as $e ) {
+	$el_mark_items[] = array_merge( $e, array( 'tag_y' => array( 'unit' => '%', 'size' => $e['tag_y'] ), 'dot_x' => array( 'unit' => '%', 'size' => $e['dot_x'] ), 'dot_y' => array( 'unit' => '%', 'size' => $e['dot_y'] ) ) );
+}
+$el_mark = ( new Annotated_Mark_Probe() )->markup( array( 'items' => $el_mark_items, 'link_group' => 'logo-elements', 'logo' => array( 'url' => 'x/mark.webp' ), 'logo_alt' => 'ThermStar logo mark', 'rings' => 'yes', 'glow' => '', 'animate' => 'yes' ) );
+check( 'the mark joins the same group', 1, substr_count( $el_mark, 'class="eam eam--rings eam--animate" data-link-group="logo-elements"' ) );
+check( 'a line, a dot and a focusable tag per element', array( 4, 4, 4 ), array( substr_count( $el_mark, '<path data-key=' ), substr_count( $el_mark, '<span class="eam__dot" data-key=' ), substr_count( $el_mark, 'tabindex="0"' ) ) );
+check( 'the fire dot sits where the wireframe put it', 1, substr_count( $el_mark, 'left:42.1%;top:39.6%' ) );
+check( 'the logo carries its alt', 1, substr_count( $el_mark, 'alt="ThermStar logo mark"' ) );
+check( 'no glow, no rings, when switched off', array( 0, 0 ), ( function ( $h ) { return array( substr_count( $h, 'eam--glow' ), substr_count( $h, 'eam__rings' ) ); } )( ( new Annotated_Mark_Probe() )->markup( array( 'items' => $el_mark_items, 'logo' => array( 'url' => 'x' ) ) ) ) );
+check( 'no logo and no labels, nothing', '', trim( ( new Annotated_Mark_Probe() )->markup( array() ) ) );
+check( 'no rows, no list', '', trim( ( new Element_List_Probe() )->markup( array() ) ) );
 
 /* ------------------------------------------------------------- report --- */
 

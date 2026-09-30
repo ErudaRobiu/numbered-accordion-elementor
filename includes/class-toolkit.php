@@ -124,6 +124,10 @@ final class Toolkit {
 			'file'  => 'modules/awards/class-awards-module.php',
 			'class' => '\ErudaToolkit\Modules\Awards\Awards_Module',
 		),
+		'elements'   => array(
+			'file'  => 'modules/elements/class-elements-module.php',
+			'class' => '\ErudaToolkit\Modules\Elements\Elements_Module',
+		),
 	);
 
 	/**
