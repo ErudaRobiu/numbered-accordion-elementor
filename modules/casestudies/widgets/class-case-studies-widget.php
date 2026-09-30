@@ -204,7 +204,7 @@ class Case_Studies_Widget extends Widget_Base {
 				'label'       => esc_html__( 'Button goes to', 'numbered-accordion' ),
 				'type'        => Controls_Manager::TEXT,
 				'label_block' => true,
-				'default'     => '/request-assessment/',
+				'default'     => '/services/thermal-energy-opportunity-screen/',
 				'description' => esc_html__( 'The assessment form page. The card adds ?sector=… so the form can open on the right industry.', 'numbered-accordion' ),
 				'condition'   => array( 'show_estimate' => 'yes' ),
 			)
@@ -554,7 +554,7 @@ class Case_Studies_Widget extends Widget_Base {
 		$use_chips = isset( $settings['show_chips'] ) && 'yes' === $settings['show_chips'] && count( $chips ) > 1;
 		$estimate  = isset( $settings['show_estimate'] ) && 'yes' === $settings['show_estimate'];
 		$est_text  = $this->word( $settings, 'estimate_text', __( 'Estimate my site', 'numbered-accordion' ) );
-		$est_url   = $this->word( $settings, 'estimate_url', '/request-assessment/' );
+		$est_url   = $this->word( $settings, 'estimate_url', '/services/thermal-energy-opportunity-screen/' );
 		$all       = $this->word( $settings, 'all_label', __( 'All', 'numbered-accordion' ) );
 		$basis     = $this->word( $settings, 'basis_prefix', __( 'Basis:', 'numbered-accordion' ) );
 		$steps     = array(

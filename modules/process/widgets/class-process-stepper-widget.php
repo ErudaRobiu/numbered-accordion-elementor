@@ -231,7 +231,7 @@ class Process_Stepper_Widget extends Widget_Base {
 			array(
 				'label'   => esc_html__( 'Fallback link', 'numbered-accordion' ),
 				'type'    => Controls_Manager::URL,
-				'default' => array( 'url' => '/request-assessment/' ),
+				'default' => array( 'url' => '/services/thermal-energy-opportunity-screen/' ),
 			)
 		);
 
