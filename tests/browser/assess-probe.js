@@ -60,7 +60,7 @@ const state = sel => page => page.evaluate(sel => {
 
 (async () => {
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new', args: ['--no-sandbox'] });
-  const M = state('#modal .eas');
+  const M = state('.eas-dialog .eas');
 
   /* ------------------------------------------------ desktop, happy path --- */
 
@@ -75,75 +75,77 @@ const state = sel => page => page.evaluate(sel => {
   check('a .ts-assess button opens it instead of navigating, even with a page-transition script taking link clicks', s.open === true && s.locked && page.url() === URL && nav === 0, page.url() + ' navigations:' + nav);
   check('opens on step 1', s.step === 1);
   const look = await page.evaluate(() => {
-    const n = document.querySelector('#modal [data-eas-next]');
+    const n = document.querySelector('.eas-dialog [data-eas-next]');
     const c = getComputedStyle(n);
-    const i = document.querySelector('#modal .eas__range');
-    return { nextBg: c.backgroundImage.slice(0, 15), nextColor: c.color, range: getComputedStyle(i).appearance, out: document.querySelector('#modal output[for$="-temp"]').textContent };
+    const i = document.querySelector('.eas-dialog .eas__range');
+    return { nextBg: c.backgroundImage.slice(0, 15), nextColor: c.color, range: getComputedStyle(i).appearance, out: document.querySelector('.eas-dialog output[for$="-temp"]').textContent };
   });
-  check('Hello Elementor pink does not reach the buttons', /gradient/.test(look.nextBg) && look.nextColor === 'rgb(255, 255, 255)', JSON.stringify(look));
+  check('Hello Elementor pink and lazy-loaded section backgrounds do not reach the buttons', /gradient/.test(look.nextBg) && look.nextColor === 'rgb(255, 255, 255)', JSON.stringify(look));
+  const home = await page.evaluate(() => document.querySelector('.eas-dialog').parentNode === document.body && !document.querySelector('#modal .eas-dialog'));
+  check('the pop-up moves itself out of its section to the end of the page', home);
   check('slider readouts start at the typical values', look.out === '230°F', look.out);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/assess-1440-step1.png` });
 
-  await page.focus('#modal input[name="temp"]');
+  await page.focus('.eas-dialog input[name="temp"]');
   for (let i = 0; i < 70; i++) await page.keyboard.press('ArrowRight');
-  const t = await page.evaluate(() => [document.querySelector('#modal output[for$="-temp"]').textContent, getComputedStyle(document.querySelector('#modal input[name="temp"]')).getPropertyValue('--p')]);
+  const t = await page.evaluate(() => [document.querySelector('.eas-dialog output[for$="-temp"]').textContent, getComputedStyle(document.querySelector('.eas-dialog input[name="temp"]')).getPropertyValue('--p')]);
   check('slider moves by keyboard; readout and fill follow', t[0] === '300°F' && parseFloat(t[1]) > 55, t.join(' '));
-  await page.click('#modal input[name="days"][value="7"] + span');
+  await page.click('.eas-dialog input[name="days"][value="7"] + span');
 
-  await page.click('#modal [data-eas-next]');
+  await page.click('.eas-dialog [data-eas-next]');
   await sleep(200);
   s = await M(page);
   check('Next goes to step 2 and focuses its title', s.step === 2 && /eas__step-title/.test(s.focus), s.focus);
-  await page.click('#modal [data-eas-next]');
+  await page.click('.eas-dialog [data-eas-next]');
   await sleep(100);
   s = await M(page);
   check('step 2 needs an industry: error shown, focus on it, stays put', s.step === 2 && s.errors.includes('industry') && s.focus === 'industry', JSON.stringify(s.errors));
-  await page.select('#modal select[name="industry"]', 'industrial-laundry');
-  await page.click('#modal input[value="lint"] + span');
-  await page.click('#modal input[value="humidity"] + span');
-  await page.click('#modal input[value="process-water"] + span');
+  await page.select('.eas-dialog select[name="industry"]', 'industrial-laundry');
+  await page.click('.eas-dialog input[value="lint"] + span');
+  await page.click('.eas-dialog input[value="humidity"] + span');
+  await page.click('.eas-dialog input[value="process-water"] + span');
   s = await M(page);
   check('the error clears once fixed', !s.errors.includes('industry'), JSON.stringify(s.errors));
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/assess-1440-step2.png` });
 
-  await page.click('#modal [data-eas-back]');
+  await page.click('.eas-dialog [data-eas-back]');
   await sleep(100);
-  const kept = await page.evaluate(() => document.querySelector('#modal output[for$="-temp"]').textContent);
+  const kept = await page.evaluate(() => document.querySelector('.eas-dialog output[for$="-temp"]').textContent);
   check('Back keeps what was entered', kept === '300°F', kept);
-  await page.click('#modal [data-eas-next]');
+  await page.click('.eas-dialog [data-eas-next]');
   await sleep(150);
-  await page.click('#modal [data-eas-next]');
+  await page.click('.eas-dialog [data-eas-next]');
   await sleep(150);
 
-  await page.click('#modal [data-eas-send]');
+  await page.click('.eas-dialog [data-eas-send]');
   await sleep(100);
   s = await M(page);
   check('step 3 checks name, email and company before sending', s.step === 3 && ['first', 'last', 'email', 'company'].every(k => s.errors.includes(k)) && posts.length === 0 && s.focus === 'first', JSON.stringify(s.errors));
-  await page.type('#modal input[name="first"]', 'Dana');
-  await page.type('#modal input[name="last"]', 'Reyes');
-  await page.type('#modal input[name="email"]', 'dana@example');
-  await page.type('#modal input[name="company"]', 'Acme Laundry');
-  await page.click('#modal [data-eas-send]');
+  await page.type('.eas-dialog input[name="first"]', 'Dana');
+  await page.type('.eas-dialog input[name="last"]', 'Reyes');
+  await page.type('.eas-dialog input[name="email"]', 'dana@example');
+  await page.type('.eas-dialog input[name="company"]', 'Acme Laundry');
+  await page.click('.eas-dialog [data-eas-send]');
   s = await M(page);
   check('a malformed email is caught', s.errors.includes('email') && posts.length === 0, JSON.stringify(s.errors));
-  await page.type('#modal input[name="email"]', '.com');
-  await page.type('#modal input[name="location"]', 'Laval, QC');
+  await page.type('.eas-dialog input[name="email"]', '.com');
+  await page.type('.eas-dialog input[name="location"]', 'Laval, QC');
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/assess-1440-step3.png` });
   await sleep(3200);
-  await page.click('#modal [data-eas-send]');
+  await page.click('.eas-dialog [data-eas-send]');
   await sleep(500);
   const p0 = posts[0] || {};
   check('sends one request with every answer', posts.length === 1 && p0.temp === 300 && p0.days === 7 && p0.industry === 'industrial-laundry' && p0.contaminants.join() === 'lint,humidity' && p0.uses.join() === 'process-water' && p0.email === 'dana@example.com' && p0.location === 'Laval, QC', JSON.stringify(p0).slice(0, 220));
   check('sends which widget it is, the page, and time on form', p0.doc === 42 && p0.el === 'mod1' && /assess\.html/.test(p0.source) && p0.elapsed > 3000 && p0.website === '', `${p0.doc} ${p0.el} ${p0.elapsed}`);
   s = await M(page);
-  const res = await page.evaluate(() => ['dollars', 'mmbtu', 'tco2', 'hours'].map(k => document.querySelector('#modal [data-r="' + k + '"]').textContent));
+  const res = await page.evaluate(() => ['dollars', 'mmbtu', 'tco2', 'hours'].map(k => document.querySelector('.eas-dialog [data-r="' + k + '"]').textContent));
   check('shows the estimate: dollars, heat, CO2, hours', s.result && res[0] === '$15,000–$22,000' && res[1] === '1,300–2,000 MMBtu/yr' && res[2] === '85.4–128.1 t/yr' && res[3] === '4,160 h/yr', res.join(' | '));
   check('focus moves to the result', /eas__result/.test(s.focus), s.focus);
-  const basis = await page.evaluate(() => document.querySelector('#modal [data-r="basis"]').textContent);
+  const basis = await page.evaluate(() => document.querySelector('.eas-dialog [data-r="basis"]').textContent);
   check('the assumptions are stated under it', /40% to 60%/.test(basis) && /\$0\.90 per therm/.test(basis), basis.slice(0, 80));
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/assess-1440-result.png` });
 
-  await page.click('#modal .eas__result [data-eas-close]');
+  await page.click('.eas-dialog .eas__result [data-eas-close]');
   await sleep(200);
   s = await M(page);
   check('Done closes it and unlocks the page', s.open === false && !s.locked, JSON.stringify(s));
@@ -173,25 +175,25 @@ const state = sel => page => page.evaluate(sel => {
   ({ page, errs, posts } = await open(browser, { width: 1440, height: 900 }, n => (n === 1 ? { status: 422, body: { ok: false, errors: { industry: 'Choose your industry.' } } } : 'abort')));
   const fill = async () => {
     await page.click('#btn1 a'); await sleep(300);
-    await page.click('#modal [data-eas-next]');
-    await page.select('#modal select[name="industry"]', 'foundries');
-    await page.click('#modal [data-eas-next]');
+    await page.click('.eas-dialog [data-eas-next]');
+    await page.select('.eas-dialog select[name="industry"]', 'foundries');
+    await page.click('.eas-dialog [data-eas-next]');
     for (const [k, v] of [['first', 'A'], ['last', 'B'], ['email', 'a@b.co'], ['company', 'C']]) {
-      await page.$eval('#modal input[name="' + k + '"]', (el, v) => { el.value = v; }, v);
+      await page.$eval('.eas-dialog input[name="' + k + '"]', (el, v) => { el.value = v; }, v);
     }
     await sleep(3100);
-    await page.click('#modal [data-eas-send]');
+    await page.click('.eas-dialog [data-eas-send]');
     await sleep(500);
   };
   await fill();
   s = await M(page);
   check('a server field error takes the visitor back to that step', s.step === 2 && s.errors.includes('industry') && s.focus === 'industry', JSON.stringify(s));
-  await page.click('#modal [data-eas-next]');
-  await page.click('#modal [data-eas-send]');
+  await page.click('.eas-dialog [data-eas-next]');
+  await page.click('.eas-dialog [data-eas-send]');
   await sleep(500);
   s = await M(page);
   check('a network failure says so and offers email and phone', s.step === 3 && /solutions@thermstar\.com/.test(s.status) && /833 667 7359/.test(s.status), s.status);
-  const btn = await page.evaluate(() => [document.querySelector('#modal [data-eas-send]').textContent, document.querySelector('#modal [data-eas-send]').getAttribute('aria-busy')]);
+  const btn = await page.evaluate(() => [document.querySelector('.eas-dialog [data-eas-send]').textContent, document.querySelector('.eas-dialog [data-eas-send]').getAttribute('aria-busy')]);
   check('the send button recovers', btn[0] === 'Get my estimate' && btn[1] === null, btn.join(' '));
   check('no script errors (errors path)', errs.length === 0, errs.join(' | '));
   await page.close();
@@ -202,19 +204,19 @@ const state = sel => page => page.evaluate(sel => {
   await page.tap('#btn1 a');
   await sleep(400);
   const ph = await page.evaluate(() => {
-    const d = document.querySelector('#modal dialog');
+    const d = document.querySelector('.eas-dialog');
     const r = d.getBoundingClientRect();
-    const nav = document.querySelector('#modal .eas__nav').getBoundingClientRect();
+    const nav = document.querySelector('.eas-dialog .eas__nav').getBoundingClientRect();
     return { w: Math.round(r.width), h: Math.round(r.height), scroll: document.documentElement.scrollWidth, inner: d.scrollWidth <= d.clientWidth + 1, navBottom: Math.round(nav.bottom) };
   });
   check('phone: full screen, nothing wider than it', ph.w === 390 && ph.h === 844 && ph.inner && ph.scroll === 390, JSON.stringify(ph));
   check('phone: the buttons stay in reach at the bottom', ph.navBottom <= 844, ph.navBottom);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/assess-390-step1.png` });
-  await page.tap('#modal [data-eas-next]');
-  await page.select('#modal select[name="industry"]', 'manufacturing');
-  await page.tap('#modal [data-eas-next]');
+  await page.tap('.eas-dialog [data-eas-next]');
+  await page.select('.eas-dialog select[name="industry"]', 'manufacturing');
+  await page.tap('.eas-dialog [data-eas-next]');
   await sleep(300);
-  const grid = await page.evaluate(() => new Set([...document.querySelectorAll('#modal .eas__grid .eas__field')].map(f => Math.round(f.getBoundingClientRect().left))).size);
+  const grid = await page.evaluate(() => new Set([...document.querySelectorAll('.eas-dialog .eas__grid .eas__field')].map(f => Math.round(f.getBoundingClientRect().left))).size);
   check('phone: contact fields in one column', grid === 1, grid);
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/assess-390-step3.png` });
   check('no script errors (phone)', errs.length === 0, errs.join(' | '));
@@ -227,7 +229,7 @@ const state = sel => page => page.evaluate(sel => {
   check('inline: shows on the page, no dialog, no close button', inl.visible && !inl.dialog && !inl.close, JSON.stringify(inl));
   await page.click('#inline [data-eas-next]');
   await sleep(150);
-  const both = await page.evaluate(() => [document.querySelector('#inline .eas__step:not([hidden])').dataset.step, document.querySelector('#modal dialog').open]);
+  const both = await page.evaluate(() => [document.querySelector('#inline .eas__step:not([hidden])').dataset.step, document.querySelector('.eas-dialog').open]);
   check('inline steps independently of the pop-up', both[0] === '2' && both[1] === false, both.join(' '));
   check('no script errors (inline)', errs.length === 0, errs.join(' | '));
   await page.close();

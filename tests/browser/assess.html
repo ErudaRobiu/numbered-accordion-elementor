@@ -14,6 +14,8 @@ body{margin:0;background:#F5F6F7;font:16px/1.6 "Plus Jakarta Sans",system-ui,san
 .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px}
 .elementor-button{display:inline-block;padding:12px 22px;border-radius:99px;background:#07864F;color:#fff;text-decoration:none}
 @media(max-width:767px){.host{padding:20px 16px}}
+/* Elementor's lazy-loaded section backgrounds: no background image inside a section until it has scrolled into view. */
+.e-con.e-parent:not(.e-lazyloaded) *{background-image:none!important}
 /* A hostile theme: Hello Elementor's buttons, inputs and lists. */
 button,[type=button],[type=submit]{display:inline-block;padding:.5rem 1rem;border:1px solid #c36;border-radius:3px;color:#c36;background:transparent;font-size:1rem}
 button:hover,button:focus,[type=button]:hover,[type=submit]:hover{color:#fff;background-color:#c36}
@@ -263,7 +265,7 @@ a{color:#c36}
 		</div>
 	<p id="plain-target" style="height:40vh">Plain link target</p>
 </div>
-<div id="modal"><dialog class="eas-dialog" id="eas-mod1-dialog" aria-labelledby="eas-mod1-title">		<div class="eas eas--modal" id="eas-mod1" data-mode="modal" data-endpoint="/wp-json/eruda/v1/assessment" data-doc="42" data-el="mod1" data-trigger=".ts-assess a, a.ts-assess, a[href$=&quot;#request&quot;]" data-price="0.9">
+<div id="modal" class="e-con e-parent"><dialog class="eas-dialog" id="eas-mod1-dialog" aria-labelledby="eas-mod1-title">		<div class="eas eas--modal" id="eas-mod1" data-mode="modal" data-endpoint="/wp-json/eruda/v1/assessment" data-doc="42" data-el="mod1" data-trigger=".ts-assess a, a.ts-assess, a[href$=&quot;#request&quot;]" data-price="0.9">
 			<div class="eas__head">
 									<button type="button" class="eas__close" data-eas-close aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
 								<p class="eas__eyebrow">Free opportunity screen</p>
