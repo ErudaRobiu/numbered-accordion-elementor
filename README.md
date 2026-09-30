@@ -61,6 +61,7 @@ modules/docshelf/                  the Documents post type, its ACF form and the
 modules/news/                      news fields on Posts and the News Grid, Carousel, Press Quotes and Post Source widgets
 modules/journey/                   the Journey Timeline widget
 modules/chain/                     the Company Chain widget
+modules/awards/                    the Award Wall widget and the eight award badges
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -326,6 +327,21 @@ comes after the line, the pulse, hover, 56px phone circles) and
 `chain-probe.js` (35: names aligned under a two-line label, the entrance order,
 stacking by column width and by phone width, a phone with the script off, no
 overflow at 1440/1100/767/360).
+
+**Award Wall (`modules/awards/`).** The eight Lepido awards on page 28: a big
+number beside a grid of badge cards, in an off-white panel. The number is the
+count of awards listed, so adding one updates it, unless a number is typed.
+`{years}` in the line becomes the earliest to latest year found, joined with
+word joiners around the dash so it never breaks across two lines. The layout
+follows the widget's own width through container queries: the number moves on
+top below 900px, the grid goes to two columns below 640px, and badge areas
+shrink below 400px. A dark badge gets a padded dark chip the size of the badge
+itself, not a dark fill across the whole badge area (the wireframe's version
+read heavier than the rest). The bundled Perpetuum badge is cropped from its
+240px dark square to the artwork plus 14px, so the file is its own chip. The
+number counts up once on scroll, from 0 on screen but with an aria-label
+holding the real number, and the cards fade in 60ms apart. The probe runs 34
+checks.
 
 ## Notes for future maintenance
 

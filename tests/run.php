@@ -653,7 +653,8 @@ check( 'the document shelf module is registered', true, in_array( 'docshelf', To
 check( 'the news module is registered', true, in_array( 'news', Toolkit::instance()->ids(), true ) );
 check( 'the journey timeline module is registered', true, in_array( 'journey', Toolkit::instance()->ids(), true ) );
 check( 'the company chain module is registered', true, in_array( 'chain', Toolkit::instance()->ids(), true ) );
-check( 'twenty-four modules ship', 24, count( Toolkit::instance()->ids() ) );
+check( 'the award wall module is registered', true, in_array( 'awards', Toolkit::instance()->ids(), true ) );
+check( 'twenty-five modules ship', 25, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -693,6 +694,7 @@ foreach ( array(
 	'modules/news/widgets/class-news-widget.php',
 	'modules/journey/widgets/class-journey-timeline-widget.php',
 	'modules/chain/widgets/class-company-chain-widget.php',
+	'modules/awards/widgets/class-award-wall-widget.php',
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -728,6 +730,7 @@ $module_files = array(
 	'modules/news/class-news-module.php',
 	'modules/journey/class-journey-module.php',
 	'modules/chain/class-chain-module.php',
+	'modules/awards/class-awards-module.php',
 );
 
 foreach ( $module_files as $relative ) {
@@ -3163,6 +3166,76 @@ check( 'arrows are hidden from screen readers', 2, substr_count( $ch_html, '" ar
 check( 'the stack width travels to the script', 1, substr_count( $ch_html, 'data-stack-at="520"' ) );
 check( 'the highlighted card', 1, substr_count( $ch_html, 'class="echn__card is-hi"' ) );
 check( 'no cards, nothing', '', trim( ( new Chain_Render_Probe() )->markup( array() ) ) );
+
+
+/* ------------------------------------------------------ Award Wall --- */
+
+require_once dirname( __DIR__ ) . '/modules/awards/class-awards-content.php';
+require_once dirname( __DIR__ ) . '/modules/awards/widgets/class-award-wall-widget.php';
+
+use ErudaToolkit\Modules\Awards\Awards_Content;
+
+$aw = Awards_Content::default_items();
+check( 'eight awards ship', 8, count( $aw ) );
+check( 'in date order, as the awards page lists them', array( '2018', '2019', '2019', '2020', '2020', '2020', '2020', '2022' ), array_column( $aw, 'year' ) );
+check( 'Nordic stays 2019 until the client says otherwise', '2019', $aw[1]['year'] );
+check( 'only Perpetuum is a dark badge', array( 'Perpetuum Energy Efficiency Prize' ), array_values( array_column( array_filter( $aw, function ( $a ) { return $a['dark']; } ), 'name' ) ) );
+foreach ( $aw as $a ) {
+	check( "the {$a['file']} badge ships", true, is_file( dirname( __DIR__ ) . '/' . Awards_Content::BADGE_DIR . $a['file'] ) );
+}
+
+$aw_cards = Awards_Content::build( array(
+	array( 'name' => ' A ', 'year' => '2021', 'dark' => 'yes', 'badge' => array( 'url' => 'a.webp', 'id' => '4' ), 'link' => array( 'url' => '/a/', 'is_external' => 'on' ) ),
+	array( 'year' => '2030' ),
+	array( 'name' => 'B', 'year' => 'Spring 2016' ),
+	array( 'name' => 'C', 'year' => 'soon' ),
+) );
+check( 'a card needs a name', array( 'A', 'B', 'C' ), array_column( $aw_cards, 'name' ) );
+check( 'fields are read', array( true, 4, '/a/', true ), array( $aw_cards[0]['dark'], $aw_cards[0]['badge_id'], $aw_cards[0]['link'], $aw_cards[0]['external'] ) );
+check( 'the range comes from the years found, joined so it never breaks', "2016\u{2060}–\u{2060}2021", Awards_Content::year_range( $aw_cards ) );
+check( 'the shipped range', "2018\u{2060}–\u{2060}2022", Awards_Content::year_range( $aw ) );
+check( 'one year is just the year', '2021', Awards_Content::year_range( array( $aw_cards[0] ) ) );
+check( 'no years, no range', '', Awards_Content::year_range( array( $aw_cards[2] ) ) );
+check( 'junk in the list is skipped', '', Awards_Content::year_range( array( null, 'x' ) ) );
+check( 'the number is the count', 8, Awards_Content::number( 'count', 99, 8 ) );
+check( 'or typed', 12, Awards_Content::number( 'manual', '12', 8 ) );
+check( 'a typed nonsense falls back to the count', 8, Awards_Content::number( 'manual', 'lots', 8 ) );
+check( 'the line fills its tokens', 'awards for Lepido, 2018–2022 (8)', Awards_Content::line( 'awards for Lepido, {years} ({count})', '2018–2022', 8 ) );
+check( 'an empty range leaves no dangling comma', 'awards for Lepido', Awards_Content::line( 'awards for Lepido, {years}', '', 8 ) );
+
+/**
+ * A widget with settings pushed in.
+ */
+class Awards_Render_Probe extends \ErudaToolkit\Modules\Awards\Widgets\Award_Wall_Widget {
+	/** @var array */
+	public $feed = array();
+	/** @return array */
+	public function get_settings_for_display() {
+		return $this->feed;
+	}
+	/**
+	 * @param array $s Settings.
+	 * @return string
+	 */
+	public function markup( $s ) {
+		$this->feed = $s;
+		ob_start();
+		( new ReflectionMethod( $this, 'render' ) )->invoke( $this );
+		return (string) ob_get_clean();
+	}
+}
+$aw_items = array();
+foreach ( $aw as $a ) {
+	$aw_items[] = array( 'badge' => array( 'url' => 'x/' . $a['file'] ), 'year' => $a['year'], 'name' => $a['name'], 'detail' => $a['detail'], 'dark' => $a['dark'] ? 'yes' : '' );
+}
+$aw_html = ( new Awards_Render_Probe() )->markup( array( 'items' => $aw_items, 'show_lead' => 'yes', 'number_mode' => 'count', 'line' => 'awards, {years}', 'animate' => 'yes' ) );
+check( 'the count is printed and handed to the script', 1, substr_count( $aw_html, '<b class="eaw__num" data-to="8">8</b>' ) );
+check( 'eight cards in an ordered list', array( 1, 8 ), array( substr_count( $aw_html, '<ol class="eaw__grid">' ), substr_count( $aw_html, '<li class="eaw__item"' ) ) );
+check( 'one dark card', 1, substr_count( $aw_html, 'class="eaw__card is-dark"' ) );
+check( 'badges carry their award as alt text', 1, substr_count( $aw_html, 'alt="WWF Climate Solver badge"' ) );
+$aw_nolead = ( new Awards_Render_Probe() )->markup( array( 'items' => $aw_items, 'show_lead' => '' ) );
+check( 'the number can be switched off', array( 0, 1 ), array( substr_count( $aw_nolead, 'eaw__lead' ), substr_count( $aw_nolead, 'eaw--no-lead' ) ) );
+check( 'no awards, nothing', '', trim( ( new Awards_Render_Probe() )->markup( array() ) ) );
 
 /* ------------------------------------------------------------- report --- */
 

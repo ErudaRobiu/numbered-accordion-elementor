@@ -120,6 +120,10 @@ final class Toolkit {
 			'file'  => 'modules/chain/class-chain-module.php',
 			'class' => '\ErudaToolkit\Modules\Chain\Chain_Module',
 		),
+		'awards'     => array(
+			'file'  => 'modules/awards/class-awards-module.php',
+			'class' => '\ErudaToolkit\Modules\Awards\Awards_Module',
+		),
 	);
 
 	/**
