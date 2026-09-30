@@ -152,6 +152,7 @@ body{margin:0;background:#fff;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-s
 .split{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
 .marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
 .narrow{max-width:300px}
+.flexcol{display:flex;flex-direction:column;align-items:flex-start;max-width:680px;outline:1px solid #e3c4f5}
 @media(max-width:1024px){.split{grid-template-columns:1fr}}
 @media(max-width:767px){.host{padding:32px 16px}}
 /* A hostile theme. */
@@ -174,6 +175,10 @@ a{color:#c36;text-decoration:underline}img:hover{opacity:.75}img{max-width:100%}
 <div class="host">
 	<p class="marker">Group "other", 300px, no entrance: must not react to the others</p>
 	<div id="e" class="narrow"><?php echo eel_fixture( $MARK, $mo ); // phpcs:ignore ?></div>
+</div>
+<div class="host">
+	<p class="marker">A 680px Elementor-style flex column: the mark fills it</p>
+	<div class="flexcol"><div id="f" class="elementor-widget elementor-widget-eam-annotated-mark"><div class="elementor-widget-container"><?php echo eel_fixture( $MARK, $mo ); // phpcs:ignore ?></div></div></div>
 </div>
 <div class="spacer">End</div>
 <script src="../../modules/elements/assets/js/elements.js"></script>

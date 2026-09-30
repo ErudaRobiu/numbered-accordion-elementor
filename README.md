@@ -365,7 +365,10 @@ builds in once on scroll (logo, labels 120ms apart, lines drawn out of their
 labels, dots pop). The list can step through the elements every 3s while on
 screen, until anyone points at anything in the group. Neither moves for
 visitors who ask for less motion, and linking still works for them. The mark
-is `thermstar-icon.png` converted to WebP (148KB to 58KB). The probe runs 75
+is `thermstar-icon.png` converted to WebP (148KB to 58KB). The mark fills its column; an optional Max width (`--eam-max`) caps it.
+Both widgets stretch by default in a flex parent, through `:where()` rules
+Elementor's own width settings override, because a container-query wrapper
+has no width of its own and collapsed to nothing otherwise. The probe runs 76
 checks, touch included.
 
 ## Notes for future maintenance

@@ -8,8 +8,20 @@
 
 /* ============================================================== list === */
 
+/* Both wrappers size themselves by their container, so they have no width of
+   their own to offer a parent that shrinks to fit (an Elementor flex
+   container with its items aligned to the start does). Stretch by default;
+   Elementor's own width settings are more specific and still win. */
+
+:where(.elementor-widget-eel-element-list),
+:where(.elementor-widget-eel-element-list > .elementor-widget-container) {
+	align-self: stretch;
+	width: 100%;
+}
+
 .eel-wrap {
 	container: eel / inline-size;
+	width: 100%;
 }
 
 .eel {
@@ -153,8 +165,16 @@
 
 /* ============================================================== mark === */
 
+/* See the list above. */
+:where(.elementor-widget-eam-annotated-mark),
+:where(.elementor-widget-eam-annotated-mark > .elementor-widget-container) {
+	align-self: stretch;
+	width: 100%;
+}
+
 .eam-wrap {
 	container: eam / inline-size;
+	width: 100%;
 }
 
 .eam {
@@ -168,7 +188,7 @@
 
 	position: relative;
 	width: 100%;
-	max-width: 560px;
+	max-width: var(--eam-max, none);
 	margin: 0 auto;
 	aspect-ratio: 560 / 520;
 }

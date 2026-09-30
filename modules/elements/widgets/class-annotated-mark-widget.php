@@ -108,6 +108,18 @@ class Annotated_Mark_Widget extends Elements_Widget {
 			)
 		);
 
+		$this->add_responsive_control(
+			'max_width',
+			array(
+				'label'       => esc_html__( 'Max width', 'numbered-accordion' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px', '%' ),
+				'range'       => array( 'px' => array( 'min' => 240, 'max' => 1200 ) ),
+				'description' => esc_html__( 'Empty fills the column. The mark stays centred.', 'numbered-accordion' ),
+				'selectors'   => array( '{{WRAPPER}} .eam' => '--eam-max: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
 		$this->end_controls_section();
 
 		$this->start_controls_section(

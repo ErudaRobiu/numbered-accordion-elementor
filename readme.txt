@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.69.0
+Stable tag: 2.69.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,11 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.69.1 =
+* Annotated Mark now fills its column instead of stopping at 560px. A new
+  Max width setting brings a cap back if you want one. Both logo element
+  widgets also stretch properly inside Elementor flex containers.
 
 = 2.69.0 =
 * **New widgets: Element List and Annotated Mark.** The four elements of the
