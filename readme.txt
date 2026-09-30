@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.66.1
+Stable tag: 2.67.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,18 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.67.0 =
+* **New widget: Journey Timeline.** Years in circles down a line that draws
+  itself in as the list scrolls into view, each row landing as the line
+  reaches it, with the current step lit green and softly pulsing. It ships
+  the page 28 milestones.
+* **New widget: Company Chain.** Who makes it, who brings it and who it
+  serves, as cards joined by arrows. The names always line up, even when one
+  label wraps. It stacks with downward arrows in a narrow column and on
+  phones. It ships the Enjay → Norrel → your facility chain.
+* Both build in once on scroll, skip that in the editor, and stay still for
+  visitors who ask for less motion.
 
 = 2.66.1 =
 * The Post Source Box's podcast button now reads "Listen on BBC Business
