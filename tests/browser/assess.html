@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assessment Form — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Urbanist:wght@700&display=swap">
+<link rel="stylesheet" href="../../modules/assess/assets/css/assessment-form.css">
+<style>
+body{margin:0;background:#F5F6F7;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;color:#0F3961}
+.host{max-width:1240px;margin:0 auto;padding:40px}
+.marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 18px}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px}
+.elementor-button{display:inline-block;padding:12px 22px;border-radius:99px;background:#07864F;color:#fff;text-decoration:none}
+@media(max-width:767px){.host{padding:20px 16px}}
+/* A hostile theme: Hello Elementor's buttons, inputs and lists. */
+button,[type=button],[type=submit]{display:inline-block;padding:.5rem 1rem;border:1px solid #c36;border-radius:3px;color:#c36;background:transparent;font-size:1rem}
+button:hover,button:focus,[type=button]:hover,[type=submit]:hover{color:#fff;background-color:#c36}
+input,select,textarea{border:2px solid #666;border-radius:0;padding:4px;font-size:12px}
+label{font-weight:400;font-size:12px}ol{padding-left:2em}li{list-style:decimal}
+a{color:#c36}
+</style>
+</head>
+<body>
+<div class="host">
+	<p class="marker">Buttons that open the pop-up</p>
+	<div class="row">
+		<div class="elementor-widget ts-assess" id="btn1"><a class="elementor-button" href="/services/thermal-energy-opportunity-screen/">Request an Assessment</a></div>
+		<a class="elementor-button" id="btn2" href="/services/thermal-energy-opportunity-screen/#request">Get Started Now</a>
+		<a class="elementor-button" id="plain" href="#plain-target">A normal link</a>
+	</div>
+	<p class="marker">Inline on a page</p>
+	<div id="inline">		<div class="eas eas--inline" id="eas-inl1" data-mode="inline" data-endpoint="/wp-json/eruda/v1/assessment" data-doc="42" data-el="inl1" data-trigger=".ts-assess a, a.ts-assess, a[href$=&quot;#request&quot;]" data-price="0.9">
+			<div class="eas__head">
+								<p class="eas__eyebrow">Free opportunity screen</p>
+									<h2 class="eas__title" id="eas-inl1-title">Estimate your heat recovery</h2>
+								<ol class="eas__steps" aria-label="Progress">
+					<li class="is-on" data-step-dot="1"><span>1</span>Your exhaust</li>
+					<li data-step-dot="2"><span>2</span>Air and use</li>
+					<li data-step-dot="3"><span>3</span>Your details</li>
+				</ol>
+			</div>
+
+			<form class="eas__form" novalidate>
+				<section class="eas__step" data-step="1" aria-labelledby="eas-inl1-s1">
+					<h3 class="eas__step-title" id="eas-inl1-s1" tabindex="-1">Your exhaust</h3>
+											<p class="eas__intro">Four numbers about your exhaust give a first estimate. Not sure? Keep the typical values and we will confirm them with you.</p>
+												<div class="eas__field eas__field--range">
+			<div class="eas__range-head">
+				<label for="eas-inl1-temp">Exhaust air temperature</label>
+				<output for="eas-inl1-temp" class="eas__value" data-unit="°F">230°F</output>
+			</div>
+			<input class="eas__range" type="range" id="eas-inl1-temp" name="temp" min="80" max="450" step="1" value="230" />
+			<div class="eas__range-ends" aria-hidden="true"><span>80°F</span><span>450°F</span></div>
+		</div>
+				<div class="eas__field eas__field--range">
+			<div class="eas__range-head">
+				<label for="eas-inl1-cfm">Airflow</label>
+				<output for="eas-inl1-cfm" class="eas__value" data-unit=" CFM">4,000 CFM</output>
+			</div>
+			<input class="eas__range" type="range" id="eas-inl1-cfm" name="cfm" min="500" max="20000" step="250" value="4000" />
+			<div class="eas__range-ends" aria-hidden="true"><span>500 CFM</span><span>20,000 CFM</span></div>
+		</div>
+				<div class="eas__field eas__field--range">
+			<div class="eas__range-head">
+				<label for="eas-inl1-hours">Hours running per day</label>
+				<output for="eas-inl1-hours" class="eas__value" data-unit=" h">16 h</output>
+			</div>
+			<input class="eas__range" type="range" id="eas-inl1-hours" name="hours" min="1" max="24" step="1" value="16" />
+			<div class="eas__range-ends" aria-hidden="true"><span>1 h</span><span>24 h</span></div>
+		</div>
+				<fieldset class="eas__field eas__chips">
+			<legend>Days per week</legend>
+			<div class="eas__chip-row">
+									<label class="eas__chip">
+						<input type="radio" name="days" value="1" />
+						<span>1</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="2" />
+						<span>2</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="3" />
+						<span>3</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="4" />
+						<span>4</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="5" checked='checked' />
+						<span>5</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="6" />
+						<span>6</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="7" />
+						<span>7</span>
+					</label>
+							</div>
+		</fieldset>
+						</section>
+
+				<section class="eas__step" data-step="2" aria-labelledby="eas-inl1-s2" hidden>
+					<h3 class="eas__step-title" id="eas-inl1-s2" tabindex="-1">What is in the air, and where could the heat go?</h3>
+					<div class="eas__field">
+						<label for="eas-inl1-industry">Industry</label>
+						<select class="eas__input" id="eas-inl1-industry" name="industry" required aria-required="true" aria-describedby="eas-inl1-industry-err">
+							<option value="">Choose one</option>
+															<option value="industrial-laundry">Industrial laundry</option>
+															<option value="food-manufacturing">Food manufacturing</option>
+															<option value="pet-food-manufacturing">Pet food manufacturing</option>
+															<option value="foundries">Foundry</option>
+															<option value="manufacturing">Manufacturing</option>
+															<option value="restaurants-commercial-kitchens">Restaurant or commercial kitchen</option>
+															<option value="other">Something else</option>
+													</select>
+						<p class="eas__err" id="eas-inl1-industry-err" hidden></p>
+					</div>
+							<fieldset class="eas__field eas__chips">
+			<legend>In the exhaust (choose any)</legend>
+			<div class="eas__chip-row">
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="lint" />
+						<span>Lint</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="grease" />
+						<span>Grease</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="dust" />
+						<span>Dust or particles</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="fibers" />
+						<span>Fibers</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="soot" />
+						<span>Soot</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="humidity" />
+						<span>High humidity</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="unsure" />
+						<span>Not sure</span>
+					</label>
+							</div>
+		</fieldset>
+				<fieldset class="eas__field eas__chips">
+			<legend>Heat could go to (choose any)</legend>
+			<div class="eas__chip-row">
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="process-air" />
+						<span>Process air</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="makeup-air" />
+						<span>Makeup air</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="process-water" />
+						<span>Process or wash water</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="boiler" />
+						<span>Boiler feedwater</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="space" />
+						<span>Space heating</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="unsure" />
+						<span>Not sure yet</span>
+					</label>
+							</div>
+		</fieldset>
+						</section>
+
+				<section class="eas__step" data-step="3" aria-labelledby="eas-inl1-s3" hidden>
+					<h3 class="eas__step-title" id="eas-inl1-s3" tabindex="-1">Where should we send your estimate?</h3>
+					<div class="eas__grid">
+								<div class="eas__field">
+			<label for="eas-inl1-first">First name</label>
+			<input class="eas__input" type="text" id="eas-inl1-first" name="first" autocomplete="given-name" required aria-required="true" aria-describedby="eas-inl1-first-err" />
+			<p class="eas__err" id="eas-inl1-first-err" hidden></p>
+		</div>
+				<div class="eas__field">
+			<label for="eas-inl1-last">Last name</label>
+			<input class="eas__input" type="text" id="eas-inl1-last" name="last" autocomplete="family-name" required aria-required="true" aria-describedby="eas-inl1-last-err" />
+			<p class="eas__err" id="eas-inl1-last-err" hidden></p>
+		</div>
+				<div class="eas__field">
+			<label for="eas-inl1-email">Work email</label>
+			<input class="eas__input" type="email" id="eas-inl1-email" name="email" autocomplete="email" required aria-required="true" aria-describedby="eas-inl1-email-err" />
+			<p class="eas__err" id="eas-inl1-email-err" hidden></p>
+		</div>
+				<div class="eas__field">
+			<label for="eas-inl1-company">Company</label>
+			<input class="eas__input" type="text" id="eas-inl1-company" name="company" autocomplete="organization" required aria-required="true" aria-describedby="eas-inl1-company-err" />
+			<p class="eas__err" id="eas-inl1-company-err" hidden></p>
+		</div>
+				<div class="eas__field">
+			<label for="eas-inl1-role">Job title <span class="eas__opt">optional</span></label>
+			<input class="eas__input" type="text" id="eas-inl1-role" name="role" autocomplete="organization-title" aria-describedby="eas-inl1-role-err" />
+			<p class="eas__err" id="eas-inl1-role-err" hidden></p>
+		</div>
+				<div class="eas__field">
+			<label for="eas-inl1-phone">Phone <span class="eas__opt">optional</span></label>
+			<input class="eas__input" type="tel" id="eas-inl1-phone" name="phone" autocomplete="tel" aria-describedby="eas-inl1-phone-err" />
+			<p class="eas__err" id="eas-inl1-phone-err" hidden></p>
+		</div>
+							</div>
+							<div class="eas__field">
+			<label for="eas-inl1-location">Facility location (city, state or province) <span class="eas__opt">optional</span></label>
+			<input class="eas__input" type="text" id="eas-inl1-location" name="location" autocomplete="address-level2" aria-describedby="eas-inl1-location-err" />
+			<p class="eas__err" id="eas-inl1-location-err" hidden></p>
+		</div>
+							<div class="eas__field">
+						<label for="eas-inl1-notes">Anything else about the site <span class="eas__opt">optional</span></label>
+						<textarea class="eas__input" id="eas-inl1-notes" name="notes" rows="3"></textarea>
+					</div>
+					<div class="eas__hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
+											<p class="eas__privacy">We use your details only to follow up on this request. No engineering package needed to start.</p>
+									</section>
+
+				<p class="eas__status" role="alert" hidden></p>
+
+				<div class="eas__nav">
+					<button type="button" class="eas__btn eas__btn--ghost" data-eas-back hidden>Back</button>
+					<button type="button" class="eas__btn" data-eas-next>Next</button>
+					<button type="submit" class="eas__btn" data-eas-send hidden>Get my estimate</button>
+				</div>
+			</form>
+
+			<section class="eas__result" hidden aria-labelledby="eas-inl1-r" tabindex="-1">
+				<p class="eas__eyebrow">Your indicative estimate</p>
+				<h3 class="eas__result-title" id="eas-inl1-r"><span data-r="dollars"></span> <small>a year in fuel</small></h3>
+				<dl class="eas__figures">
+					<div><dt>Heat recovered</dt><dd data-r="mmbtu"></dd></div>
+					<div><dt>CO2 avoided</dt><dd data-r="tco2"></dd></div>
+					<div><dt>Operating hours</dt><dd data-r="hours"></dd></div>
+				</dl>
+				<p class="eas__basis" data-r="basis"></p>
+				<div class="eas__next">
+					<strong>What happens next</strong>
+					<p>
+						A ThermStar engineer will contact you to arrange the free Thermal Energy Opportunity Screen, which confirms what your exhaust and heating demand can really support.													A copy of this estimate is on its way to your inbox.											</p>
+				</div>
+				<div class="eas__nav">
+										<a class="eas__btn eas__btn--ghost" href="tel:+18336677359">Call 833 667 7359</a>
+				</div>
+			</section>
+		</div>
+		</div>
+	<p id="plain-target" style="height:40vh">Plain link target</p>
+</div>
+<div id="modal"><dialog class="eas-dialog" id="eas-mod1-dialog" aria-labelledby="eas-mod1-title">		<div class="eas eas--modal" id="eas-mod1" data-mode="modal" data-endpoint="/wp-json/eruda/v1/assessment" data-doc="42" data-el="mod1" data-trigger=".ts-assess a, a.ts-assess, a[href$=&quot;#request&quot;]" data-price="0.9">
+			<div class="eas__head">
+									<button type="button" class="eas__close" data-eas-close aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+								<p class="eas__eyebrow">Free opportunity screen</p>
+									<h2 class="eas__title" id="eas-mod1-title">Estimate your heat recovery</h2>
+								<ol class="eas__steps" aria-label="Progress">
+					<li class="is-on" data-step-dot="1"><span>1</span>Your exhaust</li>
+					<li data-step-dot="2"><span>2</span>Air and use</li>
+					<li data-step-dot="3"><span>3</span>Your details</li>
+				</ol>
+			</div>
+
+			<form class="eas__form" novalidate>
+				<section class="eas__step" data-step="1" aria-labelledby="eas-mod1-s1">
+					<h3 class="eas__step-title" id="eas-mod1-s1" tabindex="-1">Your exhaust</h3>
+											<p class="eas__intro">Four numbers about your exhaust give a first estimate. Not sure? Keep the typical values and we will confirm them with you.</p>
+												<div class="eas__field eas__field--range">
+			<div class="eas__range-head">
+				<label for="eas-mod1-temp">Exhaust air temperature</label>
+				<output for="eas-mod1-temp" class="eas__value" data-unit="°F">230°F</output>
+			</div>
+			<input class="eas__range" type="range" id="eas-mod1-temp" name="temp" min="80" max="450" step="1" value="230" />
+			<div class="eas__range-ends" aria-hidden="true"><span>80°F</span><span>450°F</span></div>
+		</div>
+				<div class="eas__field eas__field--range">
+			<div class="eas__range-head">
+				<label for="eas-mod1-cfm">Airflow</label>
+				<output for="eas-mod1-cfm" class="eas__value" data-unit=" CFM">4,000 CFM</output>
+			</div>
+			<input class="eas__range" type="range" id="eas-mod1-cfm" name="cfm" min="500" max="20000" step="250" value="4000" />
+			<div class="eas__range-ends" aria-hidden="true"><span>500 CFM</span><span>20,000 CFM</span></div>
+		</div>
+				<div class="eas__field eas__field--range">
+			<div class="eas__range-head">
+				<label for="eas-mod1-hours">Hours running per day</label>
+				<output for="eas-mod1-hours" class="eas__value" data-unit=" h">16 h</output>
+			</div>
+			<input class="eas__range" type="range" id="eas-mod1-hours" name="hours" min="1" max="24" step="1" value="16" />
+			<div class="eas__range-ends" aria-hidden="true"><span>1 h</span><span>24 h</span></div>
+		</div>
+				<fieldset class="eas__field eas__chips">
+			<legend>Days per week</legend>
+			<div class="eas__chip-row">
+									<label class="eas__chip">
+						<input type="radio" name="days" value="1" />
+						<span>1</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="2" />
+						<span>2</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="3" />
+						<span>3</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="4" />
+						<span>4</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="5" checked='checked' />
+						<span>5</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="6" />
+						<span>6</span>
+					</label>
+									<label class="eas__chip">
+						<input type="radio" name="days" value="7" />
+						<span>7</span>
+					</label>
+							</div>
+		</fieldset>
+						</section>
+
+				<section class="eas__step" data-step="2" aria-labelledby="eas-mod1-s2" hidden>
+					<h3 class="eas__step-title" id="eas-mod1-s2" tabindex="-1">What is in the air, and where could the heat go?</h3>
+					<div class="eas__field">
+						<label for="eas-mod1-industry">Industry</label>
+						<select class="eas__input" id="eas-mod1-industry" name="industry" required aria-required="true" aria-describedby="eas-mod1-industry-err">
+							<option value="">Choose one</option>
+															<option value="industrial-laundry">Industrial laundry</option>
+															<option value="food-manufacturing">Food manufacturing</option>
+															<option value="pet-food-manufacturing">Pet food manufacturing</option>
+															<option value="foundries">Foundry</option>
+															<option value="manufacturing">Manufacturing</option>
+															<option value="restaurants-commercial-kitchens">Restaurant or commercial kitchen</option>
+															<option value="other">Something else</option>
+													</select>
+						<p class="eas__err" id="eas-mod1-industry-err" hidden></p>
+					</div>
+							<fieldset class="eas__field eas__chips">
+			<legend>In the exhaust (choose any)</legend>
+			<div class="eas__chip-row">
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="lint" />
+						<span>Lint</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="grease" />
+						<span>Grease</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="dust" />
+						<span>Dust or particles</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="fibers" />
+						<span>Fibers</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="soot" />
+						<span>Soot</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="humidity" />
+						<span>High humidity</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="contaminants" value="unsure" />
+						<span>Not sure</span>
+					</label>
+							</div>
+		</fieldset>
+				<fieldset class="eas__field eas__chips">
+			<legend>Heat could go to (choose any)</legend>
+			<div class="eas__chip-row">
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="process-air" />
+						<span>Process air</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="makeup-air" />
+						<span>Makeup air</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="process-water" />
+						<span>Process or wash water</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="boiler" />
+						<span>Boiler feedwater</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="space" />
+						<span>Space heating</span>
+					</label>
+									<label class="eas__chip">
+						<input type="checkbox" name="uses" value="unsure" />
+						<span>Not sure yet</span>
+					</label>
+							</div>
+		</fieldset>
+						</section>
+
+				<section class="eas__step" data-step="3" aria-labelledby="eas-mod1-s3" hidden>
+					<h3 class="eas__step-title" id="eas-mod1-s3" tabindex="-1">Where should we send your estimate?</h3>
+					<div class="eas__grid">
+								<div class="eas__field">
+			<label for="eas-mod1-first">First name</label>
+			<input class="eas__input" type="text" id="eas-mod1-first" name="first" autocomplete="given-name" required aria-required="true" aria-describedby="eas-mod1-first-err" />
+			<p class="eas__err" id="eas-mod1-first-err" hidden></p>
+		</div>
+				<div class="eas__field">
+			<label for="eas-mod1-last">Last name</label>
+			<input class="eas__input" type="text" id="eas-mod1-last" name="last" autocomplete="family-name" required aria-required="true" aria-describedby="eas-mod1-last-err" />
+			<p class="eas__err" id="eas-mod1-last-err" hidden></p>
+		</div>
+				<div class="eas__field">
+			<label for="eas-mod1-email">Work email</label>
+			<input class="eas__input" type="email" id="eas-mod1-email" name="email" autocomplete="email" required aria-required="true" aria-describedby="eas-mod1-email-err" />
+			<p class="eas__err" id="eas-mod1-email-err" hidden></p>
+		</div>
+				<div class="eas__field">
+			<label for="eas-mod1-company">Company</label>
+			<input class="eas__input" type="text" id="eas-mod1-company" name="company" autocomplete="organization" required aria-required="true" aria-describedby="eas-mod1-company-err" />
+			<p class="eas__err" id="eas-mod1-company-err" hidden></p>
+		</div>
+				<div class="eas__field">
+			<label for="eas-mod1-role">Job title <span class="eas__opt">optional</span></label>
+			<input class="eas__input" type="text" id="eas-mod1-role" name="role" autocomplete="organization-title" aria-describedby="eas-mod1-role-err" />
+			<p class="eas__err" id="eas-mod1-role-err" hidden></p>
+		</div>
+				<div class="eas__field">
+			<label for="eas-mod1-phone">Phone <span class="eas__opt">optional</span></label>
+			<input class="eas__input" type="tel" id="eas-mod1-phone" name="phone" autocomplete="tel" aria-describedby="eas-mod1-phone-err" />
+			<p class="eas__err" id="eas-mod1-phone-err" hidden></p>
+		</div>
+							</div>
+							<div class="eas__field">
+			<label for="eas-mod1-location">Facility location (city, state or province) <span class="eas__opt">optional</span></label>
+			<input class="eas__input" type="text" id="eas-mod1-location" name="location" autocomplete="address-level2" aria-describedby="eas-mod1-location-err" />
+			<p class="eas__err" id="eas-mod1-location-err" hidden></p>
+		</div>
+							<div class="eas__field">
+						<label for="eas-mod1-notes">Anything else about the site <span class="eas__opt">optional</span></label>
+						<textarea class="eas__input" id="eas-mod1-notes" name="notes" rows="3"></textarea>
+					</div>
+					<div class="eas__hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
+											<p class="eas__privacy">We use your details only to follow up on this request. No engineering package needed to start.</p>
+									</section>
+
+				<p class="eas__status" role="alert" hidden></p>
+
+				<div class="eas__nav">
+					<button type="button" class="eas__btn eas__btn--ghost" data-eas-back hidden>Back</button>
+					<button type="button" class="eas__btn" data-eas-next>Next</button>
+					<button type="submit" class="eas__btn" data-eas-send hidden>Get my estimate</button>
+				</div>
+			</form>
+
+			<section class="eas__result" hidden aria-labelledby="eas-mod1-r" tabindex="-1">
+				<p class="eas__eyebrow">Your indicative estimate</p>
+				<h3 class="eas__result-title" id="eas-mod1-r"><span data-r="dollars"></span> <small>a year in fuel</small></h3>
+				<dl class="eas__figures">
+					<div><dt>Heat recovered</dt><dd data-r="mmbtu"></dd></div>
+					<div><dt>CO2 avoided</dt><dd data-r="tco2"></dd></div>
+					<div><dt>Operating hours</dt><dd data-r="hours"></dd></div>
+				</dl>
+				<p class="eas__basis" data-r="basis"></p>
+				<div class="eas__next">
+					<strong>What happens next</strong>
+					<p>
+						A ThermStar engineer will contact you to arrange the free Thermal Energy Opportunity Screen, which confirms what your exhaust and heating demand can really support.													A copy of this estimate is on its way to your inbox.											</p>
+				</div>
+				<div class="eas__nav">
+											<button type="button" class="eas__btn" data-eas-close>Done</button>
+										<a class="eas__btn eas__btn--ghost" href="tel:+18336677359">Call 833 667 7359</a>
+				</div>
+			</section>
+		</div>
+		</dialog></div>
+<script src="../../modules/assess/assets/js/assessment-form.js"></script>
+</body>
+</html>
+	

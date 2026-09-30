@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.70.1
+Stable tag: 2.71.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,16 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.71.0 =
+* **New widget: Assessment Form.** A three-step request that ends with an
+  indicative savings estimate: exhaust temperature, airflow and hours on
+  sliders, what the exhaust carries and where the heat could go, then contact
+  details. Shows as a pop-up any "Request an Assessment" button opens, or on a
+  page.
+* Every request is saved under Assessments in the dashboard, and can be
+  emailed to your team and to the visitor.
+* Built-in spam protection, and a "save only" mode for testing.
 
 = 2.70.1 =
 * Process Stepper and Case Studies now default to the site's real page

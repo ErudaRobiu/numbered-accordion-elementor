@@ -64,6 +64,7 @@ modules/chain/                     the Company Chain widget
 modules/awards/                    the Award Wall widget and the eight award badges
 modules/elements/                  Element List and Annotated Mark, two linked widgets, and the mark
 modules/process/                   the Process Stepper widget
+modules/assess/                    the Assessment Form widget, its REST route and the Assessments list
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -396,6 +397,30 @@ Optional auto-advance steps through while on screen and stops for good at the
 first pointer or key. The entrance draws the line and lands the stages 70ms
 apart. Reduced motion: nothing moves, the fill and caret jump. The probe runs
 57 checks, including Hello Elementor's pink buttons and the no-script layout.
+
+**Assessment Form (`modules/assess/`).** A three-step heat recovery request:
+the exhaust (temperature, airflow and hours on sliders, days as chips), what
+it carries and where the heat could go (industry, tappable chips), then
+contact details. After sending, the visitor sees an indicative estimate:
+dollars a year, MMBtu a year, tonnes of CO2 and operating hours, with the
+assumptions spelled out under it (1.08 × CFM × (exhaust °F − 60), 40% to 60%
+recovered, fuel at 80% efficiency, the widget's gas price per therm, space
+heating alone counted for half the year; figures to two significant figures).
+As a pop-up it is a native `<dialog>` placed once, in the footer template:
+any link matching its trigger (default `.ts-assess a, a.ts-assess,
+a[href$="#request"]`) opens it, and without script those links go where they
+point. It can also sit inline on a page. Requests post to
+`POST /wp-json/eruda/v1/assessment`, which reads the recipient, price and send
+mode from the widget as saved in Elementor (never from the request, so the
+route can't be aimed at another inbox), drops bots through a hidden field and
+a three-second minimum, limits a connection to five requests an hour, saves
+every request under **Assessments** in the dashboard (a private post type with
+list columns and a read-only summary), and, in "send" mode, emails the team
+(reply goes to the visitor) and the visitor (their estimate). "Save only"
+mode is for staging. The probe fakes the server, so it never saves or sends,
+and runs 34 checks: every step, errors from the browser and the server, a
+network failure, keyboard, Escape and backdrop closing, phone full-screen and
+the inline copy.
 
 ## Notes for future maintenance
 

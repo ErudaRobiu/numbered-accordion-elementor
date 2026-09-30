@@ -132,6 +132,10 @@ final class Toolkit {
 			'file'  => 'modules/process/class-process-module.php',
 			'class' => '\ErudaToolkit\Modules\Process\Process_Module',
 		),
+		'assess'     => array(
+			'file'  => 'modules/assess/class-assess-module.php',
+			'class' => '\ErudaToolkit\Modules\Assess\Assess_Module',
+		),
 	);
 
 	/**
