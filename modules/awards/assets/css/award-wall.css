@@ -1,0 +1,279 @@
+/**
+ * Eruda Toolkit - Award Wall
+ *
+ * A count beside a grid of award badges, in an off-white panel. The layout
+ * follows the widget's own width (container queries), not the screen's, so
+ * it is right in a full-width section and in a column alike:
+ *
+ *   900px and up   the number on the left, the badges in four columns
+ *   below 900px    the number above, beside its line; four columns below
+ *   below 640px    two columns
+ *   below 400px    two columns, smaller badge areas
+ *
+ * A dark badge gets a dark chip the size of the badge itself, not a dark fill
+ * across the whole badge area, which made it read heavier than the rest.
+ */
+
+.eaw-wrap {
+	container: eaw / inline-size;
+}
+
+.eaw {
+	--eaw-panel: #F5F6F7;
+	--eaw-card: #fff;
+	--eaw-line: #DDE2E6;
+	--eaw-green: #07864F;
+	--eaw-ink: #0F3961;
+	--eaw-muted: #0F3961B3;
+	--eaw-chip: #242425;
+	--eaw-cols: 4;
+	--eaw-badge-h: 110px;
+	--eaw-gap: 10px;
+	--eaw-radius: 16px;
+
+	display: grid;
+	grid-template-columns: 230px minmax(0, 1fr);
+	align-items: center;
+	gap: 30px;
+	padding: 30px;
+	border: 1px solid var(--eaw-line);
+	border-radius: 25px;
+	background: var(--eaw-panel);
+	font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.eaw *,
+.eaw *::before,
+.eaw *::after {
+	box-sizing: border-box;
+}
+
+.eaw--no-lead {
+	grid-template-columns: minmax(0, 1fr);
+}
+
+/* ---------------------------------------------------------------- lead --- */
+
+.eaw .eaw__lead {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 0;
+}
+
+.eaw__num {
+	font-family: "Bebas Neue", Impact, sans-serif;
+	font-size: 110px;
+	font-weight: 400;
+	line-height: .8;
+	font-variant-numeric: tabular-nums;
+	color: var(--eaw-green);
+}
+
+.eaw__line {
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: var(--eaw-ink);
+}
+
+/* ---------------------------------------------------------------- grid --- */
+
+.eaw .eaw__grid {
+	display: grid;
+	grid-template-columns: repeat(var(--eaw-cols), minmax(0, 1fr));
+	gap: var(--eaw-gap);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.eaw .eaw__item {
+	display: flex;
+	margin: 0;
+	padding: 0;
+}
+
+.eaw .eaw__item::before,
+.eaw .eaw__item::marker {
+	content: none;
+}
+
+.eaw .eaw__card,
+.eaw a.eaw__card:hover,
+.eaw a.eaw__card:focus {
+	color: inherit;
+	text-decoration: none;
+}
+
+.eaw .eaw__card {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 3px;
+	min-width: 0;
+	padding: 14px;
+	border: 1px solid var(--eaw-line);
+	border-radius: var(--eaw-radius);
+	background: var(--eaw-card);
+	transition: transform .25s cubic-bezier(.2, .7, .2, 1), box-shadow .25s;
+}
+
+.eaw .eaw__card:hover,
+.eaw a.eaw__card:focus-visible {
+	transform: translateY(-3px);
+	box-shadow: 0 12px 28px #0F39611A;
+}
+
+.eaw a.eaw__card:focus-visible {
+	outline: 3px solid #4DCF8D;
+	outline-offset: 2px;
+}
+
+.eaw__badge {
+	display: grid;
+	place-items: center;
+	height: var(--eaw-badge-h);
+	margin-bottom: 8px;
+}
+
+.eaw .eaw__badge img,
+.eaw .eaw__badge img:hover {
+	display: block;
+	width: auto;
+	max-width: 88%;
+	height: auto;
+	max-height: calc(var(--eaw-badge-h) - 10px);
+	object-fit: contain;
+	opacity: 1;
+	transition: transform .3s cubic-bezier(.2, .7, .2, 1);
+}
+
+/* A dark chip hugging the badge, padded, the same visual size as the rest. */
+.eaw .is-dark .eaw__badge img {
+	max-width: calc(88% - 20px);
+	max-height: calc(var(--eaw-badge-h) - 40px);
+	padding: 10px;
+	border-radius: 12px;
+	background: var(--eaw-chip);
+	box-sizing: content-box;
+}
+
+.eaw .eaw__card:hover .eaw__badge img {
+	transform: scale(1.04);
+}
+
+.eaw__year {
+	font-family: "Bebas Neue", Impact, sans-serif;
+	font-size: 20px;
+	font-weight: 400;
+	line-height: 1;
+	color: var(--eaw-green);
+}
+
+.eaw .eaw__name {
+	font-size: 13.5px;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--eaw-ink);
+	overflow-wrap: anywhere;
+	hyphens: auto;
+}
+
+.eaw__detail {
+	font-size: 11.5px;
+	line-height: 1.4;
+	color: var(--eaw-muted);
+}
+
+/* ------------------------------------------------------------ entrance --- */
+
+@keyframes eaw-in {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+}
+
+.eaw--armed:not(.is-in) .eaw__card {
+	opacity: 0;
+}
+
+/* 60ms apart, capped at seven steps, so eight cards are in by 700ms. */
+.eaw--armed.is-in .eaw__card {
+	animation: eaw-in .28s cubic-bezier(.2, .7, .2, 1) backwards;
+	animation-delay: calc(min(var(--eaw-i), 7) * 60ms);
+}
+
+/* ------------------------------------------------------------- widths --- */
+
+@container eaw (max-width: 899px) {
+	.eaw {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 22px;
+		padding: 24px;
+	}
+
+	.eaw .eaw__lead {
+		flex-direction: row;
+		align-items: center;
+		gap: 18px;
+	}
+
+	.eaw__num {
+		flex: none;
+		font-size: 88px;
+	}
+
+	.eaw__line {
+		max-width: 36ch;
+	}
+}
+
+@container eaw (max-width: 639px) {
+	.eaw .eaw__grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@container eaw (max-width: 400px) {
+	.eaw {
+		--eaw-badge-h: 84px;
+
+		gap: 18px;
+		padding: 16px;
+		border-radius: 20px;
+	}
+
+	.eaw .eaw__lead {
+		gap: 14px;
+	}
+
+	.eaw__num {
+		font-size: 68px;
+	}
+
+	.eaw__line {
+		font-size: 14px;
+	}
+
+	.eaw .eaw__card {
+		padding: 12px;
+	}
+}
+
+/* ------------------------------------------------------- less motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+	.eaw .eaw__card {
+		animation: none !important;
+		opacity: 1 !important;
+		transition: box-shadow .2s;
+	}
+
+	.eaw .eaw__card:hover,
+	.eaw a.eaw__card:focus-visible,
+	.eaw .eaw__card:hover .eaw__badge img {
+		transform: none;
+	}
+}

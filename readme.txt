@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.67.0
+Stable tag: 2.68.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,16 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.68.0 =
+* **New widget: Award Wall.** Award badges in a grid beside a big number that
+  counts up as it scrolls into view. The number is the count of awards
+  listed, so adding one updates it, and the line under it fills in the year
+  range. It ships the eight Lepido awards and their badges.
+* A dark badge gets a neat dark chip the size of the badge, not a dark block
+  across the whole card.
+* It fits its space, not just the screen: the number moves on top in a
+  narrower column, and the badges go to two columns when space is tight.
 
 = 2.67.0 =
 * **New widget: Journey Timeline.** Years in circles down a line that draws
