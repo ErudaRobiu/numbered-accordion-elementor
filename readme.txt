@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.66.0
+Stable tag: 2.66.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,11 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.66.1 =
+* The Post Source Box's podcast button now reads "Listen on BBC Business
+  Daily ↗" instead of just "Listen": its setting shared a name with the
+  "Listen" label above the player.
 
 = 2.66.0 =
 * **The News Grid is now plain cards:** equal cards, three across on

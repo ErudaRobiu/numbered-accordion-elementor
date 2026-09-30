@@ -80,7 +80,7 @@ class Post_Source_Widget extends News_Widget {
 		foreach ( array(
 			'by_text'      => array( esc_html__( 'Before the source', 'numbered-accordion' ), esc_html__( 'Originally published by', 'numbered-accordion' ) ),
 			'read_text'    => array( esc_html__( 'Article button (%s is the source)', 'numbered-accordion' ), esc_html__( 'Read on %s', 'numbered-accordion' ) ),
-			'listen_text'  => array( esc_html__( 'Podcast button (%s is the source)', 'numbered-accordion' ), esc_html__( 'Listen on %s', 'numbered-accordion' ) ),
+			'listen_button' => array( esc_html__( 'Podcast button (%s is the source)', 'numbered-accordion' ), esc_html__( 'Listen on %s', 'numbered-accordion' ) ),
 			'listen_text'  => array( esc_html__( 'Above the player', 'numbered-accordion' ), esc_html__( 'Listen', 'numbered-accordion' ) ),
 			'related_text' => array( esc_html__( 'Above the related page', 'numbered-accordion' ), esc_html__( 'Related', 'numbered-accordion' ) ),
 		) as $id => $word ) {
@@ -161,7 +161,9 @@ class Post_Source_Widget extends News_Widget {
 		}
 
 		$card    = $box['card'];
-		$labels  = News_Render::labels( array( 'listen' => $this->word( $settings, 'listen_text', '' ) ) );
+		// listen_button, not listen_text: listen_text is the "Listen" label
+		// above the player, and sharing an id made the button read "Listen".
+		$labels  = News_Render::labels( array( 'listen' => $this->word( $settings, 'listen_button', '' ) ) );
 		$podcast = 'audio' === News_Content::variants( array( $card ) )[0];
 		$source  = '' !== $card['source'] ? $card['source'] : ( '' !== $box['source_url'] ? (string) wp_parse_url( $box['source_url'], PHP_URL_HOST ) : '' );
 		$has_src = '' !== $box['source_url'];

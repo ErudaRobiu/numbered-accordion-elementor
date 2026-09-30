@@ -3042,6 +3042,24 @@ check( 'the press defaults are the three old tiles', array( 'BBC News', 'Forbes'
 } )() );
 check( 'only the BBC quote has a link so far', array( 'https://www.bbc.com/news/business-65328579', '', '' ), array_map( function ( $q ) { return $q['link']['url']; }, \ErudaToolkit\Modules\News\Widgets\Press_Quotes_Widget::default_quotes() ) );
 
+
+// No widget may declare the same control id twice: Elementor keeps one, and
+// a second control with the same id silently takes the first's default.
+foreach ( glob( dirname( __DIR__ ) . '/modules/*/widgets/*.php' ) as $nw_file ) {
+	$nw_src = (string) file_get_contents( $nw_file );
+	// Lists of settings looped into controls count too, but only where the
+	// loop uses the list's keys as the ids unchanged ($id, not 'colour_' . $key).
+	$nw_word_ids = array( 1 => array() );
+	if ( preg_match( '/add_(?:responsive_)?control\(\s*\$id\s*,/', $nw_src ) ) {
+		preg_match_all( "/^\t{3}'([a-z_0-9]+)'\s*=>\s*array\(\s*esc_html__\(/m", $nw_src, $nw_word_ids );
+	}
+	// Widget-level controls only: a repeater's fields have their own ids.
+	preg_match_all( "/\$this->add_(?:responsive_)?control\(\s*'([a-z_0-9]+)'/", $nw_src, $nw_ctrl_ids );
+	$nw_ids  = array_merge( $nw_word_ids[1], $nw_ctrl_ids[1] );
+	$nw_dups = array_keys( array_filter( array_count_values( $nw_ids ), function ( $n ) { return $n > 1; } ) );
+	check( basename( $nw_file ) . ' declares each control id once', array(), $nw_dups );
+}
+
 /* ------------------------------------------------------------- report --- */
 
 
