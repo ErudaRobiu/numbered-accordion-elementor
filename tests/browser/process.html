@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Process Stepper — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;600;700&family=Urbanist:wght@700&display=swap">
+<link rel="stylesheet" href="../../modules/process/assets/css/process-stepper.css">
+<style>
+body{margin:0;background:#fff;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;color:#0F3961}
+.spacer{height:110vh;display:grid;place-items:center;color:#8A97A1}
+.band{background:#F5F6F7}
+.host{max-width:1240px;margin:0 auto;padding:60px 40px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 44px}
+.narrow{max-width:340px}
+.flexcol{display:flex;flex-direction:column;align-items:flex-start}
+@media(max-width:1024px){.split{grid-template-columns:1fr}}
+@media(max-width:767px){.host{padding:32px 16px}}
+/* A hostile theme: Hello Elementor's buttons and links. */
+button,[type=button]{display:inline-block;padding:.5rem 1rem;border:1px solid #c36;border-radius:3px;color:#c36;background:transparent;font-size:1rem;text-align:center}
+button:hover,button:focus,[type=button]:hover,[type=button]:focus{color:#fff;background-color:#c36;text-decoration:none}
+ol{padding-left:2em}li{margin-bottom:.5em;list-style:decimal}p{margin:0 0 1em}
+a{color:#c36;text-decoration:underline}a:hover{color:#336}
+</style>
+</head>
+<body>
+<div class="spacer">Scroll down — the rail builds in when it arrives</div>
+<div class="band">
+	<div class="host">
+		<p class="marker">Page 28: full width on #F5F6F7</p>
+		<div class="flexcol"><div id="a" class="elementor-widget elementor-widget-eps-process-stepper"><div class="elementor-widget-container">		<div class="eps-wrap">
+			<div class="eps eps--animate" id="eps-a1" data-mode="h" data-scroll-below="900" data-vertical-below="560" style="--eps-n:8;--eps-k:0">
+				<div class="eps__scroller">
+					<ol class="eps__rail" aria-label="How ThermStar works, step by step">
+																				<li class="eps__item is-start is-sel" style="--eps-i:0">
+								<button type="button" class="eps__stage" id="eps-a1-s0" aria-controls="eps-a1-p0 eps-a1-b0" tabindex="0" aria-current="step">
+									<span class="eps__dot">01</span>
+									<span class="eps__name"><span class="eps__label">Opportunity screening</span> <span class="eps__badge">You start here</span></span>
+								</button>
+								<div class="eps__body" id="eps-a1-b0">
+									<div class="eps__inner">
+																					<p class="eps__desc">Where heat leaves your facility, and where it could serve a useful load.</p>
+																				<a class="eps__link" href="/thermal-energy-opportunity-screen/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:1">
+								<button type="button" class="eps__stage" id="eps-a1-s1" aria-controls="eps-a1-p1 eps-a1-b1" tabindex="-1">
+									<span class="eps__dot">02</span>
+									<span class="eps__name"><span class="eps__label">Technical data review</span></span>
+								</button>
+								<div class="eps__body" id="eps-a1-b1">
+									<div class="eps__inner">
+																					<p class="eps__desc">Exhaust conditions, operating hours and the receiving demand, reviewed together.</p>
+																				<a class="eps__link" href="/technical-data-review/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:2">
+								<button type="button" class="eps__stage" id="eps-a1-s2" aria-controls="eps-a1-p2 eps-a1-b2" tabindex="-1">
+									<span class="eps__dot">03</span>
+									<span class="eps__name"><span class="eps__label">Preliminary assessment</span></span>
+								</button>
+								<div class="eps__body" id="eps-a1-b2">
+									<div class="eps__inner">
+																					<p class="eps__desc">Recoverable energy, delivery options and early project economics.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:3">
+								<button type="button" class="eps__stage" id="eps-a1-s3" aria-controls="eps-a1-p3 eps-a1-b3" tabindex="-1">
+									<span class="eps__dot">04</span>
+									<span class="eps__name"><span class="eps__label">Configuration</span></span>
+								</button>
+								<div class="eps__body" id="eps-a1-b3">
+									<div class="eps__inner">
+																					<p class="eps__desc">A system concept built around your source, your demand and your site.</p>
+																				<a class="eps__link" href="/configuration-implementation-verification/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:4">
+								<button type="button" class="eps__stage" id="eps-a1-s4" aria-controls="eps-a1-p4 eps-a1-b4" tabindex="-1">
+									<span class="eps__dot">05</span>
+									<span class="eps__name"><span class="eps__label">Proposal</span></span>
+								</button>
+								<div class="eps__body" id="eps-a1-b4">
+									<div class="eps__inner">
+																					<p class="eps__desc">ThermStar’s supply and services, and the interfaces your team owns.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:5">
+								<button type="button" class="eps__stage" id="eps-a1-s5" aria-controls="eps-a1-p5 eps-a1-b5" tabindex="-1">
+									<span class="eps__dot">06</span>
+									<span class="eps__name"><span class="eps__label">Implementation coordination</span></span>
+								</button>
+								<div class="eps__body" id="eps-a1-b5">
+									<div class="eps__inner">
+																					<p class="eps__desc">Working with your engineers and contractors on delivery and integration.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:6">
+								<button type="button" class="eps__stage" id="eps-a1-s6" aria-controls="eps-a1-p6 eps-a1-b6" tabindex="-1">
+									<span class="eps__dot">07</span>
+									<span class="eps__name"><span class="eps__label">Commissioning</span></span>
+								</button>
+								<div class="eps__body" id="eps-a1-b6">
+									<div class="eps__inner">
+																					<p class="eps__desc">Controls, sensors and operating sequences checked and confirmed.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:7">
+								<button type="button" class="eps__stage" id="eps-a1-s7" aria-controls="eps-a1-p7 eps-a1-b7" tabindex="-1">
+									<span class="eps__dot">08</span>
+									<span class="eps__name"><span class="eps__label">Measurement</span></span>
+								</button>
+								<div class="eps__body" id="eps-a1-b7">
+									<div class="eps__inner">
+																					<p class="eps__desc">Recovered energy documented after startup, with reporting for incentives.</p>
+																				<a class="eps__link" href="/thermstar-power-intelligence/">Learn more →</a>									</div>
+								</div>
+							</li>
+											</ol>
+				</div>
+				<div class="eps__panel" aria-live="polite">
+																	<div class="eps__slide" id="eps-a1-p0" data-i="0">
+							<b class="eps__pn" aria-hidden="true">01</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Opportunity screening</strong>
+																	<p class="eps__desc">Where heat leaves your facility, and where it could serve a useful load.</p>
+															</div>
+							<a class="eps__link" href="/thermal-energy-opportunity-screen/">Learn more →</a>						</div>
+																	<div class="eps__slide" id="eps-a1-p1" data-i="1" hidden>
+							<b class="eps__pn" aria-hidden="true">02</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Technical data review</strong>
+																	<p class="eps__desc">Exhaust conditions, operating hours and the receiving demand, reviewed together.</p>
+															</div>
+							<a class="eps__link" href="/technical-data-review/">Learn more →</a>						</div>
+																	<div class="eps__slide" id="eps-a1-p2" data-i="2" hidden>
+							<b class="eps__pn" aria-hidden="true">03</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Preliminary assessment</strong>
+																	<p class="eps__desc">Recoverable energy, delivery options and early project economics.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-a1-p3" data-i="3" hidden>
+							<b class="eps__pn" aria-hidden="true">04</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Configuration</strong>
+																	<p class="eps__desc">A system concept built around your source, your demand and your site.</p>
+															</div>
+							<a class="eps__link" href="/configuration-implementation-verification/">Learn more →</a>						</div>
+																	<div class="eps__slide" id="eps-a1-p4" data-i="4" hidden>
+							<b class="eps__pn" aria-hidden="true">05</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Proposal</strong>
+																	<p class="eps__desc">ThermStar’s supply and services, and the interfaces your team owns.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-a1-p5" data-i="5" hidden>
+							<b class="eps__pn" aria-hidden="true">06</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Implementation coordination</strong>
+																	<p class="eps__desc">Working with your engineers and contractors on delivery and integration.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-a1-p6" data-i="6" hidden>
+							<b class="eps__pn" aria-hidden="true">07</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Commissioning</strong>
+																	<p class="eps__desc">Controls, sensors and operating sequences checked and confirmed.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-a1-p7" data-i="7" hidden>
+							<b class="eps__pn" aria-hidden="true">08</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Measurement</strong>
+																	<p class="eps__desc">Recovered energy documented after startup, with reporting for incentives.</p>
+															</div>
+							<a class="eps__link" href="/thermstar-power-intelligence/">Learn more →</a>						</div>
+									</div>
+			</div>
+						<script>(function(r){var w=r&&r.clientWidth;if(w){r.setAttribute('data-mode',w<+r.getAttribute('data-vertical-below')?'v':w<+r.getAttribute('data-scroll-below')?'scroll':'h');}}(document.currentScript&&document.currentScript.previousElementSibling));</script>
+		</div>
+		</div></div></div>
+	</div>
+</div>
+<div class="host split">
+	<div><p class="marker">A half column</p><div id="b">		<div class="eps-wrap">
+			<div class="eps eps--animate" id="eps-b2" data-mode="h" data-scroll-below="900" data-vertical-below="560" style="--eps-n:8;--eps-k:0">
+				<div class="eps__scroller">
+					<ol class="eps__rail" aria-label="How ThermStar works, step by step">
+																				<li class="eps__item is-start is-sel" style="--eps-i:0">
+								<button type="button" class="eps__stage" id="eps-b2-s0" aria-controls="eps-b2-p0 eps-b2-b0" tabindex="0" aria-current="step">
+									<span class="eps__dot">01</span>
+									<span class="eps__name"><span class="eps__label">Opportunity screening</span> <span class="eps__badge">You start here</span></span>
+								</button>
+								<div class="eps__body" id="eps-b2-b0">
+									<div class="eps__inner">
+																					<p class="eps__desc">Where heat leaves your facility, and where it could serve a useful load.</p>
+																				<a class="eps__link" href="/thermal-energy-opportunity-screen/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:1">
+								<button type="button" class="eps__stage" id="eps-b2-s1" aria-controls="eps-b2-p1 eps-b2-b1" tabindex="-1">
+									<span class="eps__dot">02</span>
+									<span class="eps__name"><span class="eps__label">Technical data review</span></span>
+								</button>
+								<div class="eps__body" id="eps-b2-b1">
+									<div class="eps__inner">
+																					<p class="eps__desc">Exhaust conditions, operating hours and the receiving demand, reviewed together.</p>
+																				<a class="eps__link" href="/technical-data-review/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:2">
+								<button type="button" class="eps__stage" id="eps-b2-s2" aria-controls="eps-b2-p2 eps-b2-b2" tabindex="-1">
+									<span class="eps__dot">03</span>
+									<span class="eps__name"><span class="eps__label">Preliminary assessment</span></span>
+								</button>
+								<div class="eps__body" id="eps-b2-b2">
+									<div class="eps__inner">
+																					<p class="eps__desc">Recoverable energy, delivery options and early project economics.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:3">
+								<button type="button" class="eps__stage" id="eps-b2-s3" aria-controls="eps-b2-p3 eps-b2-b3" tabindex="-1">
+									<span class="eps__dot">04</span>
+									<span class="eps__name"><span class="eps__label">Configuration</span></span>
+								</button>
+								<div class="eps__body" id="eps-b2-b3">
+									<div class="eps__inner">
+																					<p class="eps__desc">A system concept built around your source, your demand and your site.</p>
+																				<a class="eps__link" href="/configuration-implementation-verification/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:4">
+								<button type="button" class="eps__stage" id="eps-b2-s4" aria-controls="eps-b2-p4 eps-b2-b4" tabindex="-1">
+									<span class="eps__dot">05</span>
+									<span class="eps__name"><span class="eps__label">Proposal</span></span>
+								</button>
+								<div class="eps__body" id="eps-b2-b4">
+									<div class="eps__inner">
+																					<p class="eps__desc">ThermStar’s supply and services, and the interfaces your team owns.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:5">
+								<button type="button" class="eps__stage" id="eps-b2-s5" aria-controls="eps-b2-p5 eps-b2-b5" tabindex="-1">
+									<span class="eps__dot">06</span>
+									<span class="eps__name"><span class="eps__label">Implementation coordination</span></span>
+								</button>
+								<div class="eps__body" id="eps-b2-b5">
+									<div class="eps__inner">
+																					<p class="eps__desc">Working with your engineers and contractors on delivery and integration.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:6">
+								<button type="button" class="eps__stage" id="eps-b2-s6" aria-controls="eps-b2-p6 eps-b2-b6" tabindex="-1">
+									<span class="eps__dot">07</span>
+									<span class="eps__name"><span class="eps__label">Commissioning</span></span>
+								</button>
+								<div class="eps__body" id="eps-b2-b6">
+									<div class="eps__inner">
+																					<p class="eps__desc">Controls, sensors and operating sequences checked and confirmed.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:7">
+								<button type="button" class="eps__stage" id="eps-b2-s7" aria-controls="eps-b2-p7 eps-b2-b7" tabindex="-1">
+									<span class="eps__dot">08</span>
+									<span class="eps__name"><span class="eps__label">Measurement</span></span>
+								</button>
+								<div class="eps__body" id="eps-b2-b7">
+									<div class="eps__inner">
+																					<p class="eps__desc">Recovered energy documented after startup, with reporting for incentives.</p>
+																				<a class="eps__link" href="/thermstar-power-intelligence/">Learn more →</a>									</div>
+								</div>
+							</li>
+											</ol>
+				</div>
+				<div class="eps__panel" aria-live="polite">
+																	<div class="eps__slide" id="eps-b2-p0" data-i="0">
+							<b class="eps__pn" aria-hidden="true">01</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Opportunity screening</strong>
+																	<p class="eps__desc">Where heat leaves your facility, and where it could serve a useful load.</p>
+															</div>
+							<a class="eps__link" href="/thermal-energy-opportunity-screen/">Learn more →</a>						</div>
+																	<div class="eps__slide" id="eps-b2-p1" data-i="1" hidden>
+							<b class="eps__pn" aria-hidden="true">02</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Technical data review</strong>
+																	<p class="eps__desc">Exhaust conditions, operating hours and the receiving demand, reviewed together.</p>
+															</div>
+							<a class="eps__link" href="/technical-data-review/">Learn more →</a>						</div>
+																	<div class="eps__slide" id="eps-b2-p2" data-i="2" hidden>
+							<b class="eps__pn" aria-hidden="true">03</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Preliminary assessment</strong>
+																	<p class="eps__desc">Recoverable energy, delivery options and early project economics.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-b2-p3" data-i="3" hidden>
+							<b class="eps__pn" aria-hidden="true">04</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Configuration</strong>
+																	<p class="eps__desc">A system concept built around your source, your demand and your site.</p>
+															</div>
+							<a class="eps__link" href="/configuration-implementation-verification/">Learn more →</a>						</div>
+																	<div class="eps__slide" id="eps-b2-p4" data-i="4" hidden>
+							<b class="eps__pn" aria-hidden="true">05</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Proposal</strong>
+																	<p class="eps__desc">ThermStar’s supply and services, and the interfaces your team owns.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-b2-p5" data-i="5" hidden>
+							<b class="eps__pn" aria-hidden="true">06</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Implementation coordination</strong>
+																	<p class="eps__desc">Working with your engineers and contractors on delivery and integration.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-b2-p6" data-i="6" hidden>
+							<b class="eps__pn" aria-hidden="true">07</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Commissioning</strong>
+																	<p class="eps__desc">Controls, sensors and operating sequences checked and confirmed.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-b2-p7" data-i="7" hidden>
+							<b class="eps__pn" aria-hidden="true">08</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Measurement</strong>
+																	<p class="eps__desc">Recovered energy documented after startup, with reporting for incentives.</p>
+															</div>
+							<a class="eps__link" href="/thermstar-power-intelligence/">Learn more →</a>						</div>
+									</div>
+			</div>
+						<script>(function(r){var w=r&&r.clientWidth;if(w){r.setAttribute('data-mode',w<+r.getAttribute('data-vertical-below')?'v':w<+r.getAttribute('data-scroll-below')?'scroll':'h');}}(document.currentScript&&document.currentScript.previousElementSibling));</script>
+		</div>
+		</div></div>
+	<div><p class="marker">340px: vertical</p><div id="c" class="narrow">		<div class="eps-wrap">
+			<div class="eps eps--animate" id="eps-c3" data-mode="h" data-scroll-below="900" data-vertical-below="560" style="--eps-n:8;--eps-k:0">
+				<div class="eps__scroller">
+					<ol class="eps__rail" aria-label="How ThermStar works, step by step">
+																				<li class="eps__item is-start is-sel" style="--eps-i:0">
+								<button type="button" class="eps__stage" id="eps-c3-s0" aria-controls="eps-c3-p0 eps-c3-b0" tabindex="0" aria-current="step">
+									<span class="eps__dot">01</span>
+									<span class="eps__name"><span class="eps__label">Opportunity screening</span> <span class="eps__badge">You start here</span></span>
+								</button>
+								<div class="eps__body" id="eps-c3-b0">
+									<div class="eps__inner">
+																					<p class="eps__desc">Where heat leaves your facility, and where it could serve a useful load.</p>
+																				<a class="eps__link" href="/thermal-energy-opportunity-screen/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:1">
+								<button type="button" class="eps__stage" id="eps-c3-s1" aria-controls="eps-c3-p1 eps-c3-b1" tabindex="-1">
+									<span class="eps__dot">02</span>
+									<span class="eps__name"><span class="eps__label">Technical data review</span></span>
+								</button>
+								<div class="eps__body" id="eps-c3-b1">
+									<div class="eps__inner">
+																					<p class="eps__desc">Exhaust conditions, operating hours and the receiving demand, reviewed together.</p>
+																				<a class="eps__link" href="/technical-data-review/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:2">
+								<button type="button" class="eps__stage" id="eps-c3-s2" aria-controls="eps-c3-p2 eps-c3-b2" tabindex="-1">
+									<span class="eps__dot">03</span>
+									<span class="eps__name"><span class="eps__label">Preliminary assessment</span></span>
+								</button>
+								<div class="eps__body" id="eps-c3-b2">
+									<div class="eps__inner">
+																					<p class="eps__desc">Recoverable energy, delivery options and early project economics.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:3">
+								<button type="button" class="eps__stage" id="eps-c3-s3" aria-controls="eps-c3-p3 eps-c3-b3" tabindex="-1">
+									<span class="eps__dot">04</span>
+									<span class="eps__name"><span class="eps__label">Configuration</span></span>
+								</button>
+								<div class="eps__body" id="eps-c3-b3">
+									<div class="eps__inner">
+																					<p class="eps__desc">A system concept built around your source, your demand and your site.</p>
+																				<a class="eps__link" href="/configuration-implementation-verification/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:4">
+								<button type="button" class="eps__stage" id="eps-c3-s4" aria-controls="eps-c3-p4 eps-c3-b4" tabindex="-1">
+									<span class="eps__dot">05</span>
+									<span class="eps__name"><span class="eps__label">Proposal</span></span>
+								</button>
+								<div class="eps__body" id="eps-c3-b4">
+									<div class="eps__inner">
+																					<p class="eps__desc">ThermStar’s supply and services, and the interfaces your team owns.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:5">
+								<button type="button" class="eps__stage" id="eps-c3-s5" aria-controls="eps-c3-p5 eps-c3-b5" tabindex="-1">
+									<span class="eps__dot">06</span>
+									<span class="eps__name"><span class="eps__label">Implementation coordination</span></span>
+								</button>
+								<div class="eps__body" id="eps-c3-b5">
+									<div class="eps__inner">
+																					<p class="eps__desc">Working with your engineers and contractors on delivery and integration.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:6">
+								<button type="button" class="eps__stage" id="eps-c3-s6" aria-controls="eps-c3-p6 eps-c3-b6" tabindex="-1">
+									<span class="eps__dot">07</span>
+									<span class="eps__name"><span class="eps__label">Commissioning</span></span>
+								</button>
+								<div class="eps__body" id="eps-c3-b6">
+									<div class="eps__inner">
+																					<p class="eps__desc">Controls, sensors and operating sequences checked and confirmed.</p>
+																				<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:7">
+								<button type="button" class="eps__stage" id="eps-c3-s7" aria-controls="eps-c3-p7 eps-c3-b7" tabindex="-1">
+									<span class="eps__dot">08</span>
+									<span class="eps__name"><span class="eps__label">Measurement</span></span>
+								</button>
+								<div class="eps__body" id="eps-c3-b7">
+									<div class="eps__inner">
+																					<p class="eps__desc">Recovered energy documented after startup, with reporting for incentives.</p>
+																				<a class="eps__link" href="/thermstar-power-intelligence/">Learn more →</a>									</div>
+								</div>
+							</li>
+											</ol>
+				</div>
+				<div class="eps__panel" aria-live="polite">
+																	<div class="eps__slide" id="eps-c3-p0" data-i="0">
+							<b class="eps__pn" aria-hidden="true">01</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Opportunity screening</strong>
+																	<p class="eps__desc">Where heat leaves your facility, and where it could serve a useful load.</p>
+															</div>
+							<a class="eps__link" href="/thermal-energy-opportunity-screen/">Learn more →</a>						</div>
+																	<div class="eps__slide" id="eps-c3-p1" data-i="1" hidden>
+							<b class="eps__pn" aria-hidden="true">02</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Technical data review</strong>
+																	<p class="eps__desc">Exhaust conditions, operating hours and the receiving demand, reviewed together.</p>
+															</div>
+							<a class="eps__link" href="/technical-data-review/">Learn more →</a>						</div>
+																	<div class="eps__slide" id="eps-c3-p2" data-i="2" hidden>
+							<b class="eps__pn" aria-hidden="true">03</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Preliminary assessment</strong>
+																	<p class="eps__desc">Recoverable energy, delivery options and early project economics.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-c3-p3" data-i="3" hidden>
+							<b class="eps__pn" aria-hidden="true">04</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Configuration</strong>
+																	<p class="eps__desc">A system concept built around your source, your demand and your site.</p>
+															</div>
+							<a class="eps__link" href="/configuration-implementation-verification/">Learn more →</a>						</div>
+																	<div class="eps__slide" id="eps-c3-p4" data-i="4" hidden>
+							<b class="eps__pn" aria-hidden="true">05</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Proposal</strong>
+																	<p class="eps__desc">ThermStar’s supply and services, and the interfaces your team owns.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-c3-p5" data-i="5" hidden>
+							<b class="eps__pn" aria-hidden="true">06</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Implementation coordination</strong>
+																	<p class="eps__desc">Working with your engineers and contractors on delivery and integration.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-c3-p6" data-i="6" hidden>
+							<b class="eps__pn" aria-hidden="true">07</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Commissioning</strong>
+																	<p class="eps__desc">Controls, sensors and operating sequences checked and confirmed.</p>
+															</div>
+							<a class="eps__link eps__link--quiet" href="/request-assessment/">Request an Assessment</a>						</div>
+																	<div class="eps__slide" id="eps-c3-p7" data-i="7" hidden>
+							<b class="eps__pn" aria-hidden="true">08</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Measurement</strong>
+																	<p class="eps__desc">Recovered energy documented after startup, with reporting for incentives.</p>
+															</div>
+							<a class="eps__link" href="/thermstar-power-intelligence/">Learn more →</a>						</div>
+									</div>
+			</div>
+						<script>(function(r){var w=r&&r.clientWidth;if(w){r.setAttribute('data-mode',w<+r.getAttribute('data-vertical-below')?'v':w<+r.getAttribute('data-scroll-below')?'scroll':'h');}}(document.currentScript&&document.currentScript.previousElementSibling));</script>
+		</div>
+		</div></div>
+</div>
+<div class="host">
+	<p class="marker">Five stages, custom number, no fallback, opens on 2, auto-advance every 2s</p>
+	<div id="d">		<div class="eps-wrap">
+			<div class="eps" id="eps-d4" data-mode="h" data-scroll-below="900" data-vertical-below="560" data-auto="2000" style="--eps-n:5;--eps-k:1">
+				<div class="eps__scroller">
+					<ol class="eps__rail" aria-label="How ThermStar works, step by step">
+																				<li class="eps__item is-start is-done" style="--eps-i:0">
+								<button type="button" class="eps__stage" id="eps-d4-s0" aria-controls="eps-d4-p0 eps-d4-b0" tabindex="-1">
+									<span class="eps__dot">01</span>
+									<span class="eps__name"><span class="eps__label">Opportunity screening</span> <span class="eps__badge">You start here</span></span>
+								</button>
+								<div class="eps__body" id="eps-d4-b0">
+									<div class="eps__inner">
+																					<p class="eps__desc">Where heat leaves your facility, and where it could serve a useful load.</p>
+																				<a class="eps__link" href="/thermal-energy-opportunity-screen/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item is-sel" style="--eps-i:1">
+								<button type="button" class="eps__stage" id="eps-d4-s1" aria-controls="eps-d4-p1 eps-d4-b1" tabindex="0" aria-current="step">
+									<span class="eps__dot">02</span>
+									<span class="eps__name"><span class="eps__label">Technical data review</span></span>
+								</button>
+								<div class="eps__body" id="eps-d4-b1">
+									<div class="eps__inner">
+																					<p class="eps__desc">Exhaust conditions, operating hours and the receiving demand, reviewed together.</p>
+																				<a class="eps__link" href="/technical-data-review/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:2">
+								<button type="button" class="eps__stage" id="eps-d4-s2" aria-controls="eps-d4-p2 eps-d4-b2" tabindex="-1">
+									<span class="eps__dot">A</span>
+									<span class="eps__name"><span class="eps__label">Preliminary assessment</span></span>
+								</button>
+								<div class="eps__body" id="eps-d4-b2">
+									<div class="eps__inner">
+																					<p class="eps__desc">Recoverable energy, delivery options and early project economics.</p>
+																													</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:3">
+								<button type="button" class="eps__stage" id="eps-d4-s3" aria-controls="eps-d4-p3 eps-d4-b3" tabindex="-1">
+									<span class="eps__dot">04</span>
+									<span class="eps__name"><span class="eps__label">Configuration</span></span>
+								</button>
+								<div class="eps__body" id="eps-d4-b3">
+									<div class="eps__inner">
+																					<p class="eps__desc">A system concept built around your source, your demand and your site.</p>
+																				<a class="eps__link" href="/configuration-implementation-verification/">Learn more →</a>									</div>
+								</div>
+							</li>
+																				<li class="eps__item" style="--eps-i:4">
+								<button type="button" class="eps__stage" id="eps-d4-s4" aria-controls="eps-d4-p4 eps-d4-b4" tabindex="-1">
+									<span class="eps__dot">05</span>
+									<span class="eps__name"><span class="eps__label">A deliberately long stage title that has to wrap without spilling anywhere</span></span>
+								</button>
+								<div class="eps__body" id="eps-d4-b4">
+									<div class="eps__inner">
+																					<p class="eps__desc">ThermStar’s supply and services, and the interfaces your team owns.</p>
+																													</div>
+								</div>
+							</li>
+											</ol>
+				</div>
+				<div class="eps__panel" aria-live="polite">
+																	<div class="eps__slide" id="eps-d4-p0" data-i="0" hidden>
+							<b class="eps__pn" aria-hidden="true">01</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Opportunity screening</strong>
+																	<p class="eps__desc">Where heat leaves your facility, and where it could serve a useful load.</p>
+															</div>
+							<a class="eps__link" href="/thermal-energy-opportunity-screen/">Learn more →</a>						</div>
+																	<div class="eps__slide" id="eps-d4-p1" data-i="1">
+							<b class="eps__pn" aria-hidden="true">02</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Technical data review</strong>
+																	<p class="eps__desc">Exhaust conditions, operating hours and the receiving demand, reviewed together.</p>
+															</div>
+							<a class="eps__link" href="/technical-data-review/">Learn more →</a>						</div>
+																	<div class="eps__slide eps__slide--wide" id="eps-d4-p2" data-i="2" hidden>
+							<b class="eps__pn" aria-hidden="true">A</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Preliminary assessment</strong>
+																	<p class="eps__desc">Recoverable energy, delivery options and early project economics.</p>
+															</div>
+													</div>
+																	<div class="eps__slide" id="eps-d4-p3" data-i="3" hidden>
+							<b class="eps__pn" aria-hidden="true">04</b>
+							<div class="eps__copy">
+								<strong class="eps__title">Configuration</strong>
+																	<p class="eps__desc">A system concept built around your source, your demand and your site.</p>
+															</div>
+							<a class="eps__link" href="/configuration-implementation-verification/">Learn more →</a>						</div>
+																	<div class="eps__slide eps__slide--wide" id="eps-d4-p4" data-i="4" hidden>
+							<b class="eps__pn" aria-hidden="true">05</b>
+							<div class="eps__copy">
+								<strong class="eps__title">A deliberately long stage title that has to wrap without spilling anywhere</strong>
+																	<p class="eps__desc">ThermStar’s supply and services, and the interfaces your team owns.</p>
+															</div>
+													</div>
+									</div>
+			</div>
+						<script>(function(r){var w=r&&r.clientWidth;if(w){r.setAttribute('data-mode',w<+r.getAttribute('data-vertical-below')?'v':w<+r.getAttribute('data-scroll-below')?'scroll':'h');}}(document.currentScript&&document.currentScript.previousElementSibling));</script>
+		</div>
+		</div>
+</div>
+<div class="spacer">End</div>
+<script src="../../modules/process/assets/js/process-stepper.js"></script>
+</body>
+</html>
+	

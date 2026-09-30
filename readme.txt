@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.69.1
+Stable tag: 2.70.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,18 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.70.0 =
+* **New widget: Process Stepper.** Numbered stages on a rail, a green line
+  that fills up to the stage you pick, and a panel underneath that explains
+  it. Ships with ThermStar's eight stages, from Opportunity screening to
+  Measurement.
+* Stages without their own link show a quieter "Request an Assessment"
+  button, so the panel never looks empty on one side.
+* Fits any space: equal columns when wide, a rail that scrolls sideways in a
+  narrower column, and a vertical stepper on phones where the picked stage
+  opens in place.
+* Keyboard friendly (arrow keys, Home, End) and optional auto-advance.
 
 = 2.69.1 =
 * Annotated Mark now fills its column instead of stopping at 560px. A new

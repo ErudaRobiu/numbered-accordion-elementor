@@ -128,6 +128,10 @@ final class Toolkit {
 			'file'  => 'modules/elements/class-elements-module.php',
 			'class' => '\ErudaToolkit\Modules\Elements\Elements_Module',
 		),
+		'process'    => array(
+			'file'  => 'modules/process/class-process-module.php',
+			'class' => '\ErudaToolkit\Modules\Process\Process_Module',
+		),
 	);
 
 	/**
