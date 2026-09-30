@@ -108,6 +108,10 @@ final class Toolkit {
 			'file'  => 'modules/docshelf/class-docshelf-module.php',
 			'class' => '\ErudaToolkit\Modules\DocShelf\DocShelf_Module',
 		),
+		'news'       => array(
+			'file'  => 'modules/news/class-news-module.php',
+			'class' => '\ErudaToolkit\Modules\News\News_Module',
+		),
 	);
 
 	/**

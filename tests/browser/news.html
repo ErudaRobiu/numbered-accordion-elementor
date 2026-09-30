@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>News — browser fixture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Urbanist:wght@700&display=swap">
+<link rel="stylesheet" href="../../modules/news/assets/css/news.css">
+<style>
+body{margin:0;background:#F5F6F7;font:16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif;color:#0F3961}
+.host{max-width:1240px;margin:0 auto;padding:60px 40px}
+.dark{background:linear-gradient(180deg,#07131C,#0A2A26)}
+.marker{color:#07864F;font:700 12px/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin:0 0 14px}
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+@media(max-width:760px){.host{padding:32px 16px}}
+/* A hostile theme: Hello Elementor's button and link rules, and the usual image ones. */
+[type=button],button{background-color:transparent;border:1px solid #c36;border-radius:3px;color:#c36;display:inline-block;font-size:1rem;font-weight:400;padding:.5rem 1rem;text-align:center;white-space:nowrap}
+[type=button]:hover,button:hover,[type=button]:focus,button:focus{background-color:#c36;color:#fff;text-decoration:none}
+a{color:#c36;text-decoration:underline}a:hover{color:#336}
+img{max-width:100%;height:auto}
+img:hover{opacity:.75}
+blockquote{margin:1em 2em;font-style:italic;border-left:4px solid #c36}
+h3{font-size:2em}
+</style>
+</head>
+<body>
+<section class="host" id="posts">
+	<p class="marker">News Grid — the four seed posts</p>
+	<div id="a">		<div class="enws-grid"
+			data-rest=""
+			data-per="9"
+			data-next="3"
+			data-featured="1"
+			data-cats=""
+			data-tags=""
+			data-hash-prefix="news-">
+							<div class="enws-grid__chips" role="group" aria-label="Filter posts by category">
+					<button type="button" class="enws-chip" data-seg="all" aria-pressed="true">All</button>
+											<button type="button" class="enws-chip" data-seg="insights" aria-pressed="false">Insights</button>
+											<button type="button" class="enws-chip" data-seg="updates" aria-pressed="false">Updates</button>
+											<button type="button" class="enws-chip" data-seg="media" aria-pressed="false">Media</button>
+									</div>
+			
+			<div class="enws-bento" aria-live="polite">
+							<a class="enws-card enws-card--wide" href="#post-1" data-cat="media">
+				<img src="news-img/p27-bbc-article.webp" alt="" loading="lazy" />				<span class="enws-card__shade" aria-hidden="true"></span>
+				<span class="enws-card__txt"><span class="enws-pill">Media</span><strong>Why there is serious money in kitchen fumes</strong><em><time datetime="2023-05-02">2 May 2023</time> · BBC News</em></span>
+				<span class="enws-card__go" aria-hidden="true">↗</span>
+			</a>
+						<article class="enws-card enws-card--audio" data-cat="media">
+				<span class="enws-card__top"><span class="enws-pill enws-pill--dk">Media · Podcast</span><em>BBC Business Daily</em></span>
+				<h3 class="enws-card__title"><a href="#post-4">Recycling heat from kitchens to keep restaurants warm</a></h3>
+				<div class="enws-audio" data-audio-src="news-img/silence.mp3" data-audio-title="Recycling heat from kitchens to keep restaurants warm" data-post-id="4" data-context="grid"><audio controls preload="none" src="news-img/silence.mp3" aria-label="Play: Recycling heat from kitchens to keep restaurants warm"></audio></div>									<blockquote>“We were looking at ways in which we could reduce our costs and become more sustainable, and this was at the forefront of what we&#039;d found.”<cite>Matt Manfield, facilities manager, Turtle Bay (UK)</cite></blockquote>
+							</article>
+						<a class="enws-card enws-card--image" href="#post-2" data-cat="insights">
+				<span class="enws-card__pic"><img src="news-img/p27-post-2271.webp" alt="" loading="lazy" /><span class="enws-pill">Insights</span></span>
+				<span class="enws-card__body">
+					<strong>The ROI of Waste Heat Recovery: Proven, Reliable, and Achievable in Three Years or Better</strong>
+											<span class="enws-card__ex">Across North America, industrial facilities lose enormous amounts of heat every day through hot, particulate-laden exhaust.</span>
+										<em><time datetime="2025-11-20">20 Nov 2025</time> · Article <b aria-hidden="true">↗</b></em>				</span>
+			</a>
+						<a class="enws-card enws-card--image" href="#post-3" data-cat="updates">
+				<span class="enws-card__pic"><img src="news-img/p27-post-488.webp" alt="" loading="lazy" /><span class="enws-pill">Updates</span></span>
+				<span class="enws-card__body">
+					<strong>Welcome to Norrel™: Reclaim Waste Heat. Energy Savings Delivered.</strong>
+											<span class="enws-card__ex">Is your business wasting valuable energy because traditional heat recovery systems can’t handle your hot, particulate-laden, and humid exhaust?</span>
+										<em><time datetime="2025-10-27">27 Oct 2025</time> · Article <b aria-hidden="true">↗</b></em>				</span>
+			</a>
+										</div>
+
+			<p class="enws-empty" hidden>Nothing here yet. New posts appear as they&#039;re published.</p>
+
+					</div>
+		</div>
+</section>
+<section class="host">
+	<p class="marker">News Grid — three per load, Load more, Go deeper tile</p>
+	<div id="b">		<div class="enws-grid"
+			data-rest="news-more.json"
+			data-per="3"
+			data-next="2"
+			data-featured="1"
+			data-cats=""
+			data-tags=""
+			data-hash-prefix="news-">
+							<div class="enws-grid__chips" role="group" aria-label="Filter posts by category">
+					<button type="button" class="enws-chip" data-seg="all" aria-pressed="true">All</button>
+											<button type="button" class="enws-chip" data-seg="insights" aria-pressed="false">Insights</button>
+											<button type="button" class="enws-chip" data-seg="updates" aria-pressed="false">Updates</button>
+											<button type="button" class="enws-chip" data-seg="media" aria-pressed="false">Media</button>
+									</div>
+			
+			<div class="enws-bento" aria-live="polite">
+							<a class="enws-card enws-card--wide" href="#post-1" data-cat="media">
+				<img src="news-img/p27-bbc-article.webp" alt="" loading="lazy" />				<span class="enws-card__shade" aria-hidden="true"></span>
+				<span class="enws-card__txt"><span class="enws-pill">Media</span><strong>Why there is serious money in kitchen fumes</strong><em><time datetime="2023-05-02">2 May 2023</time> · BBC News</em></span>
+				<span class="enws-card__go" aria-hidden="true">↗</span>
+			</a>
+						<a class="enws-card enws-card--image" href="#post-2" data-cat="insights">
+				<span class="enws-card__pic"><img src="news-img/p27-post-2271.webp" alt="" loading="lazy" /><span class="enws-pill">Insights</span></span>
+				<span class="enws-card__body">
+					<strong>The ROI of Waste Heat Recovery: Proven, Reliable, and Achievable in Three Years or Better</strong>
+											<span class="enws-card__ex">Across North America, industrial facilities lose enormous amounts of heat every day through hot, particulate-laden exhaust.</span>
+										<em><time datetime="2025-11-20">20 Nov 2025</time> · Article <b aria-hidden="true">↗</b></em>				</span>
+			</a>
+						<a class="enws-card enws-card--image" href="#post-3" data-cat="updates">
+				<span class="enws-card__pic"><img src="news-img/p27-post-488.webp" alt="" loading="lazy" /><span class="enws-pill">Updates</span></span>
+				<span class="enws-card__body">
+					<strong>Welcome to Norrel™: Reclaim Waste Heat. Energy Savings Delivered.</strong>
+											<span class="enws-card__ex">Is your business wasting valuable energy because traditional heat recovery systems can’t handle your hot, particulate-laden, and humid exhaust?</span>
+										<em><time datetime="2025-10-27">27 Oct 2025</time> · Article <b aria-hidden="true">↗</b></em>				</span>
+			</a>
+												<div class="enws-card enws-card--next">
+												<span class="enws-next__chip">Go deeper</span>						<strong>Looking for white papers?</strong>
+						<span class="enws-next__text">The Resource Library has them all.</span>
+													<a class="enws-next__btn" href="/resources/">Resource Library</a>
+											</div>
+							</div>
+
+			<p class="enws-empty" hidden>Nothing here yet. New posts appear as they&#039;re published.</p>
+
+							<div class="enws-more"><button type="button" class="enws-more__btn">Load more</button></div>
+					</div>
+		</div>
+</section>
+<section class="host" style="background:#fff">
+	<p class="marker">News Carousel — built-in arrows</p>
+	<div id="c">		<div class="enws-car-wrap" data-arrows="bar">
+							<div class="enws-car__bar">
+					<button type="button" class="enws-car__btn" data-dir="-1" aria-label="Previous posts"><span aria-hidden="true">←</span></button>
+					<button type="button" class="enws-car__btn" data-dir="1" aria-label="Next posts"><span aria-hidden="true">→</span></button>
+											<a class="enws-car__all" href="/news/">All posts</a>
+									</div>
+						<div class="enws-car" tabindex="0" role="region" aria-label="Latest posts">
+						<a class="enws-car__card" href="#post-2">
+			<span class="enws-car__img"><img src="news-img/p27-post-2271.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Insights</b>										<time datetime="2025-11-20">20 Nov 2025</time>
+				</span>
+				<strong>The ROI of Waste Heat Recovery: Proven, Reliable, and Achievable in Three Years or Better</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+				<a class="enws-car__card" href="#post-1">
+			<span class="enws-car__img"><img src="news-img/p27-bbc-article.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Media</b>										<time datetime="2023-05-02">2 May 2023</time>
+				</span>
+				<strong>Why there is serious money in kitchen fumes</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+				<a class="enws-car__card" href="#post-3">
+			<span class="enws-car__img"><img src="news-img/p27-post-488.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Updates</b>										<time datetime="2025-10-27">27 Oct 2025</time>
+				</span>
+				<strong>Welcome to Norrel™: Reclaim Waste Heat. Energy Savings Delivered.</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+				<a class="enws-car__card" href="#post-4">
+			<span class="enws-car__img"><img src="news-img/p27-bbc-podcast.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Media</b>					<i>Podcast</i>					<time datetime="2023-05-02">2 May 2023</time>
+				</span>
+				<strong>Recycling heat from kitchens to keep restaurants warm</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+				<a class="enws-car__card" href="#post-2">
+			<span class="enws-car__img"><img src="news-img/p27-post-2271.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Insights</b>										<time datetime="2025-11-20">20 Nov 2025</time>
+				</span>
+				<strong>The ROI of Waste Heat Recovery: Proven, Reliable, and Achievable in Three Years or Better</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+				<a class="enws-car__card" href="#post-3">
+			<span class="enws-car__img"><img src="news-img/p27-post-488.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Updates</b>										<time datetime="2025-10-27">27 Oct 2025</time>
+				</span>
+				<strong>Welcome to Norrel™: Reclaim Waste Heat. Energy Savings Delivered.</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+					</div>
+		</div>
+		</div>
+</section>
+<section class="host" id="ext">
+	<div class="head"><p class="marker">News Carousel — my own buttons</p><span><span class="elementor-widget enws-car-prev"><a href="#" class="elementor-button">Prev</a></span> <span class="elementor-widget enws-car-next"><a href="#" class="elementor-button">Next</a></span></span></div>
+	<div id="d">		<div class="enws-car-wrap" data-arrows="external">
+						<div class="enws-car" tabindex="0" role="region" aria-label="Latest posts">
+						<a class="enws-car__card" href="#post-2">
+			<span class="enws-car__img"><img src="news-img/p27-post-2271.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Insights</b>										<time datetime="2025-11-20">20 Nov 2025</time>
+				</span>
+				<strong>The ROI of Waste Heat Recovery: Proven, Reliable, and Achievable in Three Years or Better</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+				<a class="enws-car__card" href="#post-1">
+			<span class="enws-car__img"><img src="news-img/p27-bbc-article.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Media</b>										<time datetime="2023-05-02">2 May 2023</time>
+				</span>
+				<strong>Why there is serious money in kitchen fumes</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+				<a class="enws-car__card" href="#post-3">
+			<span class="enws-car__img"><img src="news-img/p27-post-488.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Updates</b>										<time datetime="2025-10-27">27 Oct 2025</time>
+				</span>
+				<strong>Welcome to Norrel™: Reclaim Waste Heat. Energy Savings Delivered.</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+				<a class="enws-car__card" href="#post-4">
+			<span class="enws-car__img"><img src="news-img/p27-bbc-podcast.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Media</b>					<i>Podcast</i>					<time datetime="2023-05-02">2 May 2023</time>
+				</span>
+				<strong>Recycling heat from kitchens to keep restaurants warm</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+				<a class="enws-car__card" href="#post-2">
+			<span class="enws-car__img"><img src="news-img/p27-post-2271.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Insights</b>										<time datetime="2025-11-20">20 Nov 2025</time>
+				</span>
+				<strong>The ROI of Waste Heat Recovery: Proven, Reliable, and Achievable in Three Years or Better</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+				<a class="enws-car__card" href="#post-3">
+			<span class="enws-car__img"><img src="news-img/p27-post-488.webp" alt="" loading="lazy" /></span>
+			<span class="enws-car__body">
+				<span class="enws-car__meta">
+					<b>Updates</b>										<time datetime="2025-10-27">27 Oct 2025</time>
+				</span>
+				<strong>Welcome to Norrel™: Reclaim Waste Heat. Energy Savings Delivered.</strong>
+				<span class="enws-car__go">Read <span aria-hidden="true">→</span></span>
+			</span>
+		</a>
+					</div>
+		</div>
+		</div>
+</section>
+<section class="host dark">
+	<p class="marker">Press Quotes</p>
+	<div id="e">		<div class="enws-press">
+											<figure class="enws-press__q">
+											<span class="enws-press__logo enws-press__logo--bbc" role="img" aria-label="BBC News">
+							<i>B</i><i>B</i><i>C</i>						</span>
+										<blockquote>“There is serious money in kitchen fumes. Enjay is one of a handful of companies that can offer profitable energy recovery from kitchen exhaust.”</blockquote>
+											<figcaption>
+															<a href="https://www.bbc.com/news/business-65328579" target="_blank" rel="noopener">BBC News <span aria-hidden="true">↗</span></a>
+													</figcaption>
+									</figure>
+											<figure class="enws-press__q">
+											<span class="enws-press__logo enws-press__logo--serif" role="img" aria-label="Forbes">
+							Forbes						</span>
+										<blockquote>“By deploying the Enjay product, customers use less energy and emit less CO2. Enjay focuses on the ROI, couched in terms of the number of kilowatt hours that customers can save.”</blockquote>
+											<figcaption>
+															Forbes													</figcaption>
+									</figure>
+											<figure class="enws-press__q">
+											<span class="enws-press__logo enws-press__logo--heavy" role="img" aria-label="Premier Construction">
+							PREMIER<small>CONSTRUCTION</small>						</span>
+										<blockquote>“Enjay drives kitchen costs down at Burger King and Turtle Bay. Its patented Lepido platform is widely used by hotels, restaurants and schools.”</blockquote>
+											<figcaption>
+															Premier Construction													</figcaption>
+									</figure>
+					</div>
+		</div>
+</section>
+<section class="host">
+	<p class="marker">Post Source Box</p>
+	<div id="f" style="max-width:720px">		<aside class="enws-src">
+							<div class="enws-src__from">
+					<p>Originally published by <b>BBC Business Daily</b></p>
+					<a class="enws-src__btn" href="https://www.bbc.co.uk/programmes/w3ct4w8v" target="_blank" rel="noopener">Read on BBC Business Daily <span aria-hidden="true">↗</span></a>
+				</div>
+			
+							<div class="enws-src__listen">
+										<span class="enws-src__eyebrow">Listen</span>					<div class="enws-audio" data-audio-src="news-img/silence.mp3" data-audio-title="Recycling heat from kitchens to keep restaurants warm" data-post-id="4" data-context="source"><audio controls preload="none" src="news-img/silence.mp3" aria-label="Play: Recycling heat from kitchens to keep restaurants warm"></audio></div>				</div>
+			
+							<a class="enws-src__rel" href="/restaurants-commercial-kitchens/">
+					<span class="enws-src__eyebrow">Related</span>
+					<strong>Restaurants &amp; Commercial Kitchens</strong>
+					<span>Grease-laden kitchen exhaust, recovered for make-up air.</span>					<i aria-hidden="true">→</i>
+				</a>
+					</aside>
+		</div>
+</section>
+<script src="../../modules/news/assets/js/news.js"></script>
+</body>
+</html>
+	

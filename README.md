@@ -58,6 +58,7 @@ modules/logotabs/                  the Customer Logo Tabs widget, its assets and
 modules/anatomy/                   the Case Anatomy widget, its assets and the three case logos
 modules/casestudies/               the Case Studies post type, its ACF form and the Case Studies widget
 modules/docshelf/                  the Documents post type, its ACF form and the Document Shelf widget
+modules/news/                      news fields on Posts and the News Grid, Carousel, Press Quotes and Post Source widgets
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -241,6 +242,58 @@ each PDF at 110 dpi, ~600px WebP). The Pancake Factory study and the Scott
 Preston onboarding form are never seeded, and a test holds that. The probe
 runs 40 checks, the same 40 as before the switch, because the widget looks and
 behaves exactly as it did.
+
+**News (`modules/news/`).** Page 27 and everything that lists posts. News items
+are WordPress's own **Posts**, by Robiu's choice: no post type is registered.
+Categories are core categories (Insights, Updates, Media, each with its
+content-doc H2 as the description), and topics are core tags. The module adds
+the "News item" ACF form to posts (featured, audio file with its quote and
+credit, source name and link, the required Related page, and a card layout
+override) and four widgets. None uses Elementor's Loop Grid or Loop Carousel.
+
+- **News Grid** (`enws-news-grid`): the bento. The newest *featured* post
+  leads the first page as the big card, wherever its date falls, and is left
+  out of every later page so it never shows twice. A post with audio is a
+  podcast card, and everything else is a photo card. On the first page the
+  tall cards come straight after the big one, so they stand beside it and the
+  photo cards stack newest first; in plain date order a podcast older than
+  the photos would drop to the last row and leave a hole. Dense packing
+  fills every other gap except the end of the last row. For that one, the
+  script stretches the last card of a short final row to the edge, pinning
+  its start to the column it already sits in (an end of `-1` with an
+  automatic start would move it to the last column). Chips come from the
+  categories that have posts; `#news-<slug>` opens one. On a category or tag
+  archive the grid follows it. **Load more** asks
+  `GET /wp-json/eruda/v1/news-grid` (public and read-only) for the next page,
+  and the same `News_Render` prints both, so a loaded card and a
+  server-rendered one are the same markup.
+- **News Carousel** (`enws-news-carousel`): photo cards on a scroll-snap row,
+  3.2 / 2.2 / 1.1 in view. Arrows are its own, or any two buttons in the same
+  section with the classes `enws-car-prev` / `enws-car-next`, so they can sit
+  beside a heading built with normal widgets.
+- **Press Quotes** (`enws-press-quotes`): frosted cards for a dark section. A
+  repeater is right here, because these quotes are fixed history.
+- **Post Source Box** (`enws-post-source`): for the single template. It shows
+  "Originally published by", the audio, and the Related page card.
+
+**The audio hook, for the player Robiu is building.** Every audio card and
+source box prints a slot:
+`<div class="enws-audio" data-audio-src data-audio-title data-post-id data-context>`
+with a plain `<audio controls preload="none">` inside, so a podcast plays
+before any player exists. A player takes it over either server side, through
+the `eruda_news_audio_player` filter (`$html, array{src, title, post_id,
+context}`), or in the browser by building its UI inside the slot and setting
+`data-player="ready"`, which hides the plain one. After Load more the grid
+dispatches `eruda:news-cards` with the new cards in `detail.cards`.
+
+`bin/seed-news.php` sets up the categories and topics, renames
+Uncategorized to Insights (so it stays the default and never shows as a
+chip), loads the four launch posts, and deletes "Hello world!". The two
+norrelinc.com posts keep their own bodies and dates, with the H1 that
+repeated the title removed. The Welcome post's two paragraphs, printed twice
+in the original, are kept once, and its links to norrelinc's contact page
+keep their words and lose the link until the linking pass. The probe runs 55
+checks, including no hole in the bento at 1440, 1100, 760 and 360px.
 
 ## Notes for future maintenance
 

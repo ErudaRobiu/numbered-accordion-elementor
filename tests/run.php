@@ -650,7 +650,8 @@ check( 'the customer logo tabs module is registered', true, in_array( 'logotabs'
 check( 'the case anatomy module is registered', true, in_array( 'anatomy', Toolkit::instance()->ids(), true ) );
 check( 'the case studies module is registered', true, in_array( 'casestudies', Toolkit::instance()->ids(), true ) );
 check( 'the document shelf module is registered', true, in_array( 'docshelf', Toolkit::instance()->ids(), true ) );
-check( 'twenty-one modules ship', 21, count( Toolkit::instance()->ids() ) );
+check( 'the news module is registered', true, in_array( 'news', Toolkit::instance()->ids(), true ) );
+check( 'twenty-two modules ship', 22, count( Toolkit::instance()->ids() ) );
 check( 'motion is on by default', true, Toolkit::is_enabled( 'motion', array() ) );
 check( 'motion can be switched off', false, Toolkit::is_enabled( 'motion', array( 'motion' => false ) ) );
 
@@ -687,6 +688,7 @@ foreach ( array(
 	'modules/anatomy/widgets/class-case-anatomy-widget.php',
 	'modules/casestudies/widgets/class-case-studies-widget.php',
 	'modules/docshelf/widgets/class-document-shelf-widget.php',
+	'modules/news/widgets/class-news-widget.php',
 ) as $relative ) {
 	$source = (string) file_get_contents( dirname( __DIR__ ) . '/' . $relative );
 
@@ -719,6 +721,7 @@ $module_files = array(
 	'modules/anatomy/class-anatomy-module.php',
 	'modules/casestudies/class-casestudies-module.php',
 	'modules/docshelf/class-docshelf-module.php',
+	'modules/news/class-news-module.php',
 );
 
 foreach ( $module_files as $relative ) {
@@ -2930,6 +2933,103 @@ $ds_no_all = $ds->markup( array( 'show_chips' => 'yes', 'show_all' => '' ), $ds_
 check( 'without All the first filter is pressed', 1, substr_count( $ds_no_all, 'data-seg="white" aria-pressed="true"' ) );
 check( 'and the other ten cards start hidden', 10, preg_match_all( '/edoc__card[^>]*\shidden/', $ds_no_all ) );
 check( 'no documents, nothing on the page', '', trim( $ds->markup( array(), array() ) ) );
+
+
+/* ------------------------------------------------------------- News --- */
+
+require_once dirname( __DIR__ ) . '/modules/news/class-news-content.php';
+require_once dirname( __DIR__ ) . '/modules/news/class-news-render.php';
+
+use ErudaToolkit\Modules\News\News_Content;
+use ErudaToolkit\Modules\News\News_Render;
+
+check( 'three categories, in chip order', array( 'insights', 'updates', 'media' ), array_keys( News_Content::categories() ) );
+check( 'each carries its content-doc H2', 'Customer and partner updates', News_Content::categories()['updates']['description'] );
+check( 'six topics', array( 'Basics', 'Equipment', 'Fouling', 'Boilers', 'Monitoring', 'Efficiency' ), News_Content::topics() );
+
+// The form.
+$nw_group  = News_Content::field_group();
+$nw_fields = array();
+foreach ( $nw_group['fields'] as $field ) {
+	$nw_fields[ $field['name'] ] = $field;
+}
+check( 'the form is on posts', 'post', $nw_group['location'][0][0]['value'] );
+check( 'the eight fields of the plan', array( 'nw_audio', 'nw_audio_credit', 'nw_audio_quote', 'nw_featured', 'nw_layout', 'nw_related', 'nw_source_name', 'nw_source_url' ), ( function ( $n ) { sort( $n ); return $n; } )( array_keys( $nw_fields ) ) );
+check( 'every post needs a related page', array( 1, array( 'page' ) ), array( $nw_fields['nw_related']['required'], $nw_fields['nw_related']['post_type'] ) );
+check( 'the quote and credit show only with audio', array( 'field_enws_audio', 'field_enws_audio' ), array( $nw_fields['nw_audio_quote']['conditional_logic'][0][0]['field'], $nw_fields['nw_audio_credit']['conditional_logic'][0][0]['field'] ) );
+check( 'layout choices', array( 'auto', 'wide', 'image', 'audio' ), array_keys( $nw_fields['nw_layout']['choices'] ) );
+check( 'no key collides with the other forms', array(), array_intersect( array_column( $nw_group['fields'], 'key' ), array_merge( array_column( \ErudaToolkit\Modules\CaseStudies\CaseStudies_Content::field_group()['fields'], 'key' ), array_column( \ErudaToolkit\Modules\DocShelf\DocShelf_Content::field_group()['fields'], 'key' ) ) ) );
+
+// A post becomes a card.
+$nw_make = function ( $id, $title, $date, $cat, $meta = array(), $audio = '' ) {
+	return News_Content::card(
+		array(
+			'id'        => $id,
+			'title'     => $title,
+			'url'       => '/news/p' . $id . '/',
+			'date'      => $date,
+			'excerpt'   => 'Excerpt ' . $id,
+			'cats'      => $cat ? array( array( 'slug' => $cat, 'name' => ucfirst( $cat ) ) ) : array(),
+			'meta'      => $meta,
+			'audio_url' => $audio,
+			'image'     => '<img src="x.jpg" alt="" />',
+		)
+	);
+};
+$nw_bbc  = $nw_make( 1, 'BBC', '2023-05-02 09:00:00', 'media', array( 'nw_featured' => '1', 'nw_source_name' => 'BBC News' ) );
+$nw_pod  = $nw_make( 4, 'Podcast', '2023-05-02 08:00:00', 'media', array( 'nw_source_name' => 'BBC Business Daily', 'nw_audio_quote' => '"We were looking…"', 'nw_audio_credit' => 'Matt Manfield' ), '/a.mp3' );
+$nw_roi  = $nw_make( 2, 'ROI', '2025-11-20 16:18:06', 'insights' );
+$nw_wel  = $nw_make( 3, 'Welcome', '2025-10-27 18:05:33', 'updates' );
+
+check( 'the date reads like the wireframe', array( '20 Nov 2025', '2025-11-20' ), array( $nw_roi['date'], $nw_roi['datetime'] ) );
+check( 'featured is read', array( true, false ), array( $nw_bbc['featured'], $nw_roi['featured'] ) );
+check( 'type: source, podcast or article', array( 'BBC News', 'Podcast', 'Article' ), array( $nw_bbc['type'], $nw_pod['type'], $nw_roi['type'] ) );
+check( 'an unknown layout is automatic', 'auto', $nw_make( 9, 'X', '2020-01-01', 'media', array( 'nw_layout' => 'giant' ) )['layout'] );
+check( 'no title, no card', null, $nw_make( 9, ' ', '2020-01-01', 'media' ) );
+check( 'no category, no pill', '', $nw_make( 9, 'X', '2020-01-01', '' )['cat_name'] );
+
+// Variants and the arrangement.
+check( 'first page: the first is big, audio is a podcast card', array( 'wide', 'image', 'image', 'audio' ), News_Content::variants( array( $nw_bbc, $nw_roi, $nw_wel, $nw_pod ), true ) );
+check( 'later pages have no big card', array( 'image', 'audio' ), News_Content::variants( array( $nw_roi, $nw_pod ), false ) );
+$nw_forced = $nw_roi;
+$nw_forced['layout'] = 'audio';
+check( 'a podcast layout without audio falls back to a photo card', array( 'image' ), News_Content::variants( array( $nw_forced ), false ) );
+$nw_forced['layout'] = 'wide';
+check( 'a chosen big card holds on a later page', array( 'wide' ), News_Content::variants( array( $nw_forced ), false ) );
+
+$nw_laid = News_Content::arrange( array( $nw_bbc, $nw_roi, $nw_wel, $nw_pod ), true );
+check( 'the launch bento: big, podcast beside it, then photos newest first', array( 'BBC', 'Podcast', 'ROI', 'Welcome' ), array_column( $nw_laid['cards'], 'title' ) );
+check( 'with their variants', array( 'wide', 'audio', 'image', 'image' ), $nw_laid['variants'] );
+check( 'later pages keep date order', array( 'ROI', 'Podcast', 'Welcome' ), array_column( News_Content::arrange( array( $nw_roi, $nw_pod, $nw_wel ), false )['cards'], 'title' ) );
+
+check( 'chips in the plan order, others after, never Uncategorized', array( 'insights' => 'Insights', 'updates' => 'Updates', 'media' => 'Media', 'awards' => 'Awards' ), News_Content::chips( array( array( 'slug' => 'awards', 'name' => 'Awards' ), array( 'slug' => 'media', 'name' => 'Media' ), array( 'slug' => 'uncategorized', 'name' => 'Uncategorized' ), array( 'slug' => 'insights', 'name' => 'Insights' ), array( 'slug' => 'updates', 'name' => 'Updates' ) ) ) );
+check( 'page size clamps', array( 1, 24, 9, 9 ), array( News_Content::per_page( 0 ), News_Content::per_page( 99 ), News_Content::per_page( 'x' ), News_Content::per_page( null ) ) );
+
+// The markup.
+$nw_html = News_Render::grid_cards( array( $nw_bbc, $nw_roi, $nw_wel, $nw_pod ), true );
+check( 'one big, one podcast, two photo cards', array( 1, 1, 2 ), array( substr_count( $nw_html, 'enws-card--wide' ), substr_count( $nw_html, 'enws-card--audio' ), substr_count( $nw_html, 'enws-card--image' ) ) );
+check( 'cards carry their category for the chips', 2, substr_count( $nw_html, 'data-cat="media"' ) );
+check( 'the big card links to the post', true, false !== strpos( $nw_html, '<a class="enws-card enws-card--wide" href="/news/p1/"' ) );
+check( 'date and source on the big card', true, false !== strpos( $nw_html, '<time datetime="2023-05-02">2 May 2023</time> · BBC News' ) );
+check( 'the podcast card is not one big link (it holds a player)', true, false !== strpos( $nw_html, '<article class="enws-card enws-card--audio"' ) );
+check( 'the audio slot: file, title, a plain player', true, false !== strpos( $nw_html, '<div class="enws-audio" data-audio-src="/a.mp3" data-audio-title="Podcast" data-post-id="4" data-context="grid"><audio controls preload="none" src="/a.mp3" aria-label="Play: Podcast"></audio></div>' ) );
+check( 'the quote gets one set of curly quotes', true, false !== strpos( $nw_html, '<blockquote>“We were looking…”<cite>Matt Manfield</cite></blockquote>' ) );
+check( 'the podcast pill', true, false !== strpos( $nw_html, '>Media · Podcast</span>' ) );
+
+$GLOBALS['eruda_test_filters']['eruda_news_audio_player'] = function ( $html ) {
+	return '<div class="robiu-player"></div>';
+};
+check( 'a player can replace the slot through the filter', true, false !== strpos( News_Render::audio_slot( $nw_pod, 'source' ), 'robiu-player' ) );
+unset( $GLOBALS['eruda_test_filters']['eruda_news_audio_player'] );
+
+$nw_car = News_Render::carousel_card( $nw_pod, 'Read' );
+check( 'a carousel podcast card: a Podcast pill and no player', array( true, false ), array( false !== strpos( $nw_car, '<i>Podcast</i>' ), false !== strpos( $nw_car, 'enws-audio' ) ) );
+
+check( 'the press defaults are the three old tiles', array( 'BBC News', 'Forbes', 'Premier Construction' ), ( function () {
+	require_once dirname( __DIR__ ) . '/modules/news/widgets/class-press-quotes-widget.php';
+	return array_column( \ErudaToolkit\Modules\News\Widgets\Press_Quotes_Widget::default_quotes(), 'outlet' );
+} )() );
+check( 'only the BBC quote has a link so far', array( 'https://www.bbc.com/news/business-65328579', '', '' ), array_map( function ( $q ) { return $q['link']['url']; }, \ErudaToolkit\Modules\News\Widgets\Press_Quotes_Widget::default_quotes() ) );
 
 /* ------------------------------------------------------------- report --- */
 
