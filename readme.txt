@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.71.1
+Stable tag: 2.71.2
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,11 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.71.2 =
+* Assessment Form: the pop-up's green buttons and dropdown arrow no longer
+  disappear on sites using Elementor's lazy-loaded section backgrounds. The
+  pop-up now sits at the end of the page, outside any section.
 
 = 2.71.1 =
 * Assessment Form: buttons open the pop-up on sites that also use page

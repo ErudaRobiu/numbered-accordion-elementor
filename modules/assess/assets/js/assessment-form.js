@@ -46,6 +46,13 @@
 			return;
 		}
 
+		// A pop-up lives at the end of <body>, outside every Elementor section:
+		// section styles (lazy-loaded backgrounds, transforms, overflow) must
+		// not reach it just because the widget was dropped into one.
+		if ( dialog && dialog.parentNode !== document.body ) {
+			document.body.appendChild( dialog );
+		}
+
 		/* Sliders show their value and fill up to the thumb. */
 		toArray( root.querySelectorAll( '.eas__range' ) ).forEach( function ( input ) {
 			var out = root.querySelector( 'output[for="' + input.id + '"]' );

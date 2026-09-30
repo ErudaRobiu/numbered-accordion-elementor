@@ -418,7 +418,7 @@ every request under **Assessments** in the dashboard (a private post type with
 list columns and a read-only summary), and, in "send" mode, emails the team
 (reply goes to the visitor) and the visitor (their estimate). "Save only"
 mode is for staging. The probe fakes the server, so it never saves or sends,
-and runs 34 checks: every step, errors from the browser and the server, a
+and runs 35 checks: every step, errors from the browser and the server, a
 network failure, keyboard, Escape and backdrop closing, phone full-screen and
 the inline copy.
 

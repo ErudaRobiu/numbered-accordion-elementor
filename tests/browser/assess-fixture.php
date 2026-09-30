@@ -154,6 +154,8 @@ body{margin:0;background:#F5F6F7;font:16px/1.6 "Plus Jakarta Sans",system-ui,san
 .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px}
 .elementor-button{display:inline-block;padding:12px 22px;border-radius:99px;background:#07864F;color:#fff;text-decoration:none}
 @media(max-width:767px){.host{padding:20px 16px}}
+/* Elementor's lazy-loaded section backgrounds: no background image inside a section until it has scrolled into view. */
+.e-con.e-parent:not(.e-lazyloaded) *{background-image:none!important}
 /* A hostile theme: Hello Elementor's buttons, inputs and lists. */
 button,[type=button],[type=submit]{display:inline-block;padding:.5rem 1rem;border:1px solid #c36;border-radius:3px;color:#c36;background:transparent;font-size:1rem}
 button:hover,button:focus,[type=button]:hover,[type=submit]:hover{color:#fff;background-color:#c36}
@@ -174,7 +176,7 @@ a{color:#c36}
 	<div id="inline"><?php echo eas_fixture( array_merge( $base, array( 'mode' => 'inline' ) ), 'inl1' ); // phpcs:ignore ?></div>
 	<p id="plain-target" style="height:40vh">Plain link target</p>
 </div>
-<div id="modal"><?php echo eas_fixture( array_merge( $base, array( 'mode' => 'modal' ) ), 'mod1' ); // phpcs:ignore ?></div>
+<div id="modal" class="e-con e-parent"><?php echo eas_fixture( array_merge( $base, array( 'mode' => 'modal' ) ), 'mod1' ); // phpcs:ignore ?></div>
 <script>
 /* Stand-in for the page-transition module: takes every link click that is not already handled. */
 window.__navigated = [];
