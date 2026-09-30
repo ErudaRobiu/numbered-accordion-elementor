@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.71.0
+Stable tag: 2.71.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,10 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.71.1 =
+* Assessment Form: buttons open the pop-up on sites that also use page
+  transitions (the transition used to take the click and leave the page).
 
 = 2.71.0 =
 * **New widget: Assessment Form.** A three-step request that ends with an

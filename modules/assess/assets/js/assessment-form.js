@@ -326,7 +326,7 @@
 					}
 					event.preventDefault();
 					root.eas.open();
-				} );
+				}, true ); // Capture: run before anything else that takes link clicks (page transitions do), which then sees the click is handled.
 
 				if ( '#assessment' === window.location.hash ) {
 					root.eas.open();
