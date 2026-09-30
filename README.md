@@ -62,6 +62,7 @@ modules/news/                      news fields on Posts and the News Grid, Carou
 modules/journey/                   the Journey Timeline widget
 modules/chain/                     the Company Chain widget
 modules/awards/                    the Award Wall widget and the eight award badges
+modules/elements/                  Element List and Annotated Mark, two linked widgets, and the mark
 modules/duplicator/                the Duplicate action
 tests/                             php tests/run.php
 docs/QA.md                         manual checklist for what the tests cannot cover
@@ -342,6 +343,30 @@ read heavier than the rest). The bundled Perpetuum badge is cropped from its
 number counts up once on scroll, from 0 on screen but with an aria-label
 holding the real number, and the cards fade in 60ms apart. The probe runs 34
 checks.
+
+**Element List and Annotated Mark (`modules/elements/`).** The logo section on
+page 28, "Four elements, one mission", as two widgets that can sit anywhere:
+the list of Air, Fire, Water and Earth with their tinted icon tiles, and the
+logo with a pill label per element joined by a leader line to a dot on the
+part of the mark it describes. Pointing at, focusing or tapping an item in
+either one lights the same key in every widget of the same link group (the
+default is `logo-elements`). The widgets never look for each other: an item
+announces `document` CustomEvent `eruda:link` with `{ group, key, source }`,
+an empty key clears, and anything else on the page may listen or announce the
+same way. Leaving, Esc, tapping the item again or tapping elsewhere clears it.
+The mark fades what is not lit to .35; the list steps the lit row in and turns
+its name green. Leader lines are drawn by the script in stage pixels from each
+label's measured inner edge, level for 12.5% of the width, then to the dot,
+redrawn on resize and once fonts load; without the script a percent estimate
+stands in. Dot and label positions are sliders in percent of the 560×520
+stage, so the defaults are the wireframe's. Below 420px of widget width the
+labels shrink to 20px and the list's subtitle goes under the name. The mark
+builds in once on scroll (logo, labels 120ms apart, lines drawn out of their
+labels, dots pop). The list can step through the elements every 3s while on
+screen, until anyone points at anything in the group. Neither moves for
+visitors who ask for less motion, and linking still works for them. The mark
+is `thermstar-icon.png` converted to WebP (148KB to 58KB). The probe runs 75
+checks, touch included.
 
 ## Notes for future maintenance
 

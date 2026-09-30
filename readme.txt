@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.68.0
+Stable tag: 2.69.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,16 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.69.0 =
+* **New widgets: Element List and Annotated Mark.** The four elements of the
+  ThermStar logo as a list, and the logo itself with a label and a leader line
+  for each element. Point at an element in either and it lights up in both,
+  wherever they sit on the page. They find each other by a shared link group,
+  so more than one pair can live on a page without crossing wires.
+* The mark builds in when it scrolls into view. The list can step through the
+  elements by itself until a visitor points at one.
+* Works with a keyboard (Tab, Esc) and on touch screens (tap, tap again).
 
 = 2.68.0 =
 * **New widget: Award Wall.** Award badges in a grid beside a big number that

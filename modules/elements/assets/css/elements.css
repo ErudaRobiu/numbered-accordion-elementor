@@ -1,0 +1,440 @@
+/**
+ * Eruda Toolkit - Element List and Annotated Mark
+ *
+ * Two widgets that light up together. Whichever item is active carries
+ * .is-on in every widget of its link group, and a widget holding the active
+ * item carries .has-on; everything below styles those two states.
+ */
+
+/* ============================================================== list === */
+
+.eel-wrap {
+	container: eel / inline-size;
+}
+
+.eel {
+	--eel-tile: 52px;
+	--eel-radius: 14px;
+	--eel-tint: 14%;
+	--eel-c: #07864F;
+	--eel-line: #DDE2E6;
+	--eel-ink: #0F3961;
+	--eel-muted: #0F3961B3;
+	--eel-active: #07864F;
+
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+	border-top: 1px solid var(--eel-line);
+	list-style: none;
+	font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.eel *,
+.eel *::before,
+.eel *::after {
+	box-sizing: border-box;
+}
+
+.eel .eel__row {
+	display: grid;
+	grid-template-columns: var(--eel-tile) minmax(0, 1fr);
+	align-items: start;
+	column-gap: 18px;
+	margin: 0;
+	padding: 14px 0;
+	border-bottom: 1px solid var(--eel-line);
+	list-style: none;
+	cursor: default;
+	transition: padding .25s cubic-bezier(.2, .7, .2, 1);
+}
+
+.eel .eel__row::before,
+.eel .eel__row::marker {
+	content: none;
+}
+
+.eel .eel__row:focus-visible {
+	outline: 3px solid #4DCF8D;
+	outline-offset: 2px;
+	border-radius: 8px;
+}
+
+.eel__tile {
+	display: grid;
+	place-items: center;
+	width: var(--eel-tile);
+	height: var(--eel-tile);
+	border-radius: var(--eel-radius);
+	background: color-mix(in srgb, var(--eel-c) var(--eel-tint), transparent);
+	color: var(--eel-c);
+	transition: background-color .25s;
+}
+
+.eel__tile svg,
+.eel__tile i {
+	display: block;
+	width: calc(var(--eel-tile) * .54);
+	height: calc(var(--eel-tile) * .54);
+	font-size: calc(var(--eel-tile) * .54);
+	fill: currentColor;
+}
+
+.eel__tile svg path[fill="none"] {
+	fill: none;
+}
+
+.eel__body {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.eel__name {
+	font-family: "Bebas Neue", Impact, sans-serif;
+	font-size: 28px;
+	font-weight: 400;
+	line-height: 1;
+	color: var(--eel-ink);
+	transition: color .25s;
+}
+
+.eel .eel__sub {
+	margin-left: 4px;
+	font-size: 16px;
+	font-style: normal;
+	font-weight: 600;
+	color: var(--eel-muted);
+}
+
+.eel__text {
+	font-size: 14.5px;
+	line-height: 1.5;
+	color: var(--eel-muted);
+}
+
+/* Active: in from the left, the name green, the tile deeper. */
+.eel .eel__row.is-on {
+	padding-left: 10px;
+}
+
+.eel .is-on .eel__name {
+	color: var(--eel-active);
+}
+
+.eel .is-on .eel__tile {
+	background: color-mix(in srgb, var(--eel-c) calc(var(--eel-tint) * 2.2), transparent);
+}
+
+@media (max-width: 767px) {
+	.eel {
+		--eel-tile: 44px;
+	}
+
+	.eel .eel__row {
+		column-gap: 14px;
+	}
+}
+
+/* Narrow: the subtitle goes under the name, without its dash. */
+@container eel (max-width: 420px) {
+	.eel .eel__sub {
+		display: block;
+		margin: 4px 0 0;
+		font-size: 15px;
+	}
+
+	.eel__dash {
+		display: none;
+	}
+}
+
+/* ============================================================== mark === */
+
+.eam-wrap {
+	container: eam / inline-size;
+}
+
+.eam {
+	--eam-logo: 50%;
+	--eam-line: #9FB6C3;
+	--eam-active: #07864F;
+	--eam-ink: #0F3961;
+	--eam-c: #07864F;
+	--eam-dot: 12px;
+	--eam-border: #DDE2E6;
+
+	position: relative;
+	width: 100%;
+	max-width: 560px;
+	margin: 0 auto;
+	aspect-ratio: 560 / 520;
+}
+
+.eam *,
+.eam *::before,
+.eam *::after {
+	box-sizing: border-box;
+}
+
+.eam--glow {
+	background: radial-gradient(closest-side, #E4EDF1, #E4EDF100 100%);
+}
+
+.eam__rings {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	pointer-events: none;
+}
+
+.eam__rings circle {
+	fill: none;
+	stroke: var(--eam-border);
+	stroke-dasharray: 3 7;
+}
+
+.eam__rings circle + circle {
+	stroke-opacity: .6;
+}
+
+.eam .eam__logo,
+.eam .eam__logo:hover {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: var(--eam-logo);
+	max-width: none;
+	height: auto;
+	filter: drop-shadow(0 18px 30px #0F39612A);
+	opacity: 1;
+	transform: translate(-50%, -52%);
+}
+
+/* Lines and dots sit above the logo; tags above both. */
+.eam__lines {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	pointer-events: none;
+}
+
+.eam__line {
+	fill: none;
+	stroke: var(--eam-line);
+	stroke-width: 1.5;
+	stroke-dasharray: 4 4;
+	transition: stroke .25s, stroke-width .25s, opacity .25s;
+}
+
+.eam__dot {
+	position: absolute;
+	z-index: 2;
+	width: var(--eam-dot);
+	height: var(--eam-dot);
+	border: 2.5px solid var(--eam-active);
+	border-radius: 50%;
+	background: #fff;
+	transform: translate(-50%, -50%);
+	transition: transform .25s cubic-bezier(.2, .7, .2, 1.3), background-color .25s, opacity .25s;
+	pointer-events: none;
+}
+
+.eam .eam__tag {
+	position: absolute;
+	z-index: 3;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 9px 18px 7px;
+	border: 1px solid var(--eam-border);
+	border-radius: 999px;
+	background: #fff;
+	box-shadow: 0 6px 18px #0F396112;
+	color: var(--eam-ink);
+	font-family: "Bebas Neue", Impact, sans-serif;
+	font-size: 30px;
+	line-height: 1;
+	white-space: nowrap;
+	cursor: default;
+	transform: translateY(-50%);
+	transition: background-color .25s, border-color .25s, color .25s, opacity .25s;
+}
+
+.eam__tag--tl,
+.eam__tag--bl {
+	left: 0;
+}
+
+.eam__tag--tr,
+.eam__tag--br {
+	right: 0;
+}
+
+.eam .eam__tag:focus-visible {
+	outline: 3px solid #4DCF8D;
+	outline-offset: 3px;
+}
+
+.eam__ic {
+	display: grid;
+	place-items: center;
+	color: var(--eam-c);
+	transition: color .25s;
+}
+
+.eam__ic svg,
+.eam__ic i {
+	display: block;
+	width: 22px;
+	height: 22px;
+	font-size: 22px;
+	fill: currentColor;
+}
+
+.eam__ic svg path[fill="none"] {
+	fill: none;
+}
+
+/* Active: the tag goes solid, its line goes solid and heavier, its dot fills
+   and grows; everything else fades back. */
+.eam .eam__tag.is-on {
+	border-color: var(--eam-active);
+	background: var(--eam-active);
+	color: #fff;
+}
+
+.eam .is-on .eam__ic {
+	color: #fff;
+}
+
+.eam .eam__line.is-on {
+	stroke: var(--eam-active);
+	stroke-width: 2.5;
+	stroke-dasharray: none;
+}
+
+.eam .eam__dot.is-on {
+	background: var(--eam-active);
+	transform: translate(-50%, -50%) scale(1.5);
+}
+
+.eam.has-on [data-key]:not(.is-on) {
+	opacity: .35;
+}
+
+/* Small: smaller tags, so they never cover the mark or run off it. */
+@container eam (max-width: 420px) {
+	.eam .eam__tag {
+		gap: 5px;
+		padding: 6px 11px 4px;
+		font-size: 20px;
+	}
+
+	.eam__ic svg,
+	.eam__ic i {
+		width: 18px;
+		height: 18px;
+		font-size: 18px;
+	}
+
+	.eam {
+		--eam-dot: 10px;
+	}
+}
+
+@container eam (max-width: 300px) {
+	.eam .eam__tag {
+		padding: 5px 9px 3px;
+		font-size: 17px;
+	}
+
+	.eam__ic svg,
+	.eam__ic i {
+		width: 15px;
+		height: 15px;
+	}
+}
+
+/* ---------------------------------------------------------- entrance --- */
+
+@keyframes eam-logo {
+	from {
+		opacity: 0;
+		transform: translate(-50%, -52%) scale(.88);
+	}
+}
+
+@keyframes eam-in {
+	from { opacity: 0; }
+}
+
+@keyframes eam-draw-l {
+	from { clip-path: inset(0 100% 0 0); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes eam-draw-r {
+	from { clip-path: inset(0 0 0 100%); }
+	to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes eam-pop {
+	from {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(.3);
+	}
+}
+
+.eam--armed:not(.is-in) :is(.eam__logo, .eam__line, .eam__dot, .eam__tag) {
+	opacity: 0;
+}
+
+.eam--armed.is-in .eam__logo {
+	animation: eam-logo .5s cubic-bezier(.2, .7, .2, 1) backwards;
+}
+
+/* Each tag appears, its line draws in from it, then its dot pops. */
+.eam--armed.is-in .eam__tag {
+	animation: eam-in .3s ease-out backwards;
+	animation-delay: calc(320ms + var(--eam-i) * 120ms);
+}
+
+.eam--armed.is-in .eam__line--l {
+	animation: eam-draw-l .4s ease-out backwards;
+	animation-delay: calc(360ms + var(--eam-i) * 120ms);
+}
+
+.eam--armed.is-in .eam__line--r {
+	animation: eam-draw-r .4s ease-out backwards;
+	animation-delay: calc(360ms + var(--eam-i) * 120ms);
+}
+
+.eam--armed.is-in .eam__dot {
+	animation: eam-pop .3s cubic-bezier(.2, .8, .3, 1.4) backwards;
+	animation-delay: calc(720ms + var(--eam-i) * 120ms);
+}
+
+/* ------------------------------------------------------- less motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+	.eel .eel__row,
+	.eam .eam__dot {
+		transition: none;
+	}
+
+	.eam :is(.eam__logo, .eam__line, .eam__dot, .eam__tag) {
+		animation: none !important;
+	}
+
+	.eam--armed :is(.eam__logo, .eam__line, .eam__dot, .eam__tag) {
+		opacity: 1;
+	}
+}
