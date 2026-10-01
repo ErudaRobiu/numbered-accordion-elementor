@@ -132,6 +132,11 @@ untouched, and nothing needs re-saving.
 
 == Changelog ==
 
+= 2.72.0 =
+* Scroll Rail: new "Grid" option under How it travels. The same cards sit in
+  rows instead of crossing the screen, with Cards per row set per device
+  (3 / 2 / 1 by default). Existing rails are unchanged.
+
 = 2.71.2 =
 * Assessment Form: the pop-up's green buttons and dropdown arrow no longer
   disappear on sites using Elementor's lazy-loaded section backgrounds. The

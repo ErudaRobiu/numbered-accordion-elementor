@@ -677,7 +677,24 @@ class Scroll_Rail_Widget extends Widget_Base {
 				'options'     => array(
 					'pinned' => esc_html__( 'Pinned - the page holds still while the row crosses', 'numbered-accordion' ),
 					'flow'   => esc_html__( 'Flow - travels as the section crosses the screen, adds no height', 'numbered-accordion' ),
+					'grid'   => esc_html__( 'Grid - does not travel; the cards sit in rows', 'numbered-accordion' ),
 				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'grid_columns',
+			array(
+				'label'          => esc_html__( 'Cards per row', 'numbered-accordion' ),
+				'description'    => esc_html__( 'The cards share the width of the row equally, so Card width does not apply here; Card shape still does.', 'numbered-accordion' ),
+				'type'           => Controls_Manager::NUMBER,
+				'min'            => 1,
+				'max'            => 6,
+				'default'        => 3,
+				'tablet_default' => 2,
+				'mobile_default' => 1,
+				'selectors'      => array( '{{WRAPPER}} .erail' => '--erail-cols: {{VALUE}};' ),
+				'condition'      => array( 'mode' => 'grid' ),
 			)
 		);
 
@@ -983,7 +1000,16 @@ class Scroll_Rail_Widget extends Widget_Base {
 		$pace     = $this->slider( $settings, 'pace', 1, 0.4, 2.5 );
 		$pauseIn  = $this->slider( $settings, 'pause_in', 30, 0, 150 ) / 100;
 		$pauseOut = $this->slider( $settings, 'pause_out', 30, 0, 150 ) / 100;
-		$mode     = isset( $settings['mode'] ) && 'flow' === $settings['mode'] ? 'flow' : 'pinned';
+		$mode     = isset( $settings['mode'] ) && in_array( $settings['mode'], array( 'flow', 'grid' ), true ) ? $settings['mode'] : 'pinned';
+
+		// A grid does not travel, so there is nothing for a bar or a count to
+		// report, no end for a fade to soften and no row to pull out wide.
+		if ( 'grid' === $mode ) {
+			$bar   = false;
+			$tally = false;
+			$bleed = false;
+			$fade  = false;
+		}
 
 		$centre = isset( $settings['centre_on'] ) ? $settings['centre_on'] : 'auto';
 		$centre = in_array( $centre, array( 'auto', 'cards', 'section' ), true ) ? $centre : 'auto';

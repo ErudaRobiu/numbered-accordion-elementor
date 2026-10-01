@@ -485,6 +485,40 @@
 	}
 }
 
+/* ------------------------------------------------------------- grid --- */
+
+/*
+ * Grid: the same cards, laid out in rows instead of travelling. Nothing here
+ * is driven by the script, which leaves a grid alone, so the row stops being
+ * a scroller and the cards take their width from the column instead of from
+ * --erail-card. These selectors outrank the narrow-screen rules above, which
+ * is what keeps a phone from turning the grid back into a swipe row.
+ */
+.erail[data-erail-mode="grid"] .erail__viewport {
+	overflow: visible;
+	scroll-snap-type: none;
+	/* The render leaves the fade and the bleed off a grid; these hold even
+	   if the attributes are put back by hand. */
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	-webkit-mask-image: none;
+	mask-image: none;
+}
+
+.erail[data-erail-mode="grid"] .erail__track {
+	display: grid;
+	grid-template-columns: repeat(var(--erail-cols, 3), minmax(0, 1fr));
+	width: auto;
+	padding: 0;
+	transform: none !important;
+}
+
+.erail[data-erail-mode="grid"] .erail__card {
+	width: auto;
+	min-width: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.erail,
 	.erail[data-erail-ready] {
