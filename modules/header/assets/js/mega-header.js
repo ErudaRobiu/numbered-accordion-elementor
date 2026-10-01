@@ -558,8 +558,27 @@
 			inner.style.maxHeight = Math.max( 120, window.innerHeight - Math.max( 0, top ) ) + 'px';
 		}
 
+		// Overflow alone does not hold a page that smooth scrolling drives:
+		// Lenis moves it from script, so it is paused for as long as the
+		// drawer is open, and told to leave the drawer's own scrolling alone.
 		function lockPage( on ) {
+			var smooth = window.erudaSmoothScroll && window.erudaSmoothScroll.lenis;
+			var inner = root.querySelector( '.ehdr__nav-inner' );
+
 			document.documentElement.classList.toggle( 'ehdr-locked', !! on );
+
+			if ( inner ) {
+				inner.setAttribute( 'data-lenis-prevent', '' );
+			}
+
+			if ( smooth && typeof smooth.stop === 'function' ) {
+				if ( on ) {
+					smooth.stop();
+				} else {
+					smooth.start();
+				}
+			}
+
 			fitDrawer();
 		}
 

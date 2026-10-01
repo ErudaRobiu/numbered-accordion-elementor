@@ -132,6 +132,11 @@ untouched, and nothing needs re-saving.
 
 == Changelog ==
 
+= 2.73.1 =
+* Mega Header: the phone menu's scroll lock now also holds on sites using
+  Smooth Scroll, which moves the page from script; it pauses while the menu is
+  open.
+
 = 2.73.0 =
 * Mega Header: the page you are on is marked in the menu. Its panel link keeps
   the hover highlight, and the item it sits under keeps its underline.
