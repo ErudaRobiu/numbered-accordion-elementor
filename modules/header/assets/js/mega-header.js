@@ -538,8 +538,42 @@
 			);
 		}
 
+		// The drawer's room is the window under the bar; the page is locked
+		// behind it, so anything taller has to scroll inside the drawer.
+		function fitDrawer() {
+			var inner = root.querySelector( '.ehdr__nav-inner' );
+
+			if ( ! inner ) {
+				return;
+			}
+
+			if ( ! root.hasAttribute( DRAWER ) ) {
+				inner.style.maxHeight = '';
+
+				return;
+			}
+
+			var top = inner.getBoundingClientRect().top;
+
+			inner.style.maxHeight = Math.max( 120, window.innerHeight - Math.max( 0, top ) ) + 'px';
+		}
+
+		function lockPage( on ) {
+			document.documentElement.classList.toggle( 'ehdr-locked', !! on );
+			fitDrawer();
+		}
+
+		window.addEventListener( 'resize', function () {
+			if ( root.hasAttribute( DRAWER ) && ! isNarrow() ) {
+				closeDrawer();
+			}
+
+			fitDrawer();
+		} );
+
 		function closeDrawer() {
 			root.removeAttribute( DRAWER );
+			lockPage( false );
 
 			if ( burger ) {
 				burger.setAttribute( 'aria-expanded', 'false' );
@@ -562,6 +596,7 @@
 
 				root.setAttribute( DRAWER, '' );
 				burger.setAttribute( 'aria-expanded', 'true' );
+				lockPage( true );
 			} );
 		}
 

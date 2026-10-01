@@ -971,6 +971,43 @@
 	outline-offset: 2px;
 }
 
+/* The page being viewed: the hover look, held, without the slide. */
+.ehdr .ehdr__panel-link[aria-current="page"] {
+	background: var(--ehdr-panel-link-bg, rgba(0, 165, 93, 0.08));
+	color: var(--ehdr-ink-hover, #00a55d) !important;
+}
+
+.ehdr .ehdr__panel-link[aria-current="page"] svg {
+	opacity: 1;
+	transform: translateX(0);
+}
+
+/* The section the page belongs to keeps its underline. */
+.ehdr .ehdr__item--current > .ehdr__link {
+	color: var(--ehdr-ink-hover, #00a55d) !important;
+}
+
+.ehdr__item--current > .ehdr__link::after {
+	transform: scaleX(1);
+}
+
+/*
+ * The page behind an open drawer stays put. Locking the page takes away the
+ * only way a tall drawer used to be scrolled, so the drawer scrolls itself:
+ * the script sets its height to whatever is left under the bar.
+ */
+html.ehdr-locked,
+html.ehdr-locked body {
+	overflow: hidden !important;
+	overscroll-behavior: none;
+}
+
+.ehdr[data-ehdr-drawer] .ehdr__nav-inner {
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch;
+}
+
 .ehdr__panel-link small {
 	display: block;
 	margin-top: 3px;

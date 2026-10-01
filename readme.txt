@@ -132,6 +132,12 @@ untouched, and nothing needs re-saving.
 
 == Changelog ==
 
+= 2.73.0 =
+* Mega Header: the page you are on is marked in the menu. Its panel link keeps
+  the hover highlight, and the item it sits under keeps its underline.
+* Mega Header: the page behind an open phone menu no longer scrolls; a tall
+  menu scrolls inside itself instead.
+
 = 2.72.0 =
 * Scroll Rail: new "Grid" option under How it travels. The same cards sit in
   rows instead of crossing the screen, with Cards per row set per device
