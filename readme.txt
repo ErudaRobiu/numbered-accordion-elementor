@@ -132,6 +132,11 @@ untouched, and nothing needs re-saving.
 
 == Changelog ==
 
+= 2.74.0 =
+* Case Studies: a link ending #cases-<sector> (for example
+  /case-studies/#cases-foundries) opens the grid filtered to that sector and
+  scrolls to it.
+
 = 2.73.1 =
 * Mega Header: the phone menu's scroll lock now also holds on sites using
   Smooth Scroll, which moves the page from script; it pauses while the menu is
