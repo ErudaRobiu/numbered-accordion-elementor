@@ -943,6 +943,7 @@ is scrolling. Where that scrolling comes from is the whole choice:
 |---|---|
 | Pinned | extra page height, bought so the page can stand still while the row crosses — the default |
 | Flow | the section's own journey across the screen. Adds no height |
+| Grid | no travel at all: the same cards sit in rows, 3 / 2 / 1 per row by default (*Cards per row*, responsive). The script leaves it alone, and the progress bar, count, faded ends and bleed are switched off because there is no row for them to describe |
 
 **The height pinning buys is not a side effect; it is the mechanism.** A
 pinned section holds the page still while something inside it moves, and the

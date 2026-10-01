@@ -73,6 +73,11 @@
 
 		root.erudaRailReady = true;
 
+		// A grid is laid out by the stylesheet alone and never moves.
+		if ( 'grid' === root.getAttribute( 'data-erail-mode' ) ) {
+			return;
+		}
+
 		var stage = root.querySelector( '.erail__stage' );
 		var viewport = root.querySelector( '.erail__viewport' );
 		var track = root.querySelector( '.erail__track' );
