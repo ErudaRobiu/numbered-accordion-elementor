@@ -1712,6 +1712,62 @@ class Mega_Header_Widget extends Widget_Base {
 	}
 
 	/**
+	 * The path of the page being viewed, normalised to a trailing slash.
+	 *
+	 * @return string Empty when there is no request to read, as in the editor.
+	 */
+	private static function current_path() {
+		static $path = null;
+
+		if ( null !== $path ) {
+			return $path;
+		}
+
+		$uri  = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only compared, never printed.
+		$path = '' === $uri || false !== strpos( $uri, 'admin-ajax.php' ) ? '' : self::normalise_path( $uri );
+
+		return $path;
+	}
+
+	/**
+	 * A URL's path with a single trailing slash, or null when it points off the site.
+	 *
+	 * @param string $url URL or path.
+	 * @return string|null
+	 */
+	private static function normalise_path( $url ) {
+		$parts = function_exists( 'wp_parse_url' ) ? wp_parse_url( $url ) : parse_url( $url ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+
+		if ( ! is_array( $parts ) ) {
+			return null;
+		}
+
+		if ( ! empty( $parts['host'] ) && strtolower( $parts['host'] ) !== strtolower( self::home_host() ) ) {
+			return null;
+		}
+
+		$path = isset( $parts['path'] ) ? $parts['path'] : '/';
+
+		return '/' . trim( $path, '/' ) . ( '/' === $path || '' === trim( $path, '/' ) ? '' : '/' );
+	}
+
+	/**
+	 * Whether a link points at the page being viewed. Anchors and other sites never do.
+	 *
+	 * @param string $url Link URL.
+	 * @return bool
+	 */
+	private static function is_current( $url ) {
+		$here = self::current_path();
+
+		if ( '' === $here || '' === $url || '#' === $url[0] ) {
+			return false;
+		}
+
+		return self::normalise_path( $url ) === $here;
+	}
+
+	/**
 	 * Print href, target and rel for one of Elementor's URL controls.
 	 *
 	 * @param array $link Link control value.
@@ -1724,6 +1780,10 @@ class Mega_Header_Widget extends Widget_Base {
 		}
 
 		echo ' href="' . esc_url( $url ) . '"';
+
+		if ( self::is_current( $url ) ) {
+			echo ' aria-current="page"';
+		}
 
 		if ( ! empty( $link['is_external'] ) ) {
 			echo ' target="_blank"';
@@ -1985,7 +2045,15 @@ class Mega_Header_Widget extends Widget_Base {
 						// four short rows across the width of the header.
 						$drop = ( $hasPanel && $links && ! $aside );
 						?>
-						<li class="ehdr__item<?php echo $drop ? ' ehdr__item--drop' : ''; ?>">
+						<?php
+						// The item a visitor is inside of: its own page, or any page its panel lists.
+						$here = self::is_current( isset( $item['link']['url'] ) ? $item['link']['url'] : '' );
+
+						foreach ( $links as $row ) {
+							$here = $here || self::is_current( isset( $row['link']['url'] ) ? $row['link']['url'] : '' );
+						}
+						?>
+						<li class="ehdr__item<?php echo $drop ? ' ehdr__item--drop' : ''; ?><?php echo $here ? ' ehdr__item--current' : ''; ?>">
 							<a class="ehdr__link"<?php $this->link_attrs( isset( $item['link'] ) ? $item['link'] : array() ); ?>>
 								<?php $this->label( $label, $anim ); ?>
 								<?php
