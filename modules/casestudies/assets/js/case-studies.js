@@ -75,6 +75,30 @@
 				} );
 			} );
 		} );
+
+		// A link ending #cases-<sector> opens the grid on that sector, so a
+		// sector page can point at its own case rather than at all of them.
+		function fromHash() {
+			var match = /^#cases-([a-z0-9-]+)$/.exec( window.location.hash || '' );
+			var chip = match ? root.querySelector( '.ecs__chip[data-seg="' + match[1] + '"]' ) : null;
+
+			if ( ! chip ) {
+				return;
+			}
+
+			chip.click();
+
+			var smooth = window.erudaSmoothScroll && window.erudaSmoothScroll.lenis;
+
+			if ( smooth && typeof smooth.scrollTo === 'function' ) {
+				smooth.scrollTo( root, { offset: -120 } );
+			} else if ( root.scrollIntoView ) {
+				root.scrollIntoView( { block: 'start' } );
+			}
+		}
+
+		fromHash();
+		window.addEventListener( 'hashchange', fromHash );
 	}
 
 	/**
