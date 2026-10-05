@@ -49,6 +49,18 @@
 		// A pop-up lives at the end of <body>, outside every Elementor section:
 		// section styles (lazy-loaded backgrounds, transforms, overflow) must
 		// not reach it just because the widget was dropped into one.
+		// The corner booking button follows the form in the markup; it moves
+		// out for the same reason, or a transformed section would pin it to
+		// itself instead of the viewport.
+		var badge = ( dialog || root ).nextElementSibling;
+		if ( badge && badge.classList.contains( 'eas-badge' ) ) {
+			if ( document.body.querySelector( ':scope > .eas-badge' ) ) {
+				badge.parentNode.removeChild( badge ); // A second form on the page: one corner button is enough.
+			} else {
+				document.body.appendChild( badge );
+			}
+		}
+
 		if ( dialog && dialog.parentNode !== document.body ) {
 			document.body.appendChild( dialog );
 		}

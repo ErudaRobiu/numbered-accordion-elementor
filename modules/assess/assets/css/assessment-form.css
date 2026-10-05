@@ -673,7 +673,91 @@ html.eas-locked {
 	}
 }
 
+/* ======================================================= booking === */
+
+.eas .eas__sr,
+.eas-badge .eas__sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+.eas .eas__btn--book svg {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	margin-left: 8px;
+}
+
+/* Sits under the header (999) so the phone menu drawer covers it. */
+.eas-badge,
+.eas-badge:hover,
+.eas-badge:focus,
+.eas-badge:visited {
+	position: fixed;
+	right: 20px;
+	bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+	z-index: 990;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 48px;
+	padding: 12px 20px 12px 16px;
+	border: 1px solid #FFFFFF2E;
+	border-radius: 999px;
+	background-color: #07864F;
+	background-image: linear-gradient(135deg, #07864F, #0A6B55);
+	box-shadow: 0 10px 28px #0B1D3047;
+	color: #fff;
+	font: 600 14px/1.2 "Plus Jakarta Sans", system-ui, sans-serif;
+	letter-spacing: .01em;
+	text-decoration: none;
+	transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.eas-badge:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 14px 32px #0B1D3059;
+}
+
+.eas-badge:focus-visible {
+	outline: 3px solid #4DCF8D;
+	outline-offset: 3px;
+}
+
+.eas-badge svg {
+	flex: none;
+	width: 20px;
+	height: 20px;
+}
+
+@media (max-width: 767px) {
+	.eas-badge,
+	.eas-badge:hover,
+	.eas-badge:focus,
+	.eas-badge:visited {
+		right: 14px;
+		bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+		min-height: 44px;
+		padding: 10px 16px 10px 13px;
+		font-size: 13px;
+	}
+}
+
+@media print {
+	.eas-badge {
+		display: none !important;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
+	.eas-badge {
+		transition: none;
+	}
+
 	.eas-dialog[open],
 	.eas__step,
 	.eas__result {

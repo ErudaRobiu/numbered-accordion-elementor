@@ -173,7 +173,7 @@ class Assessment_Form_Widget extends Widget_Base {
 			array(
 				'label'   => esc_html__( 'Team email', 'numbered-accordion' ),
 				'type'    => Controls_Manager::TEXT,
-				'default' => 'solutions@thermstar.com',
+				'default' => 'sales@thermstar.com',
 			)
 		);
 
@@ -187,6 +187,50 @@ class Assessment_Form_Widget extends Widget_Base {
 				'max'         => 5,
 				'step'        => 0.05,
 				'description' => esc_html__( 'Shown to the visitor with the result.', 'numbered-accordion' ),
+			)
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section( 'section_booking', array( 'label' => esc_html__( 'Booking', 'numbered-accordion' ) ) );
+
+		$this->add_control(
+			'booking_url',
+			array(
+				'label'       => esc_html__( 'Booking page', 'numbered-accordion' ),
+				'type'        => Controls_Manager::TEXT,
+				'default'     => Assess_Module::BOOKING_URL,
+				'description' => esc_html__( 'Microsoft Bookings will not open inside another site, so every booking link opens it in a new tab. Leave empty to hide them.', 'numbered-accordion' ),
+			)
+		);
+
+		$this->add_control(
+			'booking_label',
+			array(
+				'label'   => esc_html__( 'Button after the estimate', 'numbered-accordion' ),
+				'type'    => Controls_Manager::TEXT,
+				'default' => esc_html__( 'Schedule your personalized analysis', 'numbered-accordion' ),
+			)
+		);
+
+		$this->add_control(
+			'badge',
+			array(
+				'label'        => esc_html__( 'Booking button in the corner', 'numbered-accordion' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'return_value' => 'yes',
+				'description'  => esc_html__( 'A small button fixed to the lower right of every page this widget is on.', 'numbered-accordion' ),
+			)
+		);
+
+		$this->add_control(
+			'badge_label',
+			array(
+				'label'     => esc_html__( 'Corner button text', 'numbered-accordion' ),
+				'type'      => Controls_Manager::TEXT,
+				'default'   => esc_html__( 'Schedule time with us', 'numbered-accordion' ),
+				'condition' => array( 'badge' => 'yes' ),
 			)
 		);
 
@@ -285,6 +329,9 @@ class Assessment_Form_Widget extends Widget_Base {
 		$title = trim( (string) ( $s['title'] ?? '' ) );
 		$price = is_numeric( $s['price'] ?? null ) ? (float) $s['price'] : 0.9;
 		$edit  = class_exists( '\Elementor\Plugin' ) && \Elementor\Plugin::$instance->editor->is_edit_mode();
+		$book  = trim( (string) ( $s['booking_url'] ?? '' ) );
+		$book_label = trim( (string) ( $s['booking_label'] ?? '' ) );
+		$book_label = '' !== $book_label ? $book_label : __( 'Schedule your personalized analysis', 'numbered-accordion' );
 
 		$attrs = sprintf(
 			' data-mode="%s" data-endpoint="%s" data-doc="%d" data-el="%s" data-trigger="%s" data-price="%s"',
@@ -397,7 +444,11 @@ class Assessment_Form_Widget extends Widget_Base {
 				<div class="eas__next">
 					<strong><?php esc_html_e( 'What happens next', 'numbered-accordion' ); ?></strong>
 					<p>
-						<?php esc_html_e( 'A ThermStar engineer will contact you to arrange the free Thermal Energy Opportunity Screen, which confirms what your exhaust and heating demand can really support.', 'numbered-accordion' ); ?>
+						<?php if ( $book ) : ?>
+							<?php esc_html_e( 'Book a time with a ThermStar engineer for the free Thermal Energy Opportunity Screen, which confirms what your exhaust and heating demand can really support. If you would rather wait, we will contact you.', 'numbered-accordion' ); ?>
+						<?php else : ?>
+							<?php esc_html_e( 'A ThermStar engineer will contact you to arrange the free Thermal Energy Opportunity Screen, which confirms what your exhaust and heating demand can really support.', 'numbered-accordion' ); ?>
+						<?php endif; ?>
 						<?php if ( 'save' !== ( $s['delivery'] ?? 'send' ) ) : ?>
 							<?php esc_html_e( 'A copy of this estimate is on its way to your inbox.', 'numbered-accordion' ); ?>
 						<?php endif; ?>
@@ -405,9 +456,13 @@ class Assessment_Form_Widget extends Widget_Base {
 				</div>
 				<div class="eas__nav">
 					<?php if ( 'modal' === $mode ) : ?>
-						<button type="button" class="eas__btn" data-eas-close><?php esc_html_e( 'Done', 'numbered-accordion' ); ?></button>
+						<button type="button" class="eas__btn<?php echo $book ? ' eas__btn--ghost' : ''; ?>" data-eas-close><?php esc_html_e( 'Done', 'numbered-accordion' ); ?></button>
 					<?php endif; ?>
-					<a class="eas__btn eas__btn--ghost" href="tel:+18336677359"><?php esc_html_e( 'Call 833 667 7359', 'numbered-accordion' ); ?></a>
+					<?php if ( $book ) : ?>
+						<a class="eas__btn eas__btn--book" href="<?php echo esc_url( $book ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $book_label ); ?><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="eas__sr"><?php esc_html_e( '(opens in a new tab)', 'numbered-accordion' ); ?></span></a>
+					<?php else : ?>
+						<a class="eas__btn eas__btn--ghost" href="tel:+18336677359"><?php esc_html_e( 'Call 833 667 7359', 'numbered-accordion' ); ?></a>
+					<?php endif; ?>
 				</div>
 			</section>
 		</div>
@@ -415,5 +470,28 @@ class Assessment_Form_Widget extends Widget_Base {
 		if ( 'modal' === $mode ) {
 			echo '</dialog>';
 		}
+
+		if ( $book && 'yes' === ( $s['badge'] ?? '' ) && ! $edit ) {
+			$this->badge( $book, trim( (string) ( $s['badge_label'] ?? '' ) ) );
+		}
+	}
+
+	/**
+	 * The booking button fixed to the corner of the page, as the old site's
+	 * Calendly badge was. The script moves it to <body> so no transformed
+	 * Elementor section can pin it to itself instead of the viewport.
+	 *
+	 * @param string $url   Booking page.
+	 * @param string $label Button text.
+	 */
+	private function badge( $url, $label ) {
+		$label = '' !== $label ? $label : __( 'Schedule time with us', 'numbered-accordion' );
+		?>
+		<a class="eas-badge" href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener">
+			<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 10h17M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+			<span><?php echo esc_html( $label ); ?></span>
+			<span class="eas__sr"><?php esc_html_e( '(opens in a new tab)', 'numbered-accordion' ); ?></span>
+		</a>
+		<?php
 	}
 }

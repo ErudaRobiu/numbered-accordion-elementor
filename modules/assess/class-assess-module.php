@@ -24,6 +24,7 @@ final class Assess_Module extends Elementor_Module {
 	const REST_NS       = 'eruda/v1';
 	const REST_ROUTE    = '/assessment';
 	const WIDGET        = 'eas-assessment-form';
+	const BOOKING_URL   = 'https://bookings.cloud.microsoft/book/IntroductoryCall@thermstar.com/';
 
 	/**
 	 * Requests one visitor may send in an hour.
@@ -231,7 +232,7 @@ final class Assess_Module extends Elementor_Module {
 			$mail['visitor'] = wp_mail(
 				$d['email'],
 				'Your heat recovery estimate from ThermStar',
-				self::visitor_email( $d, $estimate ),
+				self::visitor_email( $d, $estimate, self::booking_url( $settings ) ),
 				array( 'Reply-To: ThermStar <' . $to . '>' )
 			);
 		}
@@ -246,30 +247,49 @@ final class Assess_Module extends Elementor_Module {
 	/**
 	 * The note the visitor gets.
 	 *
-	 * @param array $d Clean data.
-	 * @param array $e Estimate.
+	 * @param array  $d    Clean data.
+	 * @param array  $e    Estimate.
+	 * @param string $book Booking page, or empty.
 	 * @return string
 	 */
-	public static function visitor_email( $d, $e ) {
+	public static function visitor_email( $d, $e, $book = '' ) {
 		$f = array( Assess_Content::class, 'fmt' );
 
-		return implode(
-			"\n",
-			array(
-				'Hi ' . $d['first'] . ',',
-				'',
-				'Thank you for your request. Based on what you entered, a ThermStar system could recover an indicative:',
-				'',
-				'  $' . $f( $e['dollars'][0] ) . ' to $' . $f( $e['dollars'][1] ) . ' a year in fuel, at $' . number_format( $e['price'], 2 ) . ' per therm',
-				'  ' . $f( $e['mmbtu'][0] ) . ' to ' . $f( $e['mmbtu'][1] ) . ' MMBtu of heat a year',
-				'  ' . $f( $e['tco2'][0] ) . ' to ' . $f( $e['tco2'][1] ) . ' tonnes of CO2 avoided a year',
-				'',
-				'This is an estimate from four numbers. The free Thermal Energy Opportunity Screen confirms what your exhaust and your heating demand can really support. A member of the team will be in touch to arrange it.',
-				'',
-				'ThermStar',
-				'solutions@thermstar.com · 833 667 7359',
-			)
+		$lines = array(
+			'Hi ' . $d['first'] . ',',
+			'',
+			'Thank you for your request. Based on what you entered, a ThermStar system could recover an indicative:',
+			'',
+			'  $' . $f( $e['dollars'][0] ) . ' to $' . $f( $e['dollars'][1] ) . ' a year in fuel, at $' . number_format( $e['price'], 2 ) . ' per therm',
+			'  ' . $f( $e['mmbtu'][0] ) . ' to ' . $f( $e['mmbtu'][1] ) . ' MMBtu of heat a year',
+			'  ' . $f( $e['tco2'][0] ) . ' to ' . $f( $e['tco2'][1] ) . ' tonnes of CO2 avoided a year',
+			'',
+			'This is an estimate from four numbers. The free Thermal Energy Opportunity Screen confirms what your exhaust and your heating demand can really support. A member of the team will be in touch to arrange it.',
+			'',
 		);
+
+		if ( '' !== $book ) {
+			array_push( $lines, 'Prefer to pick a time now? Schedule your personalized analysis:', $book, '' );
+		}
+
+		array_push( $lines, 'ThermStar', 'solutions@thermstar.com · 833 667 7359' );
+
+		return implode( "\n", $lines );
+	}
+
+	/**
+	 * The booking page the widget links to. A widget saved before the
+	 * setting existed has no key and gets the default; an emptied one gets none.
+	 *
+	 * @param array $settings Saved widget settings.
+	 * @return string
+	 */
+	public static function booking_url( $settings ) {
+		if ( ! array_key_exists( 'booking_url', (array) $settings ) ) {
+			return self::BOOKING_URL;
+		}
+
+		return esc_url_raw( trim( (string) $settings['booking_url'] ) );
 	}
 
 	/**
