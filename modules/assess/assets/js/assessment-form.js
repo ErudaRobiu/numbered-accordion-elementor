@@ -58,6 +58,15 @@
 				badge.parentNode.removeChild( badge ); // A second form on the page: one corner button is enough.
 			} else {
 				document.body.appendChild( badge );
+				// Held back until the hero is mostly scrolled past: heroes carry
+				// their own call to action in that corner. Without script it
+				// simply shows from the start.
+				badge.setAttribute( 'data-wait', '' );
+				var reveal = function () {
+					badge.classList.toggle( 'is-shown', window.scrollY > window.innerHeight * 0.6 );
+				};
+				window.addEventListener( 'scroll', reveal, { passive: true } );
+				reveal();
 			}
 		}
 

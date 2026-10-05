@@ -715,7 +715,13 @@ html.eas-locked {
 	font: 600 14px/1.2 "Plus Jakarta Sans", system-ui, sans-serif;
 	letter-spacing: .01em;
 	text-decoration: none;
-	transition: transform .2s ease, box-shadow .2s ease;
+	transition: transform .2s ease, box-shadow .2s ease, opacity .3s ease, visibility .3s;
+}
+
+.eas-badge[data-wait]:not(.is-shown) {
+	visibility: hidden;
+	opacity: 0;
+	transform: translateY(12px);
 }
 
 .eas-badge:hover {
