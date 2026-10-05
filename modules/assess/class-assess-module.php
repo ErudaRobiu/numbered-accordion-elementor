@@ -251,11 +251,11 @@ final class Assess_Module extends Elementor_Module {
 	 * @return bool
 	 */
 	private static function send_visitor_email( $d, $e, $settings, $team ) {
-		$logo  = get_theme_mod( 'custom_logo' );
+		$logo  = (int) ( $settings['email_logo']['id'] ?? 0 );
 		$links = array(
 			'book'  => self::booking_url( $settings ),
 			'again' => home_url( '/#assessment' ),
-			'logo'  => $logo ? (string) wp_get_attachment_image_url( $logo, 'medium' ) : '',
+			'logo'  => $logo ? (string) wp_get_attachment_image_url( $logo, 'large' ) : '',
 		);
 		$text  = Assess_Email::text( $d, $e, $links );
 		$alt   = function ( $mailer ) use ( $text ) {
