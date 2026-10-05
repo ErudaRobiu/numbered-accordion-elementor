@@ -187,7 +187,12 @@ final class Assess_Module extends Elementor_Module {
 		$key  = 'eas_rate_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		$sent = (int) get_transient( $key );
 
-		if ( $sent >= self::PER_HOUR ) {
+		// The site's own editors test the form over and over; the hourly
+		// limit is for the public. (WordPress only knows who they are when
+		// the page sent its REST nonce, which it does for logged-in users.)
+		$staff = current_user_can( 'edit_posts' );
+
+		if ( ! $staff && $sent >= self::PER_HOUR ) {
 			return new \WP_REST_Response( array( 'ok' => false, 'message' => 'Too many requests from this connection. Please email solutions@thermstar.com or call 833 667 7359.' ), 429 );
 		}
 
@@ -217,7 +222,9 @@ final class Assess_Module extends Elementor_Module {
 			update_post_meta( $post_id, '_eas_summary', $summary );
 		}
 
-		set_transient( $key, $sent + 1, HOUR_IN_SECONDS );
+		if ( ! $staff ) {
+			set_transient( $key, $sent + 1, HOUR_IN_SECONDS );
+		}
 
 		$mode = ( $settings['delivery'] ?? 'send' ) === 'save' ? 'save' : 'send';
 		$to   = sanitize_email( (string) ( $settings['recipient'] ?? '' ) );

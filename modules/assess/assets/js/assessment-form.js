@@ -314,7 +314,7 @@
 
 			fetch( root.getAttribute( 'data-endpoint' ), {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: root.getAttribute( 'data-nonce' ) ? { 'Content-Type': 'application/json', 'X-WP-Nonce': root.getAttribute( 'data-nonce' ) } : { 'Content-Type': 'application/json' },
 				body: JSON.stringify( payload() ),
 				credentials: 'same-origin',
 			} )

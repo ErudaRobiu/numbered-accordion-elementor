@@ -374,6 +374,13 @@ class Assessment_Form_Widget extends Widget_Base {
 			esc_attr( (string) $price )
 		);
 
+		// Logged-in users send a REST nonce so the route knows who they are
+		// (editors skip the hourly limit). Never for visitors: pages served
+		// to them may be cached, and a cached nonce goes stale.
+		if ( is_user_logged_in() ) {
+			$attrs .= sprintf( ' data-nonce="%s"', esc_attr( wp_create_nonce( 'wp_rest' ) ) );
+		}
+
 		if ( 'modal' === $mode && $edit ) {
 			echo '<div class="eas-editor-note">' . esc_html__( 'Assessment Form pop-up: hidden on the page, opened by any Request an Assessment button. Switch "Show as" to "On the page" to preview it here.', 'numbered-accordion' ) . '</div>';
 			return;
