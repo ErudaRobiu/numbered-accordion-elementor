@@ -673,6 +673,11 @@ html.eas-locked body {
 	margin-bottom: 18px;
 }
 
+.eas .eas__hello [data-r="name"] {
+	color: var(--eas-green);
+	font-weight: 700;
+}
+
 .eas .eas__save strong,
 .eas .eas__save span[data-r] {
 	font-variant-numeric: tabular-nums;
