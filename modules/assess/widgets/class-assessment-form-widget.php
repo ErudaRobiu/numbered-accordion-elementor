@@ -454,28 +454,26 @@ class Assessment_Form_Widget extends Widget_Base {
 			</form>
 
 			<section class="eas__result" hidden aria-labelledby="<?php echo esc_attr( $uid ); ?>-r" tabindex="-1">
-				<p class="eas__eyebrow"><?php esc_html_e( 'Your indicative estimate', 'numbered-accordion' ); ?></p>
-				<h3 class="eas__result-title" id="<?php echo esc_attr( $uid ); ?>-r"><span data-r="dollars"></span> <small><?php esc_html_e( 'a year in fuel', 'numbered-accordion' ); ?></small></h3>
-				<dl class="eas__figures">
-					<div><dt><?php esc_html_e( 'Heat recovered', 'numbered-accordion' ); ?></dt><dd data-r="mmbtu"></dd></div>
-					<div><dt><?php esc_html_e( 'CO2 avoided', 'numbered-accordion' ); ?></dt><dd data-r="tco2"></dd></div>
-					<div><dt><?php esc_html_e( 'Operating hours', 'numbered-accordion' ); ?></dt><dd data-r="hours"></dd></div>
-				</dl>
-				<p class="eas__basis" data-r="basis"></p>
-				<p class="eas__basis eas__basis--note"><?php echo esc_html( Assess_Content::WEATHER_NOTE ); ?></p>
+				<p class="eas__eyebrow"><?php esc_html_e( 'Your personalized website estimate', 'numbered-accordion' ); ?></p>
+				<p class="eas__hello"><?php esc_html_e( 'Hello', 'numbered-accordion' ); ?> <span data-r="name"></span>, <?php esc_html_e( 'thank you for using our waste heat recovery savings calculator! With the ThermStar System™ you could save:', 'numbered-accordion' ); ?></p>
+				<h3 class="eas__result-title" id="<?php echo esc_attr( $uid ); ?>-r"><span data-r="therms"></span> <small><?php esc_html_e( 'Therms per year', 'numbered-accordion' ); ?></small></h3>
+				<p class="eas__save"><?php esc_html_e( 'If you’re paying a typical', 'numbered-accordion' ); ?> <span data-r="price"></span> <?php esc_html_e( 'per Therm for natural gas,', 'numbered-accordion' ); ?> <strong><?php esc_html_e( 'you could be saving', 'numbered-accordion' ); ?> <span data-r="dollars"></span> <?php esc_html_e( 'per year.', 'numbered-accordion' ); ?></strong></p>
 				<div class="eas__next">
-					<strong><?php esc_html_e( 'What happens next', 'numbered-accordion' ); ?></strong>
-					<p>
-						<?php if ( $book ) : ?>
-							<?php esc_html_e( 'Book a time with a ThermStar engineer for the free Thermal Energy Opportunity Screen, which confirms what your exhaust and heating demand can really support. If you would rather wait, we will contact you.', 'numbered-accordion' ); ?>
-						<?php else : ?>
-							<?php esc_html_e( 'A ThermStar engineer will contact you to arrange the free Thermal Energy Opportunity Screen, which confirms what your exhaust and heating demand can really support.', 'numbered-accordion' ); ?>
-						<?php endif; ?>
+					<p><strong><?php esc_html_e( 'The ThermStar System™ recovers thermal energy from particulate-laden exhaust air streams, converting your wasted heat into clean, usable energy.', 'numbered-accordion' ); ?></strong> <?php esc_html_e( 'Dirty Air. Clean Energy.', 'numbered-accordion' ); ?></p>
+					<p><?php esc_html_e( 'Your estimate is just the beginning of a process where we evaluate your heat recovery opportunities and can share more ways to save with waste heat recovery across an individual facility or broader site network.', 'numbered-accordion' ); ?>
 						<?php if ( 'save' !== ( $s['delivery'] ?? 'send' ) ) : ?>
-							<?php esc_html_e( 'A copy of this estimate is on its way to your inbox.', 'numbered-accordion' ); ?>
+							<?php esc_html_e( 'A copy is on its way to your inbox.', 'numbered-accordion' ); ?>
 						<?php endif; ?>
 					</p>
 				</div>
+				<details class="eas__inputs">
+					<summary><?php esc_html_e( 'The inputs and contact details you submitted', 'numbered-accordion' ); ?></summary>
+					<table class="eas__table"><tbody data-r="rows"></tbody></table>
+					<button type="button" class="eas__again" data-eas-again><?php esc_html_e( 'Need another estimate? Use the savings calculator again', 'numbered-accordion' ); ?></button>
+				</details>
+				<p class="eas__basis" data-r="basis"></p>
+				<p class="eas__basis eas__basis--note"><?php echo esc_html( Assess_Content::WEATHER_NOTE ); ?></p>
+				<p class="eas__ready"><?php esc_html_e( 'Ready to explore your savings with the ThermStar System™?', 'numbered-accordion' ); ?></p>
 				<div class="eas__nav">
 					<?php if ( 'modal' === $mode ) : ?>
 						<button type="button" class="eas__btn<?php echo $book ? ' eas__btn--ghost' : ''; ?>" data-eas-close><?php esc_html_e( 'Done', 'numbered-accordion' ); ?></button>

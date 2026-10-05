@@ -163,7 +163,7 @@ final class Assess_Content {
 	 *
 	 * @param array $in    temp (°F), cfm, hours (per day), days (per week), uses (keys).
 	 * @param float $price Gas price in dollars per therm.
-	 * @return array{mmbtu: int[], dollars: int[], tco2: float[], hours: int, price: float, share: int[]}
+	 * @return array{mmbtu: int[], therms: int[], dollars: int[], tco2: float[], hours: int, price: float, share: int[]}
 	 */
 	public static function estimate( $in, $price ) {
 		$temp  = self::clamp( $in['temp'] ?? null, self::TEMP );
@@ -177,13 +177,14 @@ final class Assess_Content {
 		$per_hour = 1.08 * $cfm * max( 0, $temp - self::SINK_F );
 		$year     = $hours * $days * 52;
 
-		$out = array( 'mmbtu' => array(), 'dollars' => array(), 'tco2' => array() );
+		$out = array( 'mmbtu' => array(), 'therms' => array(), 'dollars' => array(), 'tco2' => array() );
 
 		foreach ( $range as $share ) {
 			$mmbtu  = $per_hour * $share * $year / 1000000;
 			$therms = $mmbtu * 10 / self::BURNER;
 
 			$out['mmbtu'][]   = (int) self::round2( $mmbtu );
+			$out['therms'][]  = (int) self::round2( $therms );
 			$out['dollars'][] = (int) self::round2( $therms * $price );
 			$out['tco2'][]    = round( $therms * self::KG_CO2_THERM / 1000, 1 );
 		}
@@ -271,6 +272,34 @@ final class Assess_Content {
 		}
 
 		return array( 'data' => $data, 'errors' => $errors );
+	}
+
+	/**
+	 * What the visitor sent, as labelled rows: the table under their estimate
+	 * on screen and in their email, in ThermStar's order and wording.
+	 *
+	 * @param array $d Clean data.
+	 * @return array<int, string[]> Label, value.
+	 */
+	public static function rows( $d ) {
+		$names = function ( $keys, $all ) {
+			return implode( ', ', array_map( function ( $k ) use ( $all ) { return $all[ $k ]; }, (array) $keys ) );
+		};
+
+		return array(
+			array( 'Exhaust Air Temperature (°F)', self::fmt( $d['temp'] ) . '°F' ),
+			array( 'Exhaust Airflow (CFM)', self::fmt( $d['cfm'] ) ),
+			array( 'Hours of Operation per Day', self::fmt( $d['hours'] ) ),
+			array( 'Days of Operation per Week', self::fmt( $d['days'] ) ),
+			array( 'Heat Usage Type', $names( $d['uses'], self::uses() ) ),
+			array( 'Industry Type', self::industries()[ $d['industry'] ] ?? '' ),
+			array( 'What’s in the Air?', $names( $d['contaminants'], self::contaminants() ) ),
+			array( 'Name', trim( $d['first'] . ' ' . $d['last'] ) ),
+			array( 'Company', $d['company'] ),
+			array( 'Email', $d['email'] ),
+			array( 'Site Location', $d['location'] ),
+			array( 'Job Title', $d['role'] ),
+		);
 	}
 
 	/**

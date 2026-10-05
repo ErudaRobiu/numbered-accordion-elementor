@@ -3440,6 +3440,26 @@ check( 'clean: required fields are reported, location among them', array( 'first
 $as = Assess_Content::summary( $ac['data'], $ae );
 check( 'the team email carries the estimate and the answers', true, false !== strpos( $as, 'Industry: Foundry' ) && false !== strpos( $as, '$19,000–$27,000/yr at $1.00/therm' ) && false !== strpos( $as, '(50–70% of the exhaust heat recovered)' ) && false !== strpos( $as, Assess_Content::WEATHER_NOTE ) && false !== strpos( $as, 'In the exhaust: Lint' ) );
 
+// The visitor's email: ThermStar's own copy with their numbers.
+require_once dirname( __DIR__ ) . '/modules/assess/class-assess-email.php';
+use ErudaToolkit\Modules\Assess\Assess_Email;
+
+check( 'estimate: therms of fuel displaced', array( 19000, 27000 ), $ae['therms'] );
+$em_data = array_merge( $ac['data'], array( 'first' => 'Tom', 'last' => 'Ray', 'company' => 'Norrel <Inc>', 'uses' => array( 'process-air' ), 'contaminants' => array( 'soot', 'grease' ), 'industry' => 'industrial-laundry', 'location' => 'Toronto, ON', 'role' => '' ) );
+$em_rows = Assess_Content::rows( $em_data );
+check( 'the inputs table, in ThermStar\'s order', array( 'Exhaust Air Temperature (°F)', 'Exhaust Airflow (CFM)', 'Hours of Operation per Day', 'Days of Operation per Week', 'Heat Usage Type', 'Industry Type', 'What’s in the Air?', 'Name', 'Company', 'Email', 'Site Location', 'Job Title' ), array_column( $em_rows, 0 ) );
+check( 'the inputs table reads like people write', array( 'Process air', 'Industrial laundry', 'Soot, Grease', 'Tom Ray' ), array( $em_rows[4][1], $em_rows[5][1], $em_rows[6][1], $em_rows[7][1] ) );
+$em_links = array( 'book' => 'https://book.example/x', 'again' => 'https://site.example/#assessment' );
+$em_text  = Assess_Email::text( $em_data, $ae, $em_links );
+$em_html  = Assess_Email::html( $em_data, $ae, $em_links );
+check( 'email text: greeting, therms and savings', true, false !== strpos( $em_text, 'Hello Tom,' ) && false !== strpos( $em_text, '19,000 to 27,000 Therms per year' ) && false !== strpos( $em_text, 'a typical $1.00 per Therm for natural gas, you could be saving $19,000 to $27,000 per year.' ) );
+check( 'email text: booking and calculator links', true, false !== strpos( $em_text, 'SCHEDULE YOUR PERSONALIZED ANALYSIS: https://book.example/x' ) && false !== strpos( $em_text, 'https://site.example/#assessment' ) );
+check( 'email html: the copy, the button and the table', true, false !== strpos( $em_html, 'Tom, with the ThermStar System™ you could save:' ) && false !== strpos( $em_html, 'href="https://book.example/x"' ) && false !== strpos( $em_html, 'Click here to use the savings calculator again.' ) && false !== strpos( $em_html, 'Toronto, ON' ) );
+check( 'email html: what the visitor typed is escaped', array( true, false ), array( false !== strpos( $em_html, 'Norrel &lt;Inc&gt;' ), false !== strpos( $em_html, 'Norrel <Inc>' ) ) );
+check( 'email html: the weather note goes too', true, false !== strpos( $em_html, Assess_Content::WEATHER_NOTE ) );
+check( 'email: no booking page, no button', false, strpos( Assess_Email::html( $em_data, $ae, array() ), 'SCHEDULE YOUR PERSONALIZED ANALYSIS' ) );
+check( 'email html: empty answers show a dash', true, false !== strpos( $em_html, 'Job Title</td><td style="padding:10px 14px;border-top:1px solid #DDE2E6;background:#FFFFFF;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0F3961;font-weight:bold;">&mdash;' ) );
+
 /* ------------------------------------------------------------- report --- */
 
 

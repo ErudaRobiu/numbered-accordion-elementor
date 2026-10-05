@@ -63,6 +63,7 @@ final class Assess_Module extends Elementor_Module {
 	 */
 	public function boot() {
 		require_once ERUDA_PATH . 'modules/assess/class-assess-content.php';
+		require_once ERUDA_PATH . 'modules/assess/class-assess-email.php';
 
 		add_action( 'init', array( $this, 'register_post_type' ) );
 		add_action( 'rest_api_init', array( $this, 'register_route' ) );
@@ -229,52 +230,48 @@ final class Assess_Module extends Elementor_Module {
 				$summary . "\n\nSaved in WordPress under Assessments.",
 				array( 'Reply-To: ' . $d['first'] . ' ' . $d['last'] . ' <' . $d['email'] . '>' )
 			);
-			$mail['visitor'] = wp_mail(
-				$d['email'],
-				'Your heat recovery estimate from ThermStar',
-				self::visitor_email( $d, $estimate, self::booking_url( $settings ) ),
-				array( 'Reply-To: ThermStar <' . $to . '>' )
-			);
+			$mail['visitor'] = self::send_visitor_email( $d, $estimate, $settings, $to );
 		}
 
 		if ( $post_id && ! is_wp_error( $post_id ) ) {
 			update_post_meta( $post_id, '_eas_mail', array( 'mode' => $mode, 'to' => $to ) + $mail );
 		}
 
-		return new \WP_REST_Response( array( 'ok' => true, 'estimate' => $estimate ), 200 );
+		return new \WP_REST_Response( array( 'ok' => true, 'estimate' => $estimate, 'rows' => Assess_Content::rows( $d ) ), 200 );
 	}
 
 	/**
-	 * The note the visitor gets.
+	 * Email the visitor their estimate: ThermStar's HTML letter, with the
+	 * plain text version alongside for mail apps that will not show HTML.
 	 *
-	 * @param array  $d    Clean data.
-	 * @param array  $e    Estimate.
-	 * @param string $book Booking page, or empty.
-	 * @return string
+	 * @param array  $d        Clean data.
+	 * @param array  $e        Estimate.
+	 * @param array  $settings Saved widget settings.
+	 * @param string $team     Team address, for replies.
+	 * @return bool
 	 */
-	public static function visitor_email( $d, $e, $book = '' ) {
-		$f = array( Assess_Content::class, 'fmt' );
-
-		$lines = array(
-			'Hi ' . $d['first'] . ',',
-			'',
-			'Thank you for your request. Based on what you entered, a ThermStar system could recover an indicative:',
-			'',
-			'  $' . $f( $e['dollars'][0] ) . ' to $' . $f( $e['dollars'][1] ) . ' a year in fuel, at $' . number_format( $e['price'], 2 ) . ' per therm',
-			'  ' . $f( $e['mmbtu'][0] ) . ' to ' . $f( $e['mmbtu'][1] ) . ' MMBtu of heat a year',
-			'  ' . $f( $e['tco2'][0] ) . ' to ' . $f( $e['tco2'][1] ) . ' tonnes of CO2 avoided a year',
-			'',
-			'This is an estimate from four numbers. The free Thermal Energy Opportunity Screen confirms what your exhaust and your heating demand can really support. A member of the team will be in touch to arrange it.',
-			'',
+	private static function send_visitor_email( $d, $e, $settings, $team ) {
+		$logo  = get_theme_mod( 'custom_logo' );
+		$links = array(
+			'book'  => self::booking_url( $settings ),
+			'again' => home_url( '/#assessment' ),
+			'logo'  => $logo ? (string) wp_get_attachment_image_url( $logo, 'medium' ) : '',
 		);
+		$text  = Assess_Email::text( $d, $e, $links );
+		$alt   = function ( $mailer ) use ( $text ) {
+			$mailer->AltBody = $text; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		};
 
-		if ( '' !== $book ) {
-			array_push( $lines, 'Prefer to pick a time now? Schedule your personalized analysis:', $book, '' );
-		}
+		add_action( 'phpmailer_init', $alt );
+		$sent = wp_mail(
+			$d['email'],
+			Assess_Email::SUBJECT,
+			Assess_Email::html( $d, $e, $links ),
+			array( 'Content-Type: text/html; charset=UTF-8', 'Reply-To: ThermStar <' . $team . '>' )
+		);
+		remove_action( 'phpmailer_init', $alt );
 
-		array_push( $lines, 'ThermStar', 'solutions@thermstar.com · 833 667 7359' );
-
-		return implode( "\n", $lines );
+		return $sent;
 	}
 
 	/**

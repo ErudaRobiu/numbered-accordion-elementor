@@ -245,7 +245,7 @@
 			status.hidden = false;
 		}
 
-		function showResult( e ) {
+		function showResult( e, rows ) {
 			var price = e ? e.price : +root.getAttribute( 'data-price' );
 			var set = function ( key, text ) {
 				var el = result.querySelector( '[data-r="' + key + '"]' );
@@ -253,22 +253,53 @@
 					el.textContent = text;
 				}
 			};
+			var table = result.querySelector( '[data-r="rows"]' );
+
+			set( 'name', field( 'first' ).value.trim() );
 
 			if ( e ) {
-				set( 'dollars', range( e.dollars, '', '$' ) );
-				set( 'mmbtu', range( e.mmbtu, ' MMBtu/yr' ) );
-				set( 'tco2', range( e.tco2, ' t/yr' ) );
-				set( 'hours', nf.format( e.hours ) + ' h/yr' );
 				var share = e.share && 2 === e.share.length ? e.share : [ 30, 50 ];
-				set( 'basis', 'Indicative. Heat = 1.08 × airflow × (exhaust temperature − 60 °F), with ' + share[0] + '% to ' + share[1] + '% of it recovered for the uses you chose, displacing fuel burned at 80% efficiency at $' + Number( price ).toFixed( 2 ) + ' per therm. The free screen replaces these assumptions with your real data.' );
+				set( 'therms', nf.format( e.therms[0] ) + ' to ' + nf.format( e.therms[1] ) );
+				set( 'price', '$' + Number( price ).toFixed( 2 ) );
+				set( 'dollars', '$' + nf.format( e.dollars[0] ) + ' to $' + nf.format( e.dollars[1] ) );
+				set( 'basis', 'Indicative. Heat = 1.08 × airflow × (exhaust temperature − 60 °F), with ' + share[0] + '% to ' + share[1] + '% of it recovered for the uses you chose, displacing fuel burned at 80% efficiency. The free screen replaces these assumptions with your real data.' );
 			} else {
-				set( 'dollars', 'Thank you' );
+				set( 'therms', 'Thank you' );
+			}
+
+			// The answers as the server cleaned them, so the table matches the email.
+			if ( table ) {
+				table.textContent = '';
+				( rows || [] ).forEach( function ( row ) {
+					var tr = document.createElement( 'tr' );
+					var th = document.createElement( 'th' );
+					var td = document.createElement( 'td' );
+					th.scope = 'row';
+					th.textContent = row[0];
+					td.textContent = row[1] || '—';
+					tr.appendChild( th );
+					tr.appendChild( td );
+					table.appendChild( tr );
+				} );
+				table.closest( 'details' ).hidden = ! ( rows && rows.length );
 			}
 
 			form.hidden = true;
 			result.hidden = false;
 			dots.forEach( function ( d ) { d.classList.remove( 'is-on' ); d.classList.add( 'is-done' ); } );
 			result.focus();
+		}
+
+		// Another estimate: back to the start with the last answers kept, so
+		// the visitor changes only what they want to.
+		var again = root.querySelector( '[data-eas-again]' );
+		if ( again ) {
+			again.addEventListener( 'click', function () {
+				result.hidden = true;
+				form.hidden = false;
+				started = Date.now();
+				show( 1, true );
+			} );
 		}
 
 		form.addEventListener( 'submit', function ( event ) {
@@ -294,7 +325,7 @@
 				} )
 				.then( function ( r ) {
 					if ( r.body && r.body.ok ) {
-						showResult( r.body.estimate );
+						showResult( r.body.estimate, r.body.rows );
 						return;
 					}
 

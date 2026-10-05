@@ -661,34 +661,109 @@ html.eas-locked body {
 	font-weight: 600;
 }
 
-.eas .eas__figures {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 12px;
-	margin: 0 0 18px;
+.eas .eas__hello,
+.eas .eas__save,
+.eas .eas__ready {
+	margin: 0 0 14px;
+	color: var(--eas-navy);
+	font-size: 16px;
 }
 
-.eas__figures div {
-	padding: 14px 16px;
+.eas .eas__save {
+	margin-bottom: 18px;
+}
+
+.eas .eas__save strong,
+.eas .eas__save span[data-r] {
+	font-variant-numeric: tabular-nums;
+}
+
+.eas .eas__ready {
+	margin: 18px 0 0;
+	font-weight: 700;
+}
+
+/* The answers, folded away: the estimate is the point, the table is proof. */
+.eas .eas__inputs {
+	margin: 16px 0 14px;
 	border: 1px solid var(--eas-line);
 	border-radius: 14px;
+	background: #fff;
+}
+
+.eas .eas__inputs summary {
+	padding: 13px 16px;
+	color: var(--eas-navy);
+	font-size: 14px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.eas .eas__inputs summary:focus-visible {
+	outline: 3px solid #4DCF8D;
+	outline-offset: 2px;
+	border-radius: 14px;
+}
+
+.eas .eas__table {
+	width: 100%;
+	margin: 0;
+	border: 0;
+	border-collapse: collapse;
+	font-size: 14px;
+}
+
+.eas .eas__table th,
+.eas .eas__table td {
+	padding: 9px 16px;
+	border: 0;
+	border-top: 1px solid var(--eas-line);
+	background: transparent;
+	color: var(--eas-navy);
+	text-align: left;
+	vertical-align: top;
+}
+
+.eas .eas__table th {
+	width: 50%;
+	color: var(--eas-muted);
+	font-weight: 500;
+}
+
+.eas .eas__table td {
+	font-weight: 700;
+	overflow-wrap: anywhere;
+}
+
+.eas .eas__table tr:nth-child(odd) th,
+.eas .eas__table tr:nth-child(odd) td {
 	background: var(--eas-bg);
 }
 
-.eas .eas__figures dt {
-	color: var(--eas-muted);
-	font-size: 12px;
-	font-weight: 700;
-	letter-spacing: .04em;
-	text-transform: uppercase;
+.eas .eas__again,
+.eas .eas__again:hover,
+.eas .eas__again:focus {
+	display: block;
+	width: 100%;
+	margin: 0;
+	padding: 13px 16px;
+	border: 0;
+	border-top: 1px solid var(--eas-line);
+	border-radius: 0 0 14px 14px;
+	background: transparent;
+	box-shadow: none;
+	color: var(--eas-green);
+	font: 700 14px/1.3 "Plus Jakarta Sans", system-ui, sans-serif;
+	letter-spacing: normal;
+	text-align: left;
+	text-decoration: underline;
+	text-transform: none;
+	cursor: pointer;
 }
 
-.eas .eas__figures dd {
-	margin: 4px 0 0;
-	color: var(--eas-navy);
-	font-size: 17px;
-	font-weight: 700;
-	font-variant-numeric: tabular-nums;
+.eas .eas__again:focus-visible {
+	outline: 3px solid #4DCF8D;
+	outline-offset: -3px;
 }
 
 .eas .eas__basis {
@@ -713,8 +788,12 @@ html.eas-locked body {
 }
 
 .eas .eas__next p {
-	margin: 4px 0 0;
+	margin: 0;
 	color: var(--eas-navy);
+}
+
+.eas .eas__next p + p {
+	margin-top: 10px;
 }
 
 /* ============================================================ narrow === */
@@ -737,9 +816,13 @@ html.eas-locked body {
 		padding: 20px 18px 26px;
 	}
 
-	.eas__grid,
-	.eas .eas__figures {
+	.eas__grid {
 		grid-template-columns: 1fr;
+	}
+
+	.eas .eas__table th,
+	.eas .eas__table td {
+		padding-inline: 12px;
 	}
 
 	.eas .eas__steps li {
