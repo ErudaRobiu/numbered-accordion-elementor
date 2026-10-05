@@ -310,6 +310,24 @@
 		if ( dialog ) {
 			var trigger = root.getAttribute( 'data-trigger' );
 
+			// Overflow alone does not hold a page that smooth scrolling drives:
+			// Lenis moves it from script, so it is paused while the pop-up is
+			// open and told to leave the pop-up's own scrolling alone.
+			dialog.setAttribute( 'data-lenis-prevent', '' );
+			var lockPage = function ( on ) {
+				var smooth = window.erudaSmoothScroll && window.erudaSmoothScroll.lenis;
+
+				document.documentElement.classList.toggle( 'eas-locked', !! on );
+
+				if ( smooth && typeof smooth.stop === 'function' ) {
+					if ( on ) {
+						smooth.stop();
+					} else {
+						smooth.start();
+					}
+				}
+			};
+
 			root.eas = {
 				open: function () {
 					if ( ! result.hidden ) {
@@ -321,7 +339,7 @@
 					} else {
 						dialog.setAttribute( 'open', '' );
 					}
-					document.documentElement.classList.add( 'eas-locked' );
+					lockPage( true );
 				},
 			};
 
@@ -330,7 +348,7 @@
 			} );
 
 			dialog.addEventListener( 'close', function () {
-				document.documentElement.classList.remove( 'eas-locked' );
+				lockPage( false );
 			} );
 
 			// A click on the backdrop lands on the dialog itself.
