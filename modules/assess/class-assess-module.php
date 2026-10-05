@@ -197,7 +197,7 @@ final class Assess_Module extends Elementor_Module {
 		}
 
 		$d        = $clean['data'];
-		$price    = isset( $settings['price']['size'] ) ? (float) $settings['price']['size'] : ( is_numeric( $settings['price'] ?? null ) ? (float) $settings['price'] : 0.9 );
+		$price    = isset( $settings['price']['size'] ) ? (float) $settings['price']['size'] : ( is_numeric( $settings['price'] ?? null ) ? (float) $settings['price'] : Assess_Content::PRICE );
 		$estimate = Assess_Content::estimate( $d, $price );
 		$summary  = Assess_Content::summary( $d, $estimate );
 

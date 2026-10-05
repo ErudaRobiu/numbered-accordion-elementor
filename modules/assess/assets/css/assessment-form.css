@@ -341,6 +341,63 @@ html.eas-locked body {
 	font-weight: 600;
 }
 
+/* Facility location: the field and a one-tap "Several sites". The button
+   restates every state, as the buttons above do, against theme styles. */
+.eas__location {
+	display: flex;
+	gap: 10px;
+}
+
+.eas .eas__several,
+.eas .eas__several:hover,
+.eas .eas__several:focus {
+	flex: none;
+	min-height: 48px;
+	margin: 0;
+	padding: 0 16px;
+	border: 1px solid #C9D2D8;
+	border-radius: 999px;
+	background: #fff;
+	box-shadow: none;
+	color: var(--eas-navy);
+	font: 600 14px/1.2 "Plus Jakarta Sans", system-ui, sans-serif;
+	letter-spacing: normal;
+	text-transform: none;
+	cursor: pointer;
+	transition: background-color .2s, border-color .2s, color .2s;
+}
+
+.eas .eas__several:hover {
+	border-color: var(--eas-green);
+}
+
+.eas .eas__several[aria-pressed="true"] {
+	border-color: var(--eas-green);
+	background: var(--eas-green);
+	color: #fff;
+}
+
+.eas .eas__several:focus-visible {
+	outline: 3px solid #4DCF8D;
+	outline-offset: 2px;
+}
+
+.eas .eas__hint {
+	margin: 0;
+	color: var(--eas-muted);
+	font-size: 13px;
+}
+
+@media (max-width: 480px) {
+	.eas__location {
+		flex-wrap: wrap;
+	}
+
+	.eas .eas__several {
+		min-height: 42px;
+	}
+}
+
 /* Sliders */
 .eas__range-head {
 	display: flex;
@@ -638,6 +695,14 @@ html.eas-locked body {
 	margin: 0 0 18px;
 	color: var(--eas-muted);
 	font-size: 13px;
+}
+
+.eas .eas__basis[data-r="basis"] {
+	margin-bottom: 6px;
+}
+
+.eas .eas__basis--note {
+	font-style: italic;
 }
 
 .eas__next {

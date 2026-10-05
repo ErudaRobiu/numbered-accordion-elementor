@@ -182,7 +182,7 @@ class Assessment_Form_Widget extends Widget_Base {
 			array(
 				'label'       => esc_html__( 'Gas price for the estimate ($ per therm)', 'numbered-accordion' ),
 				'type'        => Controls_Manager::NUMBER,
-				'default'     => 0.9,
+				'default'     => Assess_Content::PRICE,
 				'min'         => 0.1,
 				'max'         => 5,
 				'step'        => 0.05,
@@ -319,6 +319,27 @@ class Assessment_Form_Widget extends Widget_Base {
 	}
 
 	/**
+	 * Facility location: required, because ThermStar runs the request against
+	 * its own weather data. One tap answers it for a multi-site request.
+	 *
+	 * @param string $uid Instance prefix.
+	 */
+	private function location_field( $uid ) {
+		$fid = $uid . '-location';
+		?>
+		<div class="eas__field">
+			<label for="<?php echo esc_attr( $fid ); ?>"><?php esc_html_e( 'Facility location', 'numbered-accordion' ); ?></label>
+			<div class="eas__location">
+				<input class="eas__input" type="text" id="<?php echo esc_attr( $fid ); ?>" name="location" autocomplete="address-level2" placeholder="<?php esc_attr_e( 'City, state or province', 'numbered-accordion' ); ?>" required aria-required="true" aria-describedby="<?php echo esc_attr( $fid ); ?>-hint <?php echo esc_attr( $fid ); ?>-err" />
+				<button type="button" class="eas__several" data-eas-several="<?php echo esc_attr( Assess_Content::SEVERAL_SITES ); ?>" aria-pressed="false"><?php echo esc_html( Assess_Content::SEVERAL_SITES ); ?></button>
+			</div>
+			<p class="eas__hint" id="<?php echo esc_attr( $fid ); ?>-hint"><?php esc_html_e( 'We use it to match your site to local weather data.', 'numbered-accordion' ); ?></p>
+			<p class="eas__err" id="<?php echo esc_attr( $fid ); ?>-err" hidden></p>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Render the widget on the front end.
 	 */
 	protected function render() {
@@ -327,7 +348,7 @@ class Assessment_Form_Widget extends Widget_Base {
 		$mode  = ( $s['mode'] ?? 'modal' ) === 'inline' ? 'inline' : 'modal';
 		$uid   = 'eas-' . preg_replace( '/[^a-z0-9]/i', '', (string) $this->get_id() );
 		$title = trim( (string) ( $s['title'] ?? '' ) );
-		$price = is_numeric( $s['price'] ?? null ) ? (float) $s['price'] : 0.9;
+		$price = is_numeric( $s['price'] ?? null ) ? (float) $s['price'] : Assess_Content::PRICE;
 		$edit  = class_exists( '\Elementor\Plugin' ) && \Elementor\Plugin::$instance->editor->is_edit_mode();
 		$book  = trim( (string) ( $s['booking_url'] ?? '' ) );
 		$book_label = trim( (string) ( $s['booking_label'] ?? '' ) );
@@ -412,7 +433,7 @@ class Assessment_Form_Widget extends Widget_Base {
 						$this->text_field( 'phone', __( 'Phone', 'numbered-accordion' ), 'tel', 'tel', false, $uid );
 						?>
 					</div>
-					<?php $this->text_field( 'location', __( 'Facility location (city, state or province)', 'numbered-accordion' ), 'text', 'address-level2', false, $uid ); ?>
+					<?php $this->location_field( $uid ); ?>
 					<div class="eas__field">
 						<label for="<?php echo esc_attr( $uid ); ?>-notes"><?php esc_html_e( 'Anything else about the site', 'numbered-accordion' ); ?> <span class="eas__opt"><?php esc_html_e( 'optional', 'numbered-accordion' ); ?></span></label>
 						<textarea class="eas__input" id="<?php echo esc_attr( $uid ); ?>-notes" name="notes" rows="3"></textarea>
@@ -441,6 +462,7 @@ class Assessment_Form_Widget extends Widget_Base {
 					<div><dt><?php esc_html_e( 'Operating hours', 'numbered-accordion' ); ?></dt><dd data-r="hours"></dd></div>
 				</dl>
 				<p class="eas__basis" data-r="basis"></p>
+				<p class="eas__basis eas__basis--note"><?php echo esc_html( Assess_Content::WEATHER_NOTE ); ?></p>
 				<div class="eas__next">
 					<strong><?php esc_html_e( 'What happens next', 'numbered-accordion' ); ?></strong>
 					<p>

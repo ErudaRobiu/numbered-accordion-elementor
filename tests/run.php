@@ -3414,25 +3414,31 @@ foreach ( array(
 
 use ErudaToolkit\Modules\Assess\Assess_Content;
 
-$ae = Assess_Content::estimate( array( 'temp' => 230, 'cfm' => 4000, 'hours' => 16, 'days' => 5, 'uses' => array( 'process-water' ) ), 0.9 );
-check( 'estimate: heat recovered, two significant figures', array( 1200, 1800 ), $ae['mmbtu'] );
-check( 'estimate: dollars a year at the set gas price', array( 14000, 21000 ), $ae['dollars'] );
-check( 'estimate: CO2 avoided', array( 81.0, 121.4 ), $ae['tco2'] );
+// Process air recovers 50–70%: 1.08 × 4,000 × 170 × 4,160 h = 3,055 MMBtu of exhaust heat a year.
+$ae = Assess_Content::estimate( array( 'temp' => 230, 'cfm' => 4000, 'hours' => 16, 'days' => 5, 'uses' => array( 'process-air' ) ), 1.0 );
+check( 'estimate: heat recovered, two significant figures', array( 1500, 2100 ), $ae['mmbtu'] );
+check( 'estimate: dollars a year at the set gas price', array( 19000, 27000 ), $ae['dollars'] );
+check( 'estimate: CO2 avoided', array( 101.2, 141.7 ), $ae['tco2'] );
 check( 'estimate: operating hours over 52 weeks', 4160, $ae['hours'] );
-check( 'space heating alone runs half the year', 2080, Assess_Content::estimate( array( 'temp' => 230, 'cfm' => 4000, 'hours' => 16, 'days' => 5, 'uses' => array( 'space' ) ), 0.9 )['hours'] );
-check( 'space heating with another use runs all year', 4160, Assess_Content::estimate( array( 'temp' => 230, 'cfm' => 4000, 'hours' => 16, 'days' => 5, 'uses' => array( 'space', 'boiler' ) ), 0.9 )['hours'] );
+check( 'estimate: the share used is reported', array( 50, 70 ), $ae['share'] );
+check( 'each use has the client\'s range', array( array( 0.5, 0.7 ), array( 0.3, 0.5 ), array( 0.3, 0.5 ), array( 0.45, 0.65 ), array( 0.2, 0.4 ), array( 0.3, 0.5 ) ), array_values( Assess_Content::shares() ) );
+check( 'every use offered has a range', array_keys( Assess_Content::uses() ), array_keys( Assess_Content::shares() ) );
+check( 'several uses: lowest low, highest high', array( 0.2, 0.65 ), Assess_Content::share( array( 'space', 'boiler' ) ) );
+check( 'nothing picked counts as not sure', array( 0.3, 0.5 ), Assess_Content::share( array() ) );
+check( 'unknown uses are ignored', array( 0.45, 0.65 ), Assess_Content::share( array( 'boiler', 'bogus' ) ) );
+check( 'space heating alone runs all year at its own range', array( 4160, array( 20, 40 ) ), array_values( array_intersect_key( Assess_Content::estimate( array( 'temp' => 230, 'cfm' => 4000, 'hours' => 16, 'days' => 5, 'uses' => array( 'space' ) ), 1.0 ), array_flip( array( 'hours', 'share' ) ) ) ) );
 check( 'inputs are held to the slider ranges', array( 450.0, 500.0, 24.0, 7.0 ), array( Assess_Content::clamp( 9999, Assess_Content::TEMP ), Assess_Content::clamp( 3, Assess_Content::CFM ), Assess_Content::clamp( 99, Assess_Content::HOURS ), Assess_Content::clamp( 'x', array( 1, 7, 1, 7 ) ) ) );
-check( 'a nonsense price falls back to $0.90', 0.9, Assess_Content::estimate( array(), 'free' )['price'] );
+check( 'a nonsense price falls back to $1.00', 1.0, Assess_Content::estimate( array(), 'free' )['price'] );
 check( 'rounding keeps two significant figures', array( 15000.0, 1200.0, 99.0, 0 ), array( Assess_Content::round2( 14873 ), Assess_Content::round2( 1222.07 ), Assess_Content::round2( 99.4 ), Assess_Content::round2( -5 ) ) );
 
-$ac = Assess_Content::clean( array( 'first' => ' Dana ', 'last' => 'Reyes<script>', 'email' => 'dana@example.com', 'company' => 'Acme', 'industry' => 'foundries', 'contaminants' => array( 'lint', 'bogus' ), 'uses' => 'boiler', 'temp' => '300', 'notes' => '<b>hi</b>' ) );
+$ac = Assess_Content::clean( array( 'first' => ' Dana ', 'last' => 'Reyes<script>', 'email' => 'dana@example.com', 'company' => 'Acme', 'location' => 'Several sites', 'industry' => 'foundries', 'contaminants' => array( 'lint', 'bogus' ), 'uses' => 'boiler', 'temp' => '300', 'notes' => '<b>hi</b>' ) );
 check( 'clean: a complete request has no errors', array(), $ac['errors'] );
 check( 'clean: text is trimmed and stripped of tags', array( 'Dana', 'Reyes', 'hi' ), array( $ac['data']['first'], $ac['data']['last'], $ac['data']['notes'] ) );
 check( 'clean: only known choices survive', array( array( 'lint' ), array( 'boiler' ) ), array( $ac['data']['contaminants'], $ac['data']['uses'] ) );
 $ac2 = Assess_Content::clean( array( 'email' => 'not-an-email', 'industry' => 'mining' ) );
-check( 'clean: required fields are reported', array( 'first', 'last', 'email', 'company', 'industry' ), array_keys( $ac2['errors'] ) );
+check( 'clean: required fields are reported, location among them', array( 'first', 'last', 'email', 'company', 'industry', 'location' ), array_keys( $ac2['errors'] ) );
 $as = Assess_Content::summary( $ac['data'], $ae );
-check( 'the team email carries the estimate and the answers', true, false !== strpos( $as, 'Industry: Foundry' ) && false !== strpos( $as, '$14,000–$21,000/yr at $0.90/therm' ) && false !== strpos( $as, 'In the exhaust: Lint' ) );
+check( 'the team email carries the estimate and the answers', true, false !== strpos( $as, 'Industry: Foundry' ) && false !== strpos( $as, '$19,000–$27,000/yr at $1.00/therm' ) && false !== strpos( $as, '(50–70% of the exhaust heat recovered)' ) && false !== strpos( $as, Assess_Content::WEATHER_NOTE ) && false !== strpos( $as, 'In the exhaust: Lint' ) );
 
 /* ------------------------------------------------------------- report --- */
 

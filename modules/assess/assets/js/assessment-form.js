@@ -139,8 +139,29 @@
 			last: function () { return field( 'last' ).value.trim() ? '' : 'Enter your last name.'; },
 			email: function () { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( field( 'email' ).value.trim() ) ? '' : 'Enter an email address like name@company.com.'; },
 			company: function () { return field( 'company' ).value.trim() ? '' : 'Enter your company name.'; },
+			location: function () { return field( 'location' ).value.trim() ? '' : 'Enter the facility\'s city and state or province, or choose Several sites.'; },
 		};
-		var byStep = { 1: [], 2: [ 'industry' ], 3: [ 'first', 'last', 'email', 'company' ] };
+		var byStep = { 1: [], 2: [ 'industry' ], 3: [ 'first', 'last', 'email', 'company', 'location' ] };
+
+		/* "Several sites" answers the location in one tap, and a second tap
+		   clears it again. Typing a place lets go of the button. */
+		var several = root.querySelector( '[data-eas-several]' );
+		if ( several && field( 'location' ) ) {
+			var place = field( 'location' );
+			var label = several.getAttribute( 'data-eas-several' );
+			var sync = function () {
+				several.setAttribute( 'aria-pressed', place.value.trim() === label ? 'true' : 'false' );
+			};
+			several.addEventListener( 'click', function () {
+				place.value = place.value.trim() === label ? '' : label;
+				place.dispatchEvent( new Event( 'input' ) );
+				sync();
+				if ( '' === place.value ) {
+					place.focus();
+				}
+			} );
+			place.addEventListener( 'input', sync );
+		}
 
 		function valid( n ) {
 			var first = null;
@@ -238,7 +259,8 @@
 				set( 'mmbtu', range( e.mmbtu, ' MMBtu/yr' ) );
 				set( 'tco2', range( e.tco2, ' t/yr' ) );
 				set( 'hours', nf.format( e.hours ) + ' h/yr' );
-				set( 'basis', 'Indicative. Heat = 1.08 × airflow × (exhaust temperature − 60 °F), with 40% to 60% of it recovered, displacing fuel burned at 80% efficiency at $' + Number( price ).toFixed( 2 ) + ' per therm. The free screen replaces these assumptions with your real data.' );
+				var share = e.share && 2 === e.share.length ? e.share : [ 30, 50 ];
+				set( 'basis', 'Indicative. Heat = 1.08 × airflow × (exhaust temperature − 60 °F), with ' + share[0] + '% to ' + share[1] + '% of it recovered for the uses you chose, displacing fuel burned at 80% efficiency at $' + Number( price ).toFixed( 2 ) + ' per therm. The free screen replaces these assumptions with your real data.' );
 			} else {
 				set( 'dollars', 'Thank you' );
 			}
@@ -301,6 +323,9 @@
 			form.reset();
 			toArray( root.querySelectorAll( '.eas__range' ) ).forEach( function ( i ) { i.dispatchEvent( new Event( 'input' ) ); } );
 			Object.keys( checks ).forEach( function ( k ) { setError( k, '' ); } );
+			if ( several ) {
+				several.setAttribute( 'aria-pressed', 'false' );
+			}
 			form.hidden = false;
 			result.hidden = true;
 			show( 1, false );

@@ -36,17 +36,62 @@ final class Assess_Content {
 	/**
 	 * Estimate assumptions, stated on the result so nothing is hidden.
 	 *
-	 * Recovered heat is 1.08 × CFM × (exhaust °F − 60 °F) × a recovery share
-	 * of 40% to 60%, over the operating hours of 52 weeks. It displaces fuel
-	 * burned at 80% efficiency; 1 therm is 100,000 BTU and releases about
-	 * 5.3 kg of CO2. Space heating only runs half the year.
+	 * Recovered heat is 1.08 × CFM × (exhaust °F − 60 °F) × a recovery share,
+	 * over the operating hours of 52 weeks. It displaces fuel burned at 80%
+	 * efficiency; 1 therm is 100,000 BTU and releases about 5.3 kg of CO2.
+	 * The share depends on where the heat goes (see shares()).
 	 */
-	const SINK_F        = 60;
-	const SHARE_LOW     = 0.40;
-	const SHARE_HIGH    = 0.60;
-	const BURNER        = 0.80;
-	const KG_CO2_THERM  = 5.3;
-	const SEASONAL      = 0.5;
+	const SINK_F       = 60;
+	const BURNER       = 0.80;
+	const KG_CO2_THERM = 5.3;
+	const PRICE        = 1.0;
+
+	/**
+	 * What a visitor types when the request covers more than one facility.
+	 */
+	const SEVERAL_SITES = 'Several sites';
+
+	/**
+	 * ThermStar's wording, shown with every estimate.
+	 */
+	const WEATHER_NOTE = 'Opportunity Screen results are not adjusted for ambient weather of the location selected.';
+
+	/**
+	 * Low and high recovery share for each place the heat could go, as set
+	 * by ThermStar (5 Oct 2026). Several picked: the lowest low and the
+	 * highest high of those. The client's space heating figure already allows
+	 * for the season, so nothing else trims it.
+	 *
+	 * @return array<string, float[]>
+	 */
+	public static function shares() {
+		return array(
+			'process-air'   => array( 0.50, 0.70 ),
+			'makeup-air'    => array( 0.30, 0.50 ),
+			'process-water' => array( 0.30, 0.50 ),
+			'boiler'        => array( 0.45, 0.65 ),
+			'space'         => array( 0.20, 0.40 ),
+			'unsure'        => array( 0.30, 0.50 ),
+		);
+	}
+
+	/**
+	 * The recovery share range for the uses picked. None picked counts as
+	 * "Not sure yet".
+	 *
+	 * @param array $uses Use keys.
+	 * @return float[] Low, high.
+	 */
+	public static function share( $uses ) {
+		$all  = self::shares();
+		$hits = array_values( array_intersect_key( $all, array_flip( array_map( 'strval', (array) $uses ) ) ) );
+
+		if ( ! $hits ) {
+			return $all['unsure'];
+		}
+
+		return array( min( array_column( $hits, 0 ) ), max( array_column( $hits, 1 ) ) );
+	}
 
 	/**
 	 * Industries offered, keyed for the record.
@@ -118,7 +163,7 @@ final class Assess_Content {
 	 *
 	 * @param array $in    temp (°F), cfm, hours (per day), days (per week), uses (keys).
 	 * @param float $price Gas price in dollars per therm.
-	 * @return array{mmbtu: int[], dollars: int[], tco2: float[], hours: int, price: float}
+	 * @return array{mmbtu: int[], dollars: int[], tco2: float[], hours: int, price: float, share: int[]}
 	 */
 	public static function estimate( $in, $price ) {
 		$temp  = self::clamp( $in['temp'] ?? null, self::TEMP );
@@ -126,19 +171,15 @@ final class Assess_Content {
 		$hours = self::clamp( $in['hours'] ?? null, self::HOURS );
 		$days  = self::clamp( $in['days'] ?? null, self::DAYS );
 		$uses  = is_array( $in['uses'] ?? null ) ? $in['uses'] : array();
-		$price = is_numeric( $price ) && $price > 0 ? (float) $price : 0.9;
+		$price = is_numeric( $price ) && $price > 0 ? (float) $price : self::PRICE;
+		$range = self::share( $uses );
 
 		$per_hour = 1.08 * $cfm * max( 0, $temp - self::SINK_F );
 		$year     = $hours * $days * 52;
 
-		// Space heating on its own only has a use for about half the year.
-		if ( array( 'space' ) === array_values( array_intersect( $uses, array_keys( self::uses() ) ) ) ) {
-			$year *= self::SEASONAL;
-		}
-
 		$out = array( 'mmbtu' => array(), 'dollars' => array(), 'tco2' => array() );
 
-		foreach ( array( self::SHARE_LOW, self::SHARE_HIGH ) as $share ) {
+		foreach ( $range as $share ) {
 			$mmbtu  = $per_hour * $share * $year / 1000000;
 			$therms = $mmbtu * 10 / self::BURNER;
 
@@ -149,6 +190,7 @@ final class Assess_Content {
 
 		$out['hours'] = (int) $year;
 		$out['price'] = $price;
+		$out['share'] = array( (int) round( $range[0] * 100 ), (int) round( $range[1] * 100 ) );
 
 		return $out;
 	}
@@ -224,6 +266,9 @@ final class Assess_Content {
 		if ( '' === $data['industry'] ) {
 			$errors['industry'] = 'Choose your industry.';
 		}
+		if ( '' === $data['location'] ) {
+			$errors['location'] = 'Enter the facility\'s city and state or province, or choose ' . self::SEVERAL_SITES . '.';
+		}
 
 		return array( 'data' => $data, 'errors' => $errors );
 	}
@@ -265,7 +310,8 @@ final class Assess_Content {
 			'In the exhaust: ' . $names( $d['contaminants'], self::contaminants() ),
 			'Heat could go to: ' . $names( $d['uses'], self::uses() ),
 			'',
-			'Indicative estimate: ' . self::fmt( $e['mmbtu'][0] ) . '–' . self::fmt( $e['mmbtu'][1] ) . ' MMBtu/yr, $' . self::fmt( $e['dollars'][0] ) . '–$' . self::fmt( $e['dollars'][1] ) . '/yr at $' . number_format( $e['price'], 2 ) . '/therm, ' . self::fmt( $e['tco2'][0] ) . '–' . self::fmt( $e['tco2'][1] ) . ' t CO2/yr',
+			'Indicative estimate: ' . self::fmt( $e['mmbtu'][0] ) . '–' . self::fmt( $e['mmbtu'][1] ) . ' MMBtu/yr, $' . self::fmt( $e['dollars'][0] ) . '–$' . self::fmt( $e['dollars'][1] ) . '/yr at $' . number_format( $e['price'], 2 ) . '/therm, ' . self::fmt( $e['tco2'][0] ) . '–' . self::fmt( $e['tco2'][1] ) . ' t CO2/yr (' . ( $e['share'][0] ?? '' ) . '–' . ( $e['share'][1] ?? '' ) . '% of the exhaust heat recovered)',
+			self::WEATHER_NOTE,
 			'',
 			'Notes: ' . ( $d['notes'] ?: 'None' ),
 			'Sent from: ' . ( $d['source'] ?: 'Unknown page' ),
