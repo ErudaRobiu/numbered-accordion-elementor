@@ -587,6 +587,54 @@ const x = t => {
     !!fade && fade.away.every((v, i) => 0 === i || v >= fade.away[i - 1] - 3),
     fade ? fade.away.join(' ') : 'n/a');
 
+  // --- but only an end with something past it ---------------------------------
+  /*
+   * Before the row sets off nothing lies to the left of the first card, so a
+   * fade there only greys out the card people read first. Back at the top of
+   * the page the first card's left edge has to look the same as its middle,
+   * while the right end, with cards still to come, keeps its fade.
+   */
+  const startEdge = await page.evaluate(async () => {
+    window.scrollTo(0, 0);
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const root = document.querySelector('.erail');
+    const viewport = document.querySelector('.erail__viewport').getBoundingClientRect();
+    const card = document.querySelector('.erail__card').getBoundingClientRect();
+    const band = parseFloat(getComputedStyle(root).getPropertyValue('--erail-fade')) || 96;
+    return {
+      l: getComputedStyle(root).getPropertyValue('--erail-fade-l').trim(),
+      r: getComputedStyle(root).getPropertyValue('--erail-fade-r').trim(),
+      x: Math.round(Math.max(card.left, viewport.left) + 2),
+      mid: Math.round(Math.max(card.left, viewport.left) + band + 20),
+      y: Math.round(card.top + card.height / 2),
+      top: Math.round(card.top),
+    };
+  });
+
+  const startPx = await (async () => {
+    const shot = await page.screenshot({ encoding: 'base64' });
+    return page.evaluate(async (data, at) => {
+      const img = new Image();
+      img.src = 'data:image/png;base64,' + data;
+      await img.decode();
+      const cv = document.createElement('canvas');
+      cv.width = img.width;
+      cv.height = img.height;
+      const ctx = cv.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const a = ctx.getImageData(at.x, at.y, 1, 1).data;
+      const b = ctx.getImageData(at.mid, at.y, 1, 1).data;
+      return Math.max(Math.abs(a[0] - b[0]), Math.abs(a[1] - b[1]), Math.abs(a[2] - b[2]));
+    }, shot, startEdge);
+  })();
+
+  check('before the row moves, the first card is not faded on its left',
+    startEdge.l === '0' && startPx <= 12,
+    '--erail-fade-l ' + startEdge.l + ', edge differs from middle by ' + startPx);
+
+  check('while the far end, with cards still to come, keeps its fade',
+    startEdge.r === '1', '--erail-fade-r ' + startEdge.r);
+
   // --- narrow screens do not pin -------------------------------------------
   await page.setViewport({ width: 420, height: 900 });
   await page.evaluate(() => { window.dispatchEvent(new Event('resize')); });

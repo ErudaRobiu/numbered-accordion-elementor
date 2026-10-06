@@ -125,20 +125,26 @@
  *
  * Only the ends fade. The mask runs the full height, so the vertical room that
  * a card's shadow and its hover lift live in is untouched.
+ *
+ * And only an end that has something past it. Before the row sets off there
+ * is nothing to the left of the first card, so a fade there just greys out
+ * the card people read first. The script eases each end in as cards travel
+ * past it (--erail-fade-l, --erail-fade-r: 0 to 1); without the script the
+ * row starts at its left edge, so that is the default.
  */
 .erail[data-erail-fade] .erail__viewport {
 	-webkit-mask-image: linear-gradient(
 		to right,
 		transparent 0,
-		#000 var(--erail-fade, 96px),
-		#000 calc(100% - var(--erail-fade, 96px)),
+		#000 calc(var(--erail-fade, 96px) * var(--erail-fade-l, 0)),
+		#000 calc(100% - var(--erail-fade, 96px) * var(--erail-fade-r, 1)),
 		transparent 100%
 	);
 	mask-image: linear-gradient(
 		to right,
 		transparent 0,
-		#000 var(--erail-fade, 96px),
-		#000 calc(100% - var(--erail-fade, 96px)),
+		#000 calc(var(--erail-fade, 96px) * var(--erail-fade-l, 0)),
+		#000 calc(100% - var(--erail-fade, 96px) * var(--erail-fade-r, 1)),
 		transparent 100%
 	);
 }

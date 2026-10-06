@@ -32,6 +32,9 @@
 	var ROOT = '.erail';
 	var READY = 'data-erail-ready';
 
+	// Pixels of travel over which an end's fade comes in.
+	var FADE_RAMP = 120;
+
 	function toArray( list ) {
 		return Array.prototype.slice.call( list || [] );
 	}
@@ -85,6 +88,7 @@
 		var count = root.querySelector( '.erail__count b' );
 		var arrows = toArray( root.querySelectorAll( '[data-erail-step]' ) );
 		var cards = toArray( root.querySelectorAll( '.erail__card' ) );
+		var fades = root.hasAttribute( 'data-erail-fade' );
 
 		/*
 		 * Where each card sits along the row, measured once.
@@ -96,6 +100,8 @@
 		 */
 		var stops = [];
 		var lastPaint = -1;
+		var lastFadeL = -1;
+		var lastFadeR = -1;
 		var lastCard = -1;
 		var lastOffset = null;
 
@@ -509,6 +515,24 @@
 				if ( filled !== lastPaint ) {
 					lastPaint = filled;
 					bar.style.transform = 'scaleX(' + ( filled / 1000 ) + ')';
+				}
+			}
+
+			if ( fades ) {
+				// Each end fades in over the first stretch of travel past
+				// it, in steps of a hundredth so a slow scroll is not a
+				// style write on every frame.
+				var left = Math.round( clamp01( offset / FADE_RAMP ) * 100 );
+				var right = Math.round( clamp01( ( span - offset ) / FADE_RAMP ) * 100 );
+
+				if ( left !== lastFadeL ) {
+					lastFadeL = left;
+					root.style.setProperty( '--erail-fade-l', String( left / 100 ) );
+				}
+
+				if ( right !== lastFadeR ) {
+					lastFadeR = right;
+					root.style.setProperty( '--erail-fade-r', String( right / 100 ) );
 				}
 			}
 
