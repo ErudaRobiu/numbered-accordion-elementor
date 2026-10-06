@@ -418,6 +418,55 @@
 	color: var(--erail-count-now, #ffffff);
 }
 
+/*
+ * Previous / next. Restated in full for every state, because themes paint
+ * buttons (Hello Elementor makes them pink on hover).
+ */
+.erail__arrows {
+	display: flex;
+	flex: 0 0 auto;
+	gap: 10px;
+}
+
+.erail .erail__arrow,
+.erail .erail__arrow:hover,
+.erail .erail__arrow:focus {
+	display: inline-grid;
+	place-items: center;
+	width: var(--erail-arrow-size, 46px);
+	height: var(--erail-arrow-size, 46px);
+	margin: 0;
+	padding: 0;
+	border: 1px solid var(--erail-arrow-line, rgba(255, 255, 255, 0.35));
+	border-radius: 50%;
+	background: var(--erail-arrow-bg, transparent);
+	box-shadow: none;
+	color: var(--erail-arrow, #ffffff);
+	cursor: pointer;
+	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.erail .erail__arrow:hover:not(:disabled) {
+	border-color: var(--erail-arrow-hover-bg, #ffffff);
+	background: var(--erail-arrow-hover-bg, #ffffff);
+	color: var(--erail-arrow-hover, #0F3961);
+}
+
+.erail .erail__arrow:focus-visible {
+	outline: 2px solid var(--erail-arrow, #ffffff);
+	outline-offset: 3px;
+}
+
+.erail .erail__arrow:disabled {
+	opacity: 0.35;
+	cursor: default;
+}
+
+.erail__arrow svg {
+	width: 20px;
+	height: 20px;
+}
+
 /* ----------------------------------------------------------- narrow --- */
 
 /*

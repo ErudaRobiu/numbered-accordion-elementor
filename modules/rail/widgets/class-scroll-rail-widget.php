@@ -866,6 +866,17 @@ class Scroll_Rail_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'arrows',
+			array(
+				'label'        => esc_html__( 'Previous and next buttons', 'numbered-accordion' ),
+				'description'  => esc_html__( 'For anyone who will not discover that scrolling moves the row: a trackpad, a mouse without a wheel, a keyboard. They step one card at a time.', 'numbered-accordion' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'return_value' => 'yes',
+			)
+		);
+
+		$this->add_control(
 			'bleed',
 			array(
 				'label'        => esc_html__( 'Edge to edge on a phone', 'numbered-accordion' ),
@@ -993,6 +1004,7 @@ class Scroll_Rail_Widget extends Widget_Base {
 		$tally = ! isset( $settings['counter'] ) || 'yes' === $settings['counter'];
 		$bleed = ! isset( $settings['bleed'] ) || 'yes' === $settings['bleed'];
 		$fade  = ! isset( $settings['edge_fade'] ) || 'yes' === $settings['edge_fade'];
+		$steps = ! isset( $settings['arrows'] ) || 'yes' === $settings['arrows'];
 
 		$tag = isset( $settings['title_tag'] ) ? $settings['title_tag'] : 'h3';
 		$tag = in_array( $tag, array( 'h2', 'h3', 'h4', 'h5', 'div', 'span' ), true ) ? $tag : 'h3';
@@ -1009,6 +1021,7 @@ class Scroll_Rail_Widget extends Widget_Base {
 			$tally = false;
 			$bleed = false;
 			$fade  = false;
+			$steps = false;
 		}
 
 		$centre = isset( $settings['centre_on'] ) ? $settings['centre_on'] : 'auto';
@@ -1098,7 +1111,7 @@ class Scroll_Rail_Widget extends Widget_Base {
 					</div>
 				</div>
 
-				<?php if ( $bar || $tally ) : ?>
+				<?php if ( $bar || $tally || $steps ) : ?>
 					<div class="erail__foot">
 						<?php if ( $bar ) : ?>
 							<div class="erail__progress" aria-hidden="true"><span></span></div>
@@ -1114,6 +1127,13 @@ class Scroll_Rail_Widget extends Widget_Base {
 							 */
 							?>
 							<p class="erail__count" aria-hidden="true"><b>1</b> / <?php echo esc_html( (string) count( $cards ) ); ?></p>
+						<?php endif; ?>
+
+						<?php if ( $steps && count( $cards ) > 1 ) : ?>
+							<div class="erail__arrows">
+								<button type="button" class="erail__arrow" data-erail-step="-1" aria-label="<?php esc_attr_e( 'Previous', 'numbered-accordion' ); ?>" disabled><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+								<button type="button" class="erail__arrow" data-erail-step="1" aria-label="<?php esc_attr_e( 'Next', 'numbered-accordion' ); ?>"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+							</div>
 						<?php endif; ?>
 					</div>
 				<?php endif; ?>

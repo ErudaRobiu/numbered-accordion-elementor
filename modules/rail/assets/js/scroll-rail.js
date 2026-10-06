@@ -83,6 +83,7 @@
 		var track = root.querySelector( '.erail__track' );
 		var bar = root.querySelector( '.erail__progress span' );
 		var count = root.querySelector( '.erail__count b' );
+		var arrows = toArray( root.querySelectorAll( '[data-erail-step]' ) );
 		var cards = toArray( root.querySelectorAll( '.erail__card' ) );
 
 		/*
@@ -511,6 +512,19 @@
 				}
 			}
 
+			if ( arrows.length ) {
+				var atStart = offset <= 1;
+				var atEnd = span <= 0 || offset >= span - 1;
+
+				arrows.forEach( function ( button ) {
+					var off = +button.getAttribute( 'data-erail-step' ) < 0 ? atStart : atEnd;
+
+					if ( button.disabled !== off ) {
+						button.disabled = off;
+					}
+				} );
+			}
+
 			if ( count ) {
 				var index = cardAt( offset );
 
@@ -623,19 +637,7 @@
 			var wanted = clamp01(
 				( card.offsetLeft + card.offsetWidth / 2 - viewport.clientWidth / 2 ) / distance
 			);
-
-			var rect = root.getBoundingClientRect();
-			var target;
-
-			if ( 'pinned' === mode ) {
-				target = window.pageYOffset + staticTop() - stickyTop + pauseIn + wanted * travel;
-			} else {
-				var basis = Math.min( rect.height, height );
-				var tStart = height - basis * readData( root, 'data-erail-start', 0.8 );
-				var tEnd = basis * readData( root, 'data-erail-finish', 0.8 ) - rect.height;
-
-				target = window.pageYOffset + rect.top - tStart + wanted * ( tStart - tEnd );
-			}
+			var target = pageTarget( wanted );
 
 			window.scrollTo( { top: Math.round( target ), behavior: 'auto' } );
 			update();
@@ -644,6 +646,102 @@
 			// as well. Undo that, or the card is shifted twice.
 			lock();
 			window.requestAnimationFrame( lock );
+		}
+
+		/**
+		 * The page scroll position at which the row has travelled `wanted`
+		 * of its way, 0 to 1. Only meaningful while the rail drives the row.
+		 *
+		 * @param {number} wanted Fraction of the travel.
+		 * @return {number}
+		 */
+		function pageTarget( wanted ) {
+			if ( 'pinned' === mode ) {
+				return window.pageYOffset + staticTop() - stickyTop + pauseIn + wanted * travel;
+			}
+
+			var rect = root.getBoundingClientRect();
+			var height = window.innerHeight || document.documentElement.clientHeight || 0;
+			var basis = Math.min( rect.height, height );
+			var tStart = height - basis * readData( root, 'data-erail-start', 0.8 );
+			var tEnd = basis * readData( root, 'data-erail-finish', 0.8 ) - rect.height;
+
+			return window.pageYOffset + rect.top - tStart + wanted * ( tStart - tEnd );
+		}
+
+		/**
+		 * Scroll the page, through smooth scrolling when the site runs it, or
+		 * the two would fight over where the page is.
+		 *
+		 * @param {number}  top    Target scroll position.
+		 * @param {boolean} glide  Animate (a button) or follow at once (a swipe).
+		 */
+		function scrollPage( top, glide ) {
+			var smooth = window.erudaSmoothScroll && window.erudaSmoothScroll.lenis;
+
+			top = Math.max( 0, Math.round( top ) );
+
+			if ( smooth && typeof smooth.scrollTo === 'function' && ! smooth.isStopped ) {
+				smooth.scrollTo( top, glide ? { duration: 0.9 } : { immediate: true } );
+			} else {
+				window.scrollTo( { top: top, behavior: glide ? 'smooth' : 'auto' } );
+			}
+		}
+
+		/**
+		 * Previous / next: one card along. Driven, that means scrolling the
+		 * page to where the row has that card at its start; as a plain
+		 * scroller it means scrolling the row itself.
+		 *
+		 * @param {number} step -1 or 1.
+		 */
+		function go( step ) {
+			var offset = driving ? progress() * distance : viewport.scrollLeft;
+			var span = driving ? distance : viewport.scrollWidth - viewport.clientWidth;
+			var index = cardAt( offset );
+			var next = Math.max( 0, Math.min( stops.length - 1, index + step ) );
+
+			// The last cards may all fit on screen at once, so the row ends
+			// before the last card reaches the start: stop at the end.
+			var to = Math.min( stops[ next ] || 0, span );
+
+			if ( Math.abs( to - offset ) < 2 && next !== index ) {
+				to = Math.min( stops[ Math.max( 0, Math.min( stops.length - 1, next + step ) ) ] || 0, span );
+			}
+
+			if ( driving ) {
+				scrollPage( pageTarget( span > 0 ? to / span : 0 ), true );
+			} else {
+				viewport.scrollTo( { left: to, behavior: prefersReducedMotion() ? 'auto' : 'smooth' } );
+			}
+		}
+
+		/*
+		 * A sideways swipe on a trackpad, over a row that the page's scroll
+		 * drives. The viewport does not scroll itself while driven, so the
+		 * swipe would otherwise do nothing at all -- which is exactly what a
+		 * MacBook user reported. It is turned into the page scroll that moves
+		 * the row the same distance.
+		 */
+		function onWheel( event ) {
+			if ( ! driving || ! distance || Math.abs( event.deltaX ) <= Math.abs( event.deltaY ) ) {
+				return;
+			}
+
+			var p = progress();
+
+			// At either end, let the swipe go wherever the browser sends it.
+			if ( ( event.deltaX < 0 && p <= 0 ) || ( event.deltaX > 0 && p >= 1 ) ) {
+				return;
+			}
+
+			event.preventDefault();
+
+			var perPixel = 'pinned' === mode ? travel / distance : Math.abs( pageTarget( 1 ) - pageTarget( 0 ) ) / distance;
+			var smooth = window.erudaSmoothScroll && window.erudaSmoothScroll.lenis;
+			var from = smooth && typeof smooth.targetScroll === 'number' ? smooth.targetScroll : window.pageYOffset;
+
+			scrollPage( from + event.deltaX * perPixel, false );
 		}
 
 		// A card whose picture has not loaded has no height yet, and a row
@@ -679,6 +777,13 @@
 		window.addEventListener( 'resize', onResize, { passive: true } );
 		root.addEventListener( 'focusin', onFocus );
 		viewport.addEventListener( 'scroll', onSwipe, { passive: true } );
+		viewport.addEventListener( 'wheel', onWheel, { passive: false } );
+
+		arrows.forEach( function ( button ) {
+			button.addEventListener( 'click', function () {
+				go( +button.getAttribute( 'data-erail-step' ) );
+			} );
+		} );
 
 		if ( typeof window.matchMedia === 'function' ) {
 			var motion = window.matchMedia( '(prefers-reduced-motion: reduce)' );
