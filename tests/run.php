@@ -510,7 +510,7 @@ foreach ( $controls as $id => $definition ) {
 
 check( 'the dim control is shown only for scrubbed presets', Motion_Presets::scrubbed(), $controls['eanm_dim']['condition']['eanm_preset'] );
 check( 'dim writes --eanm-dim as a fraction', array( '{{WRAPPER}}' => '--eanm-dim: calc({{SIZE}} / 100);' ), $controls['eanm_dim']['selectors'] );
-check( 'dim defaults to 15 per cent', 15, $controls['eanm_dim']['default']['size'] );
+check( 'dim defaults to 30 per cent: dimmer and the sentence is unreadable while it waits', 30, $controls['eanm_dim']['default']['size'] );
 
 // Neither of these means anything for an animation that fires on load.
 foreach ( array( 'eanm_threshold', 'eanm_replay' ) as $id ) {

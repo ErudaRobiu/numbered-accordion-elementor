@@ -144,7 +144,7 @@ final class Motion_Controls {
 			),
 			'eanm_dim'       => array(
 				'label'       => esc_html__( 'Dimmed to', 'numbered-accordion' ),
-				'description' => esc_html__( 'How faint a word is before the scroll reaches it.', 'numbered-accordion' ),
+				'description' => esc_html__( 'How faint a word is before the scroll reaches it. Below about 30% the sentence stops being readable while it waits.', 'numbered-accordion' ),
 				'type'        => 'slider',
 				'size_units'  => array( '%' ),
 				'range'       => array(
@@ -156,7 +156,7 @@ final class Motion_Controls {
 				),
 				'default'     => array(
 					'unit' => '%',
-					'size' => 15,
+					'size' => 30,
 				),
 				'selectors'   => array( '{{WRAPPER}}' => '--eanm-dim: calc({{SIZE}} / 100);' ),
 				'condition'   => array( 'eanm_preset' => Motion_Presets::scrubbed() ),

@@ -172,8 +172,8 @@
 }
 
 /*
- * Scroll Highlight: the words start dim and light up as the paragraph passes
- * through the middle of the screen.
+ * Scroll Highlight: the words start dim and light up as the paragraph rises
+ * to the middle of the screen, finishing there.
  *
  * The script writes --eanm-p per word, from 0 to 1, every frame. That is the
  * whole of the scrubbing; the sum below turns it into an opacity between the
@@ -187,7 +187,7 @@
  * opacities were still crawling through 0.92, 0.86, 0.75, 0.59, 0.35.
  */
 .eanm-preset-scroll-highlight [data-eanm-ready] .eanm-i {
-	opacity: calc(var(--eanm-dim, 0.15) + (1 - var(--eanm-dim, 0.15)) * var(--eanm-p, 0));
+	opacity: calc(var(--eanm-dim, 0.3) + (1 - var(--eanm-dim, 0.3)) * var(--eanm-p, 0));
 }
 
 .eanm-preset-scroll-highlight [data-eanm-armed] .eanm-i {

@@ -306,10 +306,18 @@
 	var SCRUB_SOFTNESS = 1.6;
 
 	/**
-	 * How far the element has travelled through the middle of the screen.
+	 * How far the sweep has got, 0 to 1.
 	 *
-	 * 0 when its top reaches the centre, 1 when its bottom does -- the same
-	 * band as a scrub from "top center" to "bottom center".
+	 * It starts as the paragraph comes up from the bottom of the screen and
+	 * is complete by the time the paragraph sits in the middle -- where it is
+	 * actually read. The first version ran from "top centre" to "bottom
+	 * centre", the usual scroll-scrub recipe, and on a real page that meant a
+	 * paragraph was still mostly dim the whole time anyone was reading it:
+	 * at 1440 x 900 a two-line sentence only finished lighting once its top
+	 * was 45px from the top of the window (ThermStar, Oct 2026).
+	 *
+	 * A paragraph taller than the window cannot be centred, so for those the
+	 * end is held a little below the top of the screen instead.
 	 *
 	 * @param {Element} el Target element.
 	 * @return {number} 0 to 1.
@@ -317,20 +325,19 @@
 	function scrollProgress( el ) {
 		var rect = el.getBoundingClientRect();
 		var viewport = window.innerHeight || document.documentElement.clientHeight;
-		var middle = viewport / 2;
 
 		if ( rect.height <= 0 ) {
 			return 0;
 		}
 
-		// The band is the element's own height, but never less than a good
-		// part of the screen. A one-line heading is barely forty pixels tall,
-		// and scrubbing a whole sentence across forty pixels of scroll is a
-		// flicker rather than a sweep. Taller paragraphs are unaffected, so
-		// this matches the reference wherever the reference makes sense.
-		var band = Math.max( rect.height, viewport * 0.45 );
+		var start = viewport * 0.9;
+		var end = Math.max( viewport / 2 - rect.height / 2, viewport * 0.12 );
 
-		return Math.min( Math.max( ( middle - rect.top ) / band, 0 ), 1 );
+		if ( start <= end ) {
+			return rect.top <= end ? 1 : 0;
+		}
+
+		return Math.min( Math.max( ( start - rect.top ) / ( start - end ), 0 ), 1 );
 	}
 
 	/**
