@@ -303,6 +303,66 @@ final class Assess_Content {
 	}
 
 	/**
+	 * How the estimate was worked out, in the words the result screen uses.
+	 *
+	 * @param array $e Estimate.
+	 * @return string
+	 */
+	public static function basis( $e ) {
+		$share = isset( $e['share'] ) && 2 === count( (array) $e['share'] ) ? $e['share'] : array( 30, 50 );
+
+		return 'Indicative. Heat = 1.08 × airflow × (exhaust temperature − ' . self::SINK_F . ' °F), with ' . $share[0] . '% to ' . $share[1] . '% of it recovered for the uses you chose, displacing fuel burned at ' . (int) ( self::BURNER * 100 ) . '% efficiency. The free screen replaces these assumptions with your real data.';
+	}
+
+	/**
+	 * A start token: when the form was handed out, signed so a bot cannot
+	 * make one up. The browser's own clock is never trusted for this.
+	 *
+	 * @param int    $now Unix time.
+	 * @param string $key Secret.
+	 * @return string
+	 */
+	public static function token( $now, $key ) {
+		return (int) $now . '.' . substr( hash_hmac( 'sha256', 'eas|' . (int) $now, (string) $key ), 0, 32 );
+	}
+
+	/**
+	 * Seconds since a start token was handed out, or null if it is forged
+	 * or malformed.
+	 *
+	 * @param mixed  $token Token as sent.
+	 * @param int    $now   Unix time.
+	 * @param string $key   Secret.
+	 * @return int|null
+	 */
+	public static function token_age( $token, $now, $key ) {
+		if ( ! is_string( $token ) || ! preg_match( '/^(\d{9,11})\.[0-9a-f]{32}$/', $token, $m ) ) {
+			return null;
+		}
+
+		return hash_equals( self::token( (int) $m[1], $key ), $token ) ? (int) $now - (int) $m[1] : null;
+	}
+
+	/**
+	 * Spam a person would not send: a web address in a name, company or job
+	 * title, or a note that is mostly links.
+	 *
+	 * @param array $d Clean data.
+	 * @return bool
+	 */
+	public static function is_spam( $d ) {
+		$link = '~https?://|www\.|\[url~i';
+
+		foreach ( array( 'first', 'last', 'company', 'role', 'location' ) as $key ) {
+			if ( preg_match( $link, (string) ( $d[ $key ] ?? '' ) ) ) {
+				return true;
+			}
+		}
+
+		return preg_match_all( $link, (string) ( $d['notes'] ?? '' ) ) > 2;
+	}
+
+	/**
 	 * A number for people: 15000 reads "15,000".
 	 *
 	 * @param float $n Number.

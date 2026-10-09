@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.79.1
+Stable tag: 2.80.0
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,17 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.80.0 =
+* Assessment Form: tougher on bots. The form now asks the server for a
+  signed start token when it loads, so the minimum time on the form can no
+  longer be faked by posting straight to the route; requests with a web
+  address in a name, company or job title (or a note full of links) are
+  dropped quietly; an email whose domain cannot receive mail is turned back
+  with a message; and the site sends at most 40 estimate emails to visitors
+  an hour (requests past that are still saved and still reach the team).
+* Assessment Form: the visitor's estimate email now carries the same
+  assumptions line as the result screen.
 
 = 2.74.0 =
 * Case Studies: a link ending #cases-<sector> (for example

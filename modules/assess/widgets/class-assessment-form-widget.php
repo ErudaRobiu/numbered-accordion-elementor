@@ -365,9 +365,10 @@ class Assessment_Form_Widget extends Widget_Base {
 		$book_label = '' !== $book_label ? $book_label : __( 'Schedule your personalized analysis', 'numbered-accordion' );
 
 		$attrs = sprintf(
-			' data-mode="%s" data-endpoint="%s" data-doc="%d" data-el="%s" data-trigger="%s" data-price="%s"',
+			' data-mode="%s" data-endpoint="%s" data-token="%s" data-doc="%d" data-el="%s" data-trigger="%s" data-price="%s"',
 			esc_attr( $mode ),
 			esc_url( rest_url( Assess_Module::REST_NS . Assess_Module::REST_ROUTE ) ),
+			esc_url( rest_url( Assess_Module::REST_NS . Assess_Module::REST_ROUTE . '/token' ) ),
 			$this->document_id(),
 			esc_attr( $this->get_id() ),
 			esc_attr( (string) ( $s['trigger'] ?? '' ) ),

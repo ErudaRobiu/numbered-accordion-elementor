@@ -41,6 +41,21 @@
 		var dialog = root.closest( 'dialog' );
 		var current = 1;
 		var started = Date.now();
+		var token = '';
+
+		// The server's start token: when this form was handed out, signed.
+		// Asked for now, not baked into the page, so a cached page still works.
+		function getToken() {
+			var url = root.getAttribute( 'data-token' );
+			if ( ! url || ! window.fetch ) {
+				return Promise.resolve( '' );
+			}
+			return fetch( url, { credentials: 'same-origin', cache: 'no-store' } )
+				.then( function ( r ) { return r.json(); } )
+				.then( function ( b ) { token = ( b && b.token ) || ''; return token; } )
+				.catch( function () { return ''; } );
+		}
+		getToken();
 
 		if ( ! form ) {
 			return;
@@ -237,6 +252,7 @@
 				website: get( 'website' ),
 				source: window.location.href,
 				elapsed: Date.now() - started,
+				token: token,
 			};
 		}
 
@@ -312,12 +328,21 @@
 			send.setAttribute( 'aria-busy', 'true' );
 			send.textContent = 'Sending…';
 
-			fetch( root.getAttribute( 'data-endpoint' ), {
-				method: 'POST',
-				headers: root.getAttribute( 'data-nonce' ) ? { 'Content-Type': 'application/json', 'X-WP-Nonce': root.getAttribute( 'data-nonce' ) } : { 'Content-Type': 'application/json' },
-				body: JSON.stringify( payload() ),
-				credentials: 'same-origin',
-			} )
+			// No start token yet (the first request failed): fetch one, then
+			// wait out the minimum the server asks of a person.
+			var ready = token ? Promise.resolve() : getToken().then( function () {
+				return new Promise( function ( resolve ) { setTimeout( resolve, 4500 ); } );
+			} );
+
+			ready
+				.then( function () {
+					return fetch( root.getAttribute( 'data-endpoint' ), {
+						method: 'POST',
+						headers: root.getAttribute( 'data-nonce' ) ? { 'Content-Type': 'application/json', 'X-WP-Nonce': root.getAttribute( 'data-nonce' ) } : { 'Content-Type': 'application/json' },
+						body: JSON.stringify( payload() ),
+						credentials: 'same-origin',
+					} );
+				} )
 				.then( function ( response ) {
 					return response.json().catch( function () { return {}; } ).then( function ( body ) {
 						return { status: response.status, body: body };

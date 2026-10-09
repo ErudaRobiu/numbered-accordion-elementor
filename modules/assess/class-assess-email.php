@@ -92,7 +92,7 @@ final class Assess_Email {
 			$lines[] = $row[0] . ': ' . $row[1];
 		}
 
-		array_push( $lines, '', Assess_Content::WEATHER_NOTE, '', 'ThermStar', 'solutions@thermstar.com · 833 667 7359' );
+		array_push( $lines, '', Assess_Content::basis( $e ), Assess_Content::WEATHER_NOTE, '', 'ThermStar', 'solutions@thermstar.com · 833 667 7359' );
 
 		return implode( "\n", $lines );
 	}
@@ -157,6 +157,7 @@ final class Assess_Email {
 			. '<tr><th align="left" style="padding:10px 14px;background:' . self::NAVY . ';' . $font . 'font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#FFFFFF;">Field</th><th align="left" style="padding:10px 14px;background:' . self::NAVY . ';' . $font . 'font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#FFFFFF;">Value</th></tr>'
 			. $rows
 			. '</table>'
+			. '<p style="margin:0 0 8px;' . $font . 'font-size:13px;line-height:1.5;color:' . self::MUTED . ';">' . $h( Assess_Content::basis( $e ) ) . '</p>'
 			. '<p style="margin:0 0 28px;' . $font . 'font-size:13px;line-height:1.5;font-style:italic;color:' . self::MUTED . ';">' . $h( Assess_Content::WEATHER_NOTE ) . '</p>'
 			. '</td></tr>'
 			. '<tr><td style="padding:20px 36px 28px;border-top:1px solid ' . self::LINE . ';' . $font . 'font-size:13px;line-height:1.6;color:' . self::MUTED . ';">'

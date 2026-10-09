@@ -3458,6 +3458,16 @@ check( 'email html: the copy, the button and the table', true, false !== strpos(
 check( 'email html: what the visitor typed is escaped', array( true, false ), array( false !== strpos( $em_html, 'Norrel &lt;Inc&gt;' ), false !== strpos( $em_html, 'Norrel <Inc>' ) ) );
 check( 'email html: the weather note goes too', true, false !== strpos( $em_html, Assess_Content::WEATHER_NOTE ) );
 check( 'email: no booking page, no button', false, strpos( Assess_Email::html( $em_data, $ae, array() ), 'SCHEDULE YOUR PERSONALIZED ANALYSIS' ) );
+check( 'email: the assumptions line from the result screen goes too', true, false !== strpos( $em_html, 'with 50% to 70% of it recovered for the uses you chose, displacing fuel burned at 80% efficiency.' ) && false !== strpos( $em_text, Assess_Content::basis( $ae ) ) );
+
+// Bots: a signed start token the browser cannot fake, and link spam.
+$tk = Assess_Content::token( 1791500000, 'secret' );
+check( 'token: its age is read back', 7, Assess_Content::token_age( $tk, 1791500007, 'secret' ) );
+check( 'token: another key cannot have signed it', null, Assess_Content::token_age( $tk, 1791500007, 'other' ) );
+check( 'token: an earlier time with the same signature is forged', null, Assess_Content::token_age( '1791400000' . substr( $tk, 10 ), 1791500007, 'secret' ) );
+check( 'token: missing or junk is no token', array( null, null, null ), array( Assess_Content::token_age( null, 1, 'secret' ), Assess_Content::token_age( '', 1, 'secret' ), Assess_Content::token_age( array( $tk ), 1, 'secret' ) ) );
+check( 'spam: a web address in a name or company', array( true, true, false ), array( Assess_Content::is_spam( array( 'first' => 'Visit http://x.ru' ) ), Assess_Content::is_spam( array( 'company' => 'www.cheap-seo.biz' ) ), Assess_Content::is_spam( $ac['data'] ) ) );
+check( 'spam: a note may carry a link or two, not a list', array( false, true ), array( Assess_Content::is_spam( array( 'notes' => 'See https://a.com and https://b.com' ) ), Assess_Content::is_spam( array( 'notes' => 'http://a http://b http://c' ) ) ) );
 check( 'email html: empty answers show a dash', true, false !== strpos( $em_html, 'Job Title</td><td style="padding:10px 14px;border-top:1px solid #DDE2E6;background:#FFFFFF;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0F3961;font-weight:bold;">&mdash;' ) );
 
 /* ------------------------------------------------------------- report --- */

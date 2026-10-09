@@ -32,6 +32,19 @@ final class Assess_Module extends Elementor_Module {
 	const PER_HOUR = 5;
 
 	/**
+	 * Estimate emails the whole site may send to visitors in an hour, so the
+	 * form can never be used to flood other people's inboxes. Past it the
+	 * request is still saved and the team still hears about it.
+	 */
+	const VISITOR_MAILS_PER_HOUR = 40;
+
+	/**
+	 * Seconds a person needs at least, and the longest a form may sit open.
+	 */
+	const MIN_SECONDS = 4;
+	const MAX_SECONDS = 86400;
+
+	/**
 	 * Module id.
 	 *
 	 * @return string
@@ -115,10 +128,15 @@ final class Assess_Module extends Elementor_Module {
 	 * POST /wp-json/eruda/v1/assessment
 	 *
 	 * Public by nature: anyone may ask for an assessment. Abuse is kept down
-	 * by a hidden field bots fill in, a minimum time on the form, and a limit
-	 * per visitor per hour. The recipient, price and send mode are read from
-	 * the widget as saved in Elementor, never from the request, so the route
-	 * cannot be pointed at anyone else's inbox.
+	 * by a hidden field bots fill in, a signed start token with a minimum time
+	 * on the form, a check that the email's domain takes mail, a link filter,
+	 * a limit per visitor per hour and a site-wide cap on visitor emails. The
+	 * recipient, price and send mode are read from the widget as saved in
+	 * Elementor, never from the request, so the route cannot be pointed at
+	 * anyone else's inbox.
+	 *
+	 * GET /wp-json/eruda/v1/assessment/token hands out the start token; the
+	 * form asks for it when it loads, so a cached page still gets a fresh one.
 	 */
 	public function register_route() {
 		register_rest_route(
@@ -130,6 +148,36 @@ final class Assess_Module extends Elementor_Module {
 				'callback'            => array( $this, 'handle' ),
 			)
 		);
+
+		register_rest_route(
+			self::REST_NS,
+			self::REST_ROUTE . '/token',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => '__return_true',
+				'callback'            => function () {
+					$response = new \WP_REST_Response( array( 'token' => Assess_Content::token( time(), wp_salt( 'nonce' ) ) ), 200 );
+					$response->header( 'Cache-Control', 'no-store, max-age=0' );
+					return $response;
+				},
+			)
+		);
+	}
+
+	/**
+	 * Whether an email address's domain can receive mail at all.
+	 *
+	 * @param string $email Address.
+	 * @return bool
+	 */
+	private static function domain_takes_mail( $email ) {
+		$domain = strtolower( (string) substr( strrchr( $email, '@' ), 1 ) );
+
+		if ( '' === $domain || ! function_exists( 'checkdnsrr' ) ) {
+			return true; // Cannot check here: let it through rather than lose a real request.
+		}
+
+		return checkdnsrr( $domain, 'MX' ) || checkdnsrr( $domain, 'A' ) || checkdnsrr( $domain, 'AAAA' );
 	}
 
 	/**
@@ -172,10 +220,18 @@ final class Assess_Module extends Elementor_Module {
 	public function handle( $request ) {
 		$body = (array) $request->get_json_params();
 
-		// Bots fill the hidden field and submit instantly. Answer them as if
-		// it worked, so they learn nothing.
-		if ( ! empty( $body['website'] ) || (int) ( $body['elapsed'] ?? 0 ) < 3000 ) {
-			return new \WP_REST_Response( array( 'ok' => true, 'estimate' => null ), 200 );
+		// Bots fill the hidden field, forge or skip the start token, or submit
+		// faster than anyone can read three steps. Answer them as if it
+		// worked, so they learn nothing.
+		$fake = new \WP_REST_Response( array( 'ok' => true, 'estimate' => null ), 200 );
+		$age  = Assess_Content::token_age( $body['token'] ?? null, time(), wp_salt( 'nonce' ) );
+
+		if ( ! empty( $body['website'] ) || null === $age || $age < self::MIN_SECONDS ) {
+			return $fake;
+		}
+
+		if ( $age > self::MAX_SECONDS ) {
+			return new \WP_REST_Response( array( 'ok' => false, 'message' => 'This form has been open too long. Reload the page and try again.' ), 400 );
 		}
 
 		$settings = self::widget_settings( (int) ( $body['doc'] ?? 0 ), (string) ( $body['el'] ?? '' ) );
@@ -198,8 +254,16 @@ final class Assess_Module extends Elementor_Module {
 
 		$clean = Assess_Content::clean( $body );
 
+		if ( ! isset( $clean['errors']['email'] ) && ! self::domain_takes_mail( $clean['data']['email'] ) ) {
+			$clean['errors']['email'] = 'That email address can’t receive mail. Check the part after the @.';
+		}
+
 		if ( $clean['errors'] ) {
 			return new \WP_REST_Response( array( 'ok' => false, 'errors' => $clean['errors'] ), 422 );
+		}
+
+		if ( Assess_Content::is_spam( $clean['data'] ) ) {
+			return $fake;
 		}
 
 		$d        = $clean['data'];
@@ -237,7 +301,14 @@ final class Assess_Module extends Elementor_Module {
 				$summary . "\n\nSaved in WordPress under Assessments.",
 				array( 'Reply-To: ' . $d['first'] . ' ' . $d['last'] . ' <' . $d['email'] . '>' )
 			);
-			$mail['visitor'] = self::send_visitor_email( $d, $estimate, $settings, $to );
+			$cap = (int) get_transient( 'eas_visitor_mails' );
+
+			if ( $staff || $cap < self::VISITOR_MAILS_PER_HOUR ) {
+				$mail['visitor'] = self::send_visitor_email( $d, $estimate, $settings, $to );
+				if ( ! $staff ) {
+					set_transient( 'eas_visitor_mails', $cap + 1, HOUR_IN_SECONDS );
+				}
+			}
 		}
 
 		if ( $post_id && ! is_wp_error( $post_id ) ) {
