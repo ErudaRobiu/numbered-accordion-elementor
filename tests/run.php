@@ -3454,10 +3454,12 @@ $em_text  = Assess_Email::text( $em_data, $ae, $em_links );
 $em_html  = Assess_Email::html( $em_data, $ae, $em_links );
 check( 'email text: greeting, therms and savings', true, false !== strpos( $em_text, 'Hello Tom,' ) && false !== strpos( $em_text, '19,000 to 27,000 Therms per year' ) && false !== strpos( $em_text, 'a typical $1.00 per Therm for natural gas, you could be saving $19,000 to $27,000 per year.' ) );
 check( 'email text: booking and calculator links', true, false !== strpos( $em_text, 'SCHEDULE YOUR PERSONALIZED ANALYSIS: https://book.example/x' ) && false !== strpos( $em_text, 'https://site.example/#assessment' ) );
-check( 'email html: the copy, the button and the table', true, false !== strpos( $em_html, '>Tom</strong>, with the ThermStar System™ you could save:' ) && false !== strpos( $em_html, 'href="https://book.example/x"' ) && false !== strpos( $em_html, 'Click here to use the savings calculator again.' ) && false !== strpos( $em_html, 'Toronto, ON' ) );
+check( 'email html: the copy, the button and the table', true, false !== strpos( $em_html, '>Tom, with the ThermStar System™ you could save:' ) && false !== strpos( $em_html, 'href="https://book.example/x"' ) && false !== strpos( $em_html, 'Click here to use the savings calculator again.' ) && false !== strpos( $em_html, 'Toronto, ON' ) );
 check( 'email html: what the visitor typed is escaped', array( true, false ), array( false !== strpos( $em_html, 'Norrel &lt;Inc&gt;' ), false !== strpos( $em_html, 'Norrel <Inc>' ) ) );
+check( 'email html: both figures sit in the summary', true, false !== strpos( $em_html, '>19,000 to 27,000</p>' ) && false !== strpos( $em_html, '>$19,000 to $27,000</p>' ) && false !== strpos( $em_html, 'per year at $1.00 per Therm' ) );
+check( 'email html: a preheader for the inbox preview', true, false !== strpos( $em_html, 'Your estimate: 19,000 to 27,000 therms a year, about $19,000 to $27,000 a year at $1.00 per therm.' ) );
 check( 'email html: the weather note goes too', true, false !== strpos( $em_html, Assess_Content::WEATHER_NOTE ) );
-check( 'email: no booking page, no button', false, strpos( Assess_Email::html( $em_data, $ae, array() ), 'SCHEDULE YOUR PERSONALIZED ANALYSIS' ) );
+check( 'email: no booking page, no button', false, strpos( Assess_Email::html( $em_data, $ae, array() ), 'Schedule your personalized analysis' ) );
 check( 'email: the assumptions line from the result screen goes too', true, false !== strpos( $em_html, 'with 50% to 70% of it recovered for the uses you chose, displacing fuel burned at 80% efficiency.' ) && false !== strpos( $em_text, Assess_Content::basis( $ae ) ) );
 
 // Bots: a signed start token the browser cannot fake, and link spam.
@@ -3468,7 +3470,7 @@ check( 'token: an earlier time with the same signature is forged', null, Assess_
 check( 'token: missing or junk is no token', array( null, null, null ), array( Assess_Content::token_age( null, 1, 'secret' ), Assess_Content::token_age( '', 1, 'secret' ), Assess_Content::token_age( array( $tk ), 1, 'secret' ) ) );
 check( 'spam: a web address in a name or company', array( true, true, false ), array( Assess_Content::is_spam( array( 'first' => 'Visit http://x.ru' ) ), Assess_Content::is_spam( array( 'company' => 'www.cheap-seo.biz' ) ), Assess_Content::is_spam( $ac['data'] ) ) );
 check( 'spam: a note may carry a link or two, not a list', array( false, true ), array( Assess_Content::is_spam( array( 'notes' => 'See https://a.com and https://b.com' ) ), Assess_Content::is_spam( array( 'notes' => 'http://a http://b http://c' ) ) ) );
-check( 'email html: empty answers show a dash', true, false !== strpos( $em_html, 'Job Title</td><td style="padding:10px 14px;border-top:1px solid #DDE2E6;background:#FFFFFF;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0F3961;font-weight:bold;">&mdash;' ) );
+check( 'email html: empty answers show a dash', true, false !== strpos( $em_html, 'vertical-align:top;">Job Title</td>' ) && false !== strpos( $em_html, 'vertical-align:top;">&mdash;</td>' ) );
 
 /* ------------------------------------------------------------- report --- */
 
