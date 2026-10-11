@@ -3,7 +3,7 @@ Contributors: erudarobiu
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.81.0
+Stable tag: 2.81.1
 License: GPLv2 or later
 
 A small toolkit of site-building modules: a numbered accordion and an impact
@@ -131,6 +131,10 @@ an in-place update: the plugin folder is unchanged, your accordions are
 untouched, and nothing needs re-saving.
 
 == Changelog ==
+
+= 2.81.1 =
+* Assessment Form: the estimate email's heading now reads "Your heat recovery
+  estimate".
 
 = 2.81.0 =
 * Assessment Form: the visitor's estimate email has a new, plainer

@@ -167,7 +167,7 @@ final class Assess_Email {
 			// Title and greeting.
 			. '<tr><td class="eml-px" style="padding-top:36px;' . $pad . '">'
 			. '<p style="margin:0 0 10px;' . $label . '">Opportunity Screen</p>'
-			. '<h1 style="margin:0 0 24px;' . $font . 'font-size:24px;line-height:1.3;font-weight:bold;letter-spacing:-.01em;color:' . self::NAVY . ';">Your personalized website estimate</h1>'
+			. '<h1 style="margin:0 0 24px;' . $font . 'font-size:24px;line-height:1.3;font-weight:bold;letter-spacing:-.01em;color:' . self::NAVY . ';">Your heat recovery estimate</h1>'
 			. '<p style="' . $para . '">Hello ' . $h( $p['first'] ) . ',</p>'
 			. '<p style="' . $para . '">Thank you for using our waste heat recovery savings calculator! Let’s explore your personalized website estimate.</p>'
 			. '<p style="' . $para . 'margin-bottom:20px;">' . $h( $p['first'] ) . ', with the ThermStar System™ you could save:</p>'
