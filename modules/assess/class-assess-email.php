@@ -116,12 +116,29 @@ final class Assess_Email {
 		};
 		$f = array( Assess_Content::class, 'fmt' );
 
+		// "TM" as letters, never U+2122: Outlook on Windows swaps that
+		// character for its emoji and prints it as large as a heading.
+		$tm   = '<sup style="font-size:60%;line-height:0;vertical-align:super;">TM</sup>';
+		$team = ! empty( $links['team'] );
+
 		$font  = 'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;';
 		$ink   = '#1F2D3D';
 		$para  = 'margin:0 0 16px;' . $font . 'font-size:15px;line-height:1.6;color:' . $ink . ';';
 		$label = $font . 'font-size:11px;line-height:1.4;letter-spacing:.08em;text-transform:uppercase;color:' . self::MUTED . ';';
 		$small = 'margin:0 0 8px;' . $font . 'font-size:12px;line-height:1.55;color:' . self::MUTED . ';';
 		$pad   = 'padding-left:40px;padding-right:40px;';
+
+		// The team copy is the visitor's letter word for word, plus what
+		// sales needs that the visitor was not shown back to them.
+		if ( $team ) {
+			$p['rows'][] = array( 'Phone', (string) ( $d['phone'] ?? '' ) );
+			$p['rows'][] = array( 'Notes', (string) ( $d['notes'] ?? '' ) );
+			$p['rows'][] = array( 'Sent from', (string) ( $d['source'] ?? '' ) );
+			if ( isset( $e['mmbtu'], $e['tco2'] ) ) {
+				$p['rows'][] = array( 'Heat recovered', $f( $e['mmbtu'][0] ) . ' to ' . $f( $e['mmbtu'][1] ) . ' MMBtu per year' );
+				$p['rows'][] = array( 'Carbon avoided', $f( $e['tco2'][0] ) . ' to ' . $f( $e['tco2'][1] ) . ' t CO2 per year' );
+			}
+		}
 
 		$rows = '';
 		foreach ( $p['rows'] as $row ) {
@@ -151,7 +168,9 @@ final class Assess_Email {
 			? ' Need another estimate? <a href="' . $h( $p['again'] ) . '" style="color:' . self::GREEN . ';text-decoration:underline;">Click here to use the savings calculator again.</a>'
 			: '';
 
-		$preheader = 'Your estimate: ' . $p['therms'] . ' therms a year, about ' . $p['save'] . ' a year at ' . $p['price'] . ' per therm.';
+		$preheader = $team
+			? 'New request: ' . $d['company'] . ', ' . $p['save'] . ' a year estimated.'
+			: 'Your estimate: ' . $p['therms'] . ' therms a year, about ' . $p['save'] . ' a year at ' . $p['price'] . ' per therm.';
 
 		return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="x-apple-disable-message-reformatting"><title>' . $h( self::SUBJECT ) . '</title>'
 			. '<style>@media (max-width:520px){.eml-px{padding-left:24px!important;padding-right:24px!important}.eml-fig{display:block!important;width:100%!important;padding:18px 0!important;border-left:0!important}.eml-fig2{border-top:1px solid ' . self::LINE . '!important}.eml-k{width:42%!important}}</style>'
@@ -160,6 +179,14 @@ final class Assess_Email {
 			. '<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#F3F4F6;">' . $h( $preheader ) . '</div>'
 			. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F3F4F6;"><tr><td align="center" style="padding:32px 12px;">'
 			. '<table role="presentation" width="640" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:640px;background:#FFFFFF;border-top:4px solid ' . self::NAVY . ';">'
+
+			// Team copy only: who it is from and how to answer them.
+			. ( $team
+				? '<tr><td class="eml-px" bgcolor="#EEF5F1" style="background:#EEF5F1;padding-top:18px;padding-bottom:18px;' . $pad . $font . 'font-size:14px;line-height:1.5;color:' . $ink . ';">'
+					. '<strong style="color:' . self::GREEN . ';">New assessment request</strong> from ' . $h( trim( $d['first'] . ' ' . $d['last'] ) ) . ', ' . $h( $d['company'] ) . '. '
+					. 'Reply to this email to answer them. Below is the estimate they were sent, with their full submission.'
+					. '</td></tr>'
+				: '' )
 
 			// Logo.
 			. '<tr><td class="eml-px" style="padding-top:32px;padding-bottom:28px;' . $pad . 'border-bottom:1px solid ' . self::LINE . ';">' . $logo . '</td></tr>'
@@ -170,7 +197,7 @@ final class Assess_Email {
 			. '<h1 style="margin:0 0 24px;' . $font . 'font-size:24px;line-height:1.3;font-weight:bold;letter-spacing:-.01em;color:' . self::NAVY . ';">Your heat recovery estimate</h1>'
 			. '<p style="' . $para . '">Hello ' . $h( $p['first'] ) . ',</p>'
 			. '<p style="' . $para . '">Thank you for using our waste heat recovery savings calculator! Let’s explore your personalized website estimate.</p>'
-			. '<p style="' . $para . 'margin-bottom:20px;">' . $h( $p['first'] ) . ', with the ThermStar System™ you could save:</p>'
+			. '<p style="' . $para . 'margin-bottom:20px;">' . $h( $p['first'] ) . ', with the ThermStar System' . $tm . ' you could save:</p>'
 			. '</td></tr>'
 
 			// The two figures.
@@ -184,9 +211,9 @@ final class Assess_Email {
 			// The client's copy.
 			. '<tr><td class="eml-px" style="padding-top:24px;' . $pad . '">'
 			. '<p style="' . $para . '">If you’re paying a typical ' . $h( $p['price'] ) . ' per Therm for natural gas, you could be saving ' . $h( $p['save'] ) . ' per year.</p>'
-			. '<p style="' . $para . '">The ThermStar System™ recovers thermal energy from particulate-laden exhaust air streams, converting your wasted heat into clean, usable energy. Dirty Air. Clean Energy.</p>'
+			. '<p style="' . $para . '">The ThermStar System' . $tm . ' recovers thermal energy from particulate-laden exhaust air streams, converting your wasted heat into clean, usable energy. Dirty Air. Clean Energy.</p>'
 			. '<p style="' . $para . '">Your estimate is just the beginning of a process where we evaluate your heat recovery opportunities and can share more ways to save with waste heat recovery across an individual facility or broader site network.</p>'
-			. '<p style="' . $para . 'margin:8px 0 16px;font-weight:bold;color:' . self::NAVY . ';">Ready to explore your savings with the ThermStar System™?</p>'
+			. '<p style="' . $para . 'margin:8px 0 16px;font-weight:bold;color:' . self::NAVY . ';">Ready to explore your savings with the ThermStar System' . $tm . '?</p>'
 			. $button
 			. '</td></tr>'
 
@@ -205,7 +232,7 @@ final class Assess_Email {
 			. '<tr><td class="eml-px" style="padding:24px 40px 8px;' . $font . 'font-size:12px;line-height:1.7;color:' . self::MUTED . ';">'
 			. '<strong style="color:' . self::NAVY . ';">ThermStar</strong> &nbsp;·&nbsp; Dirty Air. Clean Energy.<br>'
 			. '<a href="mailto:solutions@thermstar.com" style="color:' . self::MUTED . ';text-decoration:underline;">solutions@thermstar.com</a> &nbsp;·&nbsp; <a href="tel:+18336677359" style="color:' . self::MUTED . ';text-decoration:none;">833 667 7359</a> &nbsp;·&nbsp; <a href="https://thermstar.com/" style="color:' . self::MUTED . ';text-decoration:underline;">thermstar.com</a><br>'
-			. 'You are receiving this email because you requested an estimate on thermstar.com.'
+			. ( $team ? 'Team copy of an estimate sent from thermstar.com. Also saved in WordPress under Assessments.' : 'You are receiving this email because you requested an estimate on thermstar.com.' )
 			. '</td></tr></table>'
 			. '</td></tr></table></body></html>';
 	}

@@ -180,10 +180,10 @@ class Assessment_Form_Widget extends Widget_Base {
 		$this->add_control(
 			'email_logo',
 			array(
-				'label'       => esc_html__( 'Logo in the visitor’s email', 'numbered-accordion' ),
+				'label'       => esc_html__( 'Logo in the emails', 'numbered-accordion' ),
 				'type'        => Controls_Manager::MEDIA,
 				'media_types' => array( 'image' ),
-				'description' => esc_html__( 'Use a PNG or JPG: Outlook does not show WebP or SVG. Without one, the email starts with the name in text.', 'numbered-accordion' ),
+				'description' => esc_html__( 'Use a PNG or JPG: Outlook does not show WebP or SVG. A WebP or SVG is skipped, and without one the emails start with the name in text.', 'numbered-accordion' ),
 			)
 		);
 

@@ -295,12 +295,21 @@ final class Assess_Module extends Elementor_Module {
 		$mail = array( 'team' => false, 'visitor' => false );
 
 		if ( 'send' === $mode && is_email( $to ) ) {
+			// The same letter the visitor gets, so the team sees exactly
+			// what went out; the plain summary rides along for text-only apps.
+			$team_text = $summary . "\n\nSaved in WordPress under Assessments.";
+			$team_alt  = function ( $mailer ) use ( $team_text ) {
+				$mailer->AltBody = $team_text; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			};
+
+			add_action( 'phpmailer_init', $team_alt );
 			$mail['team'] = wp_mail(
 				$to,
 				sprintf( 'Assessment request: %s (%s)', $d['company'], Assess_Content::industries()[ $d['industry'] ] ?? 'industry not given' ),
-				$summary . "\n\nSaved in WordPress under Assessments.",
-				array( 'Reply-To: ' . $d['first'] . ' ' . $d['last'] . ' <' . $d['email'] . '>' )
+				Assess_Email::html( $d, $estimate, array( 'team' => true ) + self::email_links( $settings ) ),
+				array( 'Content-Type: text/html; charset=UTF-8', 'Reply-To: ' . $d['first'] . ' ' . $d['last'] . ' <' . $d['email'] . '>' )
 			);
+			remove_action( 'phpmailer_init', $team_alt );
 			$cap = (int) get_transient( 'eas_visitor_mails' );
 
 			if ( $staff || $cap < self::VISITOR_MAILS_PER_HOUR ) {
@@ -329,12 +338,7 @@ final class Assess_Module extends Elementor_Module {
 	 * @return bool
 	 */
 	private static function send_visitor_email( $d, $e, $settings, $team ) {
-		$logo  = (int) ( $settings['email_logo']['id'] ?? 0 );
-		$links = array(
-			'book'  => self::booking_url( $settings ),
-			'again' => home_url( '/#assessment' ),
-			'logo'  => $logo ? (string) wp_get_attachment_image_url( $logo, 'large' ) : '',
-		);
+		$links = self::email_links( $settings );
 		$text  = Assess_Email::text( $d, $e, $links );
 		$alt   = function ( $mailer ) use ( $text ) {
 			$mailer->AltBody = $text; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
@@ -350,6 +354,31 @@ final class Assess_Module extends Elementor_Module {
 		remove_action( 'phpmailer_init', $alt );
 
 		return $sent;
+	}
+
+	/**
+	 * Links both emails share.
+	 *
+	 * The logo is left out when it is WebP: Outlook on Windows cannot show
+	 * WebP and prints a broken-image box instead, so the wordmark text is
+	 * used. Set a PNG or JPG in the widget's email logo.
+	 *
+	 * @param array $settings Saved widget settings.
+	 * @return array
+	 */
+	private static function email_links( $settings ) {
+		$logo = (int) ( $settings['email_logo']['id'] ?? 0 );
+		$url  = $logo ? (string) wp_get_attachment_image_url( $logo, 'large' ) : '';
+
+		if ( '' !== $url && ( in_array( get_post_mime_type( $logo ), array( 'image/webp', 'image/svg+xml' ), true ) || preg_match( '/\.(webp|svg)(\?|$)/i', $url ) ) ) {
+			$url = '';
+		}
+
+		return array(
+			'book'  => self::booking_url( $settings ),
+			'again' => home_url( '/#assessment' ),
+			'logo'  => $url,
+		);
 	}
 
 	/**
