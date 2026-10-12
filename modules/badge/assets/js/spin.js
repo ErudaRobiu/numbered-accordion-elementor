@@ -84,14 +84,18 @@
 
 		var el = target( root );
 
-		if ( ! el || prefersReducedMotion() || typeof el.animate !== 'function' ) {
+		// Reduced motion stops it, unless the widget asks to slow instead.
+		var calm = prefersReducedMotion();
+		var slowCalm = calm && root.classList.contains( 'espin-rm-slow' );
+
+		if ( ! el || ( calm && ! slowCalm ) || typeof el.animate !== 'function' ) {
 			// Either there is nothing to turn, it should not be turning, or
 			// the stylesheet's own animation is the best that can be done.
 			// Leaving the widget un-ready is what keeps that animation going.
 			return;
 		}
 
-		var turn = readNumber( root, '--espin-speed', 18 ) * 1000;
+		var turn = readNumber( root, '--espin-speed', 18 ) * 1000 * ( slowCalm ? 3 : 1 );
 		var ramp = readNumber( root, '--espin-ramp', 700 );
 		var reverse = root.classList.contains( 'espin-dir-reverse' );
 		var stops = ! root.classList.contains( 'espin-hover-keep' );

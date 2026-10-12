@@ -608,10 +608,12 @@ foreach ( $spin as $id => $definition ) {
 check( 'the prefix that makes the widget spin', 'espin-', $spin['espin_on']['prefix_class'] );
 check( 'and the value it is given', 'yes', $spin['espin_on']['return_value'] );
 check( 'off by default, so no widget starts turning on its own', '', $spin['espin_on']['default'] );
+check( 'reduced motion stops it unless a widget asks to slow', 'stop', $spin['espin_reduced']['default'] );
+check( 'the reduced-motion class the stylesheet and script read', 'espin-rm-', $spin['espin_reduced']['prefix_class'] );
 
 // Changing any of these changes which element is animated or how, so the
 // widget has to be rebuilt rather than restyled.
-foreach ( array( 'espin_on', 'espin_target', 'espin_direction', 'espin_hover' ) as $id ) {
+foreach ( array( 'espin_on', 'espin_target', 'espin_direction', 'espin_hover', 'espin_reduced' ) as $id ) {
 	check( "{$id} re-renders rather than restyles", 'template', $spin[ $id ]['render_type'] );
 }
 

@@ -177,6 +177,19 @@ final class Spin_Controls {
 					'espin_hover' => 'stop',
 				),
 			),
+			'espin_reduced'   => array(
+				'label'        => esc_html__( 'For reduced motion', 'numbered-accordion' ),
+				'description'  => esc_html__( 'Visitors whose system asks for less motion (Windows "Animation effects" off, macOS and iOS "Reduce motion"). Stop leaves it still; Slow keeps it turning at a third of the speed, and the pointer and keyboard still stop it.', 'numbered-accordion' ),
+				'type'         => 'select',
+				'default'      => 'stop',
+				'options'      => array(
+					'stop' => esc_html__( 'Stop', 'numbered-accordion' ),
+					'slow' => esc_html__( 'Slow', 'numbered-accordion' ),
+				),
+				'prefix_class' => 'espin-rm-',
+				'render_type'  => 'template',
+				'condition'    => $on,
+			),
 			'espin_lift'      => array(
 				'label'       => esc_html__( 'Lift on hover', 'numbered-accordion' ),
 				'description' => esc_html__( 'How far it rises, which along with the slowing is what says it can be clicked.', 'numbered-accordion' ),

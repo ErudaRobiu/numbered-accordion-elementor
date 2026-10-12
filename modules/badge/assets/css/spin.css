@@ -73,10 +73,21 @@
 	 * so it stops being that. The lift stays: it is a state change rather than
 	 * continuous motion, and it is the part that says the thing is clickable.
 	 */
-	.espin-yes img,
-	.espin-yes svg,
-	.espin-yes > .elementor-widget-container {
+	.espin-yes:not(.espin-rm-slow) img,
+	.espin-yes:not(.espin-rm-slow) svg,
+	.espin-yes:not(.espin-rm-slow) > .elementor-widget-container {
 		animation: none !important;
+	}
+
+	/*
+	 * Unless the widget was told to slow down instead. Asked for on a badge
+	 * whose client reads a still badge as a broken one; a third of the speed
+	 * is a drift rather than a spin, and hover and focus still stop it.
+	 */
+	.espin-yes.espin-rm-slow:not([data-espin-ready]) img,
+	.espin-yes.espin-rm-slow:not([data-espin-ready]) svg,
+	.espin-yes.espin-rm-slow:not([data-espin-ready]) > .elementor-widget-container {
+		animation-duration: calc(var(--espin-speed, 18s) * 3);
 	}
 
 	.espin-yes {
