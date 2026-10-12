@@ -993,29 +993,6 @@
 
 			var box = bar.getBoundingClientRect();
 
-			/*
-			 * The bottom edge, not the height.
-			 *
-			 * Once it frosts the bar comes away from the top by a gap, so its
-			 * height and its bottom edge are no longer the same number. The
-			 * scrim has to start at the bottom edge or it creeps up over the
-			 * bar and blurs it.
-			 *
-			 * Not while the bar is off the screen, though. Scrolling down
-			 * hides it with a transform, and a transform is in the rect: the
-			 * measurement that follows reads a bottom edge of zero and writes
-			 * it, and nothing re-measures on the way back up, so the frosted
-			 * bar spent the rest of the session sitting on a scrim that
-			 * started at the top of the window -- blurring its own blur and
-			 * coming out a shade muddier than every other frosted surface on
-			 * the page. Keeping the last good number is right: the bar is the
-			 * same height when it comes back, and the only thing that could
-			 * have changed it is a resize, which measures again anyway.
-			 */
-			if ( ! hidden ) {
-				root.style.setProperty( '--ehdr-scrim-top', Math.round( box.bottom ) + 'px' );
-			}
-
 			// After the width above, because a folded bar moves every item in
 			// it and with them every dropdown hanging off one.
 			placeDrops();

@@ -1186,23 +1186,18 @@ html.ehdr-locked body {
  * document on a property that cannot be composited. The scrim costs one layer
  * and touches nothing it covers.
  *
- * Where it starts depends on whether the bar has a fill.
- *
- * Frosted, it starts at the bar's bottom edge: the bar is already blurring
- * what is behind it, and blurring the blur -- then darkening it -- comes out
- * muddy and a shade off every other frosted surface on the page.
- *
- * At the top of the page the bar has no fill at all, so there is nothing to
- * protect and starting below it only draws a line: a crisp strip of hero
- * across the top of the window with the rest of the picture pushed back
- * underneath it. There it runs the full height and the hero goes back
- * uniformly, bar included. Nothing in the bar is blurred either way -- the
- * scrim is a sibling at a lower z-index, so the logo, the menu and the button
- * are painted over it rather than through it.
+ * It covers the whole window, bar included. It used to start at the frosted
+ * bar's bottom edge, so as not to blur the bar's own blur -- but an open panel
+ * hardens the bar to a solid sheet with no backdrop-filter (see the open rule
+ * near the top), so there is nothing left to protect, and with a floating bar
+ * the old start line left a crisp band of page across the top of the window,
+ * round the bar and down to its bottom edge. Nothing in the bar is blurred
+ * either way: the scrim is a sibling at a lower z-index, so the logo, the
+ * menu and the button are painted over it rather than through it.
  */
 .ehdr__scrim {
 	position: fixed;
-	top: var(--ehdr-scrim-top, 0px);
+	top: 0;
 	left: 0;
 	right: 0;
 	bottom: 0;
@@ -1223,18 +1218,6 @@ html.ehdr-locked body {
 	transition:
 		opacity var(--ehdr-panel-ms, 280ms) var(--ehdr-ease, cubic-bezier(0.4, 0, 0.2, 1)),
 		visibility 0s linear 0s;
-}
-
-/*
- * The transparent bar gets no exemption.
- *
- * Done here rather than by writing a different number into --ehdr-scrim-top,
- * because the script only re-measures a third of a second after the bar
- * changes state -- long enough to watch the band appear and then heal. A
- * selector switches on the same frame the attribute does.
- */
-.ehdr:not([data-ehdr-stuck]):not([data-ehdr-preview="stuck"]) .ehdr__scrim {
-	top: 0;
 }
 
 /* ------------------------------------------------------------ the burger --- */
