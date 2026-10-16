@@ -227,7 +227,15 @@
 		for ( i = 0; i < images.length; i++ ) {
 			rect = images[ i ].getBoundingClientRect();
 
-			// Only what intersects the first screenful.
+			// Only what a visitor can see on the first screenful. A hidden
+			// image — a closed mega menu, an inactive tab — measures as a
+			// zero box at the top of the page, so it passes the position test,
+			// and a lazy one never loads, so its decode never settles. Each of
+			// those held the curtain for the full cap on every first visit.
+			if ( rect.width === 0 || rect.height === 0 ) {
+				continue;
+			}
+
 			if ( rect.top > window.innerHeight || rect.bottom < 0 ) {
 				continue;
 			}
@@ -243,13 +251,8 @@
 			}
 		}
 
-		if ( document.readyState !== 'complete' ) {
-			waits.push(
-				new Promise( function ( resolve ) {
-					window.addEventListener( 'load', resolve, { once: true } );
-				} )
-			);
-		}
+		// No wait on window load: it covers every eager image and video
+		// poster down the whole page, none of which the curtain is hiding.
 
 		if ( ! waits.length ) {
 			finish();
@@ -277,9 +280,10 @@
 	function preload( curtain, opts, reveal ) {
 		var fill    = curtain.querySelector( '.etrn__fill' );
 		var number  = curtain.querySelector( '.etrn__num' );
-		var started = ( window.performance && window.performance.now )
-			? window.performance.now()
-			: Date.now();
+		// Timed from the start of navigation, not from when this file ran.
+		// On a slow phone the script lands three or four seconds in, and a
+		// cap counted from there doubled the wait it was meant to bound.
+		var started = ( window.performance && window.performance.now ) ? 0 : Date.now();
 		var ready   = false;
 		var frame   = null;
 		var snapAt  = 0;
@@ -328,7 +332,7 @@
 
 			// However slow the image is, it does not get to hold the logo back
 			// past the point where showing it would be pointless.
-			window.setTimeout( show, Math.max( 0, opts.maximum - LOGO_IN_MS ) );
+			window.setTimeout( show, Math.max( 0, opts.maximum - LOGO_IN_MS - ( now() - started ) ) );
 		}
 
 		/**
@@ -413,7 +417,7 @@
 
 		revealLogo( curtain );
 
-		whenReady( opts.maximum, function () {
+		whenReady( Math.max( 0, opts.maximum - ( now() - started ) ), function () {
 			ready = true;
 		} );
 
@@ -426,7 +430,7 @@
 		belt = window.setTimeout( function () {
 			paint( 100 );
 			done( 0 );
-		}, opts.maximum + 1200 );
+		}, Math.max( 0, opts.maximum + 1200 - ( now() - started ) ) );
 
 		frame = window.requestAnimationFrame( tick );
 	}
@@ -441,6 +445,9 @@
 		if ( ! curtain ) {
 			return;
 		}
+
+		window.erudaTransitions = window.erudaTransitions || {};
+		window.erudaTransitions.booted = true;
 
 		// A sweep's worth of milliseconds, plus room for a slow frame.
 		var sweepMs = ( opts.sweep * 1000 ) + 250;

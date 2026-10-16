@@ -237,6 +237,11 @@ final class Transitions_Module implements Module, Configurable {
 			"if(window.self!==window.top){return;}" .
 			"if(s.getItem('etrn:covering')==='1'){d.className+=' etrn-covering';return;}" .
 			( $options['preloader'] ? "if(!s.getItem('etrn:visited')){d.className+=' etrn-preloading';}" : '' ) .
+			// If the main script never arrives (blocked, failed, stuck behind
+			// a slow connection) the page opens anyway. Once it has booted it
+			// owns the reveal, and its own belt fires before this one.
+			'setTimeout(function(){var t=window.erudaTransitions;if(t&&t.booted){return;}' .
+			"d.className=d.className.replace(/\\betrn-(preloading|covering)\\b/g,'');}," . ( (int) $options['maximum'] + 2500 ) . ');' .
 			"}catch(e){}})();";
 
 		printf( "<script id=\"eruda-transitions-boot\">%s</script>\n", $boot ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
