@@ -129,7 +129,13 @@ namespace {
 		$items[] = array( 'badge' => array( 'url' => '../../' . \ErudaToolkit\Modules\Awards\Awards_Content::BADGE_DIR . $it['file'] ), 'year' => $it['year'], 'name' => $it['name'], 'detail' => $it['detail'], 'dark' => $it['dark'] ? 'yes' : '' );
 	}
 
-	$base = array( 'items' => $items, 'show_lead' => 'yes', 'number_mode' => 'count', 'line' => 'international innovation awards for Lepido® technology, {years}', 'animate' => 'yes' );
+	// Links under some cards, as ThermStar has them: both, one, or none.
+	$items[3]['entry_link'] = array( 'url' => '#perpetuum', 'is_external' => 'on' );
+	$items[4]['about_link'] = array( 'url' => '#label', 'is_external' => 'on' );
+	$items[4]['entry_link'] = array( 'url' => '#lepido', 'is_external' => 'on' );
+	$items[6]['about_link'] = array( 'url' => '#set' );
+
+	$base = array( 'items' => $items, 'show_lead' => 'yes', 'number_mode' => 'count', 'line' => 'international innovation awards for Lepido® technology, {years}', 'animate' => 'yes', 'about_text' => 'What is this award?', 'entry_text' => "See Lepido's award" );
 
 	$other                  = $base;
 	$other['animate']       = '';

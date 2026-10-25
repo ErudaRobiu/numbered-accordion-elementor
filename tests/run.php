@@ -3245,6 +3245,20 @@ $aw_nolead = ( new Awards_Render_Probe() )->markup( array( 'items' => $aw_items,
 check( 'the number can be switched off', array( 0, 1 ), array( substr_count( $aw_nolead, 'eaw__lead' ), substr_count( $aw_nolead, 'eaw--no-lead' ) ) );
 check( 'no awards, nothing', '', trim( ( new Awards_Render_Probe() )->markup( array() ) ) );
 
+$aw_linked = Awards_Content::build( array( array( 'name' => 'S', 'about_link' => array( 'url' => ' https://a.example/label ', 'is_external' => 'on' ), 'entry_link' => array( 'url' => '' ) ) ) );
+check( 'an about link is read, an empty one is not', array( 'https://a.example/label', true, null ), array( $aw_linked[0]['about']['url'], $aw_linked[0]['about']['external'], $aw_linked[0]['entry'] ) );
+$aw_links_html = ( new Awards_Render_Probe() )->markup( array(
+	'items' => array(
+		array( 'name' => 'Solar', 'link' => array( 'url' => '/card/' ), 'about_link' => array( 'url' => 'https://a.example/label', 'is_external' => 'on' ), 'entry_link' => array( 'url' => 'https://a.example/lepido', 'is_external' => 'on' ) ),
+		array( 'name' => 'Plain', 'link' => array( 'url' => '/whole/' ) ),
+	),
+	'about_text' => 'What is this award?',
+	'entry_text' => 'See the award',
+) );
+check( 'links under a card, in order, opening a new tab', 1, preg_match( '#class="eaw__links">\s*<a class="eaw__link eaw__link--about" href="https://a.example/label" target="_blank" rel="noopener">What is this award\?.*?<a class="eaw__link eaw__link--entry" href="https://a.example/lepido" target="_blank" rel="noopener">See the award#s', $aw_links_html ) );
+check( 'a card with links under it is not itself a link', array( 0, 1 ), array( substr_count( $aw_links_html, 'href="/card/"' ), substr_count( $aw_links_html, '<a class="eaw__card" href="/whole/"' ) ) );
+check( 'a link with no words is left out', 0, substr_count( ( new Awards_Render_Probe() )->markup( array( 'items' => array( array( 'name' => 'S', 'about_link' => array( 'url' => 'https://a.example/' ) ) ), 'about_text' => ' ' ) ), 'eaw__links' ) );
+
 /* ---------------------------------------- Element List, Annotated Mark --- */
 
 require_once dirname( __DIR__ ) . '/modules/elements/class-elements-content.php';

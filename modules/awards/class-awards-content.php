@@ -76,6 +76,8 @@ final class Awards_Content {
 
 			$badge = isset( $item['badge'] ) && is_array( $item['badge'] ) ? $item['badge'] : array();
 			$link  = isset( $item['link'] ) && is_array( $item['link'] ) ? $item['link'] : array();
+			$about = self::link( $item, 'about_link' );
+			$entry = self::link( $item, 'entry_link' );
 
 			$out[] = array(
 				'badge'    => isset( $badge['url'] ) && is_string( $badge['url'] ) ? trim( $badge['url'] ) : '',
@@ -87,6 +89,8 @@ final class Awards_Content {
 				'link'     => isset( $link['url'] ) && is_string( $link['url'] ) ? trim( $link['url'] ) : '',
 				'external' => ! empty( $link['is_external'] ),
 				'nofollow' => ! empty( $link['nofollow'] ),
+				'about'    => $about,
+				'entry'    => $entry,
 			);
 		}
 
@@ -154,6 +158,29 @@ final class Awards_Content {
 		}
 
 		return trim( str_replace( array( '{years}', '{count}' ), array( $years, (string) $count ), $text ) );
+	}
+
+	/**
+	 * A text link under a card: its URL and whether it opens a new tab, or
+	 * null when there is no URL.
+	 *
+	 * @param array  $row Row.
+	 * @param string $key Key.
+	 * @return array|null
+	 */
+	private static function link( $row, $key ) {
+		$link = isset( $row[ $key ] ) && is_array( $row[ $key ] ) ? $row[ $key ] : array();
+		$url  = isset( $link['url'] ) && is_string( $link['url'] ) ? trim( $link['url'] ) : '';
+
+		if ( '' === $url ) {
+			return null;
+		}
+
+		return array(
+			'url'      => $url,
+			'external' => ! empty( $link['is_external'] ),
+			'nofollow' => ! empty( $link['nofollow'] ),
+		);
 	}
 
 	/**

@@ -146,9 +146,30 @@ class Award_Wall_Widget extends Widget_Base {
 		$awards->add_control(
 			'link',
 			array(
-				'label'   => esc_html__( 'Link', 'numbered-accordion' ),
-				'type'    => Controls_Manager::URL,
-				'default' => array( 'url' => '' ),
+				'label'       => esc_html__( 'Link', 'numbered-accordion' ),
+				'type'        => Controls_Manager::URL,
+				'default'     => array( 'url' => '' ),
+				'description' => esc_html__( 'The whole card. Ignored when either link below is set.', 'numbered-accordion' ),
+			)
+		);
+
+		$awards->add_control(
+			'about_link',
+			array(
+				'label'       => esc_html__( 'Link: about the award', 'numbered-accordion' ),
+				'type'        => Controls_Manager::URL,
+				'default'     => array( 'url' => '' ),
+				'description' => esc_html__( 'A page that explains what the award is.', 'numbered-accordion' ),
+			)
+		);
+
+		$awards->add_control(
+			'entry_link',
+			array(
+				'label'       => esc_html__( 'Link: our award', 'numbered-accordion' ),
+				'type'        => Controls_Manager::URL,
+				'default'     => array( 'url' => '' ),
+				'description' => esc_html__( 'The award itself: the listing, announcement or certificate.', 'numbered-accordion' ),
 			)
 		);
 
@@ -172,6 +193,25 @@ class Award_Wall_Widget extends Widget_Base {
 				'fields'      => $awards->get_controls(),
 				'default'     => $defaults,
 				'title_field' => '{{{ year }}} · {{{ name }}}',
+			)
+		);
+
+		$this->add_control(
+			'about_text',
+			array(
+				'label'     => esc_html__( 'Words for "about the award"', 'numbered-accordion' ),
+				'type'      => Controls_Manager::TEXT,
+				'default'   => 'What is this award?',
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_control(
+			'entry_text',
+			array(
+				'label'   => esc_html__( 'Words for "our award"', 'numbered-accordion' ),
+				'type'    => Controls_Manager::TEXT,
+				'default' => 'See the award',
 			)
 		);
 
@@ -298,6 +338,7 @@ class Award_Wall_Widget extends Widget_Base {
 			'ink'    => array( esc_html__( 'Line and names', 'numbered-accordion' ), '--eaw-ink' ),
 			'muted'  => array( esc_html__( 'Details', 'numbered-accordion' ), '--eaw-muted' ),
 			'chip'   => array( esc_html__( 'Dark badge chip', 'numbered-accordion' ), '--eaw-chip' ),
+			'link'   => array( esc_html__( 'Links under a card', 'numbered-accordion' ), '--eaw-link' ),
 		) as $id => $colour ) {
 			$this->add_control(
 				'colour_' . $id,
@@ -315,6 +356,7 @@ class Award_Wall_Widget extends Widget_Base {
 			'year_type'   => array( esc_html__( 'Year type', 'numbered-accordion' ), '.eaw__year' ),
 			'name_type'   => array( esc_html__( 'Award type', 'numbered-accordion' ), '.eaw__name' ),
 			'detail_type' => array( esc_html__( 'Detail type', 'numbered-accordion' ), '.eaw__detail' ),
+			'links_type'  => array( esc_html__( 'Link type', 'numbered-accordion' ), '.eaw__links a' ),
 		) as $id => $group ) {
 			$this->add_group_control(
 				Group_Control_Typography::get_type(),
@@ -353,6 +395,20 @@ class Award_Wall_Widget extends Widget_Base {
 	}
 
 	/**
+	 * The attributes of a link: href, and a new tab and rel when asked for.
+	 *
+	 * @param string $url      URL.
+	 * @param bool   $external New tab.
+	 * @param bool   $nofollow Nofollow.
+	 * @return string
+	 */
+	private function link_attrs( $url, $external, $nofollow ) {
+		$rel = array_filter( array( $nofollow ? 'nofollow' : '', $external ? 'noopener' : '' ) );
+
+		return ' href="' . esc_url( $url ) . '"' . ( $external ? ' target="_blank"' : '' ) . ( $rel ? ' rel="' . esc_attr( implode( ' ', $rel ) ) . '"' : '' );
+	}
+
+	/**
 	 * Render the widget on the front end.
 	 */
 	protected function render() {
@@ -368,6 +424,9 @@ class Award_Wall_Widget extends Widget_Base {
 		$animate = isset( $settings['animate'] ) && 'yes' === $settings['animate'];
 		$number  = Awards_Content::number( isset( $settings['number_mode'] ) ? $settings['number_mode'] : 'count', isset( $settings['number_manual'] ) ? $settings['number_manual'] : null, count( $cards ) );
 		$line    = Awards_Content::line( isset( $settings['line'] ) ? $settings['line'] : '', Awards_Content::year_range( $cards ), $number );
+
+		$about_text = isset( $settings['about_text'] ) && is_scalar( $settings['about_text'] ) ? trim( (string) $settings['about_text'] ) : 'What is this award?';
+		$entry_text = isset( $settings['entry_text'] ) && is_scalar( $settings['entry_text'] ) ? trim( (string) $settings['entry_text'] ) : 'See the award';
 		?>
 		<div class="eaw-wrap">
 			<div class="eaw<?php echo $animate ? ' eaw--animate' : ''; ?><?php echo $lead ? '' : ' eaw--no-lead'; ?>">
@@ -377,11 +436,19 @@ class Award_Wall_Widget extends Widget_Base {
 				<ol class="eaw__grid">
 					<?php foreach ( $cards as $i => $card ) : ?>
 						<?php
-						$tag   = '' !== $card['link'] ? 'a' : 'div';
-						$rel   = array_filter( array( $card['nofollow'] ? 'nofollow' : '', $card['external'] ? 'noopener' : '' ) );
-						$attrs = '' !== $card['link']
-							? ' href="' . esc_url( $card['link'] ) . '"' . ( $card['external'] ? ' target="_blank"' : '' ) . ( $rel ? ' rel="' . esc_attr( implode( ' ', $rel ) ) . '"' : '' )
-							: '';
+						// Links under the card cannot sit inside a card that is itself a link.
+						$links = array_filter(
+							array(
+								'about' => $card['about'] ? array( $card['about'], $about_text ) : null,
+								'entry' => $card['entry'] ? array( $card['entry'], $entry_text ) : null,
+							),
+							function ( $link ) {
+								return $link && '' !== $link[1];
+							}
+						);
+						$whole = '' !== $card['link'] && ! $links;
+						$tag   = $whole ? 'a' : 'div';
+						$attrs = $whole ? $this->link_attrs( $card['link'], $card['external'], $card['nofollow'] ) : '';
 						?>
 						<li class="eaw__item" style="--eaw-i:<?php echo (int) $i; ?>">
 							<<?php echo $tag; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> class="eaw__card<?php echo $card['dark'] ? ' is-dark' : ''; ?>"<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped parts ?>>
@@ -389,6 +456,13 @@ class Award_Wall_Widget extends Widget_Base {
 								<?php echo '' !== $card['year'] ? '<span class="eaw__year">' . esc_html( $card['year'] ) . '</span>' : ''; ?>
 								<strong class="eaw__name"><?php echo esc_html( $card['name'] ); ?></strong>
 								<?php echo '' !== $card['detail'] ? '<span class="eaw__detail">' . esc_html( $card['detail'] ) . '</span>' : ''; ?>
+								<?php if ( $links ) : ?>
+									<span class="eaw__links">
+										<?php foreach ( $links as $key => $link ) : ?>
+											<a class="eaw__link eaw__link--<?php echo esc_attr( $key ); ?>"<?php echo $this->link_attrs( $link[0]['url'], $link[0]['external'], $link[0]['nofollow'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped parts ?>><?php echo esc_html( $link[1] ); ?><?php echo $link[0]['external'] ? '<span class="eaw__ext" aria-hidden="true">&nbsp;↗</span><span class="screen-reader-text"> (opens in a new tab)</span>' : ''; ?></a>
+										<?php endforeach; ?>
+									</span>
+								<?php endif; ?>
 							</<?php echo $tag; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 						</li>
 					<?php endforeach; ?>

@@ -26,6 +26,7 @@
 	--eaw-ink: #0F3961;
 	--eaw-muted: #0F3961B3;
 	--eaw-chip: #242425;
+	--eaw-link: #07864F;
 	--eaw-cols: 4;
 	--eaw-badge-h: 110px;
 	--eaw-gap: 10px;
@@ -184,6 +185,50 @@
 	font-size: 11.5px;
 	line-height: 1.4;
 	color: var(--eaw-muted);
+}
+
+/* Links under a card, pinned to its foot so a row of cards lines them up. */
+.eaw .eaw__links {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+	margin-top: auto;
+	padding-top: 12px;
+}
+
+.eaw .eaw__links a,
+.eaw .eaw__links a:visited {
+	font-size: 12.5px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--eaw-link);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+}
+
+.eaw .eaw__links a:hover {
+	color: var(--eaw-ink);
+}
+
+.eaw .eaw__links a:focus-visible {
+	outline: 2px solid #4DCF8D;
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+.eaw .eaw__ext {
+	white-space: nowrap;
+}
+
+.eaw .screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
 }
 
 /* ------------------------------------------------------------ entrance --- */
